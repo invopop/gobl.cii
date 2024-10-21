@@ -43,22 +43,22 @@ func TestParseCtoGParty(t *testing.T) {
 		inv, err := c.NewInvoice(xmlData)
 		require.NoError(t, err)
 
-		taxRep := inv.Supplier
-		require.NotNil(t, taxRep)
+		seller := inv.Supplier
+		require.NotNil(t, seller)
 
-		assert.NotNil(t, taxRep.TaxID)
-		assert.Equal(t, cbc.Code("967611265"), taxRep.TaxID.Code)
-		assert.Equal(t, l10n.TaxCountryCode("NO"), taxRep.TaxID.Country)
+		assert.NotNil(t, seller.TaxID)
+		assert.Equal(t, cbc.Code("967611265"), seller.TaxID.Code)
+		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
 
-		assert.Equal(t, "Tax handling company AS", taxRep.Name)
-		require.Len(t, taxRep.Addresses, 1)
-		assert.Equal(t, "Regent street", taxRep.Addresses[0].Street)
-		assert.Equal(t, "Newtown", taxRep.Addresses[0].Locality)
-		assert.Equal(t, "202", taxRep.Addresses[0].Code)
-		assert.Equal(t, l10n.ISOCountryCode("NO"), taxRep.Addresses[0].Country)
+		assert.Equal(t, "Tax handling company AS", seller.Name)
+		require.Len(t, seller.Addresses, 1)
+		assert.Equal(t, "Regent street", seller.Addresses[0].Street)
+		assert.Equal(t, "Newtown", seller.Addresses[0].Locality)
+		assert.Equal(t, "202", seller.Addresses[0].Code)
+		assert.Equal(t, l10n.ISOCountryCode("NO"), seller.Addresses[0].Country)
 
 		// Test parsing of supplier
-		supplier := inv.Supplier
+		supplier := inv.Ordering.Seller
 		require.NotNil(t, supplier)
 
 		assert.Equal(t, "Salescompany ltd.", supplier.Name)
