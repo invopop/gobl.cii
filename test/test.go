@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl"
-	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl.cii/structs"
+	ctog "github.com/invopop/gobl.cii/ctog"
+	gtoc "github.com/invopop/gobl.cii/gtoc"
 	"github.com/invopop/gobl/bill"
 	// "github.com/lestrrat-go/libxml2"
 	// "github.com/lestrrat-go/libxml2/xsd"
@@ -24,17 +24,17 @@ const (
 )
 
 // NewDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*cii.Document, error) {
+func NewDocumentFrom(name string) (*gtoc.Document, error) {
 	env, err := LoadTestEnvelope(name)
 	if err != nil {
 		return nil, err
 	}
-
-	return cii.NewDocument(env)
+	c := &gtoc.Conversor{}
+	return c.ConvertToCII(env)
 }
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func LoadTestXMLDoc(name string) (*structs.XMLDoc, error) {
+func LoadTestXMLDoc(name string) (*ctog.Document, error) {
 	src, err := os.Open(filepath.Join(GetConversionTypePath(XMLPattern), name))
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func LoadTestXMLDoc(name string) (*structs.XMLDoc, error) {
 	if err != nil {
 		return nil, err
 	}
-	doc := new(structs.XMLDoc)
+	doc := new(ctog.Document)
 	if err := xml.Unmarshal(inData, doc); err != nil {
 		return nil, err
 	}
@@ -76,16 +76,6 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 	}
 
 	return env, nil
-}
-
-// GenerateXInvoiceFrom returns a XInvoice Document from a GOBL Invoice
-func GenerateXInvoiceFrom(inv *bill.Invoice) (*cii.Document, error) {
-	env, err := gobl.Envelop(inv)
-	if err != nil {
-		return nil, err
-	}
-
-	return cii.NewDocument(env)
 }
 
 // LoadOutputFile returns byte data from a file in the `test/data/out` folder

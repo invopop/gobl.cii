@@ -8,7 +8,9 @@ import (
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl.cii/structs"
+	ctog "github.com/invopop/gobl.cii/ctog"
+
+	// gtoc "github.com/invopop/gobl.cii/gtoc"
 	"github.com/spf13/cobra"
 )
 
@@ -54,7 +56,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 
 	// Check if input is JSON or XML
 	isJSON := json.Valid(inData)
-
+	conversor := cii.NewConversor()
 	var outputData []byte
 
 	if isJSON {
@@ -62,7 +64,8 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		if err := json.Unmarshal(inData, env); err != nil {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
 		}
-		doc, err := cii.NewDocument(env)
+
+		doc, err := conversor.ConvertToCII(env)
 		if err != nil {
 			return fmt.Errorf("building XRechnung and Factur-X document: %w", err)
 		}
@@ -73,14 +76,15 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		// Assume XML if not JSON
-		doc := new(structs.XMLDoc)
+		doc := new(ctog.Document)
 		if err := xml.Unmarshal(inData, doc); err != nil {
 			return fmt.Errorf("parsing input document: %w", err)
 		}
 
-		env, err := cii.NewGOBLFromCII(doc)
+		c := ctog.NewConversor()
+		env, err := c.ConvertToGOBL(inData)
 		if err != nil {
-			return fmt.Errorf("building GOBL envelope: %w", err)
+			return fmt.Errorf("converting CII to GOBL: %w", err)
 		}
 
 		outputData, err = json.MarshalIndent(env, "", "  ")

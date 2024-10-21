@@ -1,8 +1,7 @@
-package cii_test
+package cii
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"flag"
 	"os"
 	"path/filepath"
@@ -10,8 +9,10 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
-	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl.cii/structs"
+	// cii "github.com/invopop/gobl.cii"
+	// "github.com/invopop/gobl.cii/structs"
+	// "github.com/invopop/gobl.cii/test"
+	ctog "github.com/invopop/gobl.cii/ctog"
 	"github.com/invopop/gobl.cii/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
@@ -63,16 +64,15 @@ func TestNewDocumentGOBL(t *testing.T) {
 		outName := strings.Replace(inName, ".xml", ".json", 1)
 
 		t.Run(inName, func(t *testing.T) {
-			// Load XML data into doc
+			// Load XML data
 			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			doc := new(structs.XMLDoc)
-			err = xml.Unmarshal(xmlData, doc)
-			require.NoError(t, err)
+			// Create a new conversor
+			conversor := ctog.NewConversor()
 
-			// Now doc should be populated with data from the XML file
-			goblEnv, err := cii.NewGOBLFromCII(doc)
+			// Convert CII XML to GOBL
+			goblEnv, err := conversor.ConvertToGOBL(xmlData)
 			require.NoError(t, err)
 
 			// Extract the invoice from the envelope
