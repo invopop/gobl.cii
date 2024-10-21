@@ -1,0 +1,167 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "01927b3c-0885-779f-8ad3-e6f140e04d74",
+    "dig": {
+      "alg": "sha256",
+      "val": "a6810096fcd3bff6fc407acbceb9218b7d58b7980162889ca77a7fe41e763626"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "$regime": "DE",
+    "uuid": "01927b3c-0885-77d8-84cf-4c467061bd6f",
+    "type": "standard",
+    "code": "2016166",
+    "issue_date": "2015-01-09",
+    "currency": "EUR",
+    "supplier": {
+      "name": "XXX AG",
+      "tax_id": {
+        "country": "DE",
+        "code": "3730230168"
+      },
+      "addresses": [
+        {
+          "street": "Storkower Straße 207",
+          "locality": "Berlin",
+          "code": "10369",
+          "country": "DE"
+        }
+      ]
+    },
+    "customer": {
+      "name": "XXX AG",
+      "people": [
+        {
+          "name": {
+            "given": "XXXX"
+          }
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Storkower Straße 207",
+          "locality": "Berlin",
+          "code": "10369",
+          "country": "DE"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "1.000",
+        "item": {
+          "ref": "846",
+          "name": "Festpreis",
+          "description": "Neues DSL Portfolio 2016",
+          "price": "12122.5900",
+          "unit": "C62"
+        },
+        "sum": "12122.5900",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "19%"
+          }
+        ],
+        "total": "12122.5900"
+      },
+      {
+        "i": 2,
+        "quantity": "-1",
+        "item": {
+          "ref": "832",
+          "name": "Abzug",
+          "price": "606.1300",
+          "unit": "C62"
+        },
+        "sum": "-606.1300",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "19%"
+          }
+        ],
+        "total": "-606.1300"
+      },
+      {
+        "i": 3,
+        "quantity": "1.000",
+        "item": {
+          "ref": "870",
+          "name": "zzgl. ",
+          "price": "1.5000",
+          "unit": "C62"
+        },
+        "sum": "1.5000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "19%"
+          }
+        ],
+        "total": "1.5000"
+      }
+    ],
+    "payment": {
+      "terms": {
+        "due_dates": [
+          {
+            "date": "2015-01-09",
+            "amount": "13706.37",
+            "percent": "100%"
+          }
+        ]
+      },
+      "instructions": {
+        "key": "credit-transfer",
+        "credit_transfer": [
+          {
+            "iban": "DE12500105170648489890"
+          }
+        ]
+      }
+    },
+    "delivery": {
+      "date": "2016-09-06"
+    },
+    "totals": {
+      "sum": "11517.96",
+      "total": "11517.96",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "key": "standard",
+                "base": "11517.96",
+                "percent": "19%",
+                "amount": "2188.41"
+              }
+            ],
+            "amount": "2188.41"
+          }
+        ],
+        "sum": "2188.41"
+      },
+      "tax": "2188.41",
+      "total_with_tax": "13706.37",
+      "payable": "13706.37"
+    },
+    "notes": [
+      {
+        "code": "AAR",
+        "text": "This is an example invoice based on data that is used in real business.Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+      },
+      {
+        "text": "Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+      }
+    ]
+  }
+}

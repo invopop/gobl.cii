@@ -1,0 +1,161 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "019294ff-a062-7c43-835d-49f196cab4e2",
+    "dig": {
+      "alg": "sha256",
+      "val": "1c116996759565d22fba4e56dd8089f0cc443dbda3166a0f0d322899bb07cabd"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "uuid": "019294ff-a062-7c97-a04a-8871105267f8",
+    "type": "standard",
+    "code": "INVOICE_test_7",
+    "issue_date": "2013-05-13",
+    "currency": "SEK",
+    "supplier": {
+      "name": "The Sellercompany Incorporated",
+      "people": [
+        {
+          "name": {
+            "given": "Anthon Larsen"
+          }
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Main street 2, Building 4",
+          "locality": "Big city",
+          "code": "54321",
+          "country": "SE"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "Anthon@SellerCompany.se"
+        }
+      ],
+      "telephones": [
+        {
+          "num": "4698989898"
+        }
+      ]
+    },
+    "customer": {
+      "name": "THe Buyercompany",
+      "people": [
+        {
+          "name": {
+            "given": "3150bdn"
+          }
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Anystreet 8",
+          "street_extra": "Back door",
+          "locality": "Anytown",
+          "region": "RegionB",
+          "code": "101",
+          "country": "SE"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "john@buyercompany.no"
+        }
+      ],
+      "telephones": [
+        {
+          "num": "5121230"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "1",
+        "item": {
+          "ref": "RT3000",
+          "name": "Road tax",
+          "description": "Weight-based tax, vehicles \u003e3000 KGM",
+          "price": "2500.00",
+          "unit": "C62"
+        },
+        "sum": "2500.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard"
+          }
+        ],
+        "total": "2500.00"
+      },
+      {
+        "i": 2,
+        "quantity": "1",
+        "item": {
+          "ref": "REG",
+          "name": "Road Register fee",
+          "description": "Annual registration fee",
+          "price": "700.00",
+          "unit": "C62"
+        },
+        "sum": "700.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard"
+          }
+        ],
+        "total": "700.00"
+      }
+    ],
+    "ordering": {
+      "period": {
+        "start": "2013-01-01",
+        "end": "2013-12-31"
+      }
+    },
+    "payment": {
+      "instructions": {
+        "key": "credit-transfer",
+        "credit_transfer": [
+          {
+            "iban": "SE1212341234123412",
+            "bic": "SEXDABCD"
+          }
+        ]
+      }
+    },
+    "totals": {
+      "sum": "3200.00",
+      "total": "3200.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "key": "standard",
+                "base": "3200.00",
+                "amount": "0.00"
+              }
+            ],
+            "amount": "0.00"
+          }
+        ],
+        "sum": "0.00"
+      },
+      "tax": "0.00",
+      "total_with_tax": "3200.00",
+      "payable": "3200.00"
+    },
+    "notes": [
+      {
+        "text": "Testscenario 7"
+      }
+    ]
+  }
+}
