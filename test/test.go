@@ -81,13 +81,12 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 // LoadOutputFile returns byte data from a file in the `test/data/out` folder
 func LoadOutputFile(name string) ([]byte, error) {
 	var pattern string
-	if strings.HasSuffix(name, JSONPattern) {
+	if strings.HasSuffix(name, ".json") {
 		pattern = XMLPattern
 	} else {
 		pattern = JSONPattern
 	}
 	src, _ := os.Open(filepath.Join(GetOutPath(pattern), name))
-
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err

@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "01927b3c-2fef-7dc5-8147-867d086bf3dd",
+    "uuid": "0192b342-e058-7bc3-bb60-c4c6e8128c19",
     "dig": {
       "alg": "sha256",
-      "val": "8b30248de1727bf58fc9dc36bec92a00678dc396c3e0cd564667bdd02b7189e5"
+      "val": "bf9bf0c8570b674cc49226842dce8c7a69dba65327a38ebd0383331778676b89"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "DE",
-    "uuid": "01927b3c-2fef-7dfe-b5d8-5da422caadb0",
+    "uuid": "0192b342-e058-7c16-9a9b-803b7a1f112e",
     "type": "standard",
     "code": "INV000013",
     "issue_date": "2013-08-25",
@@ -32,6 +32,12 @@
     },
     "customer": {
       "name": "Buyercompany ltd",
+      "identities": [
+        {
+          "label": "0088",
+          "code": "1111111111"
+        }
+      ],
       "addresses": [
         {
           "street": "Anystreet, Building 1",

@@ -58,8 +58,8 @@ type IncludedSupplyChainTradeLineItem struct {
 			ClassName *string `xml:"ClassName"`
 			ClassCode struct {
 				Value         string `xml:",chardata"`
-				ListID        string `xml:"ListID,attr"`
-				ListVersionID string `xml:"ListVersionID,attr"`
+				ListID        string `xml:"listID,attr"`
+				ListVersionID string `xml:"listVersionID,attr"`
 			} `xml:"ClassCode"`
 		} `xml:"DesignatedProductClassification"`
 	} `xml:"SpecifiedTradeProduct"`
