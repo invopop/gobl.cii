@@ -18,8 +18,10 @@ func TestParseCtoGLines(t *testing.T) {
 		require.NoError(t, err)
 
 		c := NewConversor()
-		inv, err := c.NewInvoice(xmlData)
+		err = c.NewInvoice(xmlData)
 		require.NoError(t, err)
+
+		inv := c.GetInvoice()
 
 		lines := inv.Lines
 		require.Len(t, lines, 2)
@@ -50,8 +52,10 @@ func TestParseCtoGLines(t *testing.T) {
 		require.NoError(t, err)
 
 		c := NewConversor()
-		inv, err := c.NewInvoice(xmlData)
+		err = c.NewInvoice(xmlData)
 		require.NoError(t, err)
+
+		inv := c.GetInvoice()
 
 		lines := inv.Lines
 		require.Len(t, lines, 20)
@@ -91,8 +95,10 @@ func TestParseCtoGLines(t *testing.T) {
 		require.NoError(t, err)
 
 		c := NewConversor()
-		inv, err := c.NewInvoice(xmlData)
+		err = c.NewInvoice(xmlData)
 		require.NoError(t, err)
+
+		inv := c.GetInvoice()
 
 		lines := inv.Lines
 		require.NotEmpty(t, lines)

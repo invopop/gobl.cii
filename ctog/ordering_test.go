@@ -13,8 +13,10 @@ func TestParseCtoGOrdering(t *testing.T) {
 		require.NoError(t, err)
 
 		c := NewConversor()
-		inv, err := c.NewInvoice(doc)
+		err = c.NewInvoice(doc)
 		require.NoError(t, err)
+
+		inv := c.GetInvoice()
 
 		require.NotNil(t, inv.Ordering, "Ordering should not be nil")
 		require.NotNil(t, inv.Ordering.Period, "OrderingPeriod should not be nil")
@@ -26,8 +28,10 @@ func TestParseCtoGOrdering(t *testing.T) {
 		require.NoError(t, err)
 
 		c := NewConversor()
-		inv, err := c.NewInvoice(doc)
+		err = c.NewInvoice(doc)
 		require.NoError(t, err)
+
+		inv := c.GetInvoice()
 
 		require.NotNil(t, inv.Ordering, "Ordering should not be nil")
 		require.NotNil(t, inv.Ordering.Period, "OrderingPeriod should not be nil")

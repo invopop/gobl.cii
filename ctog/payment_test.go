@@ -11,16 +11,14 @@ import (
 )
 
 func TestParseCtoGPayment(t *testing.T) {
-	// Read the XML file
 	xmlData, err := LoadTestXMLDoc("invoice-test-04.xml")
 	require.NoError(t, err)
 
-	// Parse the entire document
 	c := NewConversor()
-	inv, err := c.NewInvoice(xmlData)
+	err = c.NewInvoice(xmlData)
 	require.NoError(t, err)
 
-	// Test the payment part
+	inv := c.GetInvoice()
 	payment := inv.Payment
 	assert.NotNil(t, payment)
 

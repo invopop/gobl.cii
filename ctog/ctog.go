@@ -38,12 +38,12 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 		return nil, err
 	}
 
-	inv, err := c.NewInvoice(c.doc)
-
+	err := c.NewInvoice(c.doc)
 	if err != nil {
 		return nil, err
 	}
-	env, err := gobl.Envelop(inv)
+
+	env, err := gobl.Envelop(c.inv)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 }
 
 // NewInvoice creates a new GOBL invoice from a CII document
-func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
+func (c *Conversor) NewInvoice(doc *Document) error {
 
 	c.inv = &bill.Invoice{
 		Code:     cbc.Code(doc.ExchangedDocument.ID),
@@ -63,13 +63,13 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 
 	issueDate, err := ParseDate(doc.ExchangedDocument.IssueDateTime.DateTimeString.Value)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	c.inv.IssueDate = issueDate
 
 	err = c.getLines(&doc.SupplyChainTradeTransaction)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Payment comprised of terms, means and payee. Check tehre is relevant info in at least one of them to create a payment
@@ -80,7 +80,7 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 			doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1") {
 		err = c.getPayment(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
@@ -99,12 +99,12 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 
 	err = c.getOrdering(doc)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = c.getDelivery(doc)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.InvoiceReferencedDcument) > 0 {
@@ -116,7 +116,7 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 			if ref.FormattedIssueDateTime != nil {
 				refDate, err := ParseDate(ref.FormattedIssueDateTime.DateTimeString.Value)
 				if err != nil {
-					return nil, err
+					return err
 				}
 				docRef.IssueDate = &refDate
 			}
@@ -138,9 +138,9 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 	if len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeAllowanceCharge) > 0 {
 		err = c.getCharges(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return c.inv, nil
+	return nil
 }

@@ -14,8 +14,10 @@ func TestParseCtoGDelivery(t *testing.T) {
 		require.NoError(t, err)
 
 		c := NewConversor()
-		inv, err := c.NewInvoice(doc)
+		err = c.NewInvoice(doc)
 		require.NoError(t, err)
+
+		inv := c.GetInvoice()
 
 		delivery := inv.Delivery
 
@@ -35,8 +37,10 @@ func TestParseCtoGDelivery(t *testing.T) {
 		require.NoError(t, err)
 
 		c := NewConversor()
-		inv, err := c.NewInvoice(doc)
+		err = c.NewInvoice(doc)
 		require.NoError(t, err)
+
+		inv := c.GetInvoice()
 
 		delivery := inv.Delivery
 

@@ -13,7 +13,7 @@ import (
 
 func (c *Conversor) getLines(transaction *SupplyChainTradeTransaction) error {
 	items := transaction.IncludedSupplyChainTradeLineItem
-	lines := make([]*bill.Line, 0, len(transaction.IncludedSupplyChainTradeLineItem))
+	lines := make([]*bill.Line, 0, len(items))
 
 	for _, item := range items {
 		price, err := num.AmountFromString(item.SpecifiedLineTradeAgreement.NetPriceProductTradePrice.ChargeAmount)
