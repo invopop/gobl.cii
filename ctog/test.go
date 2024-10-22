@@ -8,13 +8,9 @@ import (
 	"strings"
 )
 
-const (
-	xmlPattern = "*.xml"
-)
-
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
 func LoadTestXMLDoc(name string) (*Document, error) {
-	src, err := os.Open(filepath.Join(GetConversionTypePath(xmlPattern), name))
+	src, err := os.Open(filepath.Join(GetTestDataPath(), name))
 	if err != nil {
 		return nil, err
 	}
@@ -37,36 +33,23 @@ func LoadTestXMLDoc(name string) (*Document, error) {
 }
 
 // GetDataGlob returns a list of files in the `test/data` folder that match the pattern
-func GetDataGlob(pattern string) ([]string, error) {
-	return filepath.Glob(filepath.Join(GetConversionTypePath(pattern), pattern))
+func GetDataGlob() ([]string, error) {
+	return filepath.Glob(filepath.Join(GetTestDataPath(), "*.xml"))
 }
 
 // GetSchemaPath returns the path to the `test/data/schema` folder
-func GetSchemaPath(pattern string) string {
-	return filepath.Join(GetConversionTypePath(pattern), "schema")
+func GetSchemaPath() string {
+	return filepath.Join(GetTestDataPath(), "schema")
 }
 
 // GetOutPath returns the path to the `test/data/out` folder
-func GetOutPath(pattern string) string {
-	return filepath.Join(GetConversionTypePath(pattern), "out")
+func GetOutPath() string {
+	return filepath.Join(GetTestDataPath(), "out")
 }
 
-// GetDataPath returns the path to the `test/data` folder
-func GetDataPath() string {
-	return filepath.Join(GetTestPath(), "data")
-}
-
-// GetConversionTypePath returns the path to the `test/data/ctog` or `test/data/gtoc` folder
-func GetConversionTypePath(pattern string) string {
-	if pattern == xmlPattern {
-		return filepath.Join(GetDataPath(), "ctog")
-	}
-	return filepath.Join(GetDataPath(), "gtoc")
-}
-
-// GetTestPath returns the path to the `test` folder
-func GetTestPath() string {
-	return filepath.Join(getRootFolder(), "test")
+// GetTestDataPath returns the path to the `test/data/ctog` folder
+func GetTestDataPath() string {
+	return filepath.Join(getRootFolder(), "test", "data", "ctog")
 }
 
 // TODO: adapt to new folder structure
