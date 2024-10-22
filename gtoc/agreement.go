@@ -12,27 +12,6 @@ const (
 	defaultBuyerReference = "N/A"
 )
 
-// Agreement defines the structure of the ApplicableHeaderTradeAgreement of the CII standard
-type Agreement struct {
-	BuyerReference string  `xml:"ram:BuyerReference,omitempty"`
-	Seller         *Seller `xml:"ram:SellerTradeParty,omitempty"`
-	Buyer          *Buyer  `xml:"ram:BuyerTradeParty,omitempty"`
-}
-
-// PostalTradeAddress defines the structure of the PostalTradeAddress of the CII standard
-type PostalTradeAddress struct {
-	Postcode  string `xml:"ram:PostcodeCode"`
-	LineOne   string `xml:"ram:LineOne"`
-	City      string `xml:"ram:CityName"`
-	CountryID string `xml:"ram:CountryID"`
-}
-
-// URIUniversalCommunication defines the structure of URIUniversalCommunication of the CII standard
-type URIUniversalCommunication struct {
-	URIID    string `xml:",chardata"`
-	SchemeID string `xml:"schemeID,attr"`
-}
-
 // NewAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
 func NewAgreement(inv *bill.Invoice) (*Agreement, error) {
 	agreement := new(Agreement)

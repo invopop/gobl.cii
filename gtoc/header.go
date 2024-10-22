@@ -12,20 +12,6 @@ import (
 // IssueDateFormat is the issue date format in the form YYYYMMDD
 const IssueDateFormat = "102"
 
-// Header a collection of data for a Cross Industry Invoice Header that is exchanged between two or more parties in written, printed or electronic form.
-type Header struct {
-	ID           string `xml:"ram:ID"`
-	TypeCode     string `xml:"ram:TypeCode"`
-	IssueDate    *Date  `xml:"ram:IssueDateTime>udt:DateTimeString"`
-	IncludedNote *Note  `xml:"ram:IncludedNote,omitempty"`
-}
-
-// Note defines note in the RAM structure
-type Note struct {
-	Content     string `xml:"ram:Content"`
-	SubjectCode string `xml:"ram:SubjectCode"`
-}
-
 // NewHeader creates the ExchangedDocument part of a EN 16931 compliant invoice
 func NewHeader(inv *bill.Invoice) *Header {
 	return &Header{
