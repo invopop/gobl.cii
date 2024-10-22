@@ -9,8 +9,6 @@ import (
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
 	ctog "github.com/invopop/gobl.cii/ctog"
-
-	// gtoc "github.com/invopop/gobl.cii/gtoc"
 	"github.com/spf13/cobra"
 )
 
@@ -81,8 +79,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("parsing input document: %w", err)
 		}
 
-		c := ctog.NewConversor()
-		env, err := c.ConvertToGOBL(inData)
+		env, err := conversor.ConvertToGOBL(inData)
 		if err != nil {
 			return fmt.Errorf("converting CII to GOBL: %w", err)
 		}
