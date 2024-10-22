@@ -1,0 +1,177 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0192b342-e058-7bc3-bb60-c4c6e8128c19",
+    "dig": {
+      "alg": "sha256",
+      "val": "bf9bf0c8570b674cc49226842dce8c7a69dba65327a38ebd0383331778676b89"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "$regime": "DE",
+    "uuid": "0192b342-e058-7c16-9a9b-803b7a1f112e",
+    "type": "standard",
+    "code": "INV000013",
+    "issue_date": "2013-08-25",
+    "currency": "EUR",
+    "supplier": {
+      "name": "xxxx",
+      "tax_id": {
+        "country": "DE",
+        "code": "1111111"
+      },
+      "addresses": [
+        {
+          "street": "Storkower Straße 207",
+          "locality": "Berlin",
+          "code": "10369",
+          "country": "DE"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Buyercompany ltd",
+      "identities": [
+        {
+          "label": "0088",
+          "code": "1111111111"
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Anystreet, Building 1",
+          "locality": "Anytown",
+          "code": "101",
+          "country": "DE"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "1.0000",
+        "item": {
+          "name": "BPW21",
+          "price": "1.2605",
+          "unit": "C62"
+        },
+        "sum": "1.2605",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "19%"
+          }
+        ],
+        "total": "1.2605"
+      },
+      {
+        "i": 2,
+        "quantity": "1.0000",
+        "item": {
+          "name": "Poti 100k",
+          "price": "1.2605",
+          "unit": "C62"
+        },
+        "sum": "1.2605",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "19%"
+          }
+        ],
+        "total": "1.2605"
+      },
+      {
+        "i": 3,
+        "quantity": "1.0000",
+        "item": {
+          "name": "LCD Display 3.5",
+          "price": "7.4790",
+          "unit": "C62"
+        },
+        "sum": "7.4790",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "19%"
+          }
+        ],
+        "total": "7.4790"
+      }
+    ],
+    "discounts": [
+      {
+        "i": 1,
+        "amount": "0.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "rate": "standard",
+            "percent": "19%"
+          }
+        ],
+        "reason": "Rabatt"
+      }
+    ],
+    "ordering": {
+      "period": {
+        "start": "2013-01-01",
+        "end": "2013-04-01"
+      }
+    },
+    "payment": {
+      "terms": {
+        "due_dates": [
+          {
+            "date": "2013-05-10",
+            "amount": "11.90",
+            "percent": "100%"
+          }
+        ]
+      },
+      "instructions": {
+        "key": "credit-transfer",
+        "credit_transfer": [
+          {
+            "iban": "DK1212341234123412"
+          }
+        ]
+      }
+    },
+    "totals": {
+      "sum": "10.00",
+      "discount": "0.00",
+      "total": "10.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "key": "standard",
+                "base": "10.00",
+                "percent": "19%",
+                "amount": "1.90"
+              }
+            ],
+            "amount": "1.90"
+          }
+        ],
+        "sum": "1.90"
+      },
+      "tax": "1.90",
+      "total_with_tax": "11.90",
+      "payable": "11.90"
+    },
+    "notes": [
+      {
+        "code": "REG",
+        "text": "TEXT"
+      }
+    ]
+  }
+}
