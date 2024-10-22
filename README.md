@@ -63,7 +63,6 @@ import (
     "io"
 
     cii "github.com/invopop/gobl.cii"
-    ctog "github.com/invopop/gobl.cii/ctog"
     )
 
 func main() {
@@ -72,11 +71,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-    doc := new(ctog.Docuemnt)
-    if err := xml.Unmarshal(inData, doc); err != nil {
-        panic(err)
-    }
 
     conversor := cii.NewConversor()
     env, err := conversor.ConvertToGOBL(inData)

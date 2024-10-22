@@ -2,13 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
-	ctog "github.com/invopop/gobl.cii/ctog"
 	"github.com/spf13/cobra"
 )
 
@@ -74,11 +72,6 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		// Assume XML if not JSON
-		doc := new(ctog.Document)
-		if err := xml.Unmarshal(inData, doc); err != nil {
-			return fmt.Errorf("parsing input document: %w", err)
-		}
-
 		env, err := conversor.ConvertToGOBL(inData)
 		if err != nil {
 			return fmt.Errorf("converting CII to GOBL: %w", err)
