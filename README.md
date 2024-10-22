@@ -18,6 +18,8 @@ Usage of the GOBL to CII conversion library is straightforward and supports bidi
 
 Both conversion directions are supported, allowing you to seamlessly transform between GOBL and CII XML formats as needed.
 
+#### GOBL to CII
+
 ```go
 package main
 
@@ -37,7 +39,8 @@ func main() {
     }
 
     // Prepare the CII document
-    doc, err := cii.NewDocument(env)
+    conversor := cii.NewConversor()
+    doc, err := conversor.ConvertToCII(env)
     if err != nil {
         panic(err)
     }
@@ -50,6 +53,9 @@ func main() {
 
 }
 ```
+
+#### CII to GOBL
+
 ```go
 package main
 
@@ -57,7 +63,7 @@ import (
     "io"
 
     cii "github.com/invopop/gobl.cii"
-    "github.com/invopop/gobl.cii/structs"
+    ctog "github.com/invopop/gobl.cii/ctog"
     )
 
 func main() {
@@ -67,12 +73,13 @@ func main() {
 		panic(err)
 	}
 
-    doc := new(structs.XMLDoc)
+    doc := new(ctog.Docuemnt)
     if err := xml.Unmarshal(inData, doc); err != nil {
         panic(err)
     }
 
-    env, err := cii.NewGOBLFromCII(doc)
+    conversor := cii.NewConversor()
+    env, err := conversor.ConvertToGOBL(inData)
     if err != nil {
         panic(err)
     }
