@@ -7,7 +7,6 @@ import (
 	"github.com/invopop/gobl/pay"
 )
 
-// Parses the XML information for a Payment object
 func (c *Conversor) getPayment(settlement *ApplicableHeaderTradeSettlement) error {
 	payment := &bill.Payment{}
 

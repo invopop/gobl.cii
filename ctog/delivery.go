@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-// ParseCtoGDelivery parses the delivery information from the CII document
 func (c *Conversor) getDelivery(doc *Document) error {
 	delivery := &bill.Delivery{}
 

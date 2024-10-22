@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// ParseAllowanceCharges extracts the charges logic from the CII document
 func (c *Conversor) getCharges(settlement *ApplicableHeaderTradeSettlement) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount

@@ -11,7 +11,6 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// Parses the XML information for a Lines object
 func (c *Conversor) getLines(transaction *SupplyChainTradeTransaction) error {
 	items := transaction.IncludedSupplyChainTradeLineItem
 	lines := make([]*bill.Line, 0, len(transaction.IncludedSupplyChainTradeLineItem))

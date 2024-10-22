@@ -11,7 +11,6 @@ import (
 
 var onlyDigitsRegex = regexp.MustCompile(`\D`)
 
-// Parses the XML information for a Party object
 func (c *Conversor) getParty(party *TradeParty) *org.Party {
 	p := &org.Party{
 		Name: party.Name,
