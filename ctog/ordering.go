@@ -14,8 +14,8 @@ const (
 )
 
 const (
-	KeyAdditionalDocumentTypeInvoiceDataSheet = "invoice-data-sheet"
-	KeyAdditionalDocumentTypeRefPaper         = "ref-paper"
+	keyAdditionalDocumentTypeInvoiceDataSheet = "invoice-data-sheet"
+	keyAdditionalDocumentTypeRefPaper         = "ref-paper"
 )
 
 func (c *Conversor) getOrdering(doc *Document) error {
@@ -30,11 +30,19 @@ func (c *Conversor) getOrdering(doc *Document) error {
 		period := &cal.Period{}
 
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.StartDateTime != nil {
-			period.Start = ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.StartDateTime.DateTimeString)
+			start, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.StartDateTime.DateTimeString)
+			if err != nil {
+				return err
+			}
+			period.Start = start
 		}
 
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.EndDateTime != nil {
-			period.End = ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.EndDateTime.DateTimeString)
+			end, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.EndDateTime.DateTimeString)
+			if err != nil {
+				return err
+			}
+			period.End = end
 		}
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.Description != nil {
 			period.Label = *doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.Description
@@ -50,7 +58,10 @@ func (c *Conversor) getOrdering(doc *Document) error {
 			},
 		}
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument.FormattedIssueDateTime != nil {
-			refDate := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument.FormattedIssueDateTime.DateTimeString)
+			refDate, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument.FormattedIssueDateTime.DateTimeString)
+			if err != nil {
+				return err
+			}
 			ordering.Despatch[0].IssueDate = &refDate
 		}
 	}
@@ -62,7 +73,10 @@ func (c *Conversor) getOrdering(doc *Document) error {
 			},
 		}
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument.FormattedIssueDateTime != nil {
-			refDate := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument.FormattedIssueDateTime.DateTimeString)
+			refDate, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument.FormattedIssueDateTime.DateTimeString)
+			if err != nil {
+				return err
+			}
 			ordering.Receiving[0].IssueDate = &refDate
 		}
 	}
@@ -78,7 +92,10 @@ func (c *Conversor) getOrdering(doc *Document) error {
 					Code: cbc.Code(ref.IssuerAssignedID),
 				}
 				if ref.FormattedIssueDateTime != nil {
-					refDate := ParseDate(ref.FormattedIssueDateTime.DateTimeString)
+					refDate, err := ParseDate(ref.FormattedIssueDateTime.DateTimeString)
+					if err != nil {
+						return err
+					}
 					docRef.IssueDate = &refDate
 				}
 				ordering.Tender = append(ordering.Tender, docRef)
@@ -87,12 +104,12 @@ func (c *Conversor) getOrdering(doc *Document) error {
 					ordering.Identities = make([]*org.Identity, 0)
 				}
 				ordering.Identities = append(ordering.Identities, &org.Identity{
-					Key:  KeyAdditionalDocumentTypeInvoiceDataSheet,
+					Key:  keyAdditionalDocumentTypeInvoiceDataSheet,
 					Code: cbc.Code(ref.IssuerAssignedID),
 				})
 			default:
 				ordering.Identities = append(ordering.Identities, &org.Identity{
-					Key:  KeyAdditionalDocumentTypeRefPaper,
+					Key:  keyAdditionalDocumentTypeRefPaper,
 					Code: cbc.Code(ref.IssuerAssignedID),
 				})
 			}

@@ -8,7 +8,7 @@ import (
 //with the EN 16931 standard. Field names are verbatim from the schema and can be found at
 //https://unece.org/trade/uncefact/xml-schemas-2018-2012
 
-// Model for XML excluding namespaces
+// Document is the root element of a CII document
 type Document struct {
 	XMLName                     xml.Name                    `xml:"CrossIndustryInvoice"`
 	BusinessProcessContext      string                      `xml:"ExchangedDocumentContext>BusinessProcessSpecifiedDocumentContextParameter>ID"`
@@ -17,6 +17,7 @@ type Document struct {
 	SupplyChainTradeTransaction SupplyChainTradeTransaction `xml:"SupplyChainTradeTransaction"`
 }
 
+// ExchangedDocument contains basic information about the document
 type ExchangedDocument struct {
 	ID            string `xml:"ID"`
 	Name          string `xml:"Name"`
@@ -30,6 +31,7 @@ type ExchangedDocument struct {
 	IncludedNote []IncludedNote `xml:"IncludedNote"`
 }
 
+// SupplyChainTradeTransaction defines the transaction divided in lines, agreement, delivery and settlement
 type SupplyChainTradeTransaction struct {
 	IncludedSupplyChainTradeLineItem []IncludedSupplyChainTradeLineItem `xml:"IncludedSupplyChainTradeLineItem"`
 	ApplicableHeaderTradeAgreement   ApplicableHeaderTradeAgreement     `xml:"ApplicableHeaderTradeAgreement"`
@@ -37,6 +39,7 @@ type SupplyChainTradeTransaction struct {
 	ApplicableHeaderTradeSettlement  ApplicableHeaderTradeSettlement    `xml:"ApplicableHeaderTradeSettlement"`
 }
 
+// IncludedSupplyChainTradeLineItem defines a line item in the transaction
 type IncludedSupplyChainTradeLineItem struct {
 	AssociatedDocumentLineDocument struct {
 		LineID       int            `xml:"LineID"`
@@ -90,6 +93,8 @@ type IncludedSupplyChainTradeLineItem struct {
 		} `xml:"ReceivableSpecifiedTradeAccountingAccount"`
 	} `xml:"SpecifiedLineTradeSettlement"`
 }
+
+// SpecifiedTradeAllowanceCharge defines an allowance or charge in the transaction
 type SpecifiedTradeAllowanceCharge struct {
 	ChargeIndicator struct {
 		Indicator bool `xml:"Indicator"`
@@ -100,6 +105,7 @@ type SpecifiedTradeAllowanceCharge struct {
 	Reason             *string `xml:"Reason"`
 }
 
+// ApplicableHeaderTradeAgreement defines the agreement in the transaction
 type ApplicableHeaderTradeAgreement struct {
 	BuyerReference                    *string     `xml:"BuyerReference"`
 	SellerTradeParty                  TradeParty  `xml:"SellerTradeParty"`
@@ -120,6 +126,7 @@ type ApplicableHeaderTradeAgreement struct {
 	} `xml:"AdditionalReferencedDocument"`
 }
 
+// TradeParty defines a party in the transaction
 type TradeParty struct {
 	ID       string `xml:"ID,omitempty"`
 	GlobalID *struct {
@@ -152,6 +159,7 @@ type TradeParty struct {
 	} `xml:"SpecifiedTaxRegistration,omitempty"`
 }
 
+// ApplicableHeaderTradeDelivery defines the delivery in the transaction
 type ApplicableHeaderTradeDelivery struct {
 	ShipToTradeParty               *TradeParty `xml:"ShipToTradeParty"`
 	ActualDeliverySupplyChainEvent *struct {
@@ -171,6 +179,7 @@ type ApplicableHeaderTradeDelivery struct {
 	} `xml:"DeliveryNoteReferencedDocument"`
 }
 
+// ApplicableHeaderTradeSettlement defines the settlement in the transaction
 type ApplicableHeaderTradeSettlement struct {
 	InvoiceCurrencyCode                  string `xml:"InvoiceCurrencyCode"`
 	SpecifiedTradeSettlementPaymentMeans []struct {
@@ -263,11 +272,13 @@ type ApplicableHeaderTradeSettlement struct {
 	} `xml:"BillingSpecifiedPeriod"`
 }
 
+// DateTimeFormat defines a date and time string with a format
 type DateTimeFormat struct {
 	DateTimeString string `xml:"DateTimeString"`
 	Format         string `xml:"format,attr"`
 }
 
+// IncludedTradeTax defines a tax in the transaction
 type IncludedTradeTax struct {
 	CalculatedAmount      string `xml:"CalculatedAmount"`
 	TypeCode              string `xml:"TypeCode"`
@@ -276,12 +287,14 @@ type IncludedTradeTax struct {
 	RateApplicablePercent string `xml:"RateApplicablePercent"`
 }
 
+// IncludedNote defines a note in the transaction
 type IncludedNote struct {
 	ContentCode string `xml:"ContentCode"`
 	Content     string `xml:"Content"`
 	SubjectCode string `xml:"SubjectCode"`
 }
 
+// PostalTradeAddress defines a postal address
 type PostalTradeAddress struct {
 	PostcodeCode           *string `xml:"PostcodeCode,omitempty"`
 	LineOne                *string `xml:"LineOne,omitempty"`

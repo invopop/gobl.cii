@@ -1,3 +1,4 @@
+// Package ctog contains the logic to convert a CII document into a GOBL envelope
 package ctog
 
 import (
@@ -18,7 +19,7 @@ type Conversor struct {
 	doc *Document
 }
 
-// Initialize a new Conversor
+// NewConversor Builder function
 func NewConversor() *Conversor {
 	c := new(Conversor)
 	c.inv = new(bill.Invoice)
@@ -31,6 +32,7 @@ func (c *Conversor) GetInvoice() *bill.Invoice {
 	return c.inv
 }
 
+// ConvertToGOBL converts a CII document into a GOBL envelope
 func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 	if err := xml.Unmarshal(xmlData, &c.doc); err != nil {
 		return nil, err
@@ -48,18 +50,27 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 	return env, nil
 }
 
+// NewInvoice creates a new GOBL invoice from a CII document
 func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 
 	c.inv = &bill.Invoice{
-		Code:      cbc.Code(doc.ExchangedDocument.ID),
-		Type:      TypeCodeParse(doc.ExchangedDocument.TypeCode),
-		IssueDate: ParseDate(doc.ExchangedDocument.IssueDateTime.DateTimeString.Value),
-		Currency:  currency.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.InvoiceCurrencyCode),
-		Supplier:  c.getParty(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.SellerTradeParty),
-		Customer:  c.getParty(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerTradeParty),
+		Code:     cbc.Code(doc.ExchangedDocument.ID),
+		Type:     TypeCodeParse(doc.ExchangedDocument.TypeCode),
+		Currency: currency.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.InvoiceCurrencyCode),
+		Supplier: c.getParty(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.SellerTradeParty),
+		Customer: c.getParty(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerTradeParty),
 	}
 
-	c.getLines(&doc.SupplyChainTradeTransaction)
+	issueDate, err := ParseDate(doc.ExchangedDocument.IssueDateTime.DateTimeString.Value)
+	if err != nil {
+		return nil, err
+	}
+	c.inv.IssueDate = issueDate
+
+	err = c.getLines(&doc.SupplyChainTradeTransaction)
+	if err != nil {
+		return nil, err
+	}
 
 	// Payment comprised of terms, means and payee. Check tehre is relevant info in at least one of them to create a payment
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.PayeeTradeParty != nil ||
@@ -67,7 +78,10 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 			doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil) ||
 		(len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementPaymentMeans) > 0 &&
 			doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1") {
-		c.getPayment(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+		err = c.getPayment(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if len(doc.ExchangedDocument.IncludedNote) > 0 {
@@ -83,7 +97,7 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 		}
 	}
 
-	err := c.getOrdering(doc)
+	err = c.getOrdering(doc)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +114,10 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 				Code: cbc.Code(ref.IssuerAssignedID),
 			}
 			if ref.FormattedIssueDateTime != nil {
-				refDate := ParseDate(ref.FormattedIssueDateTime.DateTimeString.Value)
+				refDate, err := ParseDate(ref.FormattedIssueDateTime.DateTimeString.Value)
+				if err != nil {
+					return nil, err
+				}
 				docRef.IssueDate = &refDate
 			}
 			c.inv.Preceding = append(c.inv.Preceding, docRef)

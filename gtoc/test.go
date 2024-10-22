@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	JSONPattern = "json"
-	XMLPattern  = "xml"
+	jsonPattern = "json"
+	xmlPattern  = "xml"
 )
 
 // LoadTestInvoice returns a GOBL Invoice from a file in the `test/data` folder
@@ -28,7 +28,7 @@ func LoadTestInvoice(name string) (*bill.Invoice, error) {
 
 // LoadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
 func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
-	src, _ := os.Open(filepath.Join(GetConversionTypePath(JSONPattern), name))
+	src, _ := os.Open(filepath.Join(GetConversionTypePath(jsonPattern), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err
@@ -56,8 +56,9 @@ func GetDataPath() string {
 	return filepath.Join(GetTestPath(), "data")
 }
 
+// GetConversionTypePath returns the path to the `test/data/ctog` or `test/data/gtoc` folder
 func GetConversionTypePath(pattern string) string {
-	if pattern == XMLPattern {
+	if pattern == xmlPattern {
 		return filepath.Join(GetDataPath(), "ctog")
 	}
 	return filepath.Join(GetDataPath(), "gtoc")

@@ -9,16 +9,20 @@ import (
 )
 
 const (
-	XMLPattern = "*.xml"
+	xmlPattern = "*.xml"
 )
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
 func LoadTestXMLDoc(name string) (*Document, error) {
-	src, err := os.Open(filepath.Join(GetConversionTypePath(XMLPattern), name))
+	src, err := os.Open(filepath.Join(GetConversionTypePath(xmlPattern), name))
 	if err != nil {
 		return nil, err
 	}
-	defer src.Close()
+	defer func() {
+		if cerr := src.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	inData, err := io.ReadAll(src)
 	if err != nil {
@@ -29,7 +33,7 @@ func LoadTestXMLDoc(name string) (*Document, error) {
 		return nil, err
 	}
 
-	return doc, nil
+	return doc, err
 }
 
 // GetDataGlob returns a list of files in the `test/data` folder that match the pattern
@@ -52,8 +56,9 @@ func GetDataPath() string {
 	return filepath.Join(GetTestPath(), "data")
 }
 
+// GetConversionTypePath returns the path to the `test/data/ctog` or `test/data/gtoc` folder
 func GetConversionTypePath(pattern string) string {
-	if pattern == XMLPattern {
+	if pattern == xmlPattern {
 		return filepath.Join(GetDataPath(), "ctog")
 	}
 	return filepath.Join(GetDataPath(), "gtoc")

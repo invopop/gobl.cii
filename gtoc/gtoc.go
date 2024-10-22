@@ -1,3 +1,4 @@
+// Package gtoc contains the logic to convert a GOBL envelope into a CII document
 package gtoc
 
 import (
@@ -14,16 +15,19 @@ type Date struct {
 	Format string `xml:"format,attr,omitempty"`
 }
 
+// Conversor is the struct that contains the logic to convert a GOBL envelope into a CII document
 type Conversor struct {
 	cii *Document
 }
 
+// NewConversor Builder function
 func NewConversor() *Conversor {
 	c := new(Conversor)
 	c.cii = new(Document)
 	return c
 }
 
+// GetDocument returns the CII document
 func (c *Conversor) GetDocument() *Document {
 	return c.cii
 }

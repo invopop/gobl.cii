@@ -22,7 +22,11 @@ func (c *Conversor) getPayment(settlement *ApplicableHeaderTradeSettlement) erro
 	}
 	if len(settlement.SpecifiedTradePaymentTerms) > 0 {
 		if settlement.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil {
-			payment.Terms = getTerms(settlement)
+			terms, err := getTerms(settlement)
+			if err != nil {
+				return err
+			}
+			payment.Terms = terms
 		}
 	}
 
@@ -36,7 +40,10 @@ func (c *Conversor) getPayment(settlement *ApplicableHeaderTradeSettlement) erro
 				Amount: num.AmountFromFloat64(advancePayment.PaidAmount, 0),
 			}
 			if advancePayment.FormattedReceivedDateTime != nil {
-				advancePaymentReceivedDateTime := ParseDate(advancePayment.FormattedReceivedDateTime.DateTimeString)
+				advancePaymentReceivedDateTime, err := ParseDate(advancePayment.FormattedReceivedDateTime.DateTimeString)
+				if err != nil {
+					return err
+				}
 				advance.Date = &advancePaymentReceivedDateTime
 			}
 			payment.Advances = append(payment.Advances, advance)
@@ -47,7 +54,7 @@ func (c *Conversor) getPayment(settlement *ApplicableHeaderTradeSettlement) erro
 	return nil
 }
 
-func getTerms(settlement *ApplicableHeaderTradeSettlement) *pay.Terms {
+func getTerms(settlement *ApplicableHeaderTradeSettlement) (*pay.Terms, error) {
 	terms := &pay.Terms{}
 	var dueDates []*pay.DueDate
 
@@ -57,21 +64,27 @@ func getTerms(settlement *ApplicableHeaderTradeSettlement) *pay.Terms {
 		}
 
 		if paymentTerm.DueDateDateTime != nil {
-			dueDateTime := ParseDate(paymentTerm.DueDateDateTime.DateTimeString)
+			dueDateTime, err := ParseDate(paymentTerm.DueDateDateTime.DateTimeString)
+			if err != nil {
+				return nil, err
+			}
 			dueDate := &pay.DueDate{
 				Date: &dueDateTime,
 			}
 			if paymentTerm.PartialPaymentAmount != nil {
 				dueDate.Amount, _ = num.AmountFromString(*paymentTerm.PartialPaymentAmount)
 			} else if len(dueDates) == 0 {
-				percent, _ := num.PercentageFromString("100%")
+				percent, err := num.PercentageFromString("100%")
+				if err != nil {
+					return nil, err
+				}
 				dueDate.Percent = &percent
 			}
 			dueDates = append(dueDates, dueDate)
 		}
 	}
 	terms.DueDates = dueDates
-	return terms
+	return terms, nil
 }
 
 func getMeans(settlement *ApplicableHeaderTradeSettlement) *pay.Instructions {

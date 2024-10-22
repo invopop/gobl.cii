@@ -17,22 +17,22 @@ const (
 )
 
 const (
-	PaymentMeansCash               = "10"
-	PaymentMeansCheque             = "20"
-	PaymentMeansCreditTransfer     = "30"
-	PaymentMeansBankAccount        = "42"
-	PaymentMeansCard               = "48"
-	PaymentMeansDirectDebit        = "49"
-	PaymentMeansStandingOrder      = "57"
-	PaymentMeansSEPACreditTransfer = "58"
-	PaymentMeansSEPADirectDebit    = "59"
-	PaymentMeansReport             = "97"
+	paymentMeansCash               = "10"
+	paymentMeansCheque             = "20"
+	paymentMeansCreditTransfer     = "30"
+	paymentMeansBankAccount        = "42"
+	paymentMeansCard               = "48"
+	paymentMeansDirectDebit        = "49"
+	paymentMeansStandingOrder      = "57"
+	paymentMeansSEPACreditTransfer = "58"
+	paymentMeansSEPADirectDebit    = "59"
+	paymentMeansReport             = "97"
 )
 
 const (
-	StandardSalesTax  = "S"
-	ZeroRatedGoodsTax = "Z"
-	TaxExempt         = "E"
+	standardSalesTax  = "S"
+	zeroRatedGoodsTax = "Z"
+	taxExempt         = "E"
 )
 
 const (
@@ -44,70 +44,70 @@ const (
 )
 
 const (
-	InvoiceTypeProforma                 = "325"
-	InvoiceTypeStandard                 = "380"
-	InvoiceTypeCreditNote               = "381"
-	InvoiceTypeDebitNote                = "383"
-	InvoiceTypeCorrective               = "384"
-	InvoiceTypeSelfBilled               = "389"
-	InvoiceTypePartial                  = "326"
-	InvoiceTypePartialConstruction      = "875"
-	InvoiceTypePartialFinalConstruction = "876"
-	InvoiceTypeFinalConstruction        = "877"
+	invoiceTypeProforma                 = "325"
+	invoiceTypeStandard                 = "380"
+	invoiceTypeCreditNote               = "381"
+	invoiceTypeDebitNote                = "383"
+	invoiceTypeCorrective               = "384"
+	invoiceTypeSelfBilled               = "389"
+	invoiceTypePartial                  = "326"
+	invoiceTypePartialConstruction      = "875"
+	invoiceTypePartialFinalConstruction = "876"
+	invoiceTypeFinalConstruction        = "877"
 )
 
-// Convert a date string to a cal.Date
-func ParseDate(date string) cal.Date {
+// ParseDate converts a date string to a cal.Date
+func ParseDate(date string) (cal.Date, error) {
 	t, err := time.Parse("20060102", date)
 	if err != nil {
-		return cal.Date{}
+		return cal.Date{}, err
 	}
 
-	return cal.MakeDate(t.Year(), t.Month(), t.Day())
+	return cal.MakeDate(t.Year(), t.Month(), t.Day()), nil
 }
 
-// Map X-Rechnung rate to GOBL equivalent
+// FindTaxKey maps a CII tax type to a GOBL equivalent
 func FindTaxKey(taxType string) cbc.Key {
 	switch taxType {
-	case StandardSalesTax:
+	case standardSalesTax:
 		return tax.RateStandard
-	case ZeroRatedGoodsTax:
+	case zeroRatedGoodsTax:
 		return tax.RateZero
-	case TaxExempt:
+	case taxExempt:
 		return tax.RateExempt
 	}
 	return tax.RateStandard
 }
 
-// Map CII invoice type to GOBL equivalent
+// TypeCodeParse maps a CII invoice type to a GOBL equivalent
 // Source https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
 func TypeCodeParse(typeCode string) cbc.Key {
 	switch typeCode {
-	case InvoiceTypeStandard:
+	case invoiceTypeStandard:
 		return bill.InvoiceTypeStandard
-	case InvoiceTypeCreditNote:
+	case invoiceTypeCreditNote:
 		return bill.InvoiceTypeCreditNote
-	case InvoiceTypeCorrective:
+	case invoiceTypeCorrective:
 		return bill.InvoiceTypeCorrective
-	case InvoiceTypeProforma:
+	case invoiceTypeProforma:
 		return bill.InvoiceTypeProforma
-	case InvoiceTypeDebitNote:
+	case invoiceTypeDebitNote:
 		return bill.InvoiceTypeDebitNote
-	case InvoiceTypeSelfBilled:
+	case invoiceTypeSelfBilled:
 		return keyInvoiceTypeSelfBilled
-	case InvoiceTypePartial:
+	case invoiceTypePartial:
 		return keyInvoiceTypePartial
-	case InvoiceTypePartialConstruction:
+	case invoiceTypePartialConstruction:
 		return keyInvoiceTypePartialConstruction
-	case InvoiceTypePartialFinalConstruction:
+	case invoiceTypePartialFinalConstruction:
 		return keyInvoiceTypePartialFinalConstruction
-	case InvoiceTypeFinalConstruction:
+	case invoiceTypeFinalConstruction:
 		return keyInvoiceTypeFinalConstruction
 	}
 	return bill.InvoiceTypeOther
 }
 
-// Map UN/ECE code to GOBL equivalent
+// UnitFromUNECE maps a UN/ECE code to a GOBL unit
 func UnitFromUNECE(unece cbc.Code) org.Unit {
 	for _, def := range org.UnitDefinitions {
 		if def.UNECE == unece {
@@ -118,25 +118,25 @@ func UnitFromUNECE(unece cbc.Code) org.Unit {
 	return org.Unit(unece)
 }
 
-// Map CII payment means to GOBL equivalent
+// PaymentMeansTypeCodeParse maps a CII payment means to a GOBL equivalent
 // Source https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred4461.htm
 func PaymentMeansTypeCodeParse(typeCode string) cbc.Key {
 	switch typeCode {
-	case PaymentMeansCash:
+	case paymentMeansCash:
 		return pay.MeansKeyCash
-	case PaymentMeansCheque:
+	case paymentMeansCheque:
 		return pay.MeansKeyCheque
-	case PaymentMeansCreditTransfer:
+	case paymentMeansCreditTransfer:
 		return pay.MeansKeyCreditTransfer
-	case PaymentMeansBankAccount:
+	case paymentMeansBankAccount:
 		return pay.MeansKeyDebitTransfer
-	case PaymentMeansCard:
+	case paymentMeansCard:
 		return pay.MeansKeyCard
-	case PaymentMeansSEPACreditTransfer:
+	case paymentMeansSEPACreditTransfer:
 		return keyPaymentMeansSEPACreditTransfer
-	case PaymentMeansSEPADirectDebit:
+	case paymentMeansSEPADirectDebit:
 		return keyPaymentMeansSEPADirectDebit
-	case PaymentMeansDirectDebit:
+	case paymentMeansDirectDebit:
 		return pay.MeansKeyDirectDebit
 	default:
 		return pay.MeansKeyOther

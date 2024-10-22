@@ -10,7 +10,7 @@ import (
 	gtoc "github.com/invopop/gobl.cii/gtoc"
 )
 
-// Converter is a struct that encapsulates both CtoG and GtoC conversors
+// Conversor is a struct that encapsulates both CtoG and GtoC conversors
 type Conversor struct {
 	CtoG *ctog.Conversor
 	GtoC *gtoc.Conversor

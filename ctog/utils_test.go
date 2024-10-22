@@ -10,19 +10,26 @@ import (
 // Define tests for the ParseDate function
 func TestParseDate(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		expected string
+		name        string
+		input       string
+		expected    string
+		expectError bool
 	}{
-		{"Valid date", "20230515", "2023-05-15"},
-		{"Invalid date", "20231345", "0000-00-00"},
-		{"Empty string", "", "0000-00-00"},
+		{"Valid date", "20230515", "2023-05-15", false},
+		{"Invalid date", "20231345", "", true},
+		{"Empty string", "", "", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := ParseDate(tt.input)
-			assert.Equal(t, tt.expected, result.String())
+			result, err := ParseDate(tt.input)
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Empty(t, result)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, result.String())
+			}
 		})
 	}
 }

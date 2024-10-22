@@ -35,7 +35,10 @@ func (c *Conversor) getCharges(settlement *ApplicableHeaderTradeSettlement) erro
 				if !strings.HasSuffix(*allowanceCharge.CalculationPercent, "%") {
 					*allowanceCharge.CalculationPercent += "%"
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+				percent, err := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+				if err != nil {
+					return err
+				}
 				charge.Percent = &percent
 			}
 			if allowanceCharge.CategoryTradeTax.TypeCode != "" {
@@ -51,7 +54,10 @@ func (c *Conversor) getCharges(settlement *ApplicableHeaderTradeSettlement) erro
 				if !strings.HasSuffix(*allowanceCharge.CategoryTradeTax.RateApplicablePercent, "%") {
 					*allowanceCharge.CategoryTradeTax.RateApplicablePercent += "%"
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
+				percent, err := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
+				if err != nil {
+					return err
+				}
 				charge.Taxes[0].Percent = &percent
 			}
 			if charges == nil {
@@ -78,7 +84,10 @@ func (c *Conversor) getCharges(settlement *ApplicableHeaderTradeSettlement) erro
 				if !strings.HasSuffix(*allowanceCharge.CalculationPercent, "%") {
 					*allowanceCharge.CalculationPercent += "%"
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+				percent, err := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+				if err != nil {
+					return err
+				}
 				discount.Percent = &percent
 			}
 			if allowanceCharge.CategoryTradeTax.TypeCode != "" {
@@ -93,7 +102,10 @@ func (c *Conversor) getCharges(settlement *ApplicableHeaderTradeSettlement) erro
 				if !strings.HasSuffix(*allowanceCharge.CategoryTradeTax.RateApplicablePercent, "%") {
 					*allowanceCharge.CategoryTradeTax.RateApplicablePercent += "%"
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
+				percent, err := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
+				if err != nil {
+					return err
+				}
 				discount.Taxes[0].Percent = &percent
 			}
 			if discounts == nil {

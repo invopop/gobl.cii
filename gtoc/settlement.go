@@ -20,7 +20,7 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 		settlement.Summary = newSummary(inv.Totals, string(inv.Currency))
 	}
 
-	if inv.Preceding != nil && len(inv.Preceding) > 0 {
+	if len(inv.Preceding) > 0 {
 		cor := inv.Preceding[0]
 		settlement.ReferencedDocument = &ReferencedDocument{
 			IssuerAssignedID: invoiceNumber(cor.Series, cor.Code),
