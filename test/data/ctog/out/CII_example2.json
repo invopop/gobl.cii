@@ -18,7 +18,7 @@
       "name": "Tax handling company AS",
       "tax_id": {
         "country": "NO",
-        "code": "967611265"
+        "code": "967611265MVA"
       },
       "addresses": [
         {
@@ -35,7 +35,7 @@
       "name": "The Buyercompany",
       "tax_id": {
         "country": "NO",
-        "code": "987654321"
+        "code": "987654321MVA"
       },
       "identities": [
         {
@@ -307,7 +307,7 @@
         "name": "Salescompany ltd.",
         "tax_id": {
           "country": "NO",
-          "code": "123456789"
+          "code": "123456789MVA"
         },
         "identities": [
           {

@@ -27,7 +27,7 @@ func TestParseCtoGParty(t *testing.T) {
 
 		assert.Equal(t, "Sample Seller", seller.Name)
 		assert.Equal(t, l10n.TaxCountryCode("DE"), seller.TaxID.Country)
-		assert.Equal(t, cbc.Code("049120826"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("DE049120826"), seller.TaxID.Code)
 
 		assert.Equal(t, "Sample Buyer", buyer.Name)
 		assert.Equal(t, "Sample Street 2", buyer.Addresses[0].Street)
@@ -51,7 +51,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.NotNil(t, seller)
 
 		assert.NotNil(t, seller.TaxID)
-		assert.Equal(t, cbc.Code("967611265"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("NO967611265MVA"), seller.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
 
 		assert.Equal(t, "Tax handling company AS", seller.Name)
@@ -66,7 +66,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.NotNil(t, supplier)
 
 		assert.Equal(t, "Salescompany ltd.", supplier.Name)
-		assert.Equal(t, cbc.Code("123456789"), supplier.TaxID.Code)
+		assert.Equal(t, cbc.Code("NO123456789MVA"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
 
 		require.Len(t, supplier.Addresses, 1)

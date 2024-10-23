@@ -141,6 +141,5 @@ func (c *Conversor) NewInvoice(doc *Document) error {
 			return err
 		}
 	}
-
 	return nil
 }

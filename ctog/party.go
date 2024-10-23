@@ -1,15 +1,11 @@
 package ctog
 
 import (
-	"regexp"
-
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 )
-
-var onlyDigitsRegex = regexp.MustCompile(`\D`)
 
 func (c *Conversor) getParty(party *TradeParty) *org.Party {
 	p := &org.Party{
@@ -56,7 +52,7 @@ func (c *Conversor) getParty(party *TradeParty) *org.Party {
 				case "VA":
 					p.TaxID = &tax.Identity{
 						Country: l10n.TaxCountryCode(party.PostalTradeAddress.CountryID),
-						Code:    cbc.Code(onlyDigitsRegex.ReplaceAllString(taxReg.ID.Value, "")),
+						Code:    cbc.Code(taxReg.ID.Value),
 					}
 				case "FC":
 					identity := &org.Identity{
