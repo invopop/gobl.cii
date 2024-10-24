@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192bd6e-a5ed-7bd1-8c34-e2ac4e44d6c4",
+    "uuid": "0192be86-c5bb-745f-b138-dffc719832a2",
     "dig": {
       "alg": "sha256",
-      "val": "1915ecbc782d033e00d3eaf9063a2ec81ccbfe0e9e4d82378d006c488def454b"
+      "val": "35ec9a7381fd05469deb698c0a8f4f87373c819ab1cd30e1809361defd5a3db6"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192bd6e-a5ed-7c16-b2de-e67bcb033519",
+    "uuid": "0192be86-c5bb-74b6-bd62-aa829674843d",
     "type": "standard",
     "code": "1100512149",
     "issue_date": "2014-11-10",

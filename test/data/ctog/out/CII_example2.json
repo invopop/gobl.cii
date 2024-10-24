@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192bd6e-a53e-7e94-bf5b-61d78239a331",
+    "uuid": "0192be86-c4e6-7c0a-9d40-a95fda31a0f6",
     "dig": {
       "alg": "sha256",
-      "val": "e935f4f773e1463708cdae2710f21db4a09f05a5d1258f8b9f4e4c9e03479b0f"
+      "val": "c1b3d667d00adc4215d8ab495d2ab36f363bca103d2f36394f9861fb98a9c40f"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192bd6e-a53e-7eec-90fb-97b4037b8007",
+    "uuid": "0192be86-c4e6-7c68-8c05-1abfbab2dfec",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -423,15 +423,6 @@
       },
       "tax": "365.28",
       "total_with_tax": "1801.78",
-      "payable": "1801.78"
-    },
-    "notes": [
-      {
-        "text": "Ordered in our booth at the convention"
-      }
-    ]
-  }
-}.78",
       "payable": "1801.78"
     },
     "notes": [

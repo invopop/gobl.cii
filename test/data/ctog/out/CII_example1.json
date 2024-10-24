@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192bd6e-a520-7518-8d58-9a6da482a55e",
+    "uuid": "0192be86-c4bd-79a2-beda-9dd9518ef17f",
     "dig": {
       "alg": "sha256",
-      "val": "3083f21d0e7d2adf5c9fdb4e2620a1704abc047a22abc09d884ae2b6ec88a11c"
+      "val": "1dc80595e516fdabc6ff87f417c0c20cf5a5370550446588b76d1698728235e3"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192bd6e-a520-755a-845c-857566078350",
+    "uuid": "0192be86-c4bd-7a4b-86d6-726c9c962a05",
     "type": "standard",
     "code": "12115118",
     "issue_date": "2015-01-09",
@@ -456,25 +456,6 @@
       "tax": "33.93",
       "total_with_tax": "483.49",
       "payable": "483.49"
-    },
-    "notes": [
-      {
-        "code": "AAR",
-        "text": "Alle leveringen zijn franco. Alle prijzen zijn incl. BTW. Betalingstermijn: 14 dagen netto. Prijswijzigingen voorbehouden. Op al onze aanbiedingen, leveringen en overeenkomsten zijn van toepassing in de algemene verkoop en leveringsvoorwaarden. Gedeponeerd bij de K.v.K. te Amsterdam 25-04-'85."
-      }
-    ]
-  }
-}"amount": "94.41"
-              }
-            ],
-            "amount": "94.41"
-          }
-        ],
-        "sum": "94.41"
-      },
-      "tax": "94.41",
-      "total_with_tax": "543.97",
-      "payable": "543.97"
     },
     "notes": [
       {

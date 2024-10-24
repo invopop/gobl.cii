@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192bd6e-a55e-7b70-9c01-12add5b7173b",
+    "uuid": "0192be86-c50d-7b9e-b4fe-0f25b37159a4",
     "dig": {
       "alg": "sha256",
-      "val": "1fcc562d90b3b941e8da1a95f0ab485bbc0cfaf94d8422125ae942f29713b529"
+      "val": "fb2cf389f6662671ee08379df4bc0cbcd845dc6d36d6bc2288ee1a45e1db959f"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192bd6e-a55e-7bca-a1e5-0dbb4b01a040",
+    "uuid": "0192be86-c50d-7c06-9ebb-d1182193bdf5",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-04-10",
@@ -138,10 +138,6 @@
     "notes": [
       {
         "text": "Contract was established through our website"
-      }
-    ]
-  }
-} "Contract was established through our website"
       }
     ]
   }
