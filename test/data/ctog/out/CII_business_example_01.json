@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b342-bd39-757d-bb81-410b232e8558",
+    "uuid": "0192bd6f-b7e6-78ca-9116-a04e7501f74e",
     "dig": {
       "alg": "sha256",
-      "val": "c049c6ec765a51771047256b709e169f16158959bd886887a4e4c5ea78b23f86"
+      "val": "16cf39bce09301146d3cd340831152a54e7534c35270da36acc69f1d81e97aac"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "DE",
-    "uuid": "0192b342-bd39-75db-b4da-30ea0ce3d038",
+    "uuid": "0192bd6f-b7e6-792c-8ad9-ec5ca61512bd",
     "type": "standard",
     "code": "2016166",
     "issue_date": "2015-01-09",
@@ -63,8 +63,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "19%"
+            "percent": "19.00%"
           }
         ],
         "total": "12122.5900"
@@ -82,8 +81,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "19%"
+            "percent": "19.00%"
           }
         ],
         "total": "-606.1300"
@@ -101,8 +99,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "19%"
+            "percent": "19.00%"
           }
         ],
         "total": "1.5000"
@@ -139,9 +136,8 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "11517.96",
-                "percent": "19%",
+                "percent": "19.00%",
                 "amount": "2188.41"
               }
             ],

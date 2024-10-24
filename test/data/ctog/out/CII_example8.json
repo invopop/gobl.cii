@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b342-17b3-77e4-a02b-2195d6033e3b",
+    "uuid": "0192bd6e-a5ed-7bd1-8c34-e2ac4e44d6c4",
     "dig": {
       "alg": "sha256",
-      "val": "c90285eb7c084c4828d44e83949837e256403baddb19f8b21ee3c06de21e708e"
+      "val": "1915ecbc782d033e00d3eaf9063a2ec81ccbfe0e9e4d82378d006c488def454b"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192b342-17b3-7865-8fe1-b4eea265233a",
+    "uuid": "0192bd6e-a5ed-7c16-b2de-e67bcb033519",
     "type": "standard",
     "code": "1100512149",
     "issue_date": "2014-11-10",
@@ -53,14 +53,19 @@
         "item": {
           "name": "Getransporteerde kWh’s",
           "price": "0.00880",
-          "unit": "kwh"
+          "unit": "kwh",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
         },
         "sum": "140.80000",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "140.80000"
@@ -71,14 +76,19 @@
         "item": {
           "name": "Systeemdiensten",
           "price": "0.00101",
-          "unit": "kwh"
+          "unit": "kwh",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
         },
         "sum": "16.16000",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "16.16000"
@@ -89,14 +99,19 @@
         "item": {
           "name": "Contract transportvermogen",
           "price": "15.24000",
-          "unit": "kw"
+          "unit": "kw",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
         },
         "sum": "2011.68000",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "2011.68000"
@@ -107,14 +122,19 @@
         "item": {
           "name": "Maximaal afgenomen vermogen",
           "price": "1.530000",
-          "unit": "kw"
+          "unit": "kw",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
         },
         "sum": "88.740000",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "88.740000"
@@ -125,14 +145,19 @@
         "item": {
           "name": "Vastrecht Transportdienst",
           "price": "441.00",
-          "unit": "mon"
+          "unit": "mon",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
         },
         "sum": "441.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "441.00"
@@ -143,14 +168,19 @@
         "item": {
           "name": "Vastrecht Aansluitdienst",
           "price": "678.00",
-          "unit": "mon"
+          "unit": "mon",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
         },
         "sum": "678.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "678.00"
@@ -167,8 +197,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "83.340000"
@@ -185,8 +214,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "190.310000"
@@ -203,8 +231,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "64.210000"
@@ -221,8 +248,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "64.46000"
@@ -281,9 +307,8 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "3778.70",
-                "percent": "21.0%",
+                "percent": "21%",
                 "amount": "793.53"
               }
             ],

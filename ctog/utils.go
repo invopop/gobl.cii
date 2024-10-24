@@ -1,6 +1,8 @@
 package ctog
 
 import (
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/invopop/gobl/bill"
@@ -141,4 +143,15 @@ func PaymentMeansTypeCodeParse(typeCode string) cbc.Key {
 	default:
 		return pay.MeansKeyOther
 	}
+}
+
+func formatKey(key string) cbc.Key {
+	key = strings.ToLower(key)
+	key = strings.ReplaceAll(key, " ", "-")
+	re := regexp.MustCompile(`[^a-z0-9-+]`)
+	key = re.ReplaceAllString(key, "")
+	key = strings.Trim(key, "-+")
+	re = regexp.MustCompile(`[-+]{2,}`)
+	key = re.ReplaceAllString(key, "-")
+	return cbc.Key(key)
 }

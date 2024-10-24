@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b341-7040-709c-9117-8cd8dc8a78a9",
+    "uuid": "0192bd6e-a55e-7b70-9c01-12add5b7173b",
     "dig": {
       "alg": "sha256",
-      "val": "c49c8174d6421fa646a5dffa3ac42e3e5f06e3fb033e66967cb05ec5dd0b61ce"
+      "val": "1fcc562d90b3b941e8da1a95f0ab485bbc0cfaf94d8422125ae942f29713b529"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192b341-7040-70de-a996-87720dce1a55",
+    "uuid": "0192bd6e-a55e-7bca-a1e5-0dbb4b01a040",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-04-10",
@@ -65,7 +65,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -122,7 +121,6 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "900.00",
                 "percent": "25%",
                 "amount": "225.00"
@@ -140,6 +138,10 @@
     "notes": [
       {
         "text": "Contract was established through our website"
+      }
+    ]
+  }
+} "Contract was established through our website"
       }
     ]
   }

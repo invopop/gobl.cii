@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b342-41b7-723a-9da3-9cc96a644d23",
+    "uuid": "0192bd6e-a61b-7296-8fdc-eb5f303361c8",
     "dig": {
       "alg": "sha256",
-      "val": "5e58ef90a4c92b85af5f942e5ec76c5a3442f9725c399384dd2784ab6395bab1"
+      "val": "a67c5d6337e0a2ba61a3d6ca9299d4008f0485c38622b2b2c468ca8e92a5fe97"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192b342-41b7-7289-8f7a-7a4537005812",
+    "uuid": "0192bd6e-a61b-72e7-b94f-faaaa48046b2",
     "type": "standard",
     "code": "20150483",
     "issue_date": "2015-04-01",
@@ -58,14 +58,16 @@
         "item": {
           "name": "IExpress licentiekosten",
           "price": "49.00",
-          "unit": "mon"
+          "unit": "mon",
+          "meta": {
+            "verbruikscategorie": "Start"
+          }
         },
         "sum": "147.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "147.00"
@@ -100,9 +102,8 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "147.00",
-                "percent": "21.0%",
+                "percent": "21%",
                 "amount": "30.87"
               }
             ],

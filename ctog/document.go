@@ -65,6 +65,10 @@ type IncludedSupplyChainTradeLineItem struct {
 				ListVersionID string `xml:"listVersionID,attr"`
 			} `xml:"ClassCode"`
 		} `xml:"DesignatedProductClassification"`
+		ApplicableProductCharacteristic []*struct {
+			Description string `xml:"Description"`
+			Value       string `xml:"Value"`
+		} `xml:"ApplicableProductCharacteristic"`
 	} `xml:"SpecifiedTradeProduct"`
 	SpecifiedLineTradeAgreement struct {
 		NetPriceProductTradePrice struct {

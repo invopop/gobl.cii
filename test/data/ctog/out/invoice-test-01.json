@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b343-3b7f-73dc-9818-bedc357f0d3d",
+    "uuid": "0192bd70-3d4e-7f1a-947a-c250627f2e6a",
     "dig": {
       "alg": "sha256",
-      "val": "171607f4e3f2c5b8dc2725c3bc838493ec5cd78d3b31add8e0bb5f1099826175"
+      "val": "8d3f1bd32d749aca3c0daed6e287405ab3f3e8c6cdac25545af2797e6d88f325"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "DE",
-    "uuid": "0192b343-3b7f-7439-88cd-ab1c8e164d7e",
+    "uuid": "0192bd70-3d4f-7038-b10d-dfcb9c357862",
     "type": "standard",
     "code": "",
     "issue_date": "2024-10-01",
@@ -53,8 +53,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "19%"
+            "percent": "7%"
           }
         ],
         "total": "5350.00"
@@ -70,7 +69,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "19%"
           }
         ],
@@ -89,20 +87,24 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
-                "base": "5499.00",
+                "base": "5350.00",
+                "percent": "7%",
+                "amount": "374.50"
+              },
+              {
+                "base": "149.00",
                 "percent": "19%",
-                "amount": "1044.81"
+                "amount": "28.31"
               }
             ],
-            "amount": "1044.81"
+            "amount": "402.81"
           }
         ],
-        "sum": "1044.81"
+        "sum": "402.81"
       },
-      "tax": "1044.81",
-      "total_with_tax": "6543.81",
-      "payable": "6543.81"
+      "tax": "402.81",
+      "total_with_tax": "5901.81",
+      "payable": "5901.81"
     }
   }
 }

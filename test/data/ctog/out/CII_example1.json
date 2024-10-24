@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b341-4dd8-71aa-8198-2c89ea7b6153",
+    "uuid": "0192bd6e-a520-7518-8d58-9a6da482a55e",
     "dig": {
       "alg": "sha256",
-      "val": "becb0a8baad47b87aa64e9436024b9be3fd201eb9f72cd8fc28d53a546a492c5"
+      "val": "3083f21d0e7d2adf5c9fdb4e2620a1704abc047a22abc09d884ae2b6ec88a11c"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192b341-4dd8-7237-a9a2-c4b1059cc50b",
+    "uuid": "0192bd6e-a520-755a-845c-857566078350",
     "type": "standard",
     "code": "12115118",
     "issue_date": "2015-01-09",
@@ -62,8 +62,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "19.90"
@@ -81,8 +80,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "9.85"
@@ -100,8 +98,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "8.29"
@@ -119,8 +116,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "14.46"
@@ -138,8 +134,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "35.00"
@@ -157,8 +152,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "35.00"
@@ -176,8 +170,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "10.65"
@@ -195,8 +188,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "1.55"
@@ -214,8 +206,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "14.37"
@@ -233,8 +224,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "8.29"
@@ -252,8 +242,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "16.58"
@@ -271,8 +260,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "9.95"
@@ -290,8 +278,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "3.30"
@@ -309,8 +296,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "10.80"
@@ -328,8 +314,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "3.90"
@@ -347,8 +332,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "7.60"
@@ -366,8 +350,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "9.34"
@@ -385,8 +368,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "18.63"
@@ -404,8 +386,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "102.12"
@@ -423,8 +404,7 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "6%"
           }
         ],
         "total": "109.98"
@@ -435,7 +415,7 @@
         "due_dates": [
           {
             "date": "2015-01-09",
-            "amount": "543.97",
+            "amount": "483.49",
             "percent": "100%"
           }
         ]
@@ -458,10 +438,33 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
-                "base": "449.56",
-                "percent": "21.0%",
-                "amount": "94.41"
+                "base": "403.19",
+                "percent": "6%",
+                "amount": "24.19"
+              },
+              {
+                "base": "46.37",
+                "percent": "21%",
+                "amount": "9.74"
+              }
+            ],
+            "amount": "33.93"
+          }
+        ],
+        "sum": "33.93"
+      },
+      "tax": "33.93",
+      "total_with_tax": "483.49",
+      "payable": "483.49"
+    },
+    "notes": [
+      {
+        "code": "AAR",
+        "text": "Alle leveringen zijn franco. Alle prijzen zijn incl. BTW. Betalingstermijn: 14 dagen netto. Prijswijzigingen voorbehouden. Op al onze aanbiedingen, leveringen en overeenkomsten zijn van toepassing in de algemene verkoop en leveringsvoorwaarden. Gedeponeerd bij de K.v.K. te Amsterdam 25-04-'85."
+      }
+    ]
+  }
+}"amount": "94.41"
               }
             ],
             "amount": "94.41"

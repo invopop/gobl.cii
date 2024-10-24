@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b341-28ea-78f9-a328-2fa243adcc70",
+    "uuid": "0192bd6e-a53e-7e94-bf5b-61d78239a331",
     "dig": {
       "alg": "sha256",
-      "val": "71c1163baced2106afe38ae6af1f07dd72ffc386a254f96ec2e32250caceffa9"
+      "val": "e935f4f773e1463708cdae2710f21db4a09f05a5d1258f8b9f4e4c9e03479b0f"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192b341-28ea-794f-b5c5-e47733815ae5",
+    "uuid": "0192bd6e-a53e-7eec-90fb-97b4037b8007",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -91,7 +91,10 @@
           "description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
           "price": "1273.00",
           "unit": "NAR",
-          "origin": "DE"
+          "origin": "DE",
+          "meta": {
+            "color": "Black"
+          }
         },
         "sum": "1273.00",
         "discounts": [
@@ -109,7 +112,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -146,7 +148,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "15%"
           }
         ],
@@ -183,7 +184,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "15%"
           }
         ],
@@ -217,7 +217,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "exempt",
             "percent": "0%"
           }
         ],
@@ -245,13 +244,15 @@
             }
           ],
           "price": "0.75",
-          "unit": "m"
+          "unit": "m",
+          "meta": {
+            "type": "Cat5"
+          }
         },
         "sum": "187.50",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -400,19 +401,16 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "1460.50",
                 "percent": "25%",
                 "amount": "365.13"
               },
               {
-                "key": "standard",
                 "base": "1.00",
                 "percent": "15%",
                 "amount": "0.15"
               },
               {
-                "key": "exempt",
                 "base": "-25.00",
                 "percent": "0%",
                 "amount": "0.00"
@@ -425,6 +423,15 @@
       },
       "tax": "365.28",
       "total_with_tax": "1801.78",
+      "payable": "1801.78"
+    },
+    "notes": [
+      {
+        "text": "Ordered in our booth at the convention"
+      }
+    ]
+  }
+}.78",
       "payable": "1801.78"
     },
     "notes": [

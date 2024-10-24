@@ -30,7 +30,6 @@ func (c *Conversor) getLines(transaction *SupplyChainTradeTransaction) error {
 			},
 			Taxes: tax.Set{
 				{
-					Rate:     FindTaxKey(item.SpecifiedLineTradeSettlement.ApplicableTradeTax.CategoryCode),
 					Category: cbc.Code(item.SpecifiedLineTradeSettlement.ApplicableTradeTax.TypeCode),
 				},
 			},
@@ -130,6 +129,14 @@ func (c *Conversor) getLines(transaction *SupplyChainTradeTransaction) error {
 					Label: classification.ClassCode.ListID,
 					Code:  cbc.Code(classification.ClassCode.Value),
 				})
+			}
+		}
+
+		if item.SpecifiedTradeProduct.ApplicableProductCharacteristic != nil {
+			line.Item.Meta = make(cbc.Meta)
+			for _, characteristic := range item.SpecifiedTradeProduct.ApplicableProductCharacteristic {
+				key := formatKey(characteristic.Description)
+				line.Item.Meta[key] = characteristic.Value
 			}
 		}
 

@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b341-f3df-7931-911b-b13caac83e67",
+    "uuid": "0192bd6e-a5cf-7737-a653-0ae07e83b69b",
     "dig": {
       "alg": "sha256",
-      "val": "0fd420f9928f51ba137a414e4971f84439cc03874f2ef0d405ca0bcd3672ded3"
+      "val": "ca359b7aa270952bcc061d577a709241263a1ae45987412fa9c1e033b92c992c"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192b341-f3df-79ab-963d-403c7c70f344",
+    "uuid": "0192bd6e-a5cf-778f-b41a-4b92331ef20d",
     "type": "standard",
     "code": "INVOICE_test_7",
     "issue_date": "2013-05-13",
@@ -86,8 +86,7 @@
         "sum": "2500.00",
         "taxes": [
           {
-            "cat": "VAT",
-            "rate": "standard"
+            "cat": "VAT"
           }
         ],
         "total": "2500.00"
@@ -105,8 +104,7 @@
         "sum": "700.00",
         "taxes": [
           {
-            "cat": "VAT",
-            "rate": "standard"
+            "cat": "VAT"
           }
         ],
         "total": "700.00"
@@ -138,7 +136,6 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "3200.00",
                 "amount": "0.00"
               }
@@ -151,6 +148,14 @@
       "tax": "0.00",
       "total_with_tax": "3200.00",
       "payable": "3200.00"
+    },
+    "notes": [
+      {
+        "text": "Testscenario 7"
+      }
+    ]
+  }
+}able": "3200.00"
     },
     "notes": [
       {
