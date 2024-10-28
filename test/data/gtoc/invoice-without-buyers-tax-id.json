@@ -84,6 +84,18 @@
 						"percent": "19%"
 					}
 				],
+				"discounts": [
+					{
+						"amount": "12.00",
+						"reason": "Damage"
+					}
+				],
+				"charges": [
+					{
+						"amount": "12.00",
+						"reason": "Testing"
+					}
+				],
 				"total": "1800.00"
 			}
 		],
