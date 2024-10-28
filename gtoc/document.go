@@ -27,12 +27,50 @@ type Document struct {
 	Transaction            *Transaction `xml:"rsm:SupplyChainTradeTransaction"`
 }
 
+// Header a collection of data for a Cross Industry Invoice Header that is exchanged between two or more parties in written, printed or electronic form.
+type Header struct {
+	ID           string `xml:"ram:ID"`
+	TypeCode     string `xml:"ram:TypeCode"`
+	IssueDate    *Date  `xml:"ram:IssueDateTime>udt:DateTimeString"`
+	IncludedNote *Note  `xml:"ram:IncludedNote,omitempty"`
+}
+
 // Transaction defines the structure of the transaction in the CII standard
 type Transaction struct {
 	Lines      []*Line     `xml:"ram:IncludedSupplyChainTradeLineItem"`
 	Agreement  *Agreement  `xml:"ram:ApplicableHeaderTradeAgreement"`
 	Delivery   *Delivery   `xml:"ram:ApplicableHeaderTradeDelivery"`
 	Settlement *Settlement `xml:"ram:ApplicableHeaderTradeSettlement"`
+}
+
+// Agreement defines the structure of the ApplicableHeaderTradeAgreement of the CII standard
+type Agreement struct {
+	BuyerReference string  `xml:"ram:BuyerReference,omitempty"`
+	Seller         *Seller `xml:"ram:SellerTradeParty,omitempty"`
+	Buyer          *Buyer  `xml:"ram:BuyerTradeParty,omitempty"`
+	ProjectID      string  `xml:"ram:SpecifiedProcurringProject>ram:ID,omitempty"`
+	ProjectName    string  `xml:"ram:SpecifiedProcurringProject>ram:Name,omitempty"`
+	Contract       string  `xml:"ram:ContractReferencedDocument>ram:IssuerAssignedID,omitempty"`
+	Purchase       string  `xml:"ram:BuyerOrderReferencedDocument>ram:IssuerAssignedID,omitempty"`
+	Sales          string  `xml:"ram:SellerOrderReferencedDocument>ram:IssuerAssignedID,omitempty"`
+	Receiving      string  `xml:"ram:ReceivingAdviceReferencedDocument>ram:IssuerAssignedID,omitempty"`
+	Despatch       string  `xml:"ram:DespatchAdviceReferencedDocument>ram:IssuerAssignedID,omitempty"`
+	// Tender         string  `xml:"ram:AdditionalReferencedDocument>ram:IssuerAssignedID,omitempty"` // this can be bt-17, bt-18
+}
+
+// Delivery defines the structure of ApplicableHeaderTradeDelivery of the CII standard
+type Delivery struct {
+	Event *Date `xml:"ram:ActualDeliverySupplyChainEvent>ram:OccurrenceDateTime>udt:DateTimeString,omitempty"`
+}
+
+// Settlement defines the structure of ApplicableHeaderTradeSettlement of the CII standard
+type Settlement struct {
+	Currency           string              `xml:"ram:InvoiceCurrencyCode"`
+	TypeCode           string              `xml:"ram:SpecifiedTradeSettlementPaymentMeans>ram:TypeCode"`
+	Tax                []*Tax              `xml:"ram:ApplicableTradeTax"`
+	PaymentTerms       string              `xml:"ram:SpecifiedTradePaymentTerms>ram:Description,omitempty"`
+	Summary            *Summary            `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
+	ReferencedDocument *ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
 }
 
 // Seller defines the structure of the SellerTradeParty of the CII standard
@@ -53,32 +91,19 @@ type Buyer struct {
 	URIUniversalCommunication *URIUniversalCommunication `xml:"ram:URIUniversalCommunication>ram:URIID"`
 }
 
-// Header a collection of data for a Cross Industry Invoice Header that is exchanged between two or more parties in written, printed or electronic form.
-type Header struct {
-	ID           string `xml:"ram:ID"`
-	TypeCode     string `xml:"ram:TypeCode"`
-	IssueDate    *Date  `xml:"ram:IssueDateTime>udt:DateTimeString"`
-	IncludedNote *Note  `xml:"ram:IncludedNote,omitempty"`
-}
-
 // Note defines note in the RAM structure
 type Note struct {
 	Content     string `xml:"ram:Content"`
 	SubjectCode string `xml:"ram:SubjectCode"`
 }
 
-// Agreement defines the structure of the ApplicableHeaderTradeAgreement of the CII standard
-type Agreement struct {
-	BuyerReference string  `xml:"ram:BuyerReference,omitempty"`
-	Seller         *Seller `xml:"ram:SellerTradeParty,omitempty"`
-	Buyer          *Buyer  `xml:"ram:BuyerTradeParty,omitempty"`
-}
-
 // PostalTradeAddress defines the structure of the PostalTradeAddress of the CII standard
 type PostalTradeAddress struct {
 	Postcode  string `xml:"ram:PostcodeCode"`
 	LineOne   string `xml:"ram:LineOne"`
+	LineTwo   string `xml:"ram:LineTwo,omitempty"`
 	City      string `xml:"ram:CityName"`
+	Region    string `xml:"ram:CountrySubDivisionName,omitempty"`
 	CountryID string `xml:"ram:CountryID"`
 }
 
@@ -135,16 +160,6 @@ type Contact struct {
 	Email      string `xml:"ram:EmailURIUniversalCommunication>ram:URIID"`
 }
 
-// Settlement defines the structure of ApplicableHeaderTradeSettlement of the CII standard
-type Settlement struct {
-	Currency           string              `xml:"ram:InvoiceCurrencyCode"`
-	TypeCode           string              `xml:"ram:SpecifiedTradeSettlementPaymentMeans>ram:TypeCode"`
-	Tax                []*Tax              `xml:"ram:ApplicableTradeTax"`
-	PaymentTerms       string              `xml:"ram:SpecifiedTradePaymentTerms>ram:Description,omitempty"`
-	Summary            *Summary            `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
-	ReferencedDocument *ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
-}
-
 // Tax defines the structure of ApplicableTradeTax of the CII standard
 type Tax struct {
 	CalculatedAmount      string `xml:"ram:CalculatedAmount"`
@@ -173,9 +188,4 @@ type ReferencedDocument struct {
 type TaxTotalAmount struct {
 	Amount   string `xml:",chardata"`
 	Currency string `xml:"currencyID,attr"`
-}
-
-// Delivery defines the structure of ApplicableHeaderTradeDelivery of the CII standard
-type Delivery struct {
-	Event *Date `xml:"ram:ActualDeliverySupplyChainEvent>ram:OccurrenceDateTime>udt:DateTimeString,omitempty"`
 }

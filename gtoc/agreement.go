@@ -39,7 +39,9 @@ func NewPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
 	postalTradeAddress := &PostalTradeAddress{
 		Postcode:  address.Code,
 		LineOne:   address.Street,
+		LineTwo:   address.Number,
 		City:      address.Locality,
+		Region:    address.Region,
 		CountryID: string(address.Country),
 	}
 
