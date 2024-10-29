@@ -26,31 +26,35 @@ func NewAgreement(inv *bill.Invoice) (*Agreement, error) {
 	if customer := inv.Customer; customer != nil {
 		agreement.Buyer = NewBuyer(customer)
 	}
-	if inv.Ordering != nil && inv.Ordering.Seller != nil {
-		agreement.TaxRepresentative = agreement.Seller
-		agreement.Seller = NewSeller(inv.Ordering.Seller)
-	}
-	projectTypes := []struct {
-		projects *[]*org.DocumentRef
-		assign   func(*Project)
-	}{
-		{&inv.Ordering.Contracts, func(p *Project) { agreement.Contract = p }},
-		{&inv.Ordering.Projects, func(p *Project) { agreement.Project = p }},
-		{&inv.Ordering.Purchases, func(p *Project) { agreement.Purchase = p }},
-		{&inv.Ordering.Sales, func(p *Project) { agreement.Sales = p }},
-	}
-	for _, pt := range projectTypes {
-		if len(*pt.projects) > 0 {
-			project := &Project{
-				ID: (*pt.projects)[0].Code.String(),
+	if inv.Ordering != nil {
+		if inv.Ordering.Seller != nil {
+			agreement.TaxRepresentative = agreement.Seller
+			agreement.Seller = NewSeller(inv.Ordering.Seller)
+		}
+		if len(inv.Ordering.Contracts) > 0 {
+			agreement.Contract = &Project{
+				ID: inv.Ordering.Contracts[0].Code.String(),
 			}
-			pt.assign(project)
-			if pt.projects == &inv.Ordering.Projects && (*pt.projects)[0].Description != "" {
-				project.Name = (*pt.projects)[0].Description
+		}
+		if len(inv.Ordering.Purchases) > 0 {
+			agreement.Purchase = &Project{
+				ID: inv.Ordering.Purchases[0].Code.String(),
+			}
+		}
+		if len(inv.Ordering.Sales) > 0 {
+			agreement.Sales = &Project{
+				ID: inv.Ordering.Sales[0].Code.String(),
+			}
+		}
+		if len(inv.Ordering.Projects) > 0 {
+			agreement.Project = &Project{
+				ID: inv.Ordering.Projects[0].Code.String(),
+			}
+			if inv.Ordering.Projects[0].Description != "" {
+				agreement.Project.Name = inv.Ordering.Projects[0].Description
 			}
 		}
 	}
-
 	return agreement, nil
 }
 

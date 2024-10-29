@@ -18,7 +18,7 @@ const (
 	keyAdditionalDocumentTypeRefPaper         = "ref-paper"
 )
 
-func (c *Conversor) getOrdering(doc *Document) error {
+func (c *Converter) getOrdering(doc *Document) error {
 	ordering := &bill.Ordering{}
 
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerReference != nil {

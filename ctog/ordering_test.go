@@ -12,7 +12,7 @@ func TestParseCtoGOrdering(t *testing.T) {
 		doc, err := LoadTestXMLDoc("CII_example7.xml")
 		require.NoError(t, err)
 
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 
@@ -27,7 +27,7 @@ func TestParseCtoGOrdering(t *testing.T) {
 		doc, err := LoadTestXMLDoc("CII_example8.xml")
 		require.NoError(t, err)
 
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 

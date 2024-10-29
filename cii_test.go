@@ -76,7 +76,7 @@ func TestNewDocumentGOBL(t *testing.T) {
 			require.NoError(t, err)
 
 			// Create a new conversor
-			conversor := ctog.NewConversor()
+			conversor := ctog.NewConverter()
 
 			// Convert CII XML to GOBL
 			goblEnv, err := conversor.ConvertToGOBL(xmlData)

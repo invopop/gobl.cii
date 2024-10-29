@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/gobl/pay"
 )
 
-func (c *Conversor) getPayment(settlement *ApplicableHeaderTradeSettlement) error {
+func (c *Converter) getPayment(settlement *ApplicableHeaderTradeSettlement) error {
 	payment := &bill.Payment{}
 
 	if settlement.PayeeTradeParty != nil {

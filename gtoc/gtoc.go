@@ -14,8 +14,8 @@ type Converter struct {
 	doc *Document
 }
 
-// NewConversor Builder function
-func NewConversor() *Converter {
+// NewConverter Builder function
+func NewConverter() *Converter {
 	c := new(Converter)
 	c.doc = new(Document)
 	return c
@@ -32,13 +32,20 @@ func (c *Converter) ConvertToCII(env *gobl.Envelope) (*Document, error) {
 	if !ok {
 		return nil, fmt.Errorf("invalid type %T", env.Document)
 	}
-
-	transaction, err := NewTransaction(inv)
+	err := c.newDocument(inv)
 	if err != nil {
 		return nil, err
 	}
+	return c.doc, nil
+}
 
-	ciiDoc := Document{
+func (c *Converter) newDocument(inv *bill.Invoice) error {
+	transaction, err := NewTransaction(inv)
+	if err != nil {
+		return err
+	}
+
+	c.doc = &Document{
 		RSMNamespace:           RSM,
 		RAMNamespace:           RAM,
 		QDTNamespace:           QDT,
@@ -49,8 +56,7 @@ func (c *Converter) ConvertToCII(env *gobl.Envelope) (*Document, error) {
 		Transaction:            transaction,
 	}
 
-	c.doc = &ciiDoc
-	return c.doc, nil
+	return nil
 }
 
 // Bytes returns the XML representation of the document in bytes

@@ -11,7 +11,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Conversor) getLines(transaction *SupplyChainTradeTransaction) error {
+func (c *Converter) getLines(transaction *SupplyChainTradeTransaction) error {
 	items := transaction.IncludedSupplyChainTradeLineItem
 	lines := make([]*bill.Line, 0, len(items))
 

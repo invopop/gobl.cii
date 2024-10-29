@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Conversor) getParty(party *TradeParty) *org.Party {
+func (c *Converter) getParty(party *TradeParty) *org.Party {
 	p := &org.Party{
 		Name: party.Name,
 	}

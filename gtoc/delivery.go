@@ -2,6 +2,7 @@ package gtoc
 
 import "github.com/invopop/gobl/bill"
 
+// NewDelivery creates the ApplicableHeaderTradeDelivery part of a EN 16931 compliant invoice
 func NewDelivery(inv *bill.Invoice) *Delivery {
 	d := &Delivery{}
 	if inv.Delivery != nil {

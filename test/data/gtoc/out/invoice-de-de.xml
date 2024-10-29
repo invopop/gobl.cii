@@ -45,6 +45,50 @@
     <ram:ApplicableHeaderTradeAgreement>
       <ram:BuyerReference>XR-2024-2</ram:BuyerReference>
       <ram:SellerTradeParty>
+        <ram:Name>Salescompany ltd.</ram:Name>
+        <ram:DefinedTradeContact>
+          <ram:PersonName>Antonio Salesmacher</ram:PersonName>
+          <ram:TelephoneUniversalCommunication>
+            <ram:CompleteNumber>46211230</ram:CompleteNumber>
+          </ram:TelephoneUniversalCommunication>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>antonio@salescompany.no</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
+        </ram:DefinedTradeContact>
+        <ram:PostalTradeAddress>
+          <ram:PostcodeCode>303</ram:PostcodeCode>
+          <ram:LineOne>Main street 34</ram:LineOne>
+          <ram:CityName>Big city</ram:CityName>
+          <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
+          <ram:CountryID>NO</ram:CountryID>
+        </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">antonio@salescompany.no</ram:URIID>
+        </ram:URIUniversalCommunication>
+        <ram:SpecifiedTaxRegistration>
+          <ram:ID schemeID="VA">NO123456789MVA</ram:ID>
+        </ram:SpecifiedTaxRegistration>
+      </ram:SellerTradeParty>
+      <ram:BuyerTradeParty>
+        <ram:ID>DE282741168</ram:ID>
+        <ram:Name>Sample Consumer</ram:Name>
+        <ram:DefinedTradeContact>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>email@sample.com</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
+        </ram:DefinedTradeContact>
+        <ram:PostalTradeAddress>
+          <ram:PostcodeCode>80939</ram:PostcodeCode>
+          <ram:LineOne>Werner-Heisenberg-Allee</ram:LineOne>
+          <ram:LineTwo>25</ram:LineTwo>
+          <ram:CityName>München</ram:CityName>
+          <ram:CountryID>DE</ram:CountryID>
+        </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
+        </ram:URIUniversalCommunication>
+      </ram:BuyerTradeParty>
+      <ram:SellerTaxRepresentativeTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
         <ram:DefinedTradeContact>
           <ram:PersonName>John Doe</ram:PersonName>
@@ -58,6 +102,7 @@
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>69190</ram:PostcodeCode>
           <ram:LineOne>Dietmar-Hopp-Allee</ram:LineOne>
+          <ram:LineTwo>16</ram:LineTwo>
           <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
@@ -67,27 +112,11 @@
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
         </ram:SpecifiedTaxRegistration>
-      </ram:SellerTradeParty>
-      <ram:BuyerTradeParty>
-        <ram:ID>DE282741168</ram:ID>
-        <ram:Name>Sample Consumer</ram:Name>
-        <ram:PostalTradeAddress>
-          <ram:PostcodeCode>80939</ram:PostcodeCode>
-          <ram:LineOne>Werner-Heisenberg-Allee</ram:LineOne>
-          <ram:CityName>München</ram:CityName>
-          <ram:CountryID>DE</ram:CountryID>
-        </ram:PostalTradeAddress>
-        <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
-        </ram:URIUniversalCommunication>
-      </ram:BuyerTradeParty>
+      </ram:SellerTaxRepresentativeTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
-      <ram:SpecifiedTradeSettlementPaymentMeans>
-        <ram:TypeCode>1</ram:TypeCode>
-      </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>342.00</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>

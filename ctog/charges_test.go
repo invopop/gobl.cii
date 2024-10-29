@@ -14,7 +14,7 @@ func TestParseCtoGCharges(t *testing.T) {
 		doc, err := LoadTestXMLDoc("CII_example3.xml")
 		require.NoError(t, err)
 
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 
@@ -39,7 +39,7 @@ func TestParseCtoGCharges(t *testing.T) {
 		doc, err := LoadTestXMLDoc("CII_business_example_02.xml")
 		require.NoError(t, err)
 
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 
@@ -68,7 +68,7 @@ func TestParseCtoGCharges(t *testing.T) {
 		doc, err := LoadTestXMLDoc("CII_example2.xml")
 		require.NoError(t, err)
 
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 

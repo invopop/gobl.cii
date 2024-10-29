@@ -15,7 +15,7 @@ func TestParseCtoGParty(t *testing.T) {
 		xmlData, err := LoadTestXMLDoc("invoice-test-01.xml")
 		require.NoError(t, err)
 
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(xmlData)
 		require.NoError(t, err)
 
@@ -41,7 +41,7 @@ func TestParseCtoGParty(t *testing.T) {
 		xmlData, err := LoadTestXMLDoc("CII_example2.xml")
 		require.NoError(t, err)
 
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(xmlData)
 		require.NoError(t, err)
 

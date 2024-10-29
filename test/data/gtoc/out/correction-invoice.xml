@@ -58,6 +58,7 @@
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>69190</ram:PostcodeCode>
           <ram:LineOne>Dietmar-Hopp-Allee</ram:LineOne>
+          <ram:LineTwo>16</ram:LineTwo>
           <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
@@ -71,9 +72,15 @@
       <ram:BuyerTradeParty>
         <ram:ID>DE282741168</ram:ID>
         <ram:Name>Sample Consumer</ram:Name>
+        <ram:DefinedTradeContact>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>email@sample.com</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
+        </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>80939</ram:PostcodeCode>
           <ram:LineOne>Werner-Heisenberg-Allee</ram:LineOne>
+          <ram:LineTwo>25</ram:LineTwo>
           <ram:CityName>München</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
@@ -85,9 +92,6 @@
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
-      <ram:SpecifiedTradeSettlementPaymentMeans>
-        <ram:TypeCode>1</ram:TypeCode>
-      </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>342.00</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>

@@ -9,10 +9,10 @@
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
-    <ram:ID>CN-002</ram:ID>
-    <ram:TypeCode>381</ram:TypeCode>
+    <ram:ID>SAMPLE-001</ram:ID>
+    <ram:TypeCode>380</ram:TypeCode>
     <ram:IssueDateTime>
-      <udt:DateTimeString format="102">20240214</udt:DateTimeString>
+      <udt:DateTimeString format="102">20240213</udt:DateTimeString>
     </ram:IssueDateTime>
   </rsm:ExchangedDocument>
   <rsm:SupplyChainTradeTransaction>
@@ -43,7 +43,7 @@
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:BuyerReference>XR-2024-4</ram:BuyerReference>
+      <ram:BuyerReference>PO4711</ram:BuyerReference>
       <ram:SellerTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
         <ram:DefinedTradeContact>
@@ -88,10 +88,26 @@
           <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
         </ram:URIUniversalCommunication>
       </ram:BuyerTradeParty>
+      <ram:ContractReferencedDocument>
+        <ram:ID>2013-05</ram:ID>
+      </ram:ContractReferencedDocument>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+      <ram:SpecifiedTradeSettlementPaymentMeans>
+        <ram:TypeCode>30</ram:TypeCode>
+        <ram:PayeePartyCreditorFinancialAccount>
+          <ram:IBANID>NO9386011117947</ram:IBANID>
+        </ram:PayeePartyCreditorFinancialAccount>
+        <ram:PayerPartyDebtorFinancialAccount>
+          <ram:IBANID>DE89370400440532013000</ram:IBANID>
+        </ram:PayerPartyDebtorFinancialAccount>
+        <ram:ApplicableTradeSettlementFinancialCard>
+          <ram:ID>1234</ram:ID>
+          <ram:CardHolderName>John Doe</ram:CardHolderName>
+        </ram:ApplicableTradeSettlementFinancialCard>
+      </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>342.00</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
@@ -100,8 +116,11 @@
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradePaymentTerms>
-        <ram:Description>lorem ipsum</ram:Description>
+        <ram:DirectDebitMandateID>1234567890</ram:DirectDebitMandateID>
       </ram:SpecifiedTradePaymentTerms>
+      <ram:PayeeTradeParty>
+        <ram:Name>Ebeneser Scrooge AS</ram:Name>
+      </ram:PayeeTradeParty>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>1800.00</ram:TaxBasisTotalAmount>
@@ -109,6 +128,28 @@
         <ram:GrandTotalAmount>2142.00</ram:GrandTotalAmount>
         <ram:DuePayableAmount>2142.00</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+      <ram:SpecifiedTradeAllowanceCharge>
+        <ram:ChargeIndicator>true</ram:ChargeIndicator>
+        <ram:Reason>Freight</ram:Reason>
+        <ram:ActualAmount>11.00</ram:ActualAmount>
+        <ram:ApplicableTradeTax>
+          <ram:TypeCode></ram:TypeCode>
+          <ram:CategoryCode>VAT</ram:CategoryCode>
+          <ram:RateApplicablePercent>25</ram:RateApplicablePercent>
+        </ram:ApplicableTradeTax>
+      </ram:SpecifiedTradeAllowanceCharge>
+      <ram:SpecifiedTradeAllowanceCharge>
+        <ram:ChargeIndicator>false</ram:ChargeIndicator>
+        <ram:Reason>Promotion discount</ram:Reason>
+        <ram:ReasonCode>88</ram:ReasonCode>
+        <ram:ActualAmount>10.00</ram:ActualAmount>
+        <ram:ApplicableTradeTax>
+          <ram:TypeCode></ram:TypeCode>
+          <ram:CategoryCode>VAT</ram:CategoryCode>
+          <ram:RateApplicablePercent>25</ram:RateApplicablePercent>
+        </ram:ApplicableTradeTax>
+      </ram:SpecifiedTradeAllowanceCharge>
+      <ram:CreditorReferenceID>1234567890</ram:CreditorReferenceID>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
 </rsm:CrossIndustryInvoice>

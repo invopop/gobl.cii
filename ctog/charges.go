@@ -9,7 +9,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Conversor) getCharges(settlement *ApplicableHeaderTradeSettlement) error {
+func (c *Converter) getCharges(settlement *ApplicableHeaderTradeSettlement) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 

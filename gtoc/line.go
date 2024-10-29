@@ -23,6 +23,17 @@ func newLine(line *bill.Line) *Line {
 		TradeSettlement: newTradeSettlement(line),
 	}
 
+	if len(line.Notes) > 0 {
+		var notes []Note
+		for _, note := range line.Notes {
+			notes = append(notes, Note{
+				SubjectCode: note.Key.String(),
+				Content:     note.Text,
+			})
+		}
+		lineItem.Note = notes
+	}
+
 	return lineItem
 }
 
@@ -44,6 +55,10 @@ func newTradeSettlement(line *bill.Line) *TradeSettlement {
 	settlement := &TradeSettlement{
 		ApplicableTradeTax: applicableTradeTax,
 		Sum:                line.Total.String(),
+	}
+
+	if len(line.Charges) > 0 || len(line.Discounts) > 0 {
+		settlement.AllowanceCharge = newLineAllowanceCharges(line)
 	}
 
 	return settlement

@@ -11,29 +11,29 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-// Conversor is a struct that contains the necessary elements to convert between GOBL and CII
-type Conversor struct {
+// Converter is a struct that contains the necessary elements to convert between GOBL and CII
+type Converter struct {
 	// CtoG Output
 	inv *bill.Invoice
 	// CtoG Input
 	doc *Document
 }
 
-// NewConversor Builder function
-func NewConversor() *Conversor {
-	c := new(Conversor)
+// NewConverter Builder function
+func NewConverter() *Converter {
+	c := new(Converter)
 	c.inv = new(bill.Invoice)
 	c.doc = new(Document)
 	return c
 }
 
 // GetInvoice returns the invoice from the conversor
-func (c *Conversor) GetInvoice() *bill.Invoice {
+func (c *Converter) GetInvoice() *bill.Invoice {
 	return c.inv
 }
 
 // ConvertToGOBL converts a CII document into a GOBL envelope
-func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
+func (c *Converter) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 	if err := xml.Unmarshal(xmlData, &c.doc); err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 }
 
 // NewInvoice creates a new GOBL invoice from a CII document
-func (c *Conversor) NewInvoice(doc *Document) error {
+func (c *Converter) NewInvoice(doc *Document) error {
 
 	c.inv = &bill.Invoice{
 		Code:     cbc.Code(doc.ExchangedDocument.ID),

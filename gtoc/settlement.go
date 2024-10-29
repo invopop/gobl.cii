@@ -63,42 +63,43 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 	}
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
+		instr := inv.Payment.Instructions
 		settlement.Means = &PaymentMeans{
-			TypeCode:    findPaymentKey(inv.Payment.Instructions.Key),
-			Information: inv.Payment.Instructions.Detail,
+			TypeCode:    findPaymentKey(instr.Key),
+			Information: instr.Detail,
 		}
-		if inv.Payment.Instructions.CreditTransfer != nil {
+		if instr.CreditTransfer != nil {
 			settlement.Means.Creditor = &Creditor{
-				IBAN:   inv.Payment.Instructions.CreditTransfer[0].IBAN,
-				Name:   inv.Payment.Instructions.CreditTransfer[0].Name,
-				Number: inv.Payment.Instructions.CreditTransfer[0].Number,
+				IBAN:   instr.CreditTransfer[0].IBAN,
+				Name:   instr.CreditTransfer[0].Name,
+				Number: instr.CreditTransfer[0].Number,
 			}
 		}
-		if inv.Payment.Instructions.DirectDebit != nil {
-			settlement.Means.Debtor = inv.Payment.Instructions.DirectDebit.Account
-			settlement.CreditorRefID = inv.Payment.Instructions.DirectDebit.Creditor
+		if instr.DirectDebit != nil {
+			settlement.Means.Debtor = instr.DirectDebit.Account
+			settlement.CreditorRefID = instr.DirectDebit.Creditor
 			if settlement.PaymentTerms == nil {
 				settlement.PaymentTerms = new(Terms)
 			}
-			settlement.PaymentTerms.Mandate = inv.Payment.Instructions.DirectDebit.Ref
+			settlement.PaymentTerms.Mandate = instr.DirectDebit.Ref
 		}
-		if inv.Payment.Instructions.Card != nil {
+		if instr.Card != nil {
 			settlement.Means.Card = &Card{
-				ID:   inv.Payment.Instructions.Card.Last4,
-				Name: inv.Payment.Instructions.Card.Holder,
+				ID:   instr.Card.Last4,
+				Name: instr.Card.Holder,
 			}
 		}
 	}
 
 	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
-		settlement.AllowanceCharges = newCharges(inv)
+		settlement.AllowanceCharges = newAllowanceCharges(inv)
 	}
 
 	return settlement
 }
 
 func newSummary(totals *bill.Totals, currency string) *Summary {
-	return &Summary{
+	s := &Summary{
 		TotalAmount:         totals.Total.String(),
 		TaxBasisTotalAmount: totals.Total.String(),
 		GrandTotalAmount:    totals.TotalWithTax.String(),
@@ -108,6 +109,16 @@ func newSummary(totals *bill.Totals, currency string) *Summary {
 			Currency: currency,
 		},
 	}
+
+	if totals.Charge != nil {
+		s.Charges = totals.Charge.String()
+	}
+
+	if totals.Discount != nil {
+		s.Discounts = totals.Discount.String()
+	}
+
+	return s
 }
 
 func newTaxes(total *tax.Total) []*Tax {

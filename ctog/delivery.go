@@ -6,7 +6,7 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Conversor) getDelivery(doc *Document) error {
+func (c *Converter) getDelivery(doc *Document) error {
 	delivery := &bill.Delivery{}
 
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty != nil {
