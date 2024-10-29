@@ -9,12 +9,6 @@ import (
 	"github.com/invopop/gobl/bill"
 )
 
-// Date defines date in the UDT structure
-type Date struct {
-	Date   string `xml:",chardata"`
-	Format string `xml:"format,attr,omitempty"`
-}
-
 // Conversor is the struct that contains the logic to convert a GOBL envelope into a CII document
 type Conversor struct {
 	cii *Document

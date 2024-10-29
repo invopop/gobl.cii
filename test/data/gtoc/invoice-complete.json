@@ -91,57 +91,121 @@
 				"total": "1800.00"
 			}
 		],
+		"discounts": [
+			{
+			  "i": 1,
+			  "amount": "10.00",
+			  "taxes": [
+				{
+				  "cat": "VAT",
+				  "rate": "standard",
+				  "percent": "25%"
+				}
+			  ],
+			  "code": "88",
+			  "reason": "Promotion discount"
+			}
+		  ],
+		  "charges": [
+			{
+			  "i": 1,
+			  "amount": "11.00",
+			  "taxes": [
+				{
+				  "cat": "VAT",
+				  "rate": "standard",
+				  "percent": "25%"
+				}
+			  ],
+			  "reason": "Freight"
+			}
+		  ],
 		"ordering": {
-			"code": "XR-2024-2",
-			"seller": {
-				"name": "Salescompany ltd.",
-			"tax_id": {
-			  "country": "NO",
-			  "code": "123456789MVA"
+			"code": "PO4711",
+			"period": {
+				"start": "2013-03-10",
+				"end": "2013-04-10"
+			},
+			"contracts": [
+				{
+				"code": "2013-05"
+				}
+			],
+			"receiving": [
+				{
+				"code": "3544"
+				}
+			],
+			"despatch": [
+				{
+				"code": "5433"
+				}
+			]
+		},
+		"payment": {
+			"payee": {
+			  "name": "Ebeneser Scrooge AS",
+			  "identities": [
+				{
+				  "label": "CompanyID",
+				  "code": "989823401"
+				},
+				{
+				  "label": "0088",
+				  "code": "2298740918237"
+				}
+			  ]
+			},
+			"terms": {
+			  "due_dates": [
+				{
+				  "date": "2013-07-20",
+				  "amount": "2142.00",
+				  "percent": "100%"
+				}
+			  ],
+			  "notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
+			},
+			"instructions": {
+			  "key": "credit-transfer",
+			  "ref": "0003434323213231",
+			  "credit_transfer": [
+				{
+				  "iban": "NO9386011117947",
+				  "bic": "DNBANOKK"
+				}
+			  ],
+			  "direct_debit": {
+				"creditor": "1234567890",
+				"account": "DE89370400440532013000",
+				"ref": "1234567890"
+			  },
+			  "card": {
+				"last4": "1234",
+				"holder": "John Doe"
+			  }
+			}
+		},
+		"delivery": {
+			"receiver": {
+			  "addresses": [
+				{
+				  "street": "Deliverystreet 2",
+				  "street_extra": "Side door",
+				  "locality": "DeliveryCity",
+				  "region": "RegionD",
+				  "code": "523427",
+				  "country": "NO"
+				}
+			  ]
 			},
 			"identities": [
 			  {
-				"label": "CompanyID",
-				"code": "123456789"
-			  },
-			  {
 				"label": "0088",
-				"code": "1238764941386"
+				"code": "6754238987643"
 			  }
 			],
-			"people": [
-			  {
-				"name": {
-				  "given": "Antonio Salesmacher"
-				}
-			  }
-			],
-			"addresses": [
-			  {
-				"street": "Main street 34",
-				"street_extra": "Suite 123",
-				"locality": "Big city",
-				"region": "RegionA",
-				"code": "303",
-				"country": "NO"
-			  }
-			],
-			"emails": [
-			  {
-					"addr": "antonio@salescompany.no"
-				}
-			],
-			"telephones": [
-					{
-						"num": "46211230"
-					}
-				]
-			}
-		},
-		"payment": {
-			"terms": {
-				"detail": "lorem ipsum"
-			}
+			"date": "2024-02-10"
 		},
 		"totals": {
 			"sum": "1800.00",

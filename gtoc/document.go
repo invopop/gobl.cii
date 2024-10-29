@@ -39,23 +39,23 @@ type Header struct {
 type Transaction struct {
 	Lines      []*Line     `xml:"ram:IncludedSupplyChainTradeLineItem"`
 	Agreement  *Agreement  `xml:"ram:ApplicableHeaderTradeAgreement"`
-	Delivery   *Delivery   `xml:"ram:ApplicableHeaderTradeDelivery"`
+	Delivery   *Delivery   `xml:"ram:ApplicableHeaderTradeDelivery,omitempty"`
 	Settlement *Settlement `xml:"ram:ApplicableHeaderTradeSettlement"`
 }
 
 // Agreement defines the structure of the ApplicableHeaderTradeAgreement of the CII standard
 type Agreement struct {
-	BuyerReference string   `xml:"ram:BuyerReference,omitempty"`
-	Seller         *Seller  `xml:"ram:SellerTradeParty,omitempty"`
-	Buyer          *Buyer   `xml:"ram:BuyerTradeParty,omitempty"`
-	Project        *Project `xml:"ram:SpecifiedProcurringProject,omitempty"`
-	Contract       *Project `xml:"ram:ContractReferencedDocument,omitempty"`
-	Purchase       *Project `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
-	Sales          *Project `xml:"ram:SellerOrderReferencedDocument,omitempty"`
-	Receiving      *Project `xml:"ram:ReceivingAdviceReferencedDocument,omitempty"`
-	Despatch       *Project `xml:"ram:DespatchAdviceReferencedDocument,omitempty"`
+	BuyerReference    string   `xml:"ram:BuyerReference,omitempty"`
+	Seller            *Seller  `xml:"ram:SellerTradeParty,omitempty"`
+	Buyer             *Buyer   `xml:"ram:BuyerTradeParty,omitempty"`
+	TaxRepresentative *Seller  `xml:"ram:SellerTaxRepresentativeTradeParty,omitempty"`
+	Project           *Project `xml:"ram:SpecifiedProcurringProject,omitempty"`
+	Contract          *Project `xml:"ram:ContractReferencedDocument,omitempty"`
+	Purchase          *Project `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
+	Sales             *Project `xml:"ram:SellerOrderReferencedDocument,omitempty"`
 }
 
+// Project defines common architecture of document reference fields in the CII standard
 type Project struct {
 	ID   string `xml:"ram:ID,omitempty"`
 	Name string `xml:"ram:Name,omitempty"`
@@ -63,18 +63,57 @@ type Project struct {
 
 // Delivery defines the structure of ApplicableHeaderTradeDelivery of the CII standard
 type Delivery struct {
-	Event *Date `xml:"ram:ActualDeliverySupplyChainEvent>ram:OccurrenceDateTime>udt:DateTimeString,omitempty"`
+	Receiver  *Buyer   `xml:"ram:ShipToTradeParty,omitempty"`
+	Event     *Date    `xml:"ram:ActualDeliverySupplyChainEvent>ram:OccurrenceDateTime>udt:DateTimeString,omitempty"`
+	Receiving *Project `xml:"ram:ReceivingAdviceReferencedDocument,omitempty"`
+	Despatch  *Project `xml:"ram:DespatchAdviceReferencedDocument,omitempty"`
 }
 
 // Settlement defines the structure of ApplicableHeaderTradeSettlement of the CII standard
 type Settlement struct {
 	Currency           string              `xml:"ram:InvoiceCurrencyCode"`
-	TypeCode           string              `xml:"ram:SpecifiedTradeSettlementPaymentMeans>ram:TypeCode"`
+	Means              *PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
+	Period             *Period             `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	Tax                []*Tax              `xml:"ram:ApplicableTradeTax"`
-	PaymentTerms       string              `xml:"ram:SpecifiedTradePaymentTerms>ram:Description,omitempty"`
-	Payee              *Payee              `xml:"ram:PayeeTradeParty,omitempty"`
+	PaymentTerms       *Terms              `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`
+	Payee              *Buyer              `xml:"ram:PayeeTradeParty,omitempty"`
 	Summary            *Summary            `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
 	ReferencedDocument *ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
+	CreditorRefID      string              `xml:"ram:CreditorReferenceID,omitempty"`
+}
+
+// Terms defines the structure of SpecifiedTradePaymentTerms of the CII standard
+type Terms struct {
+	Description string `xml:"ram:Description,omitempty"`
+	Mandate     string `xml:"ram:DirectDebitMandateID,omitempty"`
+}
+
+// PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard
+type PaymentMeans struct {
+	TypeCode            string               `xml:"ram:TypeCode"`
+	Information         string               `xml:"ram:Information,omitempty"`
+	Creditor            *Creditor            `xml:"ram:PayeePartyCreditorFinancialAccount,omitempty"`
+	CreditorInstitution *CreditorInstitution `xml:"ram:PayeePartyCreditorFinancialInstitution,omitempty"`
+	Debtor              string               `xml:"ram:PayerPartyDebtorFinancialAccount>ram:IBANID,omitempty"`
+	Card                *Card                `xml:"ram:ApplicableTradeSettlementFinancialCard,omitempty"`
+}
+
+// Creditor defines the structure of PayeePartyCreditorFinancialAccount of the CII standard
+type Creditor struct {
+	IBAN   string `xml:"ram:IBANID,omitempty"`
+	Number string `xml:"ram:ProprietaryID,omitempty"`
+	Name   string `xml:"ram:AccountName,omitempty"`
+}
+
+// CreditorInstitution defines the structure of PayeePartyCreditorFinancialInstitution of the CII standard
+type CreditorInstitution struct {
+	BICID string `xml:"ram:BICID,omitempty"`
+}
+
+// Card defines the structure of ApplicableTradeSettlementFinancialCard of the CII standard
+type Card struct {
+	ID   string `xml:"ram:ID,omitempty"`
+	Name string `xml:"ram:CardHolderName,omitempty"`
 }
 
 // Seller defines the structure of the SellerTradeParty of the CII standard
@@ -94,14 +133,6 @@ type Buyer struct {
 	Contact                   *Contact                   `xml:"ram:DefinedTradeContact,omitempty"`
 	PostalTradeAddress        *PostalTradeAddress        `xml:"ram:PostalTradeAddress"`
 	URIUniversalCommunication *URIUniversalCommunication `xml:"ram:URIUniversalCommunication>ram:URIID"`
-}
-
-type Payee struct {
-	ID                        string                     `xml:"ram:ID,omitempty"`
-	Name                      string                     `xml:"ram:Name,omitempty"`
-	Contact                   *Contact                   `xml:"ram:DefinedTradeContact,omitempty"`
-	PostalTradeAddress        *PostalTradeAddress        `xml:"ram:PostalTradeAddress,omitempty"`
-	URIUniversalCommunication *URIUniversalCommunication `xml:"ram:URIUniversalCommunication>ram:URIID,omitempty"`
 }
 
 // Note defines note in the RAM structure
@@ -168,9 +199,19 @@ type LegalOrganization struct {
 
 // Contact defines the structure of the DefinedTradeContact of the CII standard
 type Contact struct {
-	PersonName string `xml:"ram:PersonName"`
-	Phone      string `xml:"ram:TelephoneUniversalCommunication>ram:CompleteNumber"`
-	Email      string `xml:"ram:EmailURIUniversalCommunication>ram:URIID"`
+	PersonName string       `xml:"ram:PersonName,omitempty"`
+	Phone      *PhoneNumber `xml:"ram:TelephoneUniversalCommunication,omitempty"`
+	Email      *Email       `xml:"ram:EmailURIUniversalCommunication,omitempty"`
+}
+
+// PhoneNumber defines the structure of the TelephoneUniversalCommunication of the CII standard
+type PhoneNumber struct {
+	CompleteNumber string `xml:"ram:CompleteNumber,omitempty"`
+}
+
+// Email defines the structure of the EmailURIUniversalCommunication of the CII standard
+type Email struct {
+	URIID string `xml:"ram:URIID,omitempty"`
 }
 
 // Tax defines the structure of ApplicableTradeTax of the CII standard
@@ -201,4 +242,16 @@ type ReferencedDocument struct {
 type TaxTotalAmount struct {
 	Amount   string `xml:",chardata"`
 	Currency string `xml:"currencyID,attr"`
+}
+
+// Period defines the structure of the ExpectedDeliveryPeriod of the CII standard
+type Period struct {
+	Start *Date `xml:"ram:StartDateTime>udt:DateTimeString"`
+	End   *Date `xml:"ram:EndDateTime>udt:DateTimeString"`
+}
+
+// Date defines date in the UDT structure
+type Date struct {
+	Date   string `xml:",chardata"`
+	Format string `xml:"format,attr,omitempty"`
 }

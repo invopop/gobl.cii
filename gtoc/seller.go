@@ -38,10 +38,14 @@ func newContact(supplier *org.Party) *Contact {
 		contact.PersonName = contactName(supplier.People[0].Name)
 	}
 	if len(supplier.Telephones) > 0 {
-		contact.Phone = supplier.Telephones[0].Number
+		contact.Phone = &PhoneNumber{
+			CompleteNumber: supplier.Telephones[0].Number,
+		}
 	}
 	if len(supplier.Emails) > 0 {
-		contact.Email = supplier.Emails[0].Address
+		contact.Email = &Email{
+			URIID: supplier.Emails[0].Address,
+		}
 	}
 
 	return contact
