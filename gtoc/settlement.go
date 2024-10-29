@@ -151,7 +151,7 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 		CalculatedAmount:      rate.Amount.String(),
 		TypeCode:              category.Code.String(),
 		BasisAmount:           rate.Base.String(),
-		CategoryCode:          FindTaxCode(rate.Key),
+		CategoryCode:          findTaxCode(rate.Key),
 		RateApplicablePercent: rate.Percent.StringWithoutSymbol(),
 	}
 

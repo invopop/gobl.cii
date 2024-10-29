@@ -6,20 +6,20 @@ import (
 )
 
 const (
-	StandardSalesTax  = "S"
-	ZeroRatedGoodsTax = "Z"
-	TaxExempt         = "E"
+	standardSalesTax  = "S"
+	zeroRatedGoodsTax = "Z"
+	taxExempt         = "E"
 )
 
-func FindTaxCode(taxRate cbc.Key) string {
+func findTaxCode(taxRate cbc.Key) string {
 	switch taxRate {
 	case tax.RateStandard:
-		return StandardSalesTax
+		return standardSalesTax
 	case tax.RateZero:
-		return ZeroRatedGoodsTax
+		return zeroRatedGoodsTax
 	case tax.RateExempt:
-		return TaxExempt
+		return taxExempt
 	}
 
-	return StandardSalesTax
+	return standardSalesTax
 }

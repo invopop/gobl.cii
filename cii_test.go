@@ -15,7 +15,6 @@ import (
 	ctog "github.com/invopop/gobl.cii/ctog"
 	gtoc "github.com/invopop/gobl.cii/gtoc"
 
-	// "github.com/invopop/gobl.cii/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,10 +28,10 @@ const (
 var update = flag.Bool("update", false, "Update out directory")
 
 func TestNewDocument(t *testing.T) {
-	// schema, err := test.LoadSchema("schema.xsd")
+	// schema, err := LoadSchema("schema.xsd")
 	// require.NoError(t, err)
 
-	examples, err := GetDataGlob("*.json")
+	examples, err := getDataGlob("*.json")
 	require.NoError(t, err)
 
 	for _, example := range examples {
@@ -49,11 +48,11 @@ func TestNewDocument(t *testing.T) {
 			// err = test.ValidateXML(schema, data)
 			// require.NoError(t, err)
 
-			output, err := LoadOutputFile(outName)
+			output, err := loadOutputFile(outName)
 			assert.NoError(t, err)
 
 			if *update {
-				err = SaveOutputFile(outName, data)
+				err = saveOutputFile(outName, data)
 				require.NoError(t, err)
 			} else {
 				assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
@@ -63,7 +62,7 @@ func TestNewDocument(t *testing.T) {
 }
 
 func TestNewDocumentGOBL(t *testing.T) {
-	examples, err := GetDataGlob("*.xml")
+	examples, err := getDataGlob("*.xml")
 	require.NoError(t, err)
 
 	for _, example := range examples {
@@ -94,7 +93,7 @@ func TestNewDocumentGOBL(t *testing.T) {
 			require.NoError(t, err)
 
 			// Load the expected output
-			output, err := LoadOutputFile(outName)
+			output, err := loadOutputFile(outName)
 			assert.NoError(t, err)
 
 			// Parse the expected output to extract the invoice
@@ -113,7 +112,7 @@ func TestNewDocumentGOBL(t *testing.T) {
 			require.NoError(t, err)
 
 			if *update {
-				err = SaveOutputFile(outName, data)
+				err = saveOutputFile(outName, data)
 				require.NoError(t, err)
 			} else {
 				assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
@@ -134,7 +133,7 @@ func NewDocumentFrom(name string) (*gtoc.Document, error) {
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
 func LoadTestXMLDoc(name string) (*ctog.Document, error) {
-	src, err := os.Open(filepath.Join(GetConversionTypePath(xmlPattern), name))
+	src, err := os.Open(filepath.Join(getConversionTypePath(xmlPattern), name))
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +167,7 @@ func LoadTestInvoice(name string) (*bill.Invoice, error) {
 
 // LoadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
 func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
-	src, _ := os.Open(filepath.Join(GetConversionTypePath(jsonPattern), name))
+	src, _ := os.Open(filepath.Join(getConversionTypePath(jsonPattern), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err
@@ -181,15 +180,14 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 	return env, nil
 }
 
-// LoadOutputFile returns byte data from a file in the `test/data/out` folder
-func LoadOutputFile(name string) ([]byte, error) {
+func loadOutputFile(name string) ([]byte, error) {
 	var pattern string
 	if strings.HasSuffix(name, ".json") {
 		pattern = xmlPattern
 	} else {
 		pattern = jsonPattern
 	}
-	src, _ := os.Open(filepath.Join(GetOutPath(pattern), name))
+	src, _ := os.Open(filepath.Join(getOutPath(pattern), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err
@@ -198,51 +196,43 @@ func LoadOutputFile(name string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// SaveOutputFile writes byte data to a file in the `test/data/out` folder
-func SaveOutputFile(name string, data []byte) error {
+func saveOutputFile(name string, data []byte) error {
 	var pattern string
 	if strings.HasSuffix(name, jsonPattern) {
 		pattern = xmlPattern
 	} else {
 		pattern = jsonPattern
 	}
-	return os.WriteFile(filepath.Join(GetOutPath(pattern), name), data, 0644)
+	return os.WriteFile(filepath.Join(getOutPath(pattern), name), data, 0644)
 }
 
-// GetDataGlob returns a list of files in the `test/data` folder that match the pattern
-func GetDataGlob(pattern string) ([]string, error) {
-	return filepath.Glob(filepath.Join(GetConversionTypePath(pattern), pattern))
+func getDataGlob(pattern string) ([]string, error) {
+	return filepath.Glob(filepath.Join(getConversionTypePath(pattern), pattern))
 }
 
-// GetSchemaPath returns the path to the `test/data/schema` folder
-func GetSchemaPath(pattern string) string {
-	return filepath.Join(GetConversionTypePath(pattern), "schema")
+// func getSchemaPath(pattern string) string {
+// 	return filepath.Join(getConversionTypePath(pattern), "schema")
+// }
+
+func getOutPath(pattern string) string {
+	return filepath.Join(getConversionTypePath(pattern), "out")
 }
 
-// GetOutPath returns the path to the `test/data/out` folder
-func GetOutPath(pattern string) string {
-	return filepath.Join(GetConversionTypePath(pattern), "out")
+func getDataPath() string {
+	return filepath.Join(getTestPath(), "data")
 }
 
-// GetDataPath returns the path to the `test/data` folder
-func GetDataPath() string {
-	return filepath.Join(GetTestPath(), "data")
-}
-
-// Differentiates between the conversion types
-func GetConversionTypePath(pattern string) string {
+func getConversionTypePath(pattern string) string {
 	if pattern == xmlPattern {
-		return filepath.Join(GetDataPath(), "ctog")
+		return filepath.Join(getDataPath(), "ctog")
 	}
-	return filepath.Join(GetDataPath(), "gtoc")
+	return filepath.Join(getDataPath(), "gtoc")
 }
 
-// GetTestPath returns the path to the `test` folder
-func GetTestPath() string {
+func getTestPath() string {
 	return filepath.Join(getRootFolder(), "test")
 }
 
-// TODO: adapt to new folder structure
 func getRootFolder() string {
 	cwd, _ := os.Getwd()
 

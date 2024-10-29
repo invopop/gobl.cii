@@ -87,7 +87,6 @@
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery>
       <ram:ShipToTradeParty>
-        <ram:Name></ram:Name>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>523427</ram:PostcodeCode>
           <ram:LineOne>Deliverystreet 2</ram:LineOne>
@@ -115,6 +114,9 @@
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>NO9386011117947</ram:IBANID>
         </ram:PayeePartyCreditorFinancialAccount>
+        <ram:PayeePartyCreditorFinancialInstitution>
+          <ram:BICID>DNBANOKK</ram:BICID>
+        </ram:PayeePartyCreditorFinancialInstitution>
         <ram:PayerPartyDebtorFinancialAccount>
           <ram:IBANID>DE89370400440532013000</ram:IBANID>
         </ram:PayerPartyDebtorFinancialAccount>
@@ -162,7 +164,7 @@
           <ram:RateApplicablePercent>25</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
       </ram:SpecifiedTradeAllowanceCharge>
-      <ram:CreditorReferenceID>1234567890</ram:CreditorReferenceID>
+      <ram:CreditorReferenceID>987654321</ram:CreditorReferenceID>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
 </rsm:CrossIndustryInvoice>

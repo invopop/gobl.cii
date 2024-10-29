@@ -9,20 +9,20 @@ import (
 
 func TestFindTaxCode(t *testing.T) {
 	t.Run("should return correct tax category", func(t *testing.T) {
-		taxCode := FindTaxCode(tax.RateStandard)
+		taxCode := findTaxCode(tax.RateStandard)
 
-		assert.Equal(t, StandardSalesTax, taxCode)
+		assert.Equal(t, standardSalesTax, taxCode)
 	})
 
 	t.Run("should return zero tax category", func(t *testing.T) {
-		taxCode := FindTaxCode(tax.RateZero)
+		taxCode := findTaxCode(tax.RateZero)
 
-		assert.Equal(t, ZeroRatedGoodsTax, taxCode)
+		assert.Equal(t, zeroRatedGoodsTax, taxCode)
 	})
 
 	t.Run("should return zero tax category", func(t *testing.T) {
-		taxCode := FindTaxCode(tax.RateExempt)
+		taxCode := findTaxCode(tax.RateExempt)
 
-		assert.Equal(t, TaxExempt, taxCode)
+		assert.Equal(t, taxExempt, taxCode)
 	})
 }
