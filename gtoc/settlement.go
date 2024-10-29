@@ -74,6 +74,9 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 				Name:   instr.CreditTransfer[0].Name,
 				Number: instr.CreditTransfer[0].Number,
 			}
+			settlement.PaymentMeans.CreditorInstitution = &CreditorInstitution{
+				BICID: instr.CreditTransfer[0].BIC,
+			}
 		}
 		if instr.DirectDebit != nil {
 			settlement.PaymentMeans.Debtor = instr.DirectDebit.Account
