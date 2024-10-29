@@ -11,10 +11,12 @@ func NewTransaction(inv *bill.Invoice) (*Transaction, error) {
 		return nil, err
 	}
 
+	delivery := NewDelivery(inv)
+
 	transaction := &Transaction{
 		Lines:      NewLines(inv.Lines),
 		Agreement:  agreement,
-		Delivery:   &Delivery{},
+		Delivery:   delivery,
 		Settlement: NewSettlement(inv),
 	}
 
