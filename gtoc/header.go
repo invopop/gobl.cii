@@ -14,7 +14,7 @@ const IssueDateFormat = "102"
 
 // NewHeader creates the ExchangedDocument part of a EN 16931 compliant invoice
 func NewHeader(inv *bill.Invoice) *Header {
-	return &Header{
+	header := &Header{
 		ID:       invoiceNumber(inv.Series, inv.Code),
 		TypeCode: invoiceTypeCode(inv),
 		IssueDate: &Date{
@@ -22,6 +22,16 @@ func NewHeader(inv *bill.Invoice) *Header {
 			Format: IssueDateFormat,
 		},
 	}
+	if len(inv.Notes) > 0 {
+		notes := make([]*Note, 0, len(inv.Notes))
+		for _, note := range inv.Notes {
+			notes = append(notes, &Note{
+				Content: note.Text,
+			})
+		}
+		header.IncludedNote = notes
+	}
+	return header
 }
 
 func formatIssueDate(date cal.Date) string {
@@ -46,6 +56,9 @@ func invoiceNumber(series cbc.Code, code cbc.Code) string {
 // - 384 (Corrected invoice)
 // - 389 (Self-billed invoice)
 // - 381 (Credit note)
+// - 875 (Partial Construction invoice)
+// - 876 (Partial Final Construction invoice)
+// - 877 (Final Construction invoice)
 func invoiceTypeCode(inv *bill.Invoice) string {
 	if isSelfBilledInvoice(inv) {
 		return "389"

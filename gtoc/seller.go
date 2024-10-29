@@ -29,14 +29,19 @@ func NewSeller(supplier *org.Party) *Seller {
 }
 
 func newContact(supplier *org.Party) *Contact {
-	if len(supplier.People) == 0 || len(supplier.Telephones) == 0 || len(supplier.Emails) == 0 {
+	if len(supplier.People) == 0 && len(supplier.Telephones) == 0 && len(supplier.Emails) == 0 {
 		return nil
 	}
 
-	contact := &Contact{
-		PersonName: contactName(supplier.People[0].Name),
-		Phone:      supplier.Telephones[0].Number,
-		Email:      supplier.Emails[0].Address,
+	contact := new(Contact)
+	if len(supplier.People) > 0 {
+		contact.PersonName = contactName(supplier.People[0].Name)
+	}
+	if len(supplier.Telephones) > 0 {
+		contact.Phone = supplier.Telephones[0].Number
+	}
+	if len(supplier.Emails) > 0 {
+		contact.Email = supplier.Emails[0].Address
 	}
 
 	return contact

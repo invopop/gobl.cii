@@ -8,6 +8,7 @@ import (
 func NewBuyer(customer *org.Party) *Buyer {
 	buyer := &Buyer{
 		Name:                      customer.Name,
+		Contact:                   newContact(customer),
 		PostalTradeAddress:        NewPostalTradeAddress(customer.Addresses),
 		URIUniversalCommunication: NewEmail(customer.Emails),
 	}

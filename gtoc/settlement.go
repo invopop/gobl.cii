@@ -2,6 +2,7 @@ package gtoc
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -29,6 +30,9 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 				Format: "102",
 			},
 		}
+	}
+	if inv.Payment != nil && inv.Payment.Payee != nil {
+		settlement.Payee = newPayee(inv.Payment.Payee)
 	}
 
 	return settlement
@@ -79,4 +83,19 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	}
 
 	return tax
+}
+
+func newPayee(party *org.Party) *Payee {
+	payee := &Payee{
+		Name:                      party.Name,
+		Contact:                   newContact(party),
+		PostalTradeAddress:        NewPostalTradeAddress(party.Addresses),
+		URIUniversalCommunication: NewEmail(party.Emails),
+	}
+
+	if party.TaxID != nil {
+		payee.ID = party.TaxID.String()
+	}
+
+	return payee
 }

@@ -26,6 +26,29 @@ func NewAgreement(inv *bill.Invoice) (*Agreement, error) {
 	if customer := inv.Customer; customer != nil {
 		agreement.Buyer = NewBuyer(customer)
 	}
+	projectTypes := []struct {
+		projects *[]*org.DocumentRef
+		assign   func(*Project)
+	}{
+		{&inv.Ordering.Contracts, func(p *Project) { agreement.Contract = p }},
+		{&inv.Ordering.Projects, func(p *Project) { agreement.Project = p }},
+		{&inv.Ordering.Purchases, func(p *Project) { agreement.Purchase = p }},
+		{&inv.Ordering.Sales, func(p *Project) { agreement.Sales = p }},
+		{&inv.Ordering.Despatch, func(p *Project) { agreement.Despatch = p }},
+		{&inv.Ordering.Receiving, func(p *Project) { agreement.Receiving = p }},
+	}
+	for _, pt := range projectTypes {
+		if len(*pt.projects) > 0 {
+			project := &Project{
+				ID: (*pt.projects)[0].Code.String(),
+			}
+			pt.assign(project)
+			if pt.projects == &inv.Ordering.Projects && (*pt.projects)[0].Description != "" {
+				project.Name = (*pt.projects)[0].Description
+			}
+		}
+	}
+
 	return agreement, nil
 }
 
