@@ -9,25 +9,25 @@ import (
 	"github.com/invopop/gobl/bill"
 )
 
-// Conversor is the struct that contains the logic to convert a GOBL envelope into a CII document
-type Conversor struct {
-	cii *Document
+// Converter is the struct that contains the logic to convert a GOBL envelope into a CII document
+type Converter struct {
+	doc *Document
 }
 
 // NewConversor Builder function
-func NewConversor() *Conversor {
-	c := new(Conversor)
-	c.cii = new(Document)
+func NewConversor() *Converter {
+	c := new(Converter)
+	c.doc = new(Document)
 	return c
 }
 
 // GetDocument returns the CII document
-func (c *Conversor) GetDocument() *Document {
-	return c.cii
+func (c *Converter) GetDocument() *Document {
+	return c.doc
 }
 
 // ConvertToCII converts a GOBL envelope into a CIIdocument
-func (c *Conversor) ConvertToCII(env *gobl.Envelope) (*Document, error) {
+func (c *Converter) ConvertToCII(env *gobl.Envelope) (*Document, error) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return nil, fmt.Errorf("invalid type %T", env.Document)
@@ -49,8 +49,8 @@ func (c *Conversor) ConvertToCII(env *gobl.Envelope) (*Document, error) {
 		Transaction:            transaction,
 	}
 
-	c.cii = &ciiDoc
-	return c.cii, nil
+	c.doc = &ciiDoc
+	return c.doc, nil
 }
 
 // Bytes returns the XML representation of the document in bytes

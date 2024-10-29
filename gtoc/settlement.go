@@ -90,6 +90,10 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 		}
 	}
 
+	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
+		settlement.AllowanceCharges = newCharges(inv)
+	}
+
 	return settlement
 }
 

@@ -42,7 +42,7 @@ func NewDocumentFrom(name string) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &Conversor{}
+	c := &Converter{}
 	return c.ConvertToCII(env)
 }
 

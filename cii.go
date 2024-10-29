@@ -13,7 +13,7 @@ import (
 // Conversor is a struct that encapsulates both CtoG and GtoC conversors
 type Conversor struct {
 	CtoG *ctog.Conversor
-	GtoC *gtoc.Conversor
+	GtoC *gtoc.Converter
 }
 
 // NewConversor creates a new Conversor instance

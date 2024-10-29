@@ -128,7 +128,7 @@ func NewDocumentFrom(name string) (*gtoc.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &gtoc.Conversor{}
+	c := &gtoc.Converter{}
 	return c.ConvertToCII(env)
 }
 
