@@ -8,14 +8,13 @@ import (
 )
 
 func TestNewSettlement(t *testing.T) {
-	t.Run("should contain the transaction settlement", func(t *testing.T) {
+	t.Run("invoice-de-de.json", func(t *testing.T) {
 		doc, err := NewDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
 		assert.Equal(t, "EUR", doc.Transaction.Settlement.Currency)
-		// assert.Equal(t, TypeCodeInstrumentNotDefined, doc.Transaction.Settlement.TypeCode)
-		// assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms)
+		assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms.Description)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TotalAmount)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TaxBasisTotalAmount)
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
@@ -24,11 +23,26 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "EUR", doc.Transaction.Settlement.Summary.TaxTotalAmount.Currency)
 	})
 
-	t.Run("should set ReferencedDocument for correction invoice", func(t *testing.T) {
+	t.Run("correction-invoice.json", func(t *testing.T) {
 		doc, err := NewDocumentFrom("correction-invoice.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument.IssuerAssignedID)
 		assert.Equal(t, &Date{Date: "20240213", Format: "102"}, doc.Transaction.Settlement.ReferencedDocument.IssueDate)
+	})
+
+	t.Run("invoice-complete.json", func(t *testing.T) {
+		doc, err := NewDocumentFrom("invoice-complete.json")
+		require.NoError(t, err)
+
+		assert.Equal(t, "30", doc.Transaction.Settlement.PaymentMeans.TypeCode)
+
+		assert.Equal(t, "NO9386011117947", doc.Transaction.Settlement.PaymentMeans.Creditor.IBAN)
+
+		assert.Equal(t, "1234", doc.Transaction.Settlement.PaymentMeans.Card.ID)
+		assert.Equal(t, "John Doe", doc.Transaction.Settlement.PaymentMeans.Card.Name)
+
+		assert.Equal(t, "1234567890", doc.Transaction.Settlement.PaymentTerms.Mandate)
+		assert.Equal(t, "DE89370400440532013000", doc.Transaction.Settlement.PaymentMeans.Debtor)
 	})
 }

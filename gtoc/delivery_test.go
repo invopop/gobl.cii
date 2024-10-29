@@ -3,23 +3,15 @@ package gtoc
 import (
 	"testing"
 
-	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewDelivery(t *testing.T) {
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		env, err := LoadTestEnvelope("invoice-complete.json")
+		doc, err := NewDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 
-		inv := env.Extract().(*bill.Invoice)
-
-		converter := NewConverter()
-		err = converter.newDocument(inv)
-		require.NoError(t, err)
-
-		doc := converter.GetDocument()
 		assert.Equal(t, "20240210", doc.Transaction.Delivery.Event.Date)
 		assert.NotNil(t, doc.Transaction.Delivery.Receiver)
 		assert.NotNil(t, doc.Transaction.Delivery.Receiver.PostalTradeAddress)

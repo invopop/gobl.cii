@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewLines(t *testing.T) {
-	t.Run("should contain the lines from invoice", func(t *testing.T) {
+	t.Run("invoice-de-de.json", func(t *testing.T) {
 		doc, err := NewDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
@@ -23,4 +23,5 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "19", doc.Transaction.Lines[0].TradeSettlement.ApplicableTradeTax[0].TaxRatePercent)
 		assert.Equal(t, "1800.00", doc.Transaction.Lines[0].TradeSettlement.Sum)
 	})
+
 }

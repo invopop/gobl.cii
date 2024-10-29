@@ -72,7 +72,7 @@ type Delivery struct {
 // Settlement defines the structure of ApplicableHeaderTradeSettlement of the CII standard
 type Settlement struct {
 	Currency           string              `xml:"ram:InvoiceCurrencyCode"`
-	Means              *PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
+	PaymentMeans       *PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
 	Period             *Period             `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	Tax                []*Tax              `xml:"ram:ApplicableTradeTax"`
 	PaymentTerms       *Terms              `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`

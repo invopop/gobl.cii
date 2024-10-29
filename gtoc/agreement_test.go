@@ -10,16 +10,9 @@ import (
 
 func TestNewAgreement(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		env, err := LoadTestEnvelope("invoice-de-de.json")
+		doc, err := NewDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
-		inv := env.Extract().(*bill.Invoice)
-
-		converter := NewConverter()
-		err = converter.newDocument(inv)
-		require.NoError(t, err)
-
-		doc := converter.GetDocument()
 		assert.Nil(t, err)
 		assert.Equal(t, "XR-2024-2", doc.Transaction.Agreement.BuyerReference)
 		assert.Equal(t, "Provide One GmbH", doc.Transaction.Agreement.TaxRepresentative.Name)

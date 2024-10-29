@@ -64,19 +64,19 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
-		settlement.Means = &PaymentMeans{
+		settlement.PaymentMeans = &PaymentMeans{
 			TypeCode:    findPaymentKey(instr.Key),
 			Information: instr.Detail,
 		}
 		if instr.CreditTransfer != nil {
-			settlement.Means.Creditor = &Creditor{
+			settlement.PaymentMeans.Creditor = &Creditor{
 				IBAN:   instr.CreditTransfer[0].IBAN,
 				Name:   instr.CreditTransfer[0].Name,
 				Number: instr.CreditTransfer[0].Number,
 			}
 		}
 		if instr.DirectDebit != nil {
-			settlement.Means.Debtor = instr.DirectDebit.Account
+			settlement.PaymentMeans.Debtor = instr.DirectDebit.Account
 			settlement.CreditorRefID = instr.DirectDebit.Creditor
 			if settlement.PaymentTerms == nil {
 				settlement.PaymentTerms = new(Terms)
@@ -84,7 +84,7 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 			settlement.PaymentTerms.Mandate = instr.DirectDebit.Ref
 		}
 		if instr.Card != nil {
-			settlement.Means.Card = &Card{
+			settlement.PaymentMeans.Card = &Card{
 				ID:   instr.Card.Last4,
 				Name: instr.Card.Holder,
 			}
