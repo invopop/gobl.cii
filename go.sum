@@ -41,6 +41,8 @@ github.com/labstack/gommon v0.4.2 h1:F8qTUNXgG1+6WQmqoUWnz8WiEU60mXVVw0P4ht1WRA0
 github.com/labstack/gommon v0.4.2/go.mod h1:QlUFxVM+SNXhDL/Z7YhocGIBYOiwB0mXm1+1bAPHPyU=
 github.com/lestrrat-go/libxml2 v0.0.0-20240521004304-a75c203ac627 h1:M7EEuhGDmn9bWSnap5mzVlg8pmVucmLytCjVjm+H4QU=
 github.com/lestrrat-go/libxml2 v0.0.0-20240521004304-a75c203ac627/go.mod h1:/0MMipmS+5SMXCSkulsvJwYmddKI4IL5tVy6AZMo9n0=
+github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3 h1:ZIYZ0+TEddrxA2dEx4ITTBCdRqRP8Zh+8nb4tSx0nOw=
+github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3/go.mod h1:/0MMipmS+5SMXCSkulsvJwYmddKI4IL5tVy6AZMo9n0=
 github.com/magefile/mage v1.15.0 h1:BvGheCMAsG3bWUDbZ8AyXXpCNwU9u5CB6sM+HNb9HYg=
 github.com/magefile/mage v1.15.0/go.mod h1:z5UZb/iS3GoOSn0JgWuiw7dxlurVYTu+/jHXqQg881A=
 github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=

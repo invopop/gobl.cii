@@ -32,19 +32,16 @@ func NewAgreement(inv *bill.Invoice) (*Agreement, error) {
 			agreement.Seller = NewSeller(inv.Ordering.Seller)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
-			agreement.Contract = &Project{
-				ID: inv.Ordering.Contracts[0].Code.String(),
-			}
+			contract := inv.Ordering.Contracts[0].Code.String()
+			agreement.Contract = &contract
 		}
 		if len(inv.Ordering.Purchases) > 0 {
-			agreement.Purchase = &Project{
-				ID: inv.Ordering.Purchases[0].Code.String(),
-			}
+			purchase := inv.Ordering.Purchases[0].Code.String()
+			agreement.Purchase = &purchase
 		}
 		if len(inv.Ordering.Sales) > 0 {
-			agreement.Sales = &Project{
-				ID: inv.Ordering.Sales[0].Code.String(),
-			}
+			sales := inv.Ordering.Sales[0].Code.String()
+			agreement.Sales = &sales
 		}
 		if len(inv.Ordering.Projects) > 0 {
 			agreement.Project = &Project{

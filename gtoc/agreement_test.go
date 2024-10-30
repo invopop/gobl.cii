@@ -39,6 +39,6 @@ func TestNewAgreement(t *testing.T) {
 		doc := converter.GetDocument()
 		assert.Nil(t, err)
 		assert.Equal(t, "PO4711", doc.Transaction.Agreement.BuyerReference)
-		assert.Equal(t, "2013-05", doc.Transaction.Agreement.Contract.ID)
+		assert.Equal(t, "2013-05", doc.Transaction.Agreement.Contract)
 	})
 }

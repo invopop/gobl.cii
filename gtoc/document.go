@@ -50,9 +50,9 @@ type Agreement struct {
 	Buyer             *Buyer   `xml:"ram:BuyerTradeParty,omitempty"`
 	TaxRepresentative *Seller  `xml:"ram:SellerTaxRepresentativeTradeParty,omitempty"`
 	Project           *Project `xml:"ram:SpecifiedProcurringProject,omitempty"`
-	Contract          *Project `xml:"ram:ContractReferencedDocument,omitempty"`
-	Purchase          *Project `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
-	Sales             *Project `xml:"ram:SellerOrderReferencedDocument,omitempty"`
+	Contract          *string  `xml:"ram:ContractReferencedDocument>ram:IssuerAssignedID,omitempty"`
+	Purchase          *string  `xml:"ram:BuyerOrderReferencedDocument>ram:IssuerAssignedID,omitempty"`
+	Sales             *string  `xml:"ram:SellerOrderReferencedDocument>ram:IssuerAssignedID,omitempty"`
 }
 
 // Project defines common architecture of document reference fields in the CII standard
@@ -144,7 +144,7 @@ type Quantity struct {
 type TradeSettlement struct {
 	ApplicableTradeTax []*ApplicableTradeTax `xml:"ram:ApplicableTradeTax"`
 	Sum                string                `xml:"ram:SpecifiedTradeSettlementLineMonetarySummation>ram:LineTotalAmount"`
-	AllowanceCharge    []*AllowanceCharge    `xml:"ram:SpecifiedLineTradeAllowanceCharge,omitempty"`
+	AllowanceCharge    []*AllowanceCharge    `xml:"ram:SpecifiedTradeAllowanceCharge,omitempty"`
 }
 
 // ApplicableTradeTax defines the structure of ApplicableTradeTax of the CII standard
@@ -191,12 +191,12 @@ type Terms struct {
 
 // PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard
 type PaymentMeans struct {
-	TypeCode            string               `xml:"ram:TypeCode"`
-	Information         string               `xml:"ram:Information,omitempty"`
-	Creditor            *Creditor            `xml:"ram:PayeePartyCreditorFinancialAccount,omitempty"`
-	CreditorInstitution *CreditorInstitution `xml:"ram:PayeePartyCreditorFinancialInstitution,omitempty"`
-	Debtor              string               `xml:"ram:PayerPartyDebtorFinancialAccount>ram:IBANID,omitempty"`
-	Card                *Card                `xml:"ram:ApplicableTradeSettlementFinancialCard,omitempty"`
+	TypeCode    string    `xml:"ram:TypeCode"`
+	Information string    `xml:"ram:Information,omitempty"`
+	Creditor    *Creditor `xml:"ram:PayeePartyCreditorFinancialAccount,omitempty"`
+	BICID       string    `xml:"ram:PayeeSpecifiedCreditorFinancialInstitution>ram:BICID,omitempty"`
+	Debtor      string    `xml:"ram:PayerPartyDebtorFinancialAccount>ram:IBANID,omitempty"`
+	Card        *Card     `xml:"ram:ApplicableTradeSettlementFinancialCard,omitempty"`
 }
 
 // Creditor defines the structure of PayeePartyCreditorFinancialAccount of the CII standard
@@ -204,11 +204,6 @@ type Creditor struct {
 	IBAN   string `xml:"ram:IBANID,omitempty"`
 	Number string `xml:"ram:ProprietaryID,omitempty"`
 	Name   string `xml:"ram:AccountName,omitempty"`
-}
-
-// CreditorInstitution defines the structure of PayeePartyCreditorFinancialInstitution of the CII standard
-type CreditorInstitution struct {
-	BICID string `xml:"ram:BICID,omitempty"`
 }
 
 // Card defines the structure of ApplicableTradeSettlementFinancialCard of the CII standard

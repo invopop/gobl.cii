@@ -19,6 +19,7 @@ func NewSeller(supplier *org.Party) *Seller {
 	}
 
 	if supplier.TaxID != nil {
+		// Assumes VAT ID being used instead of possible tax number
 		seller.SpecifiedTaxRegistration = &SpecifiedTaxRegistration{
 			ID:       supplier.TaxID.String(),
 			SchemeID: "VA",

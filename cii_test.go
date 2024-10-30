@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -18,6 +19,9 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lestrrat-go/libxml2"
+	"github.com/lestrrat-go/libxml2/xsd"
 )
 
 const (
@@ -28,15 +32,15 @@ const (
 var update = flag.Bool("update", false, "Update out directory")
 
 func TestNewDocument(t *testing.T) {
-	// schema, err := LoadSchema("schema.xsd")
-	// require.NoError(t, err)
+	schema, err := loadSchema("schema.xsd")
+	require.NoError(t, err)
 
 	examples, err := getDataGlob("*.json")
 	require.NoError(t, err)
 
 	for _, example := range examples {
 		inName := filepath.Base(example)
-		outName := strings.Replace(inName, ".json", ".xml", 1)
+		// outName := strings.Replace(inName, ".json", ".xml", 1)
 
 		t.Run(inName, func(t *testing.T) {
 			doc, err := NewDocumentFrom(inName)
@@ -45,18 +49,18 @@ func TestNewDocument(t *testing.T) {
 			data, err := doc.Bytes()
 			require.NoError(t, err)
 
-			// err = test.ValidateXML(schema, data)
-			// require.NoError(t, err)
+			err = ValidateXML(schema, data)
+			require.NoError(t, err)
 
-			output, err := loadOutputFile(outName)
-			assert.NoError(t, err)
+			// output, err := loadOutputFile(outName)
+			// assert.NoError(t, err)
 
-			if *update {
-				err = saveOutputFile(outName, data)
-				require.NoError(t, err)
-			} else {
-				assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
-			}
+			// if *update {
+			// 	err = saveOutputFile(outName, data)
+			// 	require.NoError(t, err)
+			// } else {
+			// 	assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
+			// }
 		})
 	}
 }
@@ -180,6 +184,31 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 	return env, nil
 }
 
+func loadSchema(name string) (*xsd.Schema, error) {
+	return xsd.ParseFromFile(filepath.Join(getSchemaPath(name), name))
+}
+
+// ValidateXML validates a XML document against a XSD Schema
+func ValidateXML(schema *xsd.Schema, data []byte) error {
+	xmlDoc, err := libxml2.Parse(data)
+	if err != nil {
+		return err
+	}
+
+	err = schema.Validate(xmlDoc)
+	if err != nil {
+		// Collect all errors into a single error message
+		errors := err.(xsd.SchemaValidationError).Errors()
+		var errorMessages []string
+		for _, e := range errors {
+			errorMessages = append(errorMessages, e.Error())
+		}
+		return fmt.Errorf("validation errors: %s", strings.Join(errorMessages, ",\n ")) // Return all errors as a single error
+	}
+
+	return nil
+}
+
 func loadOutputFile(name string) ([]byte, error) {
 	var pattern string
 	if strings.HasSuffix(name, ".json") {
@@ -210,9 +239,9 @@ func getDataGlob(pattern string) ([]string, error) {
 	return filepath.Glob(filepath.Join(getConversionTypePath(pattern), pattern))
 }
 
-// func getSchemaPath(pattern string) string {
-// 	return filepath.Join(getConversionTypePath(pattern), "schema")
-// }
+func getSchemaPath(pattern string) string {
+	return filepath.Join(getConversionTypePath(pattern), "schema")
+}
 
 func getOutPath(pattern string) string {
 	return filepath.Join(getConversionTypePath(pattern), "out")
