@@ -34,7 +34,6 @@
       <ram:SpecifiedLineTradeSettlement>
         <ram:ApplicableTradeTax>
           <ram:TypeCode>VAT</ram:TypeCode>
-          <ram:CategoryCode>S</ram:CategoryCode>
           <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
@@ -82,7 +81,7 @@
         </ram:URIUniversalCommunication>
       </ram:BuyerTradeParty>
       <ram:ContractReferencedDocument>
-        <ram:ID>2013-05</ram:ID>
+        <ram:IssuerAssignedID>2013-05</ram:IssuerAssignedID>
       </ram:ContractReferencedDocument>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery>
@@ -91,8 +90,8 @@
           <ram:PostcodeCode>523427</ram:PostcodeCode>
           <ram:LineOne>Deliverystreet 2</ram:LineOne>
           <ram:CityName>DeliveryCity</ram:CityName>
-          <ram:CountrySubDivisionName>RegionD</ram:CountrySubDivisionName>
           <ram:CountryID>NO</ram:CountryID>
+          <ram:CountrySubDivisionName>RegionD</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
       </ram:ShipToTradeParty>
       <ram:ActualDeliverySupplyChainEvent>
@@ -100,30 +99,34 @@
           <udt:DateTimeString>20240210</udt:DateTimeString>
         </ram:OccurrenceDateTime>
       </ram:ActualDeliverySupplyChainEvent>
-      <ram:ReceivingAdviceReferencedDocument>
-        <ram:ID>3544</ram:ID>
-      </ram:ReceivingAdviceReferencedDocument>
       <ram:DespatchAdviceReferencedDocument>
-        <ram:ID>5433</ram:ID>
+        <ram:IssuerAssignedID>5433</ram:IssuerAssignedID>
       </ram:DespatchAdviceReferencedDocument>
+      <ram:ReceivingAdviceReferencedDocument>
+        <ram:IssuerAssignedID>3544</ram:IssuerAssignedID>
+      </ram:ReceivingAdviceReferencedDocument>
     </ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
+      <ram:CreditorReferenceID>987654321</ram:CreditorReferenceID>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+      <ram:PayeeTradeParty>
+        <ram:Name>Ebeneser Scrooge AS</ram:Name>
+      </ram:PayeeTradeParty>
       <ram:SpecifiedTradeSettlementPaymentMeans>
         <ram:TypeCode>30</ram:TypeCode>
-        <ram:PayeePartyCreditorFinancialAccount>
-          <ram:IBANID>NO9386011117947</ram:IBANID>
-        </ram:PayeePartyCreditorFinancialAccount>
-        <ram:PayeePartyCreditorFinancialInstitution>
-          <ram:BICID>DNBANOKK</ram:BICID>
-        </ram:PayeePartyCreditorFinancialInstitution>
+        <ram:ApplicableTradeSettlementFinancialCard>
+          <ram:ID>1234</ram:ID>
+          <ram:CardholderName>John Doe</ram:CardholderName>
+        </ram:ApplicableTradeSettlementFinancialCard>
         <ram:PayerPartyDebtorFinancialAccount>
           <ram:IBANID>DE89370400440532013000</ram:IBANID>
         </ram:PayerPartyDebtorFinancialAccount>
-        <ram:ApplicableTradeSettlementFinancialCard>
-          <ram:ID>1234</ram:ID>
-          <ram:CardHolderName>John Doe</ram:CardHolderName>
-        </ram:ApplicableTradeSettlementFinancialCard>
+        <ram:PayeePartyCreditorFinancialAccount>
+          <ram:IBANID>NO9386011117947</ram:IBANID>
+        </ram:PayeePartyCreditorFinancialAccount>
+        <ram:PayeeSpecifiedCreditorFinancialInstitution>
+          <ram:BICID>DNBANOKK</ram:BICID>
+        </ram:PayeeSpecifiedCreditorFinancialInstitution>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>342.00</ram:CalculatedAmount>
@@ -132,12 +135,32 @@
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
+      <ram:SpecifiedTradeAllowanceCharge>
+        <ram:ChargeIndicator>
+          <udt:Indicator>true</udt:Indicator>
+        </ram:ChargeIndicator>
+        <ram:ActualAmount>11.00</ram:ActualAmount>
+        <ram:Reason>Freight</ram:Reason>
+        <ram:CategoryTradeTax>
+          <ram:TypeCode>VAT</ram:TypeCode>
+          <ram:RateApplicablePercent>25</ram:RateApplicablePercent>
+        </ram:CategoryTradeTax>
+      </ram:SpecifiedTradeAllowanceCharge>
+      <ram:SpecifiedTradeAllowanceCharge>
+        <ram:ChargeIndicator>
+          <udt:Indicator>false</udt:Indicator>
+        </ram:ChargeIndicator>
+        <ram:ActualAmount>10.00</ram:ActualAmount>
+        <ram:ReasonCode>88</ram:ReasonCode>
+        <ram:Reason>Promotion discount</ram:Reason>
+        <ram:CategoryTradeTax>
+          <ram:TypeCode>VAT</ram:TypeCode>
+          <ram:RateApplicablePercent>25</ram:RateApplicablePercent>
+        </ram:CategoryTradeTax>
+      </ram:SpecifiedTradeAllowanceCharge>
       <ram:SpecifiedTradePaymentTerms>
         <ram:DirectDebitMandateID>1234567890</ram:DirectDebitMandateID>
       </ram:SpecifiedTradePaymentTerms>
-      <ram:PayeeTradeParty>
-        <ram:Name>Ebeneser Scrooge AS</ram:Name>
-      </ram:PayeeTradeParty>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>1800.00</ram:TaxBasisTotalAmount>
@@ -145,26 +168,6 @@
         <ram:GrandTotalAmount>2142.00</ram:GrandTotalAmount>
         <ram:DuePayableAmount>2142.00</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-      <ram:SpecifiedTradeAllowanceCharge>
-        <ram:ChargeIndicator>true</ram:ChargeIndicator>
-        <ram:Reason>Freight</ram:Reason>
-        <ram:ActualAmount>11.00</ram:ActualAmount>
-        <ram:ApplicableTradeTax>
-          <ram:CategoryCode>VAT</ram:CategoryCode>
-          <ram:RateApplicablePercent>25</ram:RateApplicablePercent>
-        </ram:ApplicableTradeTax>
-      </ram:SpecifiedTradeAllowanceCharge>
-      <ram:SpecifiedTradeAllowanceCharge>
-        <ram:ChargeIndicator>false</ram:ChargeIndicator>
-        <ram:Reason>Promotion discount</ram:Reason>
-        <ram:ReasonCode>88</ram:ReasonCode>
-        <ram:ActualAmount>10.00</ram:ActualAmount>
-        <ram:ApplicableTradeTax>
-          <ram:CategoryCode>VAT</ram:CategoryCode>
-          <ram:RateApplicablePercent>25</ram:RateApplicablePercent>
-        </ram:ApplicableTradeTax>
-      </ram:SpecifiedTradeAllowanceCharge>
-      <ram:CreditorReferenceID>987654321</ram:CreditorReferenceID>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
 </rsm:CrossIndustryInvoice>

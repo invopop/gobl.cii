@@ -34,7 +34,6 @@
       <ram:SpecifiedLineTradeSettlement>
         <ram:ApplicableTradeTax>
           <ram:TypeCode>VAT</ram:TypeCode>
-          <ram:CategoryCode>S</ram:CategoryCode>
           <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
@@ -56,8 +55,8 @@
           <ram:PostcodeCode>303</ram:PostcodeCode>
           <ram:LineOne>Main street 34</ram:LineOne>
           <ram:CityName>Big city</ram:CityName>
-          <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
           <ram:CountryID>NO</ram:CountryID>
+          <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
           <ram:URIID schemeID="EM">antonio@salescompany.no</ram:URIID>
@@ -126,4 +125,5 @@
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>hainTradeTransaction>
 </rsm:CrossIndustryInvoice>

@@ -16,14 +16,12 @@ func NewDelivery(inv *bill.Invoice) *Delivery {
 		}
 	}
 	if inv.Ordering != nil && inv.Ordering.Despatch != nil {
-		d.Despatch = &Project{
-			ID: (inv.Ordering.Despatch)[0].Code.String(),
-		}
+		despatch := inv.Ordering.Despatch[0].Code.String()
+		d.Despatch = &despatch
 	}
 	if inv.Ordering != nil && inv.Ordering.Receiving != nil {
-		d.Receiving = &Project{
-			ID: (inv.Ordering.Receiving)[0].Code.String(),
-		}
+		receiving := inv.Ordering.Receiving[0].Code.String()
+		d.Receiving = &receiving
 	}
 	return d
 }

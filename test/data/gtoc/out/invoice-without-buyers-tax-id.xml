@@ -34,22 +34,25 @@
       <ram:SpecifiedLineTradeSettlement>
         <ram:ApplicableTradeTax>
           <ram:TypeCode>VAT</ram:TypeCode>
-          <ram:CategoryCode>S</ram:CategoryCode>
           <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
+        <ram:SpecifiedTradeAllowanceCharge>
+          <ram:ChargeIndicator>
+            <udt:Indicator>true</udt:Indicator>
+          </ram:ChargeIndicator>
+          <ram:ActualAmount>12.00</ram:ActualAmount>
+          <ram:Reason>Testing</ram:Reason>
+        </ram:SpecifiedTradeAllowanceCharge>
+        <ram:SpecifiedTradeAllowanceCharge>
+          <ram:ChargeIndicator>
+            <udt:Indicator>false</udt:Indicator>
+          </ram:ChargeIndicator>
+          <ram:ActualAmount>12.00</ram:ActualAmount>
+          <ram:Reason>Damage</ram:Reason>
+        </ram:SpecifiedTradeAllowanceCharge>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
           <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
         </ram:SpecifiedTradeSettlementLineMonetarySummation>
-        <ram:SpecifiedLineTradeAllowanceCharge>
-          <ram:ChargeIndicator>true</ram:ChargeIndicator>
-          <ram:Reason>Testing</ram:Reason>
-          <ram:ActualAmount>12.00</ram:ActualAmount>
-        </ram:SpecifiedLineTradeAllowanceCharge>
-        <ram:SpecifiedLineTradeAllowanceCharge>
-          <ram:ChargeIndicator>false</ram:ChargeIndicator>
-          <ram:Reason>Damage</ram:Reason>
-          <ram:ActualAmount>12.00</ram:ActualAmount>
-        </ram:SpecifiedLineTradeAllowanceCharge>
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>

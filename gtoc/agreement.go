@@ -67,8 +67,8 @@ func NewPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
 		LineOne:   address.Street,
 		LineTwo:   address.Number,
 		City:      address.Locality,
-		Region:    address.Region,
 		CountryID: string(address.Country),
+		Region:    address.Region,
 	}
 
 	return postalTradeAddress

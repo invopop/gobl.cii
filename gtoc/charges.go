@@ -35,7 +35,7 @@ func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
 
 func makeCharge(charge *bill.Charge) *AllowanceCharge {
 	c := &AllowanceCharge{
-		ChargeIndicator: true,
+		ChargeIndicator: Indicator{Value: true},
 		Amount:          charge.Amount.String(),
 	}
 	if charge.Reason != "" {
@@ -49,14 +49,14 @@ func makeCharge(charge *bill.Charge) *AllowanceCharge {
 		c.Percent = p
 	}
 	if charge.Taxes != nil {
-		c.Tax = makeTaxCategory(charge.Taxes)
+		c.Tax = makeTaxCategory(charge.Taxes[0])
 	}
 	return c
 }
 
 func makeDiscount(discount *bill.Discount) *AllowanceCharge {
 	d := &AllowanceCharge{
-		ChargeIndicator: false,
+		ChargeIndicator: Indicator{Value: false},
 		Amount:          discount.Amount.String(),
 	}
 	if discount.Reason != "" {
@@ -70,14 +70,14 @@ func makeDiscount(discount *bill.Discount) *AllowanceCharge {
 		d.Percent = p
 	}
 	if discount.Taxes != nil {
-		d.Tax = makeTaxCategory(discount.Taxes)
+		d.Tax = makeTaxCategory(discount.Taxes[0])
 	}
 	return d
 }
 
 func makeLineCharge(charge *bill.LineCharge) *AllowanceCharge {
 	c := &AllowanceCharge{
-		ChargeIndicator: true,
+		ChargeIndicator: Indicator{Value: true},
 		Amount:          charge.Amount.String(),
 	}
 	if charge.Reason != "" {
@@ -95,7 +95,7 @@ func makeLineCharge(charge *bill.LineCharge) *AllowanceCharge {
 
 func makeLineDiscount(discount *bill.LineDiscount) *AllowanceCharge {
 	d := &AllowanceCharge{
-		ChargeIndicator: false,
+		ChargeIndicator: Indicator{Value: false},
 		Amount:          discount.Amount.String(),
 	}
 	if discount.Reason != "" {
@@ -111,13 +111,13 @@ func makeLineDiscount(discount *bill.LineDiscount) *AllowanceCharge {
 	return d
 }
 
-func makeTaxCategory(taxes tax.Set) *ApplicableTradeTax {
-	category := &ApplicableTradeTax{}
-	if taxes[0].Category != "" {
-		category.TaxCode = taxes[0].Category.String()
+func makeTaxCategory(tax *tax.Combo) *Tax {
+	category := &Tax{}
+	if tax.Category != "" {
+		category.TypeCode = tax.Category.String()
 	}
-	if taxes[0].Percent != nil {
-		category.TaxRatePercent = taxes[0].Percent.StringWithoutSymbol()
+	if tax.Percent != nil {
+		category.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
 	}
 	return category
 }

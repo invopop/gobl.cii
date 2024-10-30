@@ -22,7 +22,7 @@ func TestNewDelivery(t *testing.T) {
 		assert.Equal(t, "NO", doc.Transaction.Delivery.Receiver.PostalTradeAddress.CountryID)
 
 		assert.NotNil(t, doc.Transaction.Delivery)
-		assert.Equal(t, "3544", doc.Transaction.Delivery.Receiving.ID)
-		assert.Equal(t, "5433", doc.Transaction.Delivery.Despatch.ID)
+		assert.Equal(t, "3544", *doc.Transaction.Delivery.Receiving)
+		assert.Equal(t, "5433", *doc.Transaction.Delivery.Despatch)
 	})
 }
