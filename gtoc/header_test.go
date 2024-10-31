@@ -31,10 +31,9 @@ func TestNewHeader(t *testing.T) {
 	})
 
 	t.Run("should return self billed type code for self billed invoice", func(t *testing.T) {
-		env, err := LoadTestInvoice("self-billed-invoice.json")
+		doc, err := NewDocumentFrom("self-billed-invoice.json")
 		require.NoError(t, err)
 
-		header := NewHeader(env)
-		assert.Equal(t, "389", header.TypeCode)
+		assert.Equal(t, "389", doc.ExchangedDocument.TypeCode)
 	})
 }

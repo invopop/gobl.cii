@@ -6,6 +6,18 @@ import (
 	"github.com/invopop/gobl/bill"
 )
 
+// NewLines generates lines for XInvoice
+func (c *Converter) NewLines(lines []*bill.Line) error {
+	var Lines []*Line
+
+	for _, line := range lines {
+		Lines = append(Lines, newLine(line))
+	}
+
+	c.doc.Transaction.Lines = Lines
+	return nil
+}
+
 func newLine(line *bill.Line) *Line {
 	if line.Item == nil {
 		return nil
@@ -58,15 +70,4 @@ func newTradeSettlement(line *bill.Line) *TradeSettlement {
 	}
 
 	return settlement
-}
-
-// NewLines generates lines for XInvoice
-func NewLines(lines []*bill.Line) []*Line {
-	var Lines []*Line
-
-	for _, line := range lines {
-		Lines = append(Lines, newLine(line))
-	}
-
-	return Lines
 }

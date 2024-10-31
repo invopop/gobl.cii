@@ -20,10 +20,11 @@ var paymentMeans = map[cbc.Key]string{
 }
 
 // NewSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
-func NewSettlement(inv *bill.Invoice) *Settlement {
-	settlement := &Settlement{
+func (c *Converter) NewSettlement(inv *bill.Invoice) error {
+	c.doc.Transaction.Settlement = &Settlement{
 		Currency: string(inv.Currency),
 	}
+	settlement := c.doc.Transaction.Settlement
 	if inv.Payment != nil && inv.Payment.Terms != nil {
 		settlement.PaymentTerms = &Terms{
 			Description: inv.Payment.Terms.Detail,
@@ -98,7 +99,7 @@ func NewSettlement(inv *bill.Invoice) *Settlement {
 		settlement.AllowanceCharges = newAllowanceCharges(inv)
 	}
 
-	return settlement
+	return nil
 }
 
 func newSummary(totals *bill.Totals, currency string) *Summary {

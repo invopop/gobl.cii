@@ -13,8 +13,9 @@ const (
 )
 
 // NewAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
-func NewAgreement(inv *bill.Invoice) (*Agreement, error) {
-	agreement := new(Agreement)
+func (c *Converter) NewAgreement(inv *bill.Invoice) error {
+	c.doc.Transaction.Agreement = new(Agreement)
+	agreement := c.doc.Transaction.Agreement
 	if inv.Ordering != nil && inv.Ordering.Code != "" {
 		agreement.BuyerReference = inv.Ordering.Code.String()
 	} else {
@@ -52,7 +53,7 @@ func NewAgreement(inv *bill.Invoice) (*Agreement, error) {
 			}
 		}
 	}
-	return agreement, nil
+	return nil
 }
 
 // NewPostalTradeAddress creates the PostalTradeAddress part of a EN 16931 compliant invoice

@@ -13,7 +13,7 @@ import (
 const IssueDateFormat = "102"
 
 // NewHeader creates the ExchangedDocument part of a EN 16931 compliant invoice
-func NewHeader(inv *bill.Invoice) *Header {
+func (c *Converter) NewHeader(inv *bill.Invoice) error {
 	header := &Header{
 		ID:       invoiceNumber(inv.Series, inv.Code),
 		TypeCode: invoiceTypeCode(inv),
@@ -31,7 +31,8 @@ func NewHeader(inv *bill.Invoice) *Header {
 		}
 		header.IncludedNote = notes
 	}
-	return header
+	c.doc.ExchangedDocument = header
+	return nil
 }
 
 func formatIssueDate(date cal.Date) string {

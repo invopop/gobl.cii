@@ -5,20 +5,29 @@ import (
 )
 
 // NewTransaction creates the transaction part of a EN 16931 compliant invoice
-func NewTransaction(inv *bill.Invoice) (*Transaction, error) {
-	agreement, err := NewAgreement(inv)
+func (c *Converter) NewTransaction(inv *bill.Invoice) error {
+
+	c.doc.Transaction = &Transaction{}
+
+	err := c.NewLines(inv.Lines)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	delivery := NewDelivery(inv)
-
-	transaction := &Transaction{
-		Lines:      NewLines(inv.Lines),
-		Agreement:  agreement,
-		Delivery:   delivery,
-		Settlement: NewSettlement(inv),
+	err = c.NewAgreement(inv)
+	if err != nil {
+		return err
 	}
 
-	return transaction, nil
+	err = c.NewDelivery(inv)
+	if err != nil {
+		return err
+	}
+
+	err = c.NewSettlement(inv)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

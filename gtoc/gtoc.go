@@ -40,10 +40,6 @@ func (c *Converter) ConvertToCII(env *gobl.Envelope) (*Document, error) {
 }
 
 func (c *Converter) newDocument(inv *bill.Invoice) error {
-	transaction, err := NewTransaction(inv)
-	if err != nil {
-		return err
-	}
 
 	c.doc = &Document{
 		RSMNamespace:           RSM,
@@ -52,8 +48,16 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 		UDTNamespace:           UDT,
 		BusinessProcessContext: BusinessProcess,
 		GuidelineContext:       GuidelineContext,
-		ExchangedDocument:      NewHeader(inv),
-		Transaction:            transaction,
+	}
+
+	err := c.NewHeader(inv)
+	if err != nil {
+		return err
+	}
+
+	err = c.NewTransaction(inv)
+	if err != nil {
+		return err
 	}
 
 	return nil

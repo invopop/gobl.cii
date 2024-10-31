@@ -3,8 +3,9 @@ package gtoc
 import "github.com/invopop/gobl/bill"
 
 // NewDelivery creates the ApplicableHeaderTradeDelivery part of a EN 16931 compliant invoice
-func NewDelivery(inv *bill.Invoice) *Delivery {
-	d := &Delivery{}
+func (c *Converter) NewDelivery(inv *bill.Invoice) error {
+	c.doc.Transaction.Delivery = &Delivery{}
+	d := c.doc.Transaction.Delivery
 	if inv.Delivery != nil {
 		if inv.Delivery.Date != nil {
 			d.Event = &Date{
@@ -23,5 +24,5 @@ func NewDelivery(inv *bill.Invoice) *Delivery {
 		receiving := inv.Ordering.Receiving[0].Code.String()
 		d.Receiving = &receiving
 	}
-	return d
+	return nil
 }
