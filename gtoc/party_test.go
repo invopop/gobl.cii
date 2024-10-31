@@ -34,5 +34,15 @@ func TestNewSeller(t *testing.T) {
 		assert.Equal(t, "antonio@salescompany.no", doc.Transaction.Agreement.Seller.URIUniversalCommunication.URIID)
 		assert.Equal(t, SchemeIDEmail, doc.Transaction.Agreement.Seller.URIUniversalCommunication.SchemeID)
 		assert.Equal(t, "NO123456789MVA", doc.Transaction.Agreement.Seller.SpecifiedTaxRegistration.ID)
+
+		assert.Equal(t, "Sample Consumer", doc.Transaction.Agreement.Buyer.Name)
+		assert.Equal(t, "80939", doc.Transaction.Agreement.Buyer.PostalTradeAddress.Postcode)
+		assert.Equal(t, "Werner-Heisenberg-Allee", doc.Transaction.Agreement.Buyer.PostalTradeAddress.LineOne)
+		assert.Equal(t, "25", doc.Transaction.Agreement.Buyer.PostalTradeAddress.LineTwo)
+		assert.Equal(t, "München", doc.Transaction.Agreement.Buyer.PostalTradeAddress.City)
+		assert.Equal(t, "DE", doc.Transaction.Agreement.Buyer.PostalTradeAddress.CountryID)
+		assert.Equal(t, "email@sample.com", doc.Transaction.Agreement.Buyer.URIUniversalCommunication.URIID)
+		assert.Equal(t, SchemeIDEmail, doc.Transaction.Agreement.Buyer.URIUniversalCommunication.SchemeID)
+		assert.Equal(t, "DE282741168", doc.Transaction.Agreement.Buyer.SpecifiedTaxRegistration.ID)
 	})
 }

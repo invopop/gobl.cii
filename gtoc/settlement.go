@@ -159,8 +159,8 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	return tax
 }
 
-func newPayee(party *org.Party) *Buyer {
-	payee := &Buyer{
+func newPayee(party *org.Party) *Party {
+	payee := &Party{
 		Name:                      party.Name,
 		Contact:                   newContact(party),
 		PostalTradeAddress:        NewPostalTradeAddress(party.Addresses),

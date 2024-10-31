@@ -81,7 +81,6 @@
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
         <ram:Name>Sample Consumer</ram:Name>
-        <ram:DefinedTradeContact></ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>80939</ram:PostcodeCode>
           <ram:LineOne>Werner-Heisenberg-Allee</ram:LineOne>

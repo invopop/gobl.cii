@@ -22,15 +22,15 @@ func (c *Converter) NewAgreement(inv *bill.Invoice) error {
 		agreement.BuyerReference = defaultBuyerReference
 	}
 	if supplier := inv.Supplier; supplier != nil {
-		agreement.Seller = NewSeller(supplier)
+		agreement.Seller = NewParty(supplier)
 	}
 	if customer := inv.Customer; customer != nil {
-		agreement.Buyer = NewBuyer(customer)
+		agreement.Buyer = NewParty(customer)
 	}
 	if inv.Ordering != nil {
 		if inv.Ordering.Seller != nil {
 			agreement.TaxRepresentative = agreement.Seller
-			agreement.Seller = NewSeller(inv.Ordering.Seller)
+			agreement.Seller = NewParty(inv.Ordering.Seller)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
 			contract := inv.Ordering.Contracts[0].Code.String()

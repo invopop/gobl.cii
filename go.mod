@@ -15,8 +15,6 @@ require (
 require (
 	cloud.google.com/go v0.115.1 // indirect
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
-	github.com/antchfx/xmlquery v1.4.2 // indirect
-	github.com/antchfx/xpath v1.3.2 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect

@@ -45,7 +45,6 @@
       <ram:BuyerReference>N/A</ram:BuyerReference>
       <ram:SellerTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
-        <ram:DefinedTradeContact></ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>69190</ram:PostcodeCode>
           <ram:LineOne>Dietmar-Hopp-Allee</ram:LineOne>
@@ -61,9 +60,7 @@
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
-        <ram:ID>DE282741168</ram:ID>
         <ram:Name>Sample Consumer</ram:Name>
-        <ram:DefinedTradeContact></ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>80939</ram:PostcodeCode>
           <ram:LineOne>Werner-Heisenberg-Allee</ram:LineOne>
@@ -74,6 +71,9 @@
         <ram:URIUniversalCommunication>
           <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
         </ram:URIUniversalCommunication>
+        <ram:SpecifiedTaxRegistration>
+          <ram:ID schemeID="VA">DE282741168</ram:ID>
+        </ram:SpecifiedTaxRegistration>
       </ram:BuyerTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>

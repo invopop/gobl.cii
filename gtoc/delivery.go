@@ -13,7 +13,7 @@ func (c *Converter) NewDelivery(inv *bill.Invoice) error {
 			}
 		}
 		if inv.Delivery.Receiver != nil {
-			d.Receiver = NewBuyer(inv.Delivery.Receiver)
+			d.Receiver = NewParty(inv.Delivery.Receiver)
 		}
 	}
 	if inv.Ordering != nil && inv.Ordering.Despatch != nil {

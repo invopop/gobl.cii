@@ -6,31 +6,31 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-// NewSeller creates the SellerTradeParty part of a EN 16931 compliant invoice
-func NewSeller(supplier *org.Party) *Seller {
-	if supplier == nil {
+// NewParty creates the SellerTradeParty part of a EN 16931 compliant invoice
+func NewParty(party *org.Party) *Party {
+	if party == nil {
 		return nil
 	}
-	seller := &Seller{
-		Name:                      supplier.Name,
-		Contact:                   newContact(supplier),
-		PostalTradeAddress:        NewPostalTradeAddress(supplier.Addresses),
-		URIUniversalCommunication: NewEmail(supplier.Emails),
+	p := &Party{
+		Name:                      party.Name,
+		Contact:                   newContact(party),
+		PostalTradeAddress:        NewPostalTradeAddress(party.Addresses),
+		URIUniversalCommunication: NewEmail(party.Emails),
 	}
 
-	if supplier.TaxID != nil {
+	if party.TaxID != nil {
 		// Assumes VAT ID being used instead of possible tax number
-		seller.SpecifiedTaxRegistration = &SpecifiedTaxRegistration{
-			ID:       supplier.TaxID.String(),
+		p.SpecifiedTaxRegistration = &SpecifiedTaxRegistration{
+			ID:       party.TaxID.String(),
 			SchemeID: "VA",
 		}
 	}
 
-	return seller
+	return p
 }
 
 func newContact(supplier *org.Party) *Contact {
-	if len(supplier.People) == 0 && len(supplier.Telephones) == 0 && len(supplier.Emails) == 0 {
+	if len(supplier.People) == 0 {
 		return nil
 	}
 

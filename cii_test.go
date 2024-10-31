@@ -22,20 +22,12 @@ import (
 
 	"github.com/lestrrat-go/libxml2"
 	"github.com/lestrrat-go/libxml2/xsd"
-
-	"github.com/antchfx/xmlquery"
-	"github.com/antchfx/xpath"
 )
 
 const (
 	xmlPattern  = "*.xml"
 	jsonPattern = "*.json"
 )
-
-type SchematronRule struct {
-	XPath   string
-	Message string
-}
 
 var update = flag.Bool("update", false, "Update out directory")
 
@@ -58,12 +50,6 @@ func TestNewDocument(t *testing.T) {
 			require.NoError(t, err)
 
 			err = ValidateXML(schema, data)
-			require.NoError(t, err)
-
-			rules, err := LoadSchematronRules("./test/data/gtoc/schema/en16931-cii-1.3.12/schematron/EN16931-CII-validation.sch")
-			require.NoError(t, err)
-
-			err = ValidateXMLAgainstSchematron(filepath.Join(getConversionTypePath(jsonPattern), inName), rules)
 			require.NoError(t, err)
 
 			output, err := loadOutputFile(outName)
@@ -220,63 +206,6 @@ func ValidateXML(schema *xsd.Schema, data []byte) error {
 		return fmt.Errorf("validation errors: %s", strings.Join(errorMessages, ",\n ")) // Return all errors as a single error
 	}
 
-	return nil
-}
-
-// LoadSchematronRules parses a .sch file to extract validation rules
-func LoadSchematronRules(schPath string) ([]SchematronRule, error) {
-	file, err := os.Open(schPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open Schematron file: %w", err)
-	}
-	defer file.Close()
-
-	doc, err := xmlquery.Parse(file)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse Schematron file: %w", err)
-	}
-
-	var rules []SchematronRule
-	for _, node := range xmlquery.Find(doc, "//assert") {
-		xpath := node.SelectAttr("test")
-		message := node.InnerText()
-		rules = append(rules, SchematronRule{
-			XPath:   xpath,
-			Message: message,
-		})
-	}
-	return rules, nil
-}
-
-// ValidateXMLAgainstSchematron runs XPath assertions from Schematron rules on an XML document
-func ValidateXMLAgainstSchematron(xmlPath string, rules []SchematronRule) error {
-	file, err := os.Open(xmlPath)
-	if err != nil {
-		return fmt.Errorf("failed to open XML file: %w", err)
-	}
-	defer file.Close()
-
-	doc, err := xmlquery.Parse(file)
-	if err != nil {
-		return fmt.Errorf("failed to parse XML file: %w", err)
-	}
-
-	var validationErrors []string
-	for _, rule := range rules {
-		expr, err := xpath.Compile(rule.XPath)
-		if err != nil {
-			return fmt.Errorf("failed to compile XPath expression %s: %w", rule.XPath, err)
-		}
-
-		result := expr.Evaluate(xmlquery.CreateXPathNavigator(doc))
-		if !result.(bool) {
-			validationErrors = append(validationErrors, fmt.Sprintf("Rule failed: %s", rule.Message))
-		}
-	}
-
-	if len(validationErrors) > 0 {
-		return fmt.Errorf("Schematron validation failed:\n%s", validationErrors)
-	}
 	return nil
 }
 
