@@ -17,7 +17,6 @@ func (c *Converter) NewHeader(inv *bill.Invoice) error {
 	h := &Header{
 		ID:       invoiceNumber(inv.Series, inv.Code),
 		TypeCode: inv.Tax.Ext[untdid.ExtKeyDocumentType].String(),
-		// TypeCode: invoiceTypeCode(inv),
 		IssueDate: &Date{
 			Date:   formatIssueDate(inv.IssueDate),
 			Format: IssueDateFormat,

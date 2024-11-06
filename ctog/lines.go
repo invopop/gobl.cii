@@ -43,7 +43,7 @@ func (c *Converter) prepareLines(tsct *SupplyChainTradeTransaction) error {
 		}
 
 		if it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode != "" {
-			l.Item.Unit = UnitFromUNECE(cbc.Code(it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode))
+			l.Item.Unit = unitFromUNECE(cbc.Code(it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode))
 		}
 
 		if it.SpecifiedTradeProduct.SellerAssignedID != nil {
@@ -103,7 +103,7 @@ func (c *Converter) prepareLines(tsct *SupplyChainTradeTransaction) error {
 		}
 
 		if it.SpecifiedLineTradeSettlement.SpecifiedTradeAllowanceCharge != nil {
-			l, err = parseLineCharges(it.SpecifiedLineTradeSettlement.SpecifiedTradeAllowanceCharge, l)
+			l, err = getLineCharges(it.SpecifiedLineTradeSettlement.SpecifiedTradeAllowanceCharge, l)
 			if err != nil {
 				return err
 			}
@@ -150,56 +150,22 @@ func (c *Converter) prepareLines(tsct *SupplyChainTradeTransaction) error {
 	return nil
 }
 
-// parseLineCharges parses inline charges and discounts from the CII document
-func parseLineCharges(alwcs []*SpecifiedTradeAllowanceCharge, l *bill.Line) (*bill.Line, error) {
+// getLineCharges parses inline charges and discounts from the CII document
+func getLineCharges(alwcs []*SpecifiedTradeAllowanceCharge, l *bill.Line) (*bill.Line, error) {
 	for _, ac := range alwcs {
-		a, err := num.AmountFromString(ac.ActualAmount)
-		if err != nil {
-			return nil, err
-		}
 		if ac.ChargeIndicator.Indicator {
-			c := &bill.LineCharge{
-				Amount: a,
-			}
-			if ac.ReasonCode != nil {
-				c.Code = cbc.Code(*ac.ReasonCode)
-			}
-			if ac.Reason != nil {
-				c.Reason = *ac.Reason
-			}
-			if ac.CalculationPercent != nil {
-				if !strings.HasSuffix(*ac.CalculationPercent, "%") {
-					*ac.CalculationPercent += "%"
-				}
-				p, err := num.PercentageFromString(*ac.CalculationPercent)
-				if err != nil {
-					return nil, err
-				}
-				c.Percent = &p
+			c, err := getLineCharge(ac)
+			if err != nil {
+				return nil, err
 			}
 			if l.Charges == nil {
 				l.Charges = make([]*bill.LineCharge, 0)
 			}
 			l.Charges = append(l.Charges, c)
 		} else {
-			d := &bill.LineDiscount{
-				Amount: a,
-			}
-			if ac.ReasonCode != nil {
-				d.Code = cbc.Code(*ac.ReasonCode)
-			}
-			if ac.Reason != nil {
-				d.Reason = *ac.Reason
-			}
-			if ac.CalculationPercent != nil {
-				if !strings.HasSuffix(*ac.CalculationPercent, "%") {
-					*ac.CalculationPercent += "%"
-				}
-				p, err := num.PercentageFromString(*ac.CalculationPercent)
-				if err != nil {
-					return nil, err
-				}
-				d.Percent = &p
+			d, err := getLineDiscount(ac)
+			if err != nil {
+				return nil, err
 			}
 			if l.Discounts == nil {
 				l.Discounts = make([]*bill.LineDiscount, 0)

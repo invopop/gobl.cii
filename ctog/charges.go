@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
@@ -53,7 +54,9 @@ func newCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.Charge, error) {
 		c.Amount, _ = num.AmountFromString(ac.ActualAmount)
 	}
 	if ac.ReasonCode != nil {
-		c.Code = cbc.Code(*ac.ReasonCode)
+		c.Ext = tax.Extensions{
+			untdid.ExtKeyCharge: tax.ExtValue(*ac.ReasonCode),
+		}
 	}
 	if ac.BasisAmount != nil {
 		b, err := num.AmountFromString(*ac.BasisAmount)
@@ -76,7 +79,9 @@ func newCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.Charge, error) {
 		c.Taxes = tax.Set{
 			{
 				Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
-				Rate:     FindTaxKey(ac.CategoryTradeTax.CategoryCode),
+				Ext: tax.Extensions{
+					untdid.ExtKeyTaxCategory: tax.ExtValue(ac.CategoryTradeTax.CategoryCode),
+				},
 			},
 		}
 	}
@@ -103,7 +108,9 @@ func newDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.Discount, error) {
 		d.Amount, _ = num.AmountFromString(ac.ActualAmount)
 	}
 	if ac.ReasonCode != nil {
-		d.Code = cbc.Code(*ac.ReasonCode)
+		d.Ext = tax.Extensions{
+			untdid.ExtKeyAllowance: tax.ExtValue(*ac.ReasonCode),
+		}
 	}
 	if ac.BasisAmount != nil {
 		b, err := num.AmountFromString(*ac.BasisAmount)
@@ -126,7 +133,9 @@ func newDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.Discount, error) {
 		d.Taxes = tax.Set{
 			{
 				Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
-				Rate:     FindTaxKey(ac.CategoryTradeTax.CategoryCode),
+				Ext: tax.Extensions{
+					untdid.ExtKeyTaxCategory: tax.ExtValue(ac.CategoryTradeTax.CategoryCode),
+				},
 			},
 		}
 	}
@@ -139,6 +148,64 @@ func newDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.Discount, error) {
 			return nil, err
 		}
 		d.Taxes[0].Percent = &p
+	}
+	return d, nil
+}
+
+func getLineCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.LineCharge, error) {
+	a, err := num.AmountFromString(ac.ActualAmount)
+	if err != nil {
+		return nil, err
+	}
+	c := &bill.LineCharge{
+		Amount: a,
+	}
+	if ac.ReasonCode != nil {
+		c.Ext = tax.Extensions{
+			untdid.ExtKeyCharge: tax.ExtValue(*ac.ReasonCode),
+		}
+	}
+	if ac.Reason != nil {
+		c.Reason = *ac.Reason
+	}
+	if ac.CalculationPercent != nil {
+		if !strings.HasSuffix(*ac.CalculationPercent, "%") {
+			*ac.CalculationPercent += "%"
+		}
+		p, err := num.PercentageFromString(*ac.CalculationPercent)
+		if err != nil {
+			return nil, err
+		}
+		c.Percent = &p
+	}
+	return c, nil
+}
+
+func getLineDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.LineDiscount, error) {
+	a, err := num.AmountFromString(ac.ActualAmount)
+	if err != nil {
+		return nil, err
+	}
+	d := &bill.LineDiscount{
+		Amount: a,
+	}
+	if ac.ReasonCode != nil {
+		d.Ext = tax.Extensions{
+			untdid.ExtKeyAllowance: tax.ExtValue(*ac.ReasonCode),
+		}
+	}
+	if ac.Reason != nil {
+		d.Reason = *ac.Reason
+	}
+	if ac.CalculationPercent != nil {
+		if !strings.HasSuffix(*ac.CalculationPercent, "%") {
+			*ac.CalculationPercent += "%"
+		}
+		p, err := num.PercentageFromString(*ac.CalculationPercent)
+		if err != nil {
+			return nil, err
+		}
+		d.Percent = &p
 	}
 	return d, nil
 }

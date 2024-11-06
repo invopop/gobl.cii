@@ -13,49 +13,28 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-const (
-	keyPaymentMeansSEPACreditTransfer cbc.Key = "sepa-credit-transfer"
-	keyPaymentMeansSEPADirectDebit    cbc.Key = "sepa-direct-debit"
-)
+// Currently supported payment means and invoice type keys
+var (
+	paymentMeansMap = map[string]cbc.Key{
+		"10": pay.MeansKeyCash,
+		"20": pay.MeansKeyCheque,
+		"30": pay.MeansKeyCreditTransfer,
+		"42": pay.MeansKeyDebitTransfer,
+		"48": pay.MeansKeyCard,
+		"49": pay.MeansKeyDirectDebit,
+		"58": pay.MeansKeyCreditTransfer.With(pay.MeansKeySEPA),
+		"59": pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA),
+	}
 
-const (
-	paymentMeansCash               = "10"
-	paymentMeansCheque             = "20"
-	paymentMeansCreditTransfer     = "30"
-	paymentMeansBankAccount        = "42"
-	paymentMeansCard               = "48"
-	paymentMeansDirectDebit        = "49"
-	paymentMeansStandingOrder      = "57"
-	paymentMeansSEPACreditTransfer = "58"
-	paymentMeansSEPADirectDebit    = "59"
-	paymentMeansReport             = "97"
-)
-
-const (
-	standardSalesTax  = "S"
-	zeroRatedGoodsTax = "Z"
-	taxExempt         = "E"
-)
-
-const (
-	keyInvoiceTypeSelfBilled               cbc.Key = "self-billed"
-	keyInvoiceTypePartial                  cbc.Key = "partial"
-	keyInvoiceTypePartialConstruction      cbc.Key = "partial-construction"
-	keyInvoiceTypePartialFinalConstruction cbc.Key = "partial-final-construction"
-	keyInvoiceTypeFinalConstruction        cbc.Key = "final-construction"
-)
-
-const (
-	invoiceTypeProforma                 = "325"
-	invoiceTypeStandard                 = "380"
-	invoiceTypeCreditNote               = "381"
-	invoiceTypeDebitNote                = "383"
-	invoiceTypeCorrective               = "384"
-	invoiceTypeSelfBilled               = "389"
-	invoiceTypePartial                  = "326"
-	invoiceTypePartialConstruction      = "875"
-	invoiceTypePartialFinalConstruction = "876"
-	invoiceTypeFinalConstruction        = "877"
+	invoiceTypeMap = map[string]cbc.Key{
+		"325": bill.InvoiceTypeProforma,
+		"380": bill.InvoiceTypeStandard,
+		"381": bill.InvoiceTypeCreditNote,
+		"383": bill.InvoiceTypeDebitNote,
+		"384": bill.InvoiceTypeCorrective,
+		"389": bill.InvoiceTypeStandard.With(tax.TagSelfBilled),
+		"326": bill.InvoiceTypeStandard.With(tax.TagPartial),
+	}
 )
 
 // ParseDate converts a date string to a cal.Date
@@ -68,49 +47,17 @@ func ParseDate(date string) (cal.Date, error) {
 	return cal.MakeDate(t.Year(), t.Month(), t.Day()), nil
 }
 
-// FindTaxKey maps a CII tax type to a GOBL equivalent
-func FindTaxKey(taxType string) cbc.Key {
-	switch taxType {
-	case standardSalesTax:
-		return tax.RateStandard
-	case zeroRatedGoodsTax:
-		return tax.RateZero
-	case taxExempt:
-		return tax.RateExempt
-	}
-	return tax.RateStandard
-}
-
 // TypeCodeParse maps a CII invoice type to a GOBL equivalent
 // Source https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
 func TypeCodeParse(typeCode string) cbc.Key {
-	switch typeCode {
-	case invoiceTypeStandard:
-		return bill.InvoiceTypeStandard
-	case invoiceTypeCreditNote:
-		return bill.InvoiceTypeCreditNote
-	case invoiceTypeCorrective:
-		return bill.InvoiceTypeCorrective
-	case invoiceTypeProforma:
-		return bill.InvoiceTypeProforma
-	case invoiceTypeDebitNote:
-		return bill.InvoiceTypeDebitNote
-	case invoiceTypeSelfBilled:
-		return keyInvoiceTypeSelfBilled
-	case invoiceTypePartial:
-		return keyInvoiceTypePartial
-	case invoiceTypePartialConstruction:
-		return keyInvoiceTypePartialConstruction
-	case invoiceTypePartialFinalConstruction:
-		return keyInvoiceTypePartialFinalConstruction
-	case invoiceTypeFinalConstruction:
-		return keyInvoiceTypeFinalConstruction
+	if val, ok := invoiceTypeMap[typeCode]; ok {
+		return val
 	}
 	return bill.InvoiceTypeOther
 }
 
-// UnitFromUNECE maps a UN/ECE code to a GOBL unit
-func UnitFromUNECE(unece cbc.Code) org.Unit {
+// unitFromUNECE maps a UN/ECE code to a GOBL unit
+func unitFromUNECE(unece cbc.Code) org.Unit {
 	for _, def := range org.UnitDefinitions {
 		if def.UNECE == unece {
 			return def.Unit
@@ -120,29 +67,13 @@ func UnitFromUNECE(unece cbc.Code) org.Unit {
 	return org.Unit(unece)
 }
 
-// PaymentMeansTypeCodeParse maps a CII payment means to a GOBL equivalent
+// paymentMeansCode maps a CII payment means to a GOBL equivalent
 // Source https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred4461.htm
-func PaymentMeansTypeCodeParse(typeCode string) cbc.Key {
-	switch typeCode {
-	case paymentMeansCash:
-		return pay.MeansKeyCash
-	case paymentMeansCheque:
-		return pay.MeansKeyCheque
-	case paymentMeansCreditTransfer:
-		return pay.MeansKeyCreditTransfer
-	case paymentMeansBankAccount:
-		return pay.MeansKeyDebitTransfer
-	case paymentMeansCard:
-		return pay.MeansKeyCard
-	case paymentMeansSEPACreditTransfer:
-		return keyPaymentMeansSEPACreditTransfer
-	case paymentMeansSEPADirectDebit:
-		return keyPaymentMeansSEPADirectDebit
-	case paymentMeansDirectDebit:
-		return pay.MeansKeyDirectDebit
-	default:
-		return pay.MeansKeyOther
+func paymentMeansCode(code string) cbc.Key {
+	if val, ok := paymentMeansMap[code]; ok {
+		return val
 	}
+	return pay.MeansKeyAny
 }
 
 func formatKey(key string) cbc.Key {

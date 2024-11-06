@@ -2,9 +2,11 @@ package ctog
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
+	"github.com/invopop/gobl/tax"
 )
 
 func (c *Converter) preparePayment(stlm *ApplicableHeaderTradeSettlement) error {
@@ -92,7 +94,10 @@ func getTerms(settlement *ApplicableHeaderTradeSettlement) (*pay.Terms, error) {
 func getMeans(stlm *ApplicableHeaderTradeSettlement) *pay.Instructions {
 	pm := stlm.SpecifiedTradeSettlementPaymentMeans[0]
 	inst := &pay.Instructions{
-		Key: PaymentMeansTypeCodeParse(pm.TypeCode),
+		Key: paymentMeansCode(pm.TypeCode),
+		Ext: tax.Extensions{
+			untdid.ExtKeyPaymentMeans: tax.ExtValue(pm.TypeCode),
+		},
 	}
 
 	if pm.Information != nil {

@@ -6,9 +6,11 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 // Converter is a struct that contains the necessary elements to convert between GOBL and CII
@@ -59,6 +61,11 @@ func (c *Converter) NewInvoice(doc *Document) error {
 		Currency: currency.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.InvoiceCurrencyCode),
 		Supplier: c.getParty(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.SellerTradeParty),
 		Customer: c.getParty(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerTradeParty),
+		Tax: &bill.Tax{
+			Ext: tax.Extensions{
+				untdid.ExtKeyDocumentType: tax.ExtValue(doc.ExchangedDocument.TypeCode),
+			},
+		},
 	}
 
 	issueDate, err := ParseDate(doc.ExchangedDocument.IssueDateTime.DateTimeString.Value)
@@ -73,12 +80,11 @@ func (c *Converter) NewInvoice(doc *Document) error {
 	}
 
 	// Payment comprised of terms, means and payee. Check tehre is relevant info in at least one of them to create a payment
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.PayeeTradeParty != nil ||
-		(len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradePaymentTerms) > 0 &&
-			doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil) ||
-		(len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementPaymentMeans) > 0 &&
-			doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1") {
-		err = c.preparePayment(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+	ahts := &doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement
+	if ahts.PayeeTradeParty != nil ||
+		(len(ahts.SpecifiedTradePaymentTerms) > 0 && ahts.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil) ||
+		(len(ahts.SpecifiedTradeSettlementPaymentMeans) > 0 && ahts.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1") {
+		err = c.preparePayment(ahts)
 		if err != nil {
 			return err
 		}
@@ -107,9 +113,9 @@ func (c *Converter) NewInvoice(doc *Document) error {
 		return err
 	}
 
-	if len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.InvoiceReferencedDcument) > 0 {
-		c.inv.Preceding = make([]*org.DocumentRef, 0, len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.InvoiceReferencedDcument))
-		for _, ref := range doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.InvoiceReferencedDcument {
+	if len(ahts.InvoiceReferencedDcument) > 0 {
+		c.inv.Preceding = make([]*org.DocumentRef, 0, len(ahts.InvoiceReferencedDcument))
+		for _, ref := range ahts.InvoiceReferencedDcument {
 			docRef := &org.DocumentRef{
 				Code: cbc.Code(ref.IssuerAssignedID),
 			}
@@ -135,8 +141,8 @@ func (c *Converter) NewInvoice(doc *Document) error {
 		c.inv.Supplier = c.getParty(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.SellerTaxRepresentativeTradeParty)
 	}
 
-	if len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeAllowanceCharge) > 0 {
-		err = c.prepareChargesAndDiscounts(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+	if len(ahts.SpecifiedTradeAllowanceCharge) > 0 {
+		err = c.prepareChargesAndDiscounts(ahts)
 		if err != nil {
 			return err
 		}
