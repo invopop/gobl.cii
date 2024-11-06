@@ -1,19 +1,24 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be86-c59b-7258-9b24-4cb57a8413d5",
+    "uuid": "019302d2-977b-7567-83b5-ec11e0d94f7d",
     "dig": {
       "alg": "sha256",
-      "val": "7059ecbb5f09bb1d7a19f1dbfcf46475903e203e2612c5ad4cded836e8433d88"
+      "val": "63383cae9471a2c2f8b70febc8357cbbae472b0c35ae9c611ef05af0cf27905b"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be86-c59b-72cc-8fa4-6a4e899f64f6",
+    "uuid": "019302d2-977b-75bc-8628-5234a8b3857c",
     "type": "standard",
     "code": "INVOICE_test_7",
     "issue_date": "2013-05-13",
     "currency": "SEK",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "The Sellercompany Incorporated",
       "people": [
@@ -124,7 +129,10 @@
             "iban": "SE1212341234123412",
             "bic": "SEXDABCD"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

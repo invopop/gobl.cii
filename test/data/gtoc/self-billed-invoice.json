@@ -10,6 +10,9 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"en16931"
+		],
 		"$tags": [
 			"self-billed"
 		],
@@ -19,7 +22,6 @@
 		"code": "001",
 		"issue_date": "2024-02-13",
 		"currency": "EUR",
-		"tax": {},
 		"supplier": {
 			"name": "Provide One GmbH",
 			"tax_id": {
@@ -101,6 +103,11 @@
 		"payment": {
 			"terms": {
 				"detail": "lorem ipsum"
+			}
+		},
+		"tax": {
+			"ext": {
+				"untdid-document-type": "389"
 			}
 		},
 		"totals": {

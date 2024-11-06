@@ -133,7 +133,6 @@
         <ram:CalculatedAmount>342.00</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
         <ram:BasisAmount>1800.00</ram:BasisAmount>
-        <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradeAllowanceCharge>
@@ -141,6 +140,7 @@
           <udt:Indicator>true</udt:Indicator>
         </ram:ChargeIndicator>
         <ram:ActualAmount>11.00</ram:ActualAmount>
+        <ram:ReasonCode>88</ram:ReasonCode>
         <ram:Reason>Freight</ram:Reason>
         <ram:CategoryTradeTax>
           <ram:TypeCode>VAT</ram:TypeCode>

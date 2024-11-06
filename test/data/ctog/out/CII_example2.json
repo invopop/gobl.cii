@@ -1,19 +1,24 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be86-c4e6-7c0a-9d40-a95fda31a0f6",
+    "uuid": "019302d2-96ff-743d-9f9f-c143269bd5e0",
     "dig": {
       "alg": "sha256",
-      "val": "c1b3d667d00adc4215d8ab495d2ab36f363bca103d2f36394f9861fb98a9c40f"
+      "val": "d6f038406f83516ae0b1e301ed27bdc118ad0181b1f9008c1d85271e5c9b2fee"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be86-c4e6-7c68-8c05-1abfbab2dfec",
+    "uuid": "019302d2-96ff-7486-aa2c-12dda87a93c7",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
     "currency": "NOK",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "Tax handling company AS",
       "tax_id": {
@@ -99,14 +104,14 @@
         "sum": "1273.00",
         "discounts": [
           {
-            "amount": "12.00",
-            "reason": "Damage"
+            "reason": "Damage",
+            "amount": "12.00"
           }
         ],
         "charges": [
           {
-            "amount": "12.00",
-            "reason": "Testing"
+            "reason": "Testing",
+            "amount": "12.00"
           }
         ],
         "taxes": [
@@ -267,30 +272,30 @@
     "discounts": [
       {
         "i": 1,
+        "reason": "Promotion discount",
         "amount": "100.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
-        "code": "95",
-        "reason": "Promotion discount"
+        "ext": {
+          "untdid-allowance": "95"
+        }
       }
     ],
     "charges": [
       {
         "i": 1,
+        "reason": "Freight",
         "amount": "100.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
-        ],
-        "reason": "Freight"
+        ]
       }
     ],
     "ordering": {
@@ -366,7 +371,10 @@
             "iban": "NO9386011117947",
             "bic": "DNBANOKK"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "delivery": {

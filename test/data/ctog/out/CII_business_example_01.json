@@ -1,20 +1,25 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be87-1ab1-709c-bc8c-998b9cd714f4",
+    "uuid": "019302d2-969d-7145-98d5-7a1a253e32fa",
     "dig": {
       "alg": "sha256",
-      "val": "0d23933db86393d9af3b18bb5a8c3058b1cd433fb07d0f7c4ac9ba7f13d25020"
+      "val": "fdc424d9d290f794784d7b69daa65553184387f65a1ced28b61971d6957a2a6e"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "DE",
-    "uuid": "0192be87-1ab1-7107-8456-b475b5710c79",
+    "uuid": "019302d2-969d-71b9-88df-e124db554c2a",
     "type": "standard",
     "code": "2016166",
     "issue_date": "2015-01-09",
     "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "XXX AG",
       "tax_id": {
@@ -121,7 +126,10 @@
           {
             "iban": "DE12500105170648489890"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "delivery": {

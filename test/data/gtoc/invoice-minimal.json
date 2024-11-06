@@ -10,6 +10,9 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"en16931"
+		],
 		"uuid": "018f7cec-556a-72d7-8959-b6de406b87ab",
 		"type": "standard",
 		"series": "SAMPLE",
@@ -77,6 +80,11 @@
 				"total": "1800.00"
 			}
 		],
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
 		"totals": {
 			"sum": "1800.00",
 			"total": "1800.00",

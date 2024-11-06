@@ -1,20 +1,25 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be86-c5e1-77e3-9b8a-2827d7c08b0f",
+    "uuid": "019302d2-97b5-737c-936f-1c983e250ad5",
     "dig": {
       "alg": "sha256",
-      "val": "9f30604d0500c54c482367ed333e2ce58d8847e42ca98d9d08352df2b1e69989"
+      "val": "1b97f649a32b7115d5905952b1ea2c81386ad9e9ba406eefede2af192fb52a9b"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192be86-c5e1-7832-9553-349ebd8c2fbd",
+    "uuid": "019302d2-97b5-73e5-b130-1f044f54dce3",
     "type": "standard",
     "code": "20150483",
     "issue_date": "2015-04-01",
     "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "Bluem BV",
       "tax_id": {
@@ -90,7 +95,10 @@
             "iban": "NL13RABO0377815500",
             "bic": "RABONL2U"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

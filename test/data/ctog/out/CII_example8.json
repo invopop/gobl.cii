@@ -1,20 +1,25 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be86-c5bb-745f-b138-dffc719832a2",
+    "uuid": "019302d2-9797-7c9c-9fb7-4ec40b600898",
     "dig": {
       "alg": "sha256",
-      "val": "35ec9a7381fd05469deb698c0a8f4f87373c819ab1cd30e1809361defd5a3db6"
+      "val": "6c434e8cb3b34c919f702632aa7e1dd09316fe577296173c2dbf08995167eab0"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192be86-c5bb-74b6-bd62-aa829674843d",
+    "uuid": "019302d2-9797-7cdb-b0f4-1e19cfe38673",
     "type": "standard",
     "code": "1100512149",
     "issue_date": "2014-11-10",
     "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "Enexis B.V.",
       "tax_id": {
@@ -283,7 +288,10 @@
           {
             "iban": "NL28RBOS0420242228"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "delivery": {

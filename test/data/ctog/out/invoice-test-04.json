@@ -1,20 +1,25 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be86-eef6-7859-9cd4-f678f0bbaeb7",
+    "uuid": "019302d2-97f5-717c-9d95-e1d93c77397c",
     "dig": {
       "alg": "sha256",
-      "val": "d5ae4e903f47de68c8079b92c9d796e1fde455b42067e5d01f8b7f918c3e9775"
+      "val": "ef27dd9db7342853162bd1cac83f1a5de4294bd86d3800df3afe5a5a62a195f7"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "DE",
-    "uuid": "0192be86-eef6-78a8-81e0-82e68a67618b",
+    "uuid": "019302d2-97f5-723a-a5b9-f148ab8883c8",
     "type": "standard",
     "code": "",
     "issue_date": "2024-10-01",
     "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "Sample Seller",
       "tax_id": {
@@ -108,8 +113,12 @@
           }
         ],
         "card": {
+          "first6": "",
           "last4": "3456",
-          "holder": "Ilona Schidt"
+          "holder": "Schidt"
+        },
+        "ext": {
+          "untdid-payment-means": "42"
         }
       }
     },

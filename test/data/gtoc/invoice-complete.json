@@ -10,6 +10,9 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"en16931"
+		],
 		"uuid": "019231f1-9128-71fc-b0e2-820af3036d1b",
 		"type": "standard",
 		"series": "SAMPLE",
@@ -102,22 +105,27 @@
 				  "percent": "25%"
 				}
 			  ],
-			  "code": "88",
-			  "reason": "Promotion discount"
+			  "reason": "Promotion discount",
+			  "ext": {
+				"untdid-allowance": "88"
+			  }
 			}
-		  ],
-		  "charges": [
+		],
+		"charges": [
 			{
-			  "i": 1,
-			  "amount": "11.00",
-			  "taxes": [
-				{
-				  "cat": "VAT",
-				  "rate": "standard",
-				  "percent": "25%"
+				"i": 1,
+				"amount": "11.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"rate": "standard",
+						"percent": "25%"
+					}
+				],
+				"reason": "Freight",
+				"ext": {
+				  "untdid-charge": "88"
 				}
-			  ],
-			  "reason": "Freight"
 			}
 		  ],
 		"ordering": {
@@ -169,6 +177,9 @@
 			"instructions": {
 			  "key": "credit-transfer",
 			  "ref": "0003434323213231",
+			  "ext": {
+				"untdid-payment-means": "30"
+			  },
 			  "credit_transfer": [
 				{
 				  "iban": "NO9386011117947",
@@ -206,6 +217,11 @@
 			  }
 			],
 			"date": "2024-02-10"
+		},
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"totals": {
 			"sum": "1800.00",

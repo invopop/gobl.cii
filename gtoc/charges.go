@@ -42,7 +42,7 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 	if c.Reason != "" {
 		ac.Reason = c.Reason
 	}
-	if c.Code != "" {
+	if c.Ext[untdid.ExtKeyCharge] != "" {
 		ac.ReasonCode = c.Ext[untdid.ExtKeyCharge].String()
 	}
 	if c.Percent != nil {
@@ -63,7 +63,7 @@ func newDiscount(d *bill.Discount) *AllowanceCharge {
 	if d.Reason != "" {
 		ac.Reason = d.Reason
 	}
-	if d.Code != "" {
+	if d.Ext[untdid.ExtKeyAllowance] != "" {
 		ac.ReasonCode = d.Ext[untdid.ExtKeyAllowance].String()
 	}
 	if d.Percent != nil {
@@ -84,7 +84,7 @@ func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
 	if c.Reason != "" {
 		ac.Reason = c.Reason
 	}
-	if c.Code != "" {
+	if c.Ext[untdid.ExtKeyCharge] != "" {
 		ac.ReasonCode = c.Ext[untdid.ExtKeyCharge].String()
 	}
 	if c.Percent != nil {
@@ -102,7 +102,7 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 	if d.Reason != "" {
 		ac.Reason = d.Reason
 	}
-	if d.Code != "" {
+	if d.Ext[untdid.ExtKeyAllowance] != "" {
 		ac.ReasonCode = d.Ext[untdid.ExtKeyAllowance].String()
 	}
 	if d.Percent != nil {
@@ -117,7 +117,7 @@ func makeTaxCategory(tax *tax.Combo) *Tax {
 	if tax.Category != "" {
 		c.TypeCode = tax.Category.String()
 	}
-	if !tax.Rate.IsEmpty() {
+	if tax.Ext[untdid.ExtKeyTaxCategory] != "" {
 		c.CategoryCode = tax.Ext[untdid.ExtKeyTaxCategory].String()
 	}
 	if tax.Percent != nil {

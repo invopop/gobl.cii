@@ -1,20 +1,25 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be86-c4bd-79a2-beda-9dd9518ef17f",
+    "uuid": "019302d2-96dc-7a5e-809e-8d2923944b8f",
     "dig": {
       "alg": "sha256",
-      "val": "1dc80595e516fdabc6ff87f417c0c20cf5a5370550446588b76d1698728235e3"
+      "val": "c3d65641f6b257e6db09e9d3bf96f20db6e4eec3ac2af7690a724af89bd67c93"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192be86-c4bd-7a4b-86d6-726c9c962a05",
+    "uuid": "019302d2-96dc-7ac3-9e18-6e887d666eb6",
     "type": "standard",
     "code": "12115118",
     "issue_date": "2015-01-09",
     "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "De Koksmaat",
       "tax_id": {
@@ -426,7 +431,10 @@
           {
             "iban": "NL57 RABO 0107307510"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

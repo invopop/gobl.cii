@@ -10,6 +10,9 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"en16931"
+		],
 		"uuid": "019231f1-9168-70de-b1c8-9ea4d7294ef2",
 		"type": "standard",
 		"series": "SAMPLE",
@@ -105,6 +108,11 @@
 		"payment": {
 			"terms": {
 				"detail": "lorem ipsum"
+			}
+		},
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
 			}
 		},
 		"totals": {

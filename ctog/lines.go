@@ -43,12 +43,14 @@ func (c *Converter) prepareLines(tsct *SupplyChainTradeTransaction) error {
 		}
 
 		if it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode != "" {
-			l.Item.Unit = unitFromUNECE(cbc.Code(it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode))
+			u := cbc.Code(it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode)
+			l.Item.Unit = *unitFromUNECE(&u)
 		}
 
 		if it.SpecifiedTradeProduct.SellerAssignedID != nil {
 			l.Item.Ref = *it.SpecifiedTradeProduct.SellerAssignedID
 		}
+
 		if it.SpecifiedTradeProduct.BuyerAssignedID != nil {
 			if l.Item.Identities == nil {
 				l.Item.Identities = make([]*org.Identity, 0)

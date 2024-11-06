@@ -122,7 +122,7 @@
         </ram:PayerPartyDebtorFinancialAccount>
         <ram:ApplicableTradeSettlementFinancialCard>
           <ram:ID>1234567890123456</ram:ID>
-          <ram:CardholderName>Ilona Schidt</ram:CardholderName>
+          <ram:CardholderName>Schidt</ram:CardholderName>
         </ram:ApplicableTradeSettlementFinancialCard>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>

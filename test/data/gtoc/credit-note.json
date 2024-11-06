@@ -10,6 +10,9 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"en16931"
+		],
 		"uuid": "019231f1-910c-73d9-9493-a58fdccf14e9",
 		"type": "credit-note",
 		"series": "CN",
@@ -97,6 +100,11 @@
 		"payment": {
 			"terms": {
 				"detail": "lorem ipsum"
+			}
+		},
+		"tax": {
+			"ext": {
+				"untdid-document-type": "381"
 			}
 		},
 		"totals": {

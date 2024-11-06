@@ -42,7 +42,7 @@ func TestParseCtoGPayment(t *testing.T) {
 
 	assert.NotNil(t, payment.Instructions.Card)
 	assert.Equal(t, "3456", payment.Instructions.Card.Last4)
-	assert.Equal(t, "Ilona Schidt", payment.Instructions.Card.Holder)
+	assert.Equal(t, "Schidt", payment.Instructions.Card.Holder)
 
 	assert.Len(t, payment.Instructions.CreditTransfer, 1)
 	assert.Equal(t, "123456789012345678", payment.Instructions.CreditTransfer[0].IBAN)

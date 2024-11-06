@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,19 +63,20 @@ func TestUnitFromUNECE(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected string
+		expected org.Unit
 	}{
-		{"Known UNECE code", "HUR", "h"},
-		{"Known UNECE code", "SEC", "s"},
-		{"Known UNECE code", "MTR", "m"},
-		{"Known UNECE code", "GRM", "g"},
-		{"Unknown UNECE code", "XYZ", "XYZ"},
+		{"Known UNECE code", "HUR", org.Unit("h")},
+		{"Known UNECE code", "SEC", org.Unit("s")},
+		{"Known UNECE code", "MTR", org.Unit("m")},
+		{"Known UNECE code", "GRM", org.Unit("g")},
+		{"Unknown UNECE code", "XYZ", org.Unit("XYZ")},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := unitFromUNECE(cbc.Code(tt.input))
-			assert.Equal(t, tt.expected, string(result))
+			code := cbc.Code(tt.input)
+			result := unitFromUNECE(&code)
+			assert.Equal(t, tt.expected, *result)
 		})
 	}
 }

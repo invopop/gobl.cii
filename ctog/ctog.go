@@ -81,9 +81,7 @@ func (c *Converter) NewInvoice(doc *Document) error {
 
 	// Payment comprised of terms, means and payee. Check tehre is relevant info in at least one of them to create a payment
 	ahts := &doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement
-	if ahts.PayeeTradeParty != nil ||
-		(len(ahts.SpecifiedTradePaymentTerms) > 0 && ahts.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil) ||
-		(len(ahts.SpecifiedTradeSettlementPaymentMeans) > 0 && ahts.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1") {
+	if ahts.hasPayment() {
 		err = c.preparePayment(ahts)
 		if err != nil {
 			return err
@@ -148,4 +146,10 @@ func (c *Converter) NewInvoice(doc *Document) error {
 		}
 	}
 	return nil
+}
+
+func (ah *ApplicableHeaderTradeSettlement) hasPayment() bool {
+	return ah.PayeeTradeParty != nil ||
+		(len(ah.SpecifiedTradePaymentTerms) > 0 && ah.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil) ||
+		(len(ah.SpecifiedTradeSettlementPaymentMeans) > 0 && ah.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1")
 }

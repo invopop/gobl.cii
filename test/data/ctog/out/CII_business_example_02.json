@@ -1,20 +1,25 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be87-1ad6-7ebe-aca6-05bceeac6d8d",
+    "uuid": "019302d2-96ba-7cea-a4ba-01bc582a6ffa",
     "dig": {
       "alg": "sha256",
-      "val": "eecaf8010d93772b6746a232b6c414286780cb3e1e4128db10baebf398697902"
+      "val": "649b5de4911c2c3f706199de83ac08ecd435cb56c7f520b112dece16a4b5ce8c"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "DE",
-    "uuid": "0192be87-1ad6-7f0c-a433-5e3c26fc2163",
+    "uuid": "019302d2-96ba-7d26-b4d7-9520a5b68add",
     "type": "standard",
     "code": "INV000013",
     "issue_date": "2013-08-25",
     "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
     "supplier": {
       "name": "xxxx",
       "tax_id": {
@@ -103,15 +108,14 @@
     "discounts": [
       {
         "i": 1,
+        "reason": "Rabatt",
         "amount": "0.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "19%"
+            "percent": "19.00%"
           }
-        ],
-        "reason": "Rabatt"
+        ]
       }
     ],
     "ordering": {
@@ -136,7 +140,10 @@
           {
             "iban": "DK1212341234123412"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

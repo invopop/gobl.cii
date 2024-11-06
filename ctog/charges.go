@@ -79,9 +79,6 @@ func newCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.Charge, error) {
 		c.Taxes = tax.Set{
 			{
 				Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
-				Ext: tax.Extensions{
-					untdid.ExtKeyTaxCategory: tax.ExtValue(ac.CategoryTradeTax.CategoryCode),
-				},
 			},
 		}
 	}
@@ -133,9 +130,6 @@ func newDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.Discount, error) {
 		d.Taxes = tax.Set{
 			{
 				Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
-				Ext: tax.Extensions{
-					untdid.ExtKeyTaxCategory: tax.ExtValue(ac.CategoryTradeTax.CategoryCode),
-				},
 			},
 		}
 	}

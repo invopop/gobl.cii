@@ -57,14 +57,18 @@ func TypeCodeParse(typeCode string) cbc.Key {
 }
 
 // unitFromUNECE maps a UN/ECE code to a GOBL unit
-func unitFromUNECE(unece cbc.Code) org.Unit {
+func unitFromUNECE(unece *cbc.Code) *org.Unit {
+	if unece == nil {
+		return nil
+	}
 	for _, def := range org.UnitDefinitions {
-		if def.UNECE == unece {
-			return def.Unit
+		if def.UNECE == *unece {
+			return &def.Unit
 		}
 	}
 	// If no match is found, return the original UN/ECE code as a Unit
-	return org.Unit(unece)
+	unit := org.Unit(*unece)
+	return &unit
 }
 
 // paymentMeansCode maps a CII payment means to a GOBL equivalent
