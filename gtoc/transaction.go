@@ -14,17 +14,17 @@ func (c *Converter) NewTransaction(inv *bill.Invoice) error {
 		return err
 	}
 
-	err = c.NewAgreement(inv)
+	err = c.prepareAgreement(inv)
 	if err != nil {
 		return err
 	}
 
-	err = c.NewDelivery(inv)
+	err = c.prepareDelivery(inv)
 	if err != nil {
 		return err
 	}
 
-	err = c.NewSettlement(inv)
+	err = c.prepareSettlement(inv)
 	if err != nil {
 		return err
 	}

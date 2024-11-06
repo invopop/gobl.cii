@@ -9,7 +9,7 @@ import (
 
 func TestNewDelivery(t *testing.T) {
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-complete.json")
+		doc, err := newDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "20240210", doc.Transaction.Delivery.Event.Date)

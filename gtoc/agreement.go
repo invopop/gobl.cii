@@ -12,58 +12,57 @@ const (
 	defaultBuyerReference = "N/A"
 )
 
-// NewAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
-func (c *Converter) NewAgreement(inv *bill.Invoice) error {
+// prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
+func (c *Converter) prepareAgreement(inv *bill.Invoice) error {
 	c.doc.Transaction.Agreement = new(Agreement)
-	agreement := c.doc.Transaction.Agreement
+	agmt := c.doc.Transaction.Agreement
 	if inv.Ordering != nil && inv.Ordering.Code != "" {
-		agreement.BuyerReference = inv.Ordering.Code.String()
+		agmt.BuyerReference = inv.Ordering.Code.String()
 	} else {
-		agreement.BuyerReference = defaultBuyerReference
+		agmt.BuyerReference = defaultBuyerReference
 	}
 	if supplier := inv.Supplier; supplier != nil {
-		agreement.Seller = NewParty(supplier)
+		agmt.Seller = NewParty(supplier)
 	}
 	if customer := inv.Customer; customer != nil {
-		agreement.Buyer = NewParty(customer)
+		agmt.Buyer = NewParty(customer)
 	}
 	if inv.Ordering != nil {
 		if inv.Ordering.Seller != nil {
-			agreement.TaxRepresentative = agreement.Seller
-			agreement.Seller = NewParty(inv.Ordering.Seller)
+			agmt.TaxRepresentative = agmt.Seller
+			agmt.Seller = NewParty(inv.Ordering.Seller)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
-			contract := inv.Ordering.Contracts[0].Code.String()
-			agreement.Contract = &contract
+			c := inv.Ordering.Contracts[0].Code.String()
+			agmt.Contract = &c
 		}
 		if len(inv.Ordering.Purchases) > 0 {
-			purchase := inv.Ordering.Purchases[0].Code.String()
-			agreement.Purchase = &purchase
+			p := inv.Ordering.Purchases[0].Code.String()
+			agmt.Purchase = &p
 		}
 		if len(inv.Ordering.Sales) > 0 {
-			sales := inv.Ordering.Sales[0].Code.String()
-			agreement.Sales = &sales
+			s := inv.Ordering.Sales[0].Code.String()
+			agmt.Sales = &s
 		}
 		if len(inv.Ordering.Projects) > 0 {
-			agreement.Project = &Project{
+			agmt.Project = &Project{
 				ID: inv.Ordering.Projects[0].Code.String(),
 			}
 			if inv.Ordering.Projects[0].Description != "" {
-				agreement.Project.Name = inv.Ordering.Projects[0].Description
+				agmt.Project.Name = inv.Ordering.Projects[0].Description
 			}
 		}
 	}
 	return nil
 }
 
-// NewPostalTradeAddress creates the PostalTradeAddress part of a EN 16931 compliant invoice
-func NewPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
+func newPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
 	address := addresses[0]
 
-	postalTradeAddress := &PostalTradeAddress{
+	a := &PostalTradeAddress{
 		Postcode:  address.Code,
 		LineOne:   address.Street,
 		LineTwo:   address.Number,
@@ -72,19 +71,18 @@ func NewPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
 		Region:    address.Region,
 	}
 
-	return postalTradeAddress
+	return a
 }
 
-// NewEmail creates the URIUniversalCommunication part of a EN 16931 compliant invoice
-func NewEmail(emails []*org.Email) *URIUniversalCommunication {
+func newEmail(emails []*org.Email) *URIUniversalCommunication {
 	if len(emails) == 0 {
 		return nil
 	}
 
-	email := &URIUniversalCommunication{
+	e := &URIUniversalCommunication{
 		URIID:    emails[0].Address,
 		SchemeID: SchemeIDEmail,
 	}
 
-	return email
+	return e
 }

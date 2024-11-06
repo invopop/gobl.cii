@@ -9,7 +9,7 @@ import (
 
 func TestNewHeader(t *testing.T) {
 	t.Run("should contain the header info from standard invoice", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-de-de.json")
+		doc, err := newDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
@@ -20,7 +20,7 @@ func TestNewHeader(t *testing.T) {
 	})
 
 	t.Run("should contain the header info from credit note", func(t *testing.T) {
-		doc, err := NewDocumentFrom("credit-note.json")
+		doc, err := newDocumentFrom("credit-note.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
@@ -31,7 +31,7 @@ func TestNewHeader(t *testing.T) {
 	})
 
 	t.Run("should return self billed type code for self billed invoice", func(t *testing.T) {
-		doc, err := NewDocumentFrom("self-billed-invoice.json")
+		doc, err := newDocumentFrom("self-billed-invoice.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "389", doc.ExchangedDocument.TypeCode)

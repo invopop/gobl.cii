@@ -2,8 +2,8 @@ package gtoc
 
 import "github.com/invopop/gobl/bill"
 
-// NewDelivery creates the ApplicableHeaderTradeDelivery part of a EN 16931 compliant invoice
-func (c *Converter) NewDelivery(inv *bill.Invoice) error {
+// prepareDelivery creates the ApplicableHeaderTradeDelivery part of a EN 16931 compliant invoice
+func (c *Converter) prepareDelivery(inv *bill.Invoice) error {
 	c.doc.Transaction.Delivery = &Delivery{}
 	d := c.doc.Transaction.Delivery
 	if inv.Delivery != nil {

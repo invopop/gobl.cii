@@ -8,22 +8,11 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl/bill"
 )
 
-// LoadTestInvoice returns a GOBL Invoice from a file in the `test/data` folder
-func LoadTestInvoice(name string) (*bill.Invoice, error) {
-	env, err := LoadTestEnvelope(name)
-	if err != nil {
-		return nil, err
-	}
-
-	return env.Extract().(*bill.Invoice), nil
-}
-
-// LoadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
-func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
-	src, _ := os.Open(filepath.Join(GetTestDataPath(), name))
+// loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
+func loadTestEnvelope(name string) (*gobl.Envelope, error) {
+	src, _ := os.Open(filepath.Join(getTestDataPath(), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err
@@ -36,9 +25,9 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 	return env, nil
 }
 
-// NewDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*Document, error) {
-	env, err := LoadTestEnvelope(name)
+// newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
+func newDocumentFrom(name string) (*Document, error) {
+	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
 	}
@@ -46,12 +35,11 @@ func NewDocumentFrom(name string) (*Document, error) {
 	return c.ConvertToCII(env)
 }
 
-// GetTestDataPath returns the path to the `test/data/gtoc` folder
-func GetTestDataPath() string {
+// getTestDataPath returns the path to the `test/data/gtoc` folder
+func getTestDataPath() string {
 	return filepath.Join(getRootFolder(), "test", "data", "gtoc")
 }
 
-// TODO: adapt to new folder structure
 func getRootFolder() string {
 	cwd, _ := os.Getwd()
 

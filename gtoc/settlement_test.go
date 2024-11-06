@@ -9,7 +9,7 @@ import (
 
 func TestNewSettlement(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-de-de.json")
+		doc, err := newDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
@@ -24,7 +24,7 @@ func TestNewSettlement(t *testing.T) {
 	})
 
 	t.Run("correction-invoice.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("correction-invoice.json")
+		doc, err := newDocumentFrom("correction-invoice.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument.IssuerAssignedID)
@@ -32,7 +32,7 @@ func TestNewSettlement(t *testing.T) {
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-complete.json")
+		doc, err := newDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "30", doc.Transaction.Settlement.PaymentMeans.TypeCode)

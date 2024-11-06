@@ -6,11 +6,11 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Converter) getDelivery(doc *Document) error {
-	delivery := &bill.Delivery{}
+func (c *Converter) prepareDelivery(doc *Document) error {
+	d := &bill.Delivery{}
 
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty != nil {
-		delivery.Receiver = c.getParty(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty)
+		d.Receiver = c.getParty(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty)
 	}
 
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent != nil &&
@@ -19,19 +19,19 @@ func (c *Converter) getDelivery(doc *Document) error {
 		if err != nil {
 			return err
 		}
-		delivery.Date = &deliveryDate
+		d.Date = &deliveryDate
 	}
 
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DeliveryNoteReferencedDocument != nil {
-		delivery.Identities = []*org.Identity{
+		d.Identities = []*org.Identity{
 			{
 				Code: cbc.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DeliveryNoteReferencedDocument.IssuerAssignedID),
 			},
 		}
 	}
 
-	if delivery.Receiver != nil || delivery.Date != nil || delivery.Identities != nil {
-		c.inv.Delivery = delivery
+	if d.Receiver != nil || d.Date != nil || d.Identities != nil {
+		c.inv.Delivery = d
 	}
 	return nil
 }

@@ -3,18 +3,16 @@ package cii
 import (
 	"bytes"
 	"encoding/json"
-	"encoding/xml"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/invopop/gobl"
-	ctog "github.com/invopop/gobl.cii/ctog"
-	gtoc "github.com/invopop/gobl.cii/gtoc"
+	"github.com/invopop/gobl.cii/ctog"
+	"github.com/invopop/gobl.cii/gtoc"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
@@ -43,13 +41,13 @@ func TestNewDocument(t *testing.T) {
 		outName := strings.Replace(inName, ".json", ".xml", 1)
 
 		t.Run(inName, func(t *testing.T) {
-			doc, err := NewDocumentFrom(inName)
+			doc, err := newDocumentFrom(inName)
 			require.NoError(t, err)
 
 			data, err := doc.Bytes()
 			require.NoError(t, err)
 
-			err = ValidateXML(schema, data)
+			err = validateXML(schema, data)
 			require.NoError(t, err)
 
 			output, err := loadOutputFile(outName)
@@ -78,11 +76,11 @@ func TestNewDocumentGOBL(t *testing.T) {
 			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			// Create a new conversor
-			conversor := ctog.NewConverter()
+			// Create a new converter
+			converter := ctog.NewConverter()
 
 			// Convert CII XML to GOBL
-			goblEnv, err := conversor.ConvertToGOBL(xmlData)
+			goblEnv, err := converter.ConvertToGOBL(xmlData)
 			require.NoError(t, err)
 
 			// Extract the invoice from the envelope
@@ -125,9 +123,9 @@ func TestNewDocumentGOBL(t *testing.T) {
 	}
 }
 
-// NewDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*gtoc.Document, error) {
-	env, err := LoadTestEnvelope(name)
+// newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
+func newDocumentFrom(name string) (*gtoc.Document, error) {
+	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
 	}
@@ -135,42 +133,8 @@ func NewDocumentFrom(name string) (*gtoc.Document, error) {
 	return c.ConvertToCII(env)
 }
 
-// LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func LoadTestXMLDoc(name string) (*ctog.Document, error) {
-	src, err := os.Open(filepath.Join(getConversionTypePath(xmlPattern), name))
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if cerr := src.Close(); cerr != nil && err == nil {
-			err = cerr
-		}
-	}()
-
-	inData, err := io.ReadAll(src)
-	if err != nil {
-		return nil, err
-	}
-	doc := new(ctog.Document)
-	if err := xml.Unmarshal(inData, doc); err != nil {
-		return nil, err
-	}
-
-	return doc, err
-}
-
-// LoadTestInvoice returns a GOBL Invoice from a file in the `test/data` folder
-func LoadTestInvoice(name string) (*bill.Invoice, error) {
-	env, err := LoadTestEnvelope(name)
-	if err != nil {
-		return nil, err
-	}
-
-	return env.Extract().(*bill.Invoice), nil
-}
-
-// LoadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
-func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
+// loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
+func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 	src, _ := os.Open(filepath.Join(getConversionTypePath(jsonPattern), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
@@ -188,8 +152,8 @@ func loadSchema(name string) (*xsd.Schema, error) {
 	return xsd.ParseFromFile(filepath.Join(getSchemaPath(name), name))
 }
 
-// ValidateXML validates a XML document against a XSD Schema
-func ValidateXML(schema *xsd.Schema, data []byte) error {
+// validateXML validates a XML document against a XSD Schema
+func validateXML(schema *xsd.Schema, data []byte) error {
 	xmlDoc, err := libxml2.Parse(data)
 	if err != nil {
 		return err

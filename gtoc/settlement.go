@@ -19,39 +19,39 @@ var paymentMeans = map[cbc.Key]string{
 	// pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA):    "59",
 }
 
-// NewSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
-func (c *Converter) NewSettlement(inv *bill.Invoice) error {
+// prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
+func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	c.doc.Transaction.Settlement = &Settlement{
 		Currency: string(inv.Currency),
 	}
-	settlement := c.doc.Transaction.Settlement
+	stlm := c.doc.Transaction.Settlement
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		settlement.PaymentTerms = &Terms{
+		stlm.PaymentTerms = &Terms{
 			Description: inv.Payment.Terms.Detail,
 		}
 	}
 
 	if inv.Totals != nil {
-		settlement.Tax = newTaxes(inv.Totals.Taxes)
-		settlement.Summary = newSummary(inv.Totals, string(inv.Currency))
+		stlm.Tax = newTaxes(inv.Totals.Taxes)
+		stlm.Summary = newSummary(inv.Totals, string(inv.Currency))
 	}
 
 	if len(inv.Preceding) > 0 {
-		cor := inv.Preceding[0]
-		settlement.ReferencedDocument = &ReferencedDocument{
-			IssuerAssignedID: invoiceNumber(cor.Series, cor.Code),
+		pre := inv.Preceding[0]
+		stlm.ReferencedDocument = &ReferencedDocument{
+			IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
 			IssueDate: &Date{
-				Date:   formatIssueDate(*cor.IssueDate),
+				Date:   formatIssueDate(*pre.IssueDate),
 				Format: "102",
 			},
 		}
 	}
 	if inv.Payment != nil && inv.Payment.Payee != nil {
-		settlement.Payee = newPayee(inv.Payment.Payee)
+		stlm.Payee = newPayee(inv.Payment.Payee)
 	}
 
 	if inv.Delivery != nil && inv.Delivery.Period != nil {
-		settlement.Period = &Period{
+		stlm.Period = &Period{
 			Start: &Date{
 				Date:   formatIssueDate(inv.Delivery.Period.Start),
 				Format: "102",
@@ -65,30 +65,30 @@ func (c *Converter) NewSettlement(inv *bill.Invoice) error {
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
-		settlement.PaymentMeans = &PaymentMeans{
+		stlm.PaymentMeans = &PaymentMeans{
 			TypeCode:    findPaymentKey(instr.Key),
 			Information: instr.Detail,
 		}
 		if instr.CreditTransfer != nil {
-			settlement.PaymentMeans.Creditor = &Creditor{
+			stlm.PaymentMeans.Creditor = &Creditor{
 				IBAN:   instr.CreditTransfer[0].IBAN,
 				Name:   instr.CreditTransfer[0].Name,
 				Number: instr.CreditTransfer[0].Number,
 			}
 			if instr.CreditTransfer[0].BIC != "" {
-				settlement.PaymentMeans.BICID = instr.CreditTransfer[0].BIC
+				stlm.PaymentMeans.BICID = instr.CreditTransfer[0].BIC
 			}
 		}
 		if instr.DirectDebit != nil {
-			settlement.PaymentMeans.Debtor = instr.DirectDebit.Account
-			settlement.CreditorRefID = instr.DirectDebit.Creditor
-			if settlement.PaymentTerms == nil {
-				settlement.PaymentTerms = new(Terms)
+			stlm.PaymentMeans.Debtor = instr.DirectDebit.Account
+			stlm.CreditorRefID = instr.DirectDebit.Creditor
+			if stlm.PaymentTerms == nil {
+				stlm.PaymentTerms = new(Terms)
 			}
-			settlement.PaymentTerms.Mandate = instr.DirectDebit.Ref
+			stlm.PaymentTerms.Mandate = instr.DirectDebit.Ref
 		}
 		if instr.Card != nil {
-			settlement.PaymentMeans.Card = &Card{
+			stlm.PaymentMeans.Card = &Card{
 				ID:   instr.Card.Last4,
 				Name: instr.Card.Holder,
 			}
@@ -96,7 +96,7 @@ func (c *Converter) NewSettlement(inv *bill.Invoice) error {
 	}
 
 	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
-		settlement.AllowanceCharges = newAllowanceCharges(inv)
+		stlm.AllowanceCharges = newAllowanceCharges(inv)
 	}
 
 	return nil
@@ -163,8 +163,8 @@ func newPayee(party *org.Party) *Party {
 	payee := &Party{
 		Name:                      party.Name,
 		Contact:                   newContact(party),
-		PostalTradeAddress:        NewPostalTradeAddress(party.Addresses),
-		URIUniversalCommunication: NewEmail(party.Emails),
+		PostalTradeAddress:        newPostalTradeAddress(party.Addresses),
+		URIUniversalCommunication: newEmail(party.Emails),
 	}
 
 	if party.TaxID != nil {

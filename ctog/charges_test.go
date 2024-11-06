@@ -11,7 +11,7 @@ import (
 func TestParseCtoGCharges(t *testing.T) {
 	// Invoice with Charge
 	t.Run("CII_example3.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("CII_example3.xml")
+		doc, err := loadTestXMLDoc("CII_example3.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
@@ -36,7 +36,7 @@ func TestParseCtoGCharges(t *testing.T) {
 	})
 	// Invoice with Discount and Charge
 	t.Run("CII_business_example_02.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("CII_business_example_02.xml")
+		doc, err := loadTestXMLDoc("CII_business_example_02.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
@@ -65,7 +65,7 @@ func TestParseCtoGCharges(t *testing.T) {
 
 	// Invoice with Discount and Charge
 	t.Run("CII_example2.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("CII_example2.xml")
+		doc, err := loadTestXMLDoc("CII_example2.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()

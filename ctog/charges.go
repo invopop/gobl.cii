@@ -9,108 +9,114 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) getCharges(settlement *ApplicableHeaderTradeSettlement) error {
+func (c *Converter) prepareChargesAndDiscounts(stlm *ApplicableHeaderTradeSettlement) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
-	for _, allowanceCharge := range settlement.SpecifiedTradeAllowanceCharge {
-		if allowanceCharge.ChargeIndicator.Indicator {
+	for _, ac := range stlm.SpecifiedTradeAllowanceCharge {
+		if ac.ChargeIndicator.Indicator {
 			// This is a charge
-			charge := &bill.Charge{}
-			if allowanceCharge.Reason != nil {
-				charge.Reason = *allowanceCharge.Reason
+			c := &bill.Charge{}
+			if ac.Reason != nil {
+				c.Reason = *ac.Reason
 			}
-			if allowanceCharge.ActualAmount != "" {
-				charge.Amount, _ = num.AmountFromString(allowanceCharge.ActualAmount)
+			if ac.ActualAmount != "" {
+				c.Amount, _ = num.AmountFromString(ac.ActualAmount)
 			}
-			if allowanceCharge.ReasonCode != nil {
-				charge.Code = *allowanceCharge.ReasonCode
+			if ac.ReasonCode != nil {
+				c.Code = cbc.Code(*ac.ReasonCode)
 			}
-			if allowanceCharge.BasisAmount != nil {
-				basis, _ := num.AmountFromString(*allowanceCharge.BasisAmount)
-				charge.Base = &basis
-			}
-			if allowanceCharge.CalculationPercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CalculationPercent, "%") {
-					*allowanceCharge.CalculationPercent += "%"
-				}
-				percent, err := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+			if ac.BasisAmount != nil {
+				b, err := num.AmountFromString(*ac.BasisAmount)
 				if err != nil {
 					return err
 				}
-				charge.Percent = &percent
+				c.Base = &b
 			}
-			if allowanceCharge.CategoryTradeTax.TypeCode != "" {
-				charge.Taxes = tax.Set{
+			if ac.CalculationPercent != nil {
+				if !strings.HasSuffix(*ac.CalculationPercent, "%") {
+					*ac.CalculationPercent += "%"
+				}
+				p, err := num.PercentageFromString(*ac.CalculationPercent)
+				if err != nil {
+					return err
+				}
+				c.Percent = &p
+			}
+			if ac.CategoryTradeTax.TypeCode != "" {
+				c.Taxes = tax.Set{
 					{
-						Category: cbc.Code(allowanceCharge.CategoryTradeTax.TypeCode),
-						Rate:     FindTaxKey(allowanceCharge.CategoryTradeTax.CategoryCode),
+						Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
+						Rate:     FindTaxKey(ac.CategoryTradeTax.CategoryCode),
 					},
 				}
 			}
 			// Format percentages
-			if allowanceCharge.CategoryTradeTax.RateApplicablePercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CategoryTradeTax.RateApplicablePercent, "%") {
-					*allowanceCharge.CategoryTradeTax.RateApplicablePercent += "%"
+			if ac.CategoryTradeTax.RateApplicablePercent != nil {
+				if !strings.HasSuffix(*ac.CategoryTradeTax.RateApplicablePercent, "%") {
+					*ac.CategoryTradeTax.RateApplicablePercent += "%"
 				}
-				percent, err := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
+				p, err := num.PercentageFromString(*ac.CategoryTradeTax.RateApplicablePercent)
 				if err != nil {
 					return err
 				}
-				charge.Taxes[0].Percent = &percent
+				c.Taxes[0].Percent = &p
 			}
 			if charges == nil {
 				charges = make([]*bill.Charge, 0)
 			}
-			charges = append(charges, charge)
+			charges = append(charges, c)
 		} else {
 			// This is a discount
-			discount := &bill.Discount{}
-			if allowanceCharge.Reason != nil {
-				discount.Reason = *allowanceCharge.Reason
+			d := &bill.Discount{}
+			if ac.Reason != nil {
+				d.Reason = *ac.Reason
 			}
-			if allowanceCharge.ActualAmount != "" {
-				discount.Amount, _ = num.AmountFromString(allowanceCharge.ActualAmount)
+			if ac.ActualAmount != "" {
+				d.Amount, _ = num.AmountFromString(ac.ActualAmount)
 			}
-			if allowanceCharge.ReasonCode != nil {
-				discount.Code = *allowanceCharge.ReasonCode
+			if ac.ReasonCode != nil {
+				d.Code = cbc.Code(*ac.ReasonCode)
 			}
-			if allowanceCharge.BasisAmount != nil {
-				basis, _ := num.AmountFromString(*allowanceCharge.BasisAmount)
-				discount.Base = &basis
-			}
-			if allowanceCharge.CalculationPercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CalculationPercent, "%") {
-					*allowanceCharge.CalculationPercent += "%"
-				}
-				percent, err := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+			if ac.BasisAmount != nil {
+				b, err := num.AmountFromString(*ac.BasisAmount)
 				if err != nil {
 					return err
 				}
-				discount.Percent = &percent
+				d.Base = &b
 			}
-			if allowanceCharge.CategoryTradeTax.TypeCode != "" {
-				discount.Taxes = tax.Set{
+			if ac.CalculationPercent != nil {
+				if !strings.HasSuffix(*ac.CalculationPercent, "%") {
+					*ac.CalculationPercent += "%"
+				}
+				p, err := num.PercentageFromString(*ac.CalculationPercent)
+				if err != nil {
+					return err
+				}
+				d.Percent = &p
+			}
+			if ac.CategoryTradeTax.TypeCode != "" {
+				d.Taxes = tax.Set{
 					{
-						Category: cbc.Code(allowanceCharge.CategoryTradeTax.TypeCode),
-						Rate:     FindTaxKey(allowanceCharge.CategoryTradeTax.CategoryCode),
+						Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
+						Rate:     FindTaxKey(ac.CategoryTradeTax.CategoryCode),
 					},
 				}
 			}
-			if allowanceCharge.CategoryTradeTax.RateApplicablePercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CategoryTradeTax.RateApplicablePercent, "%") {
-					*allowanceCharge.CategoryTradeTax.RateApplicablePercent += "%"
+			if ac.CategoryTradeTax.RateApplicablePercent != nil {
+				if !strings.HasSuffix(*ac.CategoryTradeTax.RateApplicablePercent, "%") {
+					*ac.CategoryTradeTax.RateApplicablePercent += "%"
 				}
-				percent, err := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
+				p, err := num.PercentageFromString(*ac.CategoryTradeTax.RateApplicablePercent)
 				if err != nil {
 					return err
 				}
-				discount.Taxes[0].Percent = &percent
+				d.Taxes[0].Percent = &p
 			}
 			if discounts == nil {
 				discounts = make([]*bill.Discount, 0)
 			}
-			discounts = append(discounts, discount)
+			discounts = append(discounts, d)
 		}
 	}
 	if charges != nil {

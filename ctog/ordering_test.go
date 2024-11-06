@@ -9,7 +9,7 @@ import (
 
 func TestParseCtoGOrdering(t *testing.T) {
 	t.Run("CII_example7.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("CII_example7.xml")
+		doc, err := loadTestXMLDoc("CII_example7.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
@@ -24,7 +24,7 @@ func TestParseCtoGOrdering(t *testing.T) {
 		assert.Equal(t, "2013-12-31", inv.Ordering.Period.End.String(), "OrderingPeriod end date should match")
 	})
 	t.Run("CII_example8.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("CII_example8.xml")
+		doc, err := loadTestXMLDoc("CII_example8.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()

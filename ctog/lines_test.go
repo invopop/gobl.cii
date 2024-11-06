@@ -14,7 +14,7 @@ import (
 func TestParseCtoGLines(t *testing.T) {
 	// Basic Invoice 1
 	t.Run("invoice-test-01.xml", func(t *testing.T) {
-		xmlData, err := LoadTestXMLDoc("invoice-test-01.xml")
+		xmlData, err := loadTestXMLDoc("invoice-test-01.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
@@ -48,7 +48,7 @@ func TestParseCtoGLines(t *testing.T) {
 
 	//Basic Invoice 2
 	t.Run("CII_example1.xml", func(t *testing.T) {
-		xmlData, err := LoadTestXMLDoc("CII_example1.xml")
+		xmlData, err := loadTestXMLDoc("CII_example1.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
@@ -91,7 +91,7 @@ func TestParseCtoGLines(t *testing.T) {
 
 	// Invoice with Description and Origin Country
 	t.Run("CII_example2.xml", func(t *testing.T) {
-		xmlData, err := LoadTestXMLDoc("CII_example2.xml")
+		xmlData, err := loadTestXMLDoc("CII_example2.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()

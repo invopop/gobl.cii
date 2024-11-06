@@ -14,8 +14,8 @@ func NewParty(party *org.Party) *Party {
 	p := &Party{
 		Name:                      party.Name,
 		Contact:                   newContact(party),
-		PostalTradeAddress:        NewPostalTradeAddress(party.Addresses),
-		URIUniversalCommunication: NewEmail(party.Emails),
+		PostalTradeAddress:        newPostalTradeAddress(party.Addresses),
+		URIUniversalCommunication: newEmail(party.Emails),
 	}
 
 	if party.TaxID != nil {

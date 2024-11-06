@@ -11,7 +11,7 @@ import (
 )
 
 func TestParseCtoGPayment(t *testing.T) {
-	xmlData, err := LoadTestXMLDoc("invoice-test-04.xml")
+	xmlData, err := loadTestXMLDoc("invoice-test-04.xml")
 	require.NoError(t, err)
 
 	c := NewConverter()

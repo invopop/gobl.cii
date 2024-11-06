@@ -9,7 +9,7 @@ import (
 
 func TestNewAllowanceCharges(t *testing.T) {
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-complete.json")
+		doc, err := newDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 		// Document Level
 		assert.Len(t, doc.Transaction.Settlement.AllowanceCharges, 2)
@@ -25,7 +25,7 @@ func TestNewAllowanceCharges(t *testing.T) {
 	})
 
 	t.Run("invoice-without-buyers-tax-id.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-without-buyers-tax-id.json")
+		doc, err := newDocumentFrom("invoice-without-buyers-tax-id.json")
 		require.NoError(t, err)
 
 		//Line Level

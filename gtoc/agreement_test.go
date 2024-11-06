@@ -10,7 +10,7 @@ import (
 
 func TestNewAgreement(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-de-de.json")
+		doc, err := newDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
@@ -27,7 +27,7 @@ func TestNewAgreement(t *testing.T) {
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		env, err := LoadTestEnvelope("invoice-complete.json")
+		env, err := loadTestEnvelope("invoice-complete.json")
 		require.NoError(t, err)
 
 		inv := env.Extract().(*bill.Invoice)

@@ -11,10 +11,10 @@ func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
 	}
 	ac := make([]*AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	for i, charge := range inv.Charges {
-		ac[i] = makeCharge(charge)
+		ac[i] = newCharge(charge)
 	}
 	for i, discount := range inv.Discounts {
-		ac[i+len(inv.Charges)] = makeDiscount(discount)
+		ac[i+len(inv.Charges)] = newDiscount(discount)
 	}
 	return ac
 }
@@ -33,7 +33,7 @@ func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
 	return ac
 }
 
-func makeCharge(charge *bill.Charge) *AllowanceCharge {
+func newCharge(charge *bill.Charge) *AllowanceCharge {
 	c := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
 		Amount:          charge.Amount.String(),
@@ -42,7 +42,7 @@ func makeCharge(charge *bill.Charge) *AllowanceCharge {
 		c.Reason = charge.Reason
 	}
 	if charge.Code != "" {
-		c.ReasonCode = charge.Code
+		c.ReasonCode = charge.Code.String()
 	}
 	if charge.Percent != nil {
 		p := charge.Percent.String()
@@ -54,7 +54,7 @@ func makeCharge(charge *bill.Charge) *AllowanceCharge {
 	return c
 }
 
-func makeDiscount(discount *bill.Discount) *AllowanceCharge {
+func newDiscount(discount *bill.Discount) *AllowanceCharge {
 	d := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
 		Amount:          discount.Amount.String(),
@@ -63,7 +63,7 @@ func makeDiscount(discount *bill.Discount) *AllowanceCharge {
 		d.Reason = discount.Reason
 	}
 	if discount.Code != "" {
-		d.ReasonCode = discount.Code
+		d.ReasonCode = discount.Code.String()
 	}
 	if discount.Percent != nil {
 		p := discount.Percent.String()
@@ -84,7 +84,7 @@ func makeLineCharge(charge *bill.LineCharge) *AllowanceCharge {
 		c.Reason = charge.Reason
 	}
 	if charge.Code != "" {
-		c.ReasonCode = charge.Code
+		c.ReasonCode = charge.Code.String()
 	}
 	if charge.Percent != nil {
 		p := charge.Percent.String()
@@ -102,7 +102,7 @@ func makeLineDiscount(discount *bill.LineDiscount) *AllowanceCharge {
 		d.Reason = discount.Reason
 	}
 	if discount.Code != "" {
-		d.ReasonCode = discount.Code
+		d.ReasonCode = discount.Code.String()
 	}
 	if discount.Percent != nil {
 		p := discount.Percent.String()

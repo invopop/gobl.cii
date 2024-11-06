@@ -10,7 +10,7 @@ import (
 
 func TestParseCtoGDelivery(t *testing.T) {
 	t.Run("CII_example4.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("CII_example4.xml")
+		doc, err := loadTestXMLDoc("CII_example4.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
@@ -33,7 +33,7 @@ func TestParseCtoGDelivery(t *testing.T) {
 	})
 
 	t.Run("CII_example8.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("CII_example8.xml")
+		doc, err := loadTestXMLDoc("CII_example8.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()

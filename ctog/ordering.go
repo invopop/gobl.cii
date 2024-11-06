@@ -18,23 +18,23 @@ const (
 	keyAdditionalDocumentTypeRefPaper         = "ref-paper"
 )
 
-func (c *Converter) getOrdering(doc *Document) error {
-	ordering := &bill.Ordering{}
+func (c *Converter) prepareOrdering(doc *Document) error {
+	ord := &bill.Ordering{}
 
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerReference != nil {
-		ordering.Code = cbc.Code(*doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerReference)
+		ord.Code = cbc.Code(*doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerReference)
 	}
 
 	// Ordering period parsing
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod != nil {
-		period := &cal.Period{}
+		per := &cal.Period{}
 
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.StartDateTime != nil {
 			start, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.StartDateTime.DateTimeString)
 			if err != nil {
 				return err
 			}
-			period.Start = start
+			per.Start = start
 		}
 
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.EndDateTime != nil {
@@ -42,17 +42,17 @@ func (c *Converter) getOrdering(doc *Document) error {
 			if err != nil {
 				return err
 			}
-			period.End = end
+			per.End = end
 		}
 		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.Description != nil {
-			period.Label = *doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.Description
+			per.Label = *doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.Description
 		}
-		ordering.Period = period
+		ord.Period = per
 	}
 
 	// Despatch, Receiving and Tender parsing
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument != nil {
-		ordering.Despatch = []*org.DocumentRef{
+		ord.Despatch = []*org.DocumentRef{
 			{
 				Code: cbc.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument.IssuerAssignedID),
 			},
@@ -62,12 +62,12 @@ func (c *Converter) getOrdering(doc *Document) error {
 			if err != nil {
 				return err
 			}
-			ordering.Despatch[0].IssueDate = &refDate
+			ord.Despatch[0].IssueDate = &refDate
 		}
 	}
 
 	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument != nil {
-		ordering.Receiving = []*org.DocumentRef{
+		ord.Receiving = []*org.DocumentRef{
 			{
 				Code: cbc.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument.IssuerAssignedID),
 			},
@@ -77,7 +77,7 @@ func (c *Converter) getOrdering(doc *Document) error {
 			if err != nil {
 				return err
 			}
-			ordering.Receiving[0].IssueDate = &refDate
+			ord.Receiving[0].IssueDate = &refDate
 		}
 	}
 
@@ -85,8 +85,8 @@ func (c *Converter) getOrdering(doc *Document) error {
 		for _, ref := range doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.AdditionalReferencedDocument {
 			switch ref.TypeCode {
 			case AdditionalDocumentTypeTender:
-				if ordering.Tender == nil {
-					ordering.Tender = make([]*org.DocumentRef, 0)
+				if ord.Tender == nil {
+					ord.Tender = make([]*org.DocumentRef, 0)
 				}
 				docRef := &org.DocumentRef{
 					Code: cbc.Code(ref.IssuerAssignedID),
@@ -98,17 +98,17 @@ func (c *Converter) getOrdering(doc *Document) error {
 					}
 					docRef.IssueDate = &refDate
 				}
-				ordering.Tender = append(ordering.Tender, docRef)
+				ord.Tender = append(ord.Tender, docRef)
 			case AdditionalDocumentTypeProductInvoice:
-				if ordering.Identities == nil {
-					ordering.Identities = make([]*org.Identity, 0)
+				if ord.Identities == nil {
+					ord.Identities = make([]*org.Identity, 0)
 				}
-				ordering.Identities = append(ordering.Identities, &org.Identity{
+				ord.Identities = append(ord.Identities, &org.Identity{
 					Key:  keyAdditionalDocumentTypeInvoiceDataSheet,
 					Code: cbc.Code(ref.IssuerAssignedID),
 				})
 			default:
-				ordering.Identities = append(ordering.Identities, &org.Identity{
+				ord.Identities = append(ord.Identities, &org.Identity{
 					Key:  keyAdditionalDocumentTypeRefPaper,
 					Code: cbc.Code(ref.IssuerAssignedID),
 				})
@@ -116,8 +116,8 @@ func (c *Converter) getOrdering(doc *Document) error {
 		}
 	}
 
-	if ordering.Code != "" || ordering.Period != nil || ordering.Despatch != nil || ordering.Receiving != nil || ordering.Tender != nil || ordering.Identities != nil {
-		c.inv.Ordering = ordering
+	if ord.Code != "" || ord.Period != nil || ord.Despatch != nil || ord.Receiving != nil || ord.Tender != nil || ord.Identities != nil {
+		c.inv.Ordering = ord
 	}
 	return nil
 }

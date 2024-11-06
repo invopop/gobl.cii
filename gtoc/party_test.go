@@ -9,7 +9,7 @@ import (
 
 func TestNewSeller(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		doc, err := NewDocumentFrom("invoice-de-de.json")
+		doc, err := newDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)

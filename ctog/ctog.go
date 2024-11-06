@@ -27,7 +27,7 @@ func NewConverter() *Converter {
 	return c
 }
 
-// GetInvoice returns the invoice from the conversor
+// GetInvoice returns the invoice from the converter
 func (c *Converter) GetInvoice() *bill.Invoice {
 	return c.inv
 }
@@ -67,7 +67,7 @@ func (c *Converter) NewInvoice(doc *Document) error {
 	}
 	c.inv.IssueDate = issueDate
 
-	err = c.getLines(&doc.SupplyChainTradeTransaction)
+	err = c.prepareLines(&doc.SupplyChainTradeTransaction)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (c *Converter) NewInvoice(doc *Document) error {
 			doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil) ||
 		(len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementPaymentMeans) > 0 &&
 			doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1") {
-		err = c.getPayment(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+		err = c.preparePayment(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
 		if err != nil {
 			return err
 		}
@@ -97,12 +97,12 @@ func (c *Converter) NewInvoice(doc *Document) error {
 		}
 	}
 
-	err = c.getOrdering(doc)
+	err = c.prepareOrdering(doc)
 	if err != nil {
 		return err
 	}
 
-	err = c.getDelivery(doc)
+	err = c.prepareDelivery(doc)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func (c *Converter) NewInvoice(doc *Document) error {
 	}
 
 	if len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.SpecifiedTradeAllowanceCharge) > 0 {
-		err = c.getCharges(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+		err = c.prepareChargesAndDiscounts(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
 		if err != nil {
 			return err
 		}

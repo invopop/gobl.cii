@@ -12,7 +12,7 @@ import (
 // Define tests for the ParseParty function
 func TestParseCtoGParty(t *testing.T) {
 	t.Run("invoice-test-01.xml", func(t *testing.T) {
-		xmlData, err := LoadTestXMLDoc("invoice-test-01.xml")
+		xmlData, err := loadTestXMLDoc("invoice-test-01.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
@@ -38,7 +38,7 @@ func TestParseCtoGParty(t *testing.T) {
 
 	// With SellerTaxRepresentativeTradeParty
 	t.Run("CII_example2.xml", func(t *testing.T) {
-		xmlData, err := LoadTestXMLDoc("CII_example2.xml")
+		xmlData, err := loadTestXMLDoc("CII_example2.xml")
 		require.NoError(t, err)
 
 		c := NewConverter()
