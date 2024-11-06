@@ -29,44 +29,41 @@ func NewParty(party *org.Party) *Party {
 	return p
 }
 
-func newContact(supplier *org.Party) *Contact {
-	if len(supplier.People) == 0 {
+func newContact(p *org.Party) *Contact {
+	if len(p.People) == 0 {
 		return nil
 	}
 
-	contact := new(Contact)
-	if len(supplier.People) > 0 {
-		contact.PersonName = contactName(supplier.People[0].Name)
-		if len(supplier.People[0].Emails) > 0 {
-			contact.Email = &Email{
-				URIID: supplier.People[0].Emails[0].Address,
+	c := new(Contact)
+	if len(p.People) > 0 {
+		c.PersonName = contactName(p.People[0].Name)
+		if len(p.People[0].Emails) > 0 {
+			c.Email = &Email{
+				URIID: p.People[0].Emails[0].Address,
 			}
 		}
 	}
-	if len(supplier.Telephones) > 0 {
-		contact.Phone = &PhoneNumber{
-			CompleteNumber: supplier.Telephones[0].Number,
+	if len(p.Telephones) > 0 {
+		c.Phone = &PhoneNumber{
+			CompleteNumber: p.Telephones[0].Number,
 		}
 	}
 
-	return contact
+	return c
 }
 
-func contactName(personName *org.Name) string {
-	given := personName.Given
-	surname := personName.Surname
+func contactName(p *org.Name) string {
+	g := p.Given
+	s := p.Surname
 
-	if given == "" && surname == "" {
+	if g == "" && s == "" {
 		return ""
 	}
-
-	if given == "" {
-		return surname
+	if g == "" {
+		return s
 	}
-
-	if surname == "" {
-		return given
+	if s == "" {
+		return g
 	}
-
-	return fmt.Sprintf("%s %s", given, surname)
+	return fmt.Sprintf("%s %s", g, s)
 }

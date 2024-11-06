@@ -103,10 +103,16 @@ type SpecifiedTradeAllowanceCharge struct {
 	ChargeIndicator struct {
 		Indicator bool `xml:"Indicator"`
 	} `xml:"ChargeIndicator"`
+	BasisAmount        *string `xml:"BasisAmount"`
 	CalculationPercent *string `xml:"CalculationPercent"`
 	ActualAmount       string  `xml:"ActualAmount"`
 	ReasonCode         *string `xml:"ReasonCode"`
 	Reason             *string `xml:"Reason"`
+	CategoryTradeTax   struct {
+		TypeCode              string  `xml:"TypeCode"`
+		CategoryCode          string  `xml:"CategoryCode"`
+		RateApplicablePercent *string `xml:"RateApplicablePercent"`
+	} `xml:"CategoryTradeTax"`
 }
 
 // ApplicableHeaderTradeAgreement defines the agreement in the transaction
@@ -245,22 +251,8 @@ type ApplicableHeaderTradeSettlement struct {
 		FormattedReceivedDateTime *DateTimeFormat    `xml:"FormattedReceivedDateTime"`
 		IncludedTradeTax          []IncludedTradeTax `xml:"IncludedTradeTax"`
 	} `xml:"SpecifiedAdvancePayment"`
-	SpecifiedTradeAllowanceCharge []*struct {
-		ChargeIndicator struct {
-			Indicator bool `xml:"Indicator"`
-		} `xml:"ChargeIndicator"`
-		BasisAmount        *string `xml:"BasisAmount"`
-		CalculationPercent *string `xml:"CalculationPercent"`
-		ActualAmount       string  `xml:"ActualAmount"`
-		ReasonCode         *string `xml:"ReasonCode"`
-		Reason             *string `xml:"Reason"`
-		CategoryTradeTax   struct {
-			TypeCode              string  `xml:"TypeCode"`
-			CategoryCode          string  `xml:"CategoryCode"`
-			RateApplicablePercent *string `xml:"RateApplicablePercent"`
-		} `xml:"CategoryTradeTax"`
-	} `xml:"SpecifiedTradeAllowanceCharge"`
-	InvoiceReferencedDcument []struct {
+	SpecifiedTradeAllowanceCharge []SpecifiedTradeAllowanceCharge `xml:"SpecifiedTradeAllowanceCharge"`
+	InvoiceReferencedDcument      []struct {
 		IssuerAssignedID       string `xml:"IssuerAssignedID"`
 		FormattedIssueDateTime *struct {
 			DateTimeString *struct {

@@ -33,91 +33,91 @@ func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
 	return ac
 }
 
-func newCharge(charge *bill.Charge) *AllowanceCharge {
-	c := &AllowanceCharge{
+func newCharge(c *bill.Charge) *AllowanceCharge {
+	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
-		Amount:          charge.Amount.String(),
+		Amount:          c.Amount.String(),
 	}
-	if charge.Reason != "" {
-		c.Reason = charge.Reason
+	if c.Reason != "" {
+		ac.Reason = c.Reason
 	}
-	if charge.Code != "" {
-		c.ReasonCode = charge.Code.String()
+	if c.Code != "" {
+		ac.ReasonCode = c.Code.String()
 	}
-	if charge.Percent != nil {
-		p := charge.Percent.String()
-		c.Percent = p
+	if c.Percent != nil {
+		p := c.Percent.String()
+		ac.Percent = p
 	}
-	if charge.Taxes != nil {
-		c.Tax = makeTaxCategory(charge.Taxes[0])
+	if c.Taxes != nil {
+		ac.Tax = makeTaxCategory(c.Taxes[0])
 	}
-	return c
+	return ac
 }
 
-func newDiscount(discount *bill.Discount) *AllowanceCharge {
-	d := &AllowanceCharge{
+func newDiscount(d *bill.Discount) *AllowanceCharge {
+	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
-		Amount:          discount.Amount.String(),
+		Amount:          d.Amount.String(),
 	}
-	if discount.Reason != "" {
-		d.Reason = discount.Reason
+	if d.Reason != "" {
+		ac.Reason = d.Reason
 	}
-	if discount.Code != "" {
-		d.ReasonCode = discount.Code.String()
+	if d.Code != "" {
+		ac.ReasonCode = d.Code.String()
 	}
-	if discount.Percent != nil {
-		p := discount.Percent.String()
-		d.Percent = p
+	if d.Percent != nil {
+		p := d.Percent.String()
+		ac.Percent = p
 	}
-	if discount.Taxes != nil {
-		d.Tax = makeTaxCategory(discount.Taxes[0])
+	if d.Taxes != nil {
+		ac.Tax = makeTaxCategory(d.Taxes[0])
 	}
-	return d
+	return ac
 }
 
-func makeLineCharge(charge *bill.LineCharge) *AllowanceCharge {
-	c := &AllowanceCharge{
+func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
+	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
-		Amount:          charge.Amount.String(),
+		Amount:          c.Amount.String(),
 	}
-	if charge.Reason != "" {
-		c.Reason = charge.Reason
+	if c.Reason != "" {
+		ac.Reason = c.Reason
 	}
-	if charge.Code != "" {
-		c.ReasonCode = charge.Code.String()
+	if c.Code != "" {
+		ac.ReasonCode = c.Code.String()
 	}
-	if charge.Percent != nil {
-		p := charge.Percent.String()
-		c.Percent = p
+	if c.Percent != nil {
+		p := c.Percent.String()
+		ac.Percent = p
 	}
-	return c
+	return ac
 }
 
-func makeLineDiscount(discount *bill.LineDiscount) *AllowanceCharge {
-	d := &AllowanceCharge{
+func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
+	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
-		Amount:          discount.Amount.String(),
+		Amount:          d.Amount.String(),
 	}
-	if discount.Reason != "" {
-		d.Reason = discount.Reason
+	if d.Reason != "" {
+		ac.Reason = d.Reason
 	}
-	if discount.Code != "" {
-		d.ReasonCode = discount.Code.String()
+	if d.Code != "" {
+		ac.ReasonCode = d.Code.String()
 	}
-	if discount.Percent != nil {
-		p := discount.Percent.String()
-		d.Percent = p
+	if d.Percent != nil {
+		p := d.Percent.String()
+		ac.Percent = p
 	}
-	return d
+	return ac
 }
 
 func makeTaxCategory(tax *tax.Combo) *Tax {
-	category := &Tax{}
+	c := &Tax{}
 	if tax.Category != "" {
-		category.TypeCode = tax.Category.String()
+		c.TypeCode = tax.Category.String()
 	}
 	if tax.Percent != nil {
-		category.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
+		c.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
 	}
-	return category
+	return c
 }

@@ -10,37 +10,37 @@ import (
 func (c *Converter) NewLines(lines []*bill.Line) error {
 	var Lines []*Line
 
-	for _, line := range lines {
-		Lines = append(Lines, newLine(line))
+	for _, l := range lines {
+		Lines = append(Lines, newLine(l))
 	}
 
 	c.doc.Transaction.Lines = Lines
 	return nil
 }
 
-func newLine(line *bill.Line) *Line {
-	if line.Item == nil {
+func newLine(l *bill.Line) *Line {
+	if l.Item == nil {
 		return nil
 	}
-	item := line.Item
+	it := l.Item
 
 	lineItem := &Line{
-		ID:       strconv.Itoa(line.Index),
-		Name:     item.Name,
-		NetPrice: item.Price.String(),
+		ID:       strconv.Itoa(l.Index),
+		Name:     it.Name,
+		NetPrice: it.Price.String(),
 		TradeDelivery: &Quantity{
-			Amount:   line.Quantity.String(),
-			UnitCode: string(item.Unit.UNECE()),
+			Amount:   l.Quantity.String(),
+			UnitCode: string(it.Unit.UNECE()),
 		},
-		TradeSettlement: newTradeSettlement(line),
+		TradeSettlement: newTradeSettlement(l),
 	}
 
-	if len(line.Notes) > 0 {
+	if len(l.Notes) > 0 {
 		var notes []Note
-		for _, note := range line.Notes {
+		for _, n := range l.Notes {
 			notes = append(notes, Note{
-				SubjectCode: note.Key.String(),
-				Content:     note.Text,
+				SubjectCode: n.Key.String(),
+				Content:     n.Text,
 			})
 		}
 		lineItem.Note = notes
@@ -49,9 +49,9 @@ func newLine(line *bill.Line) *Line {
 	return lineItem
 }
 
-func newTradeSettlement(line *bill.Line) *TradeSettlement {
+func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	var applicableTradeTax []*Tax
-	for _, tax := range line.Taxes {
+	for _, tax := range l.Taxes {
 		tradeTax := makeTaxCategory(tax)
 		if tax.Percent != nil {
 			tradeTax.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
@@ -60,14 +60,14 @@ func newTradeSettlement(line *bill.Line) *TradeSettlement {
 		applicableTradeTax = append(applicableTradeTax, tradeTax)
 	}
 
-	settlement := &TradeSettlement{
+	stlm := &TradeSettlement{
 		ApplicableTradeTax: applicableTradeTax,
-		Sum:                line.Total.String(),
+		Sum:                l.Total.String(),
 	}
 
-	if len(line.Charges) > 0 || len(line.Discounts) > 0 {
-		settlement.AllowanceCharge = newLineAllowanceCharges(line)
+	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
+		stlm.AllowanceCharge = newLineAllowanceCharges(l)
 	}
 
-	return settlement
+	return stlm
 }

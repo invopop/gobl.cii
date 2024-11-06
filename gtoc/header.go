@@ -14,7 +14,7 @@ const IssueDateFormat = "102"
 
 // NewHeader creates the ExchangedDocument part of a EN 16931 compliant invoice
 func (c *Converter) NewHeader(inv *bill.Invoice) error {
-	header := &Header{
+	h := &Header{
 		ID:       invoiceNumber(inv.Series, inv.Code),
 		TypeCode: invoiceTypeCode(inv),
 		IssueDate: &Date{
@@ -24,30 +24,30 @@ func (c *Converter) NewHeader(inv *bill.Invoice) error {
 	}
 	if len(inv.Notes) > 0 {
 		notes := make([]*Note, 0, len(inv.Notes))
-		for _, note := range inv.Notes {
+		for _, n := range inv.Notes {
 			notes = append(notes, &Note{
-				Content: note.Text,
+				Content: n.Text,
 			})
 		}
-		header.IncludedNote = notes
+		h.IncludedNote = notes
 	}
-	c.doc.ExchangedDocument = header
+	c.doc.ExchangedDocument = h
 	return nil
 }
 
-func formatIssueDate(date cal.Date) string {
-	if date.IsZero() {
+func formatIssueDate(d cal.Date) string {
+	if d.IsZero() {
 		return ""
 	}
-	t := date.Time()
+	t := d.Time()
 	return t.Format("20060102")
 }
 
-func invoiceNumber(series cbc.Code, code cbc.Code) string {
-	if series == "" {
-		return series.String()
+func invoiceNumber(s cbc.Code, c cbc.Code) string {
+	if s == "" {
+		return s.String()
 	}
-	return fmt.Sprintf("%s-%s", series, code)
+	return fmt.Sprintf("%s-%s", s, c)
 }
 
 // For German suppliers, the element "Invoice type code" (BT-3) should only contain the
