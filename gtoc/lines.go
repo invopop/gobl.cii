@@ -50,18 +50,18 @@ func newLine(l *bill.Line) *Line {
 }
 
 func newTradeSettlement(l *bill.Line) *TradeSettlement {
-	var applicableTradeTax []*Tax
+	var taxes []*Tax
 	for _, tax := range l.Taxes {
-		tradeTax := makeTaxCategory(tax)
+		t := makeTaxCategory(tax)
 		if tax.Percent != nil {
-			tradeTax.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
+			t.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
 		}
 
-		applicableTradeTax = append(applicableTradeTax, tradeTax)
+		taxes = append(taxes, t)
 	}
 
 	stlm := &TradeSettlement{
-		ApplicableTradeTax: applicableTradeTax,
+		ApplicableTradeTax: taxes,
 		Sum:                l.Total.String(),
 	}
 

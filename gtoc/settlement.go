@@ -2,22 +2,10 @@ package gtoc
 
 import (
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 )
-
-// One GOBL Release, update this to use catalogues
-var paymentMeans = map[cbc.Key]string{
-	pay.MeansKeyCash:           "10",
-	pay.MeansKeyCheque:         "20",
-	pay.MeansKeyCreditTransfer: "30",
-	pay.MeansKeyCard:           "48",
-	pay.MeansKeyDirectDebit:    "49",
-	// pay.MeansKeyCreditTransfer.With(pay.MeansKeySEPA): "58",
-	// pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA):    "59",
-}
 
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
 func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
@@ -66,7 +54,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
 		stlm.PaymentMeans = &PaymentMeans{
-			TypeCode:    findPaymentKey(instr.Key),
+			TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
 			Information: instr.Detail,
 		}
 		if instr.CreditTransfer != nil {
@@ -152,7 +140,7 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 		CalculatedAmount:      rate.Amount.String(),
 		TypeCode:              category.Code.String(),
 		BasisAmount:           rate.Base.String(),
-		CategoryCode:          findTaxCode(rate.Key),
+		CategoryCode:          rate.Ext[untdid.ExtKeyTaxCategory].String(),
 		RateApplicablePercent: rate.Percent.StringWithoutSymbol(),
 	}
 
@@ -172,11 +160,4 @@ func newPayee(party *org.Party) *Party {
 	}
 
 	return payee
-}
-
-func findPaymentKey(key cbc.Key) string {
-	if val, ok := paymentMeans[key]; ok {
-		return val
-	}
-	return "1"
 }

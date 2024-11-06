@@ -2,6 +2,7 @@ package gtoc
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -10,11 +11,11 @@ func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
 		return nil
 	}
 	ac := make([]*AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
-	for i, charge := range inv.Charges {
-		ac[i] = newCharge(charge)
+	for i, c := range inv.Charges {
+		ac[i] = newCharge(c)
 	}
-	for i, discount := range inv.Discounts {
-		ac[i+len(inv.Charges)] = newDiscount(discount)
+	for i, d := range inv.Discounts {
+		ac[i+len(inv.Charges)] = newDiscount(d)
 	}
 	return ac
 }
@@ -42,7 +43,7 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 		ac.Reason = c.Reason
 	}
 	if c.Code != "" {
-		ac.ReasonCode = c.Code.String()
+		ac.ReasonCode = c.Ext[untdid.ExtKeyCharge].String()
 	}
 	if c.Percent != nil {
 		p := c.Percent.String()
@@ -63,7 +64,7 @@ func newDiscount(d *bill.Discount) *AllowanceCharge {
 		ac.Reason = d.Reason
 	}
 	if d.Code != "" {
-		ac.ReasonCode = d.Code.String()
+		ac.ReasonCode = d.Ext[untdid.ExtKeyAllowance].String()
 	}
 	if d.Percent != nil {
 		p := d.Percent.String()
@@ -84,7 +85,7 @@ func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
 		ac.Reason = c.Reason
 	}
 	if c.Code != "" {
-		ac.ReasonCode = c.Code.String()
+		ac.ReasonCode = c.Ext[untdid.ExtKeyCharge].String()
 	}
 	if c.Percent != nil {
 		p := c.Percent.String()
@@ -102,7 +103,7 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 		ac.Reason = d.Reason
 	}
 	if d.Code != "" {
-		ac.ReasonCode = d.Code.String()
+		ac.ReasonCode = d.Ext[untdid.ExtKeyAllowance].String()
 	}
 	if d.Percent != nil {
 		p := d.Percent.String()
@@ -115,6 +116,9 @@ func makeTaxCategory(tax *tax.Combo) *Tax {
 	c := &Tax{}
 	if tax.Category != "" {
 		c.TypeCode = tax.Category.String()
+	}
+	if !tax.Rate.IsEmpty() {
+		c.CategoryCode = tax.Ext[untdid.ExtKeyTaxCategory].String()
 	}
 	if tax.Percent != nil {
 		c.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
