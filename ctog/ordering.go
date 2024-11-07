@@ -30,16 +30,16 @@ func (c *Converter) prepareOrdering(doc *document.Document) error {
 	if doc.Transaction.Settlement.Period != nil {
 		per := &cal.Period{}
 
-		if doc.Transaction.Settlement.Period.Start != nil && doc.Transaction.Settlement.Period.Start.Date != nil {
-			start, err := ParseDate(doc.Transaction.Settlement.Period.Start.Date.Date)
+		if doc.Transaction.Settlement.Period.Start != nil && doc.Transaction.Settlement.Period.Start.DateFormat != nil {
+			start, err := ParseDate(doc.Transaction.Settlement.Period.Start.DateFormat.Value)
 			if err != nil {
 				return err
 			}
 			per.Start = start
 		}
 
-		if doc.Transaction.Settlement.Period.End != nil && doc.Transaction.Settlement.Period.End.Date != nil {
-			end, err := ParseDate(doc.Transaction.Settlement.Period.End.Date.Date)
+		if doc.Transaction.Settlement.Period.End != nil && doc.Transaction.Settlement.Period.End.DateFormat != nil {
+			end, err := ParseDate(doc.Transaction.Settlement.Period.End.DateFormat.Value)
 			if err != nil {
 				return err
 			}
@@ -78,8 +78,8 @@ func (c *Converter) prepareOrdering(doc *document.Document) error {
 				docRef := &org.DocumentRef{
 					Code: cbc.Code(ref.ID),
 				}
-				if ref.IssueDate != nil {
-					refDate, err := ParseDate(ref.IssueDate.Date.Date)
+				if ref.IssueDate != nil && ref.IssueDate.DateFormat != nil {
+					refDate, err := ParseDate(ref.IssueDate.DateFormat.Value)
 					if err != nil {
 						return err
 					}

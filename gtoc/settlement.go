@@ -33,8 +33,8 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 			{
 				IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
 				IssueDate: &document.FormattedIssueDate{
-					Date: &document.Date{
-						Date:   formatIssueDate(*pre.IssueDate),
+					DateFormat: &document.Date{
+						Value:  formatIssueDate(*pre.IssueDate),
 						Format: "102",
 					},
 				},
@@ -48,14 +48,14 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	if inv.Delivery != nil && inv.Delivery.Period != nil {
 		stlm.Period = &document.Period{
 			Start: &document.IssueDate{
-				Date: &document.Date{
-					Date:   formatIssueDate(inv.Delivery.Period.Start),
+				DateFormat: &document.Date{
+					Value:  formatIssueDate(inv.Delivery.Period.Start),
 					Format: "102",
 				},
 			},
 			End: &document.IssueDate{
-				Date: &document.Date{
-					Date:   formatIssueDate(inv.Delivery.Period.End),
+				DateFormat: &document.Date{
+					Value:  formatIssueDate(inv.Delivery.Period.End),
 					Format: "102",
 				},
 			},

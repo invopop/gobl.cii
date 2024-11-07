@@ -31,9 +31,10 @@ type Header struct {
 
 // IssueDate defines the structure of the IssueDateTime of the CII standard
 type IssueDate struct {
-	Date *Date `xml:"udt:DateTimeString"`
+	DateFormat *Date `xml:"udt:DateTimeString"`
 }
 
+// FormattedIssueDate defines the structure of the FormattedIssueDateTime of the CII standard
 type FormattedIssueDate struct {
-	Date *Date `xml:"qdt:DateTimeString"`
+	DateFormat *Date `xml:"qdt:DateTimeString"`
 }

@@ -12,8 +12,8 @@ func (c *Converter) prepareDelivery(del *document.Delivery) error {
 		d.Receiver = c.getParty(del.Receiver)
 	}
 
-	if del.Event != nil && del.Event.OccurrenceDate != nil && del.Event.OccurrenceDate.Date != nil {
-		deliveryDate, err := ParseDate(del.Event.OccurrenceDate.Date.Date)
+	if del.Event != nil && del.Event.OccurrenceDate != nil && del.Event.OccurrenceDate.DateFormat != nil {
+		deliveryDate, err := ParseDate(del.Event.OccurrenceDate.DateFormat.Value)
 		if err != nil {
 			return err
 		}

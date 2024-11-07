@@ -15,8 +15,8 @@ func TestNewHeader(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "SAMPLE-001", doc.ExchangedDocument.ID)
 		assert.Equal(t, "380", doc.ExchangedDocument.TypeCode)
-		assert.Equal(t, "20240213", doc.ExchangedDocument.IssueDate.Date.Date)
-		assert.Equal(t, IssueDateFormat, doc.ExchangedDocument.IssueDate.Date.Format)
+		assert.Equal(t, "20240213", doc.ExchangedDocument.IssueDate.DateFormat.Value)
+		assert.Equal(t, IssueDateFormat, doc.ExchangedDocument.IssueDate.DateFormat.Format)
 	})
 
 	t.Run("should contain the header info from credit note", func(t *testing.T) {
@@ -26,8 +26,8 @@ func TestNewHeader(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "CN-002", doc.ExchangedDocument.ID)
 		assert.Equal(t, "381", doc.ExchangedDocument.TypeCode)
-		assert.Equal(t, "20240214", doc.ExchangedDocument.IssueDate.Date.Date)
-		assert.Equal(t, IssueDateFormat, doc.ExchangedDocument.IssueDate.Date.Format)
+		assert.Equal(t, "20240214", doc.ExchangedDocument.IssueDate.DateFormat.Value)
+		assert.Equal(t, IssueDateFormat, doc.ExchangedDocument.IssueDate.DateFormat.Format)
 	})
 
 	t.Run("should return self billed type code for self billed invoice", func(t *testing.T) {

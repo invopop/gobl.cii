@@ -28,8 +28,8 @@ func TestNewSettlement(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument[0].IssuerAssignedID)
-		assert.Equal(t, "20240213", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.Date.Date)
-		assert.Equal(t, "102", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.Date.Format)
+		assert.Equal(t, "20240213", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.DateFormat.Value)
+		assert.Equal(t, "102", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.DateFormat.Format)
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {

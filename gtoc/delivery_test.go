@@ -12,7 +12,7 @@ func TestNewDelivery(t *testing.T) {
 		doc, err := newDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 
-		assert.Equal(t, "20240210", doc.Transaction.Delivery.Event.OccurrenceDate.Date.Date)
+		assert.Equal(t, "20240210", doc.Transaction.Delivery.Event.OccurrenceDate.DateFormat.Value)
 		assert.NotNil(t, doc.Transaction.Delivery.Receiver)
 		assert.NotNil(t, doc.Transaction.Delivery.Receiver.PostalTradeAddress)
 		assert.Equal(t, "Deliverystreet 2", doc.Transaction.Delivery.Receiver.PostalTradeAddress.LineOne)

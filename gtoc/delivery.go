@@ -13,8 +13,8 @@ func (c *Converter) prepareDelivery(inv *bill.Invoice) error {
 		if inv.Delivery.Date != nil {
 			d.Event = &document.ChainEvent{
 				OccurrenceDate: &document.IssueDate{
-					Date: &document.Date{
-						Date: formatIssueDate(*inv.Delivery.Date),
+					DateFormat: &document.Date{
+						Value: formatIssueDate(*inv.Delivery.Date),
 					},
 				},
 			}

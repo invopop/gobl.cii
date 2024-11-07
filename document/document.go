@@ -53,7 +53,7 @@ type TaxTotalAmount struct {
 
 // Date defines date in the UDT structure
 type Date struct {
-	Date   string `xml:",chardata"`
+	Value  string `xml:",chardata"`
 	Format string `xml:"format,attr,omitempty"`
 }
 

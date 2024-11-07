@@ -69,7 +69,7 @@ func (c *Converter) NewInvoice(doc *document.Document) error {
 		},
 	}
 
-	issueDate, err := ParseDate(doc.ExchangedDocument.IssueDate.Date.Date)
+	issueDate, err := ParseDate(doc.ExchangedDocument.IssueDate.DateFormat.Value)
 	if err != nil {
 		return err
 	}
@@ -118,8 +118,8 @@ func (c *Converter) NewInvoice(doc *document.Document) error {
 			docRef := &org.DocumentRef{
 				Code: cbc.Code(ref.IssuerAssignedID),
 			}
-			if ref.IssueDate != nil && ref.IssueDate.Date != nil {
-				refDate, err := ParseDate(ref.IssueDate.Date.Date)
+			if ref.IssueDate != nil && ref.IssueDate.DateFormat != nil {
+				refDate, err := ParseDate(ref.IssueDate.DateFormat.Value)
 				if err != nil {
 					return err
 				}

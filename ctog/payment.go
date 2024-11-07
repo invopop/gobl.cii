@@ -43,8 +43,8 @@ func (c *Converter) preparePayment(stlm *document.Settlement) error {
 			a := &pay.Advance{
 				Amount: amt,
 			}
-			if ap.Date != nil && ap.Date.Date != nil {
-				advancePaymentReceivedDateTime, err := ParseDate(ap.Date.Date.Date)
+			if ap.Date != nil && ap.Date.DateFormat != nil {
+				advancePaymentReceivedDateTime, err := ParseDate(ap.Date.DateFormat.Value)
 				if err != nil {
 					return err
 				}
@@ -67,8 +67,8 @@ func getTerms(settlement *document.Settlement) (*pay.Terms, error) {
 			terms.Detail = term.Description
 		}
 
-		if term.DueDate != nil && term.DueDate.Date != nil {
-			dueDateTime, err := ParseDate(term.DueDate.Date.Date)
+		if term.DueDate != nil && term.DueDate.DateFormat != nil {
+			dueDateTime, err := ParseDate(term.DueDate.DateFormat.Value)
 			if err != nil {
 				return nil, err
 			}
