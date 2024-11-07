@@ -3,6 +3,7 @@ package ctog
 import (
 	"strings"
 
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -10,13 +11,13 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) prepareChargesAndDiscounts(stlm *ApplicableHeaderTradeSettlement) error {
+func (c *Converter) prepareChargesAndDiscounts(stlm *document.Settlement) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
-	for _, ac := range stlm.SpecifiedTradeAllowanceCharge {
-		if ac.ChargeIndicator.Indicator {
-			c, err := newCharge(&ac)
+	for _, ac := range stlm.AllowanceCharges {
+		if ac.ChargeIndicator.Value {
+			c, err := newCharge(ac)
 			if err != nil {
 				return err
 			}
@@ -25,7 +26,7 @@ func (c *Converter) prepareChargesAndDiscounts(stlm *ApplicableHeaderTradeSettle
 			}
 			charges = append(charges, c)
 		} else {
-			d, err := newDiscount(&ac)
+			d, err := newDiscount(ac)
 			if err != nil {
 				return err
 			}
@@ -44,50 +45,50 @@ func (c *Converter) prepareChargesAndDiscounts(stlm *ApplicableHeaderTradeSettle
 	return nil
 }
 
-func newCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.Charge, error) {
+func newCharge(ac *document.AllowanceCharge) (*bill.Charge, error) {
 	// This is a charge
 	c := &bill.Charge{}
-	if ac.Reason != nil {
-		c.Reason = *ac.Reason
+	if ac.Reason != "" {
+		c.Reason = ac.Reason
 	}
-	if ac.ActualAmount != "" {
-		c.Amount, _ = num.AmountFromString(ac.ActualAmount)
+	if ac.Amount != "" {
+		c.Amount, _ = num.AmountFromString(ac.Amount)
 	}
-	if ac.ReasonCode != nil {
+	if ac.ReasonCode != "" {
 		c.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: tax.ExtValue(*ac.ReasonCode),
+			untdid.ExtKeyCharge: tax.ExtValue(ac.ReasonCode),
 		}
 	}
-	if ac.BasisAmount != nil {
-		b, err := num.AmountFromString(*ac.BasisAmount)
+	if ac.Base != "" {
+		b, err := num.AmountFromString(ac.Base)
 		if err != nil {
 			return nil, err
 		}
 		c.Base = &b
 	}
-	if ac.CalculationPercent != nil {
-		if !strings.HasSuffix(*ac.CalculationPercent, "%") {
-			*ac.CalculationPercent += "%"
+	if ac.Percent != "" {
+		if !strings.HasSuffix(ac.Percent, "%") {
+			ac.Percent += "%"
 		}
-		p, err := num.PercentageFromString(*ac.CalculationPercent)
+		p, err := num.PercentageFromString(ac.Percent)
 		if err != nil {
 			return nil, err
 		}
 		c.Percent = &p
 	}
-	if ac.CategoryTradeTax.TypeCode != "" {
+	if ac.Tax.TypeCode != "" {
 		c.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
+				Category: cbc.Code(ac.Tax.TypeCode),
 			},
 		}
 	}
 	// Format percentages
-	if ac.CategoryTradeTax.RateApplicablePercent != nil {
-		if !strings.HasSuffix(*ac.CategoryTradeTax.RateApplicablePercent, "%") {
-			*ac.CategoryTradeTax.RateApplicablePercent += "%"
+	if ac.Tax.RateApplicablePercent != "" {
+		if !strings.HasSuffix(ac.Tax.RateApplicablePercent, "%") {
+			ac.Tax.RateApplicablePercent += "%"
 		}
-		p, err := num.PercentageFromString(*ac.CategoryTradeTax.RateApplicablePercent)
+		p, err := num.PercentageFromString(ac.Tax.RateApplicablePercent)
 		if err != nil {
 			return nil, err
 		}
@@ -96,48 +97,48 @@ func newCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.Charge, error) {
 	return c, nil
 }
 
-func newDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.Discount, error) {
+func newDiscount(ac *document.AllowanceCharge) (*bill.Discount, error) {
 	d := &bill.Discount{}
-	if ac.Reason != nil {
-		d.Reason = *ac.Reason
+	if ac.Reason != "" {
+		d.Reason = ac.Reason
 	}
-	if ac.ActualAmount != "" {
-		d.Amount, _ = num.AmountFromString(ac.ActualAmount)
+	if ac.Amount != "" {
+		d.Amount, _ = num.AmountFromString(ac.Amount)
 	}
-	if ac.ReasonCode != nil {
+	if ac.ReasonCode != "" {
 		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: tax.ExtValue(*ac.ReasonCode),
+			untdid.ExtKeyAllowance: tax.ExtValue(ac.ReasonCode),
 		}
 	}
-	if ac.BasisAmount != nil {
-		b, err := num.AmountFromString(*ac.BasisAmount)
+	if ac.Base != "" {
+		b, err := num.AmountFromString(ac.Base)
 		if err != nil {
 			return nil, err
 		}
 		d.Base = &b
 	}
-	if ac.CalculationPercent != nil {
-		if !strings.HasSuffix(*ac.CalculationPercent, "%") {
-			*ac.CalculationPercent += "%"
+	if ac.Percent != "" {
+		if !strings.HasSuffix(ac.Percent, "%") {
+			ac.Percent += "%"
 		}
-		p, err := num.PercentageFromString(*ac.CalculationPercent)
+		p, err := num.PercentageFromString(ac.Percent)
 		if err != nil {
 			return nil, err
 		}
 		d.Percent = &p
 	}
-	if ac.CategoryTradeTax.TypeCode != "" {
+	if ac.Tax.TypeCode != "" {
 		d.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.CategoryTradeTax.TypeCode),
+				Category: cbc.Code(ac.Tax.TypeCode),
 			},
 		}
 	}
-	if ac.CategoryTradeTax.RateApplicablePercent != nil {
-		if !strings.HasSuffix(*ac.CategoryTradeTax.RateApplicablePercent, "%") {
-			*ac.CategoryTradeTax.RateApplicablePercent += "%"
+	if ac.Tax.RateApplicablePercent != "" {
+		if !strings.HasSuffix(ac.Tax.RateApplicablePercent, "%") {
+			ac.Tax.RateApplicablePercent += "%"
 		}
-		p, err := num.PercentageFromString(*ac.CategoryTradeTax.RateApplicablePercent)
+		p, err := num.PercentageFromString(ac.Tax.RateApplicablePercent)
 		if err != nil {
 			return nil, err
 		}
@@ -146,27 +147,27 @@ func newDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.Discount, error) {
 	return d, nil
 }
 
-func getLineCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.LineCharge, error) {
-	a, err := num.AmountFromString(ac.ActualAmount)
+func getLineCharge(ac *document.AllowanceCharge) (*bill.LineCharge, error) {
+	a, err := num.AmountFromString(ac.Amount)
 	if err != nil {
 		return nil, err
 	}
 	c := &bill.LineCharge{
 		Amount: a,
 	}
-	if ac.ReasonCode != nil {
+	if ac.ReasonCode != "" {
 		c.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: tax.ExtValue(*ac.ReasonCode),
+			untdid.ExtKeyCharge: tax.ExtValue(ac.ReasonCode),
 		}
 	}
-	if ac.Reason != nil {
-		c.Reason = *ac.Reason
+	if ac.Reason != "" {
+		c.Reason = ac.Reason
 	}
-	if ac.CalculationPercent != nil {
-		if !strings.HasSuffix(*ac.CalculationPercent, "%") {
-			*ac.CalculationPercent += "%"
+	if ac.Percent != "" {
+		if !strings.HasSuffix(ac.Percent, "%") {
+			ac.Percent += "%"
 		}
-		p, err := num.PercentageFromString(*ac.CalculationPercent)
+		p, err := num.PercentageFromString(ac.Percent)
 		if err != nil {
 			return nil, err
 		}
@@ -175,27 +176,27 @@ func getLineCharge(ac *SpecifiedTradeAllowanceCharge) (*bill.LineCharge, error) 
 	return c, nil
 }
 
-func getLineDiscount(ac *SpecifiedTradeAllowanceCharge) (*bill.LineDiscount, error) {
-	a, err := num.AmountFromString(ac.ActualAmount)
+func getLineDiscount(ac *document.AllowanceCharge) (*bill.LineDiscount, error) {
+	a, err := num.AmountFromString(ac.Amount)
 	if err != nil {
 		return nil, err
 	}
 	d := &bill.LineDiscount{
 		Amount: a,
 	}
-	if ac.ReasonCode != nil {
+	if ac.ReasonCode != "" {
 		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: tax.ExtValue(*ac.ReasonCode),
+			untdid.ExtKeyAllowance: tax.ExtValue(ac.ReasonCode),
 		}
 	}
-	if ac.Reason != nil {
-		d.Reason = *ac.Reason
+	if ac.Reason != "" {
+		d.Reason = ac.Reason
 	}
-	if ac.CalculationPercent != nil {
-		if !strings.HasSuffix(*ac.CalculationPercent, "%") {
-			*ac.CalculationPercent += "%"
+	if ac.Percent != "" {
+		if !strings.HasSuffix(ac.Percent, "%") {
+			ac.Percent += "%"
 		}
-		p, err := num.PercentageFromString(*ac.CalculationPercent)
+		p, err := num.PercentageFromString(ac.Percent)
 		if err != nil {
 			return nil, err
 		}

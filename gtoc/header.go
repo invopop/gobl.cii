@@ -3,6 +3,7 @@ package gtoc
 import (
 	"fmt"
 
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -14,18 +15,20 @@ const IssueDateFormat = "102"
 
 // NewHeader creates the ExchangedDocument part of a EN 16931 compliant invoice
 func (c *Converter) NewHeader(inv *bill.Invoice) error {
-	h := &Header{
+	h := &document.Header{
 		ID:       invoiceNumber(inv.Series, inv.Code),
 		TypeCode: inv.Tax.Ext[untdid.ExtKeyDocumentType].String(),
-		IssueDate: &Date{
-			Date:   formatIssueDate(inv.IssueDate),
-			Format: IssueDateFormat,
+		IssueDate: &document.IssueDate{
+			Date: &document.Date{
+				Date:   formatIssueDate(inv.IssueDate),
+				Format: IssueDateFormat,
+			},
 		},
 	}
 	if len(inv.Notes) > 0 {
-		notes := make([]*Note, 0, len(inv.Notes))
+		notes := make([]*document.Note, 0, len(inv.Notes))
 		for _, n := range inv.Notes {
-			notes = append(notes, &Note{
+			notes = append(notes, &document.Note{
 				Content: n.Text,
 			})
 		}

@@ -115,19 +115,25 @@
       </ram:PayeeTradeParty>
       <ram:SpecifiedTradeSettlementPaymentMeans>
         <ram:TypeCode>30</ram:TypeCode>
-        <ram:ApplicableTradeSettlementFinancialCard>
-          <ram:ID>1234</ram:ID>
-          <ram:CardholderName>John Doe</ram:CardholderName>
-        </ram:ApplicableTradeSettlementFinancialCard>
-        <ram:PayerPartyDebtorFinancialAccount>
-          <ram:IBANID>DE89370400440532013000</ram:IBANID>
-        </ram:PayerPartyDebtorFinancialAccount>
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>NO9386011117947</ram:IBANID>
         </ram:PayeePartyCreditorFinancialAccount>
         <ram:PayeeSpecifiedCreditorFinancialInstitution>
           <ram:BICID>DNBANOKK</ram:BICID>
         </ram:PayeeSpecifiedCreditorFinancialInstitution>
+      </ram:SpecifiedTradeSettlementPaymentMeans>
+      <ram:SpecifiedTradeSettlementPaymentMeans>
+        <ram:TypeCode>30</ram:TypeCode>
+        <ram:PayerPartyDebtorFinancialAccount>
+          <ram:IBANID>DE89370400440532013000</ram:IBANID>
+        </ram:PayerPartyDebtorFinancialAccount>
+      </ram:SpecifiedTradeSettlementPaymentMeans>
+      <ram:SpecifiedTradeSettlementPaymentMeans>
+        <ram:TypeCode>30</ram:TypeCode>
+        <ram:ApplicableTradeSettlementFinancialCard>
+          <ram:ID>1234</ram:ID>
+          <ram:CardholderName>John Doe</ram:CardholderName>
+        </ram:ApplicableTradeSettlementFinancialCard>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>342.00</ram:CalculatedAmount>

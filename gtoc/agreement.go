@@ -1,6 +1,7 @@
 package gtoc
 
 import (
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/org"
 )
@@ -14,7 +15,7 @@ const (
 
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
 func (c *Converter) prepareAgreement(inv *bill.Invoice) error {
-	c.doc.Transaction.Agreement = new(Agreement)
+	c.doc.Transaction.Agreement = new(document.Agreement)
 	agmt := c.doc.Transaction.Agreement
 	if inv.Ordering != nil && inv.Ordering.Code != "" {
 		agmt.BuyerReference = inv.Ordering.Code.String()
@@ -34,18 +35,24 @@ func (c *Converter) prepareAgreement(inv *bill.Invoice) error {
 		}
 		if len(inv.Ordering.Contracts) > 0 {
 			c := inv.Ordering.Contracts[0].Code.String()
-			agmt.Contract = &c
+			agmt.Contract = &document.IssuerID{
+				ID: c,
+			}
 		}
 		if len(inv.Ordering.Purchases) > 0 {
 			p := inv.Ordering.Purchases[0].Code.String()
-			agmt.Purchase = &p
+			agmt.Purchase = &document.IssuerID{
+				ID: p,
+			}
 		}
 		if len(inv.Ordering.Sales) > 0 {
 			s := inv.Ordering.Sales[0].Code.String()
-			agmt.Sales = &s
+			agmt.Sales = &document.IssuerID{
+				ID: s,
+			}
 		}
 		if len(inv.Ordering.Projects) > 0 {
-			agmt.Project = &Project{
+			agmt.Project = &document.Project{
 				ID: inv.Ordering.Projects[0].Code.String(),
 			}
 			if inv.Ordering.Projects[0].Description != "" {
@@ -56,13 +63,13 @@ func (c *Converter) prepareAgreement(inv *bill.Invoice) error {
 	return nil
 }
 
-func newPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
+func newPostalTradeAddress(addresses []*org.Address) *document.PostalTradeAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
 	address := addresses[0]
 
-	a := &PostalTradeAddress{
+	a := &document.PostalTradeAddress{
 		Postcode:  address.Code,
 		LineOne:   address.Street,
 		LineTwo:   address.Number,
@@ -74,14 +81,16 @@ func newPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
 	return a
 }
 
-func newEmail(emails []*org.Email) *URIUniversalCommunication {
+func newEmail(emails []*org.Email) *document.URIUniversalCommunication {
 	if len(emails) == 0 {
 		return nil
 	}
 
-	e := &URIUniversalCommunication{
-		URIID:    emails[0].Address,
-		SchemeID: SchemeIDEmail,
+	e := &document.URIUniversalCommunication{
+		ID: &document.PartyID{
+			Value:    emails[0].Address,
+			SchemeID: SchemeIDEmail,
+		},
 	}
 
 	return e

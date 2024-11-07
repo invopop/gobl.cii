@@ -1,36 +1,26 @@
 package ctog
 
 import (
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/org"
 )
 
-func (c *Converter) prepareDelivery(doc *Document) error {
+func (c *Converter) prepareDelivery(del *document.Delivery) error {
 	d := &bill.Delivery{}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty != nil {
-		d.Receiver = c.getParty(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty)
+	if del.Receiver != nil {
+		d.Receiver = c.getParty(del.Receiver)
 	}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent != nil &&
-		doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent.OccurrenceDateTime != nil {
-		deliveryDate, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent.OccurrenceDateTime.DateTimeString)
+	if del.Event != nil && del.Event.OccurrenceDate != nil && del.Event.OccurrenceDate.Date != nil {
+		deliveryDate, err := ParseDate(del.Event.OccurrenceDate.Date.Date)
 		if err != nil {
 			return err
 		}
 		d.Date = &deliveryDate
 	}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DeliveryNoteReferencedDocument != nil {
-		d.Identities = []*org.Identity{
-			{
-				Code: cbc.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DeliveryNoteReferencedDocument.IssuerAssignedID),
-			},
-		}
-	}
-
-	if d.Receiver != nil || d.Date != nil || d.Identities != nil {
+	if d.Receiver != nil || d.Date != nil {
 		c.inv.Delivery = d
 	}
 	return nil

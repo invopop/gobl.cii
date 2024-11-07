@@ -1,6 +1,7 @@
 package ctog
 
 import (
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
@@ -9,39 +10,41 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) preparePayment(stlm *ApplicableHeaderTradeSettlement) error {
+func (c *Converter) preparePayment(stlm *document.Settlement) error {
 	pymt := &bill.Payment{}
 
-	if stlm.PayeeTradeParty != nil {
-		payee := &org.Party{Name: stlm.PayeeTradeParty.Name}
-		if stlm.PayeeTradeParty.PostalTradeAddress != nil {
+	if stlm.Payee != nil {
+		payee := &org.Party{Name: stlm.Payee.Name}
+		if stlm.Payee.PostalTradeAddress != nil {
 			payee.Addresses = []*org.Address{
-				parseAddress(stlm.PayeeTradeParty.PostalTradeAddress),
+				parseAddress(stlm.Payee.PostalTradeAddress),
 			}
 		}
 		pymt.Payee = payee
 	}
-	if len(stlm.SpecifiedTradePaymentTerms) > 0 {
-		if stlm.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil {
-			terms, err := getTerms(stlm)
-			if err != nil {
-				return err
-			}
-			pymt.Terms = terms
+	if len(stlm.PaymentTerms) > 0 {
+		terms, err := getTerms(stlm)
+		if err != nil {
+			return err
 		}
+		pymt.Terms = terms
 	}
 
-	if len(stlm.SpecifiedTradeSettlementPaymentMeans) > 0 && stlm.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1" {
+	if len(stlm.PaymentMeans) > 0 && stlm.PaymentMeans[0].TypeCode != "1" {
 		pymt.Instructions = getMeans(stlm)
 	}
 
-	if len(stlm.SpecifiedAdvancePayment) > 0 {
-		for _, ap := range stlm.SpecifiedAdvancePayment {
-			a := &pay.Advance{
-				Amount: num.AmountFromFloat64(ap.PaidAmount, 0),
+	if len(stlm.Advance) > 0 {
+		for _, ap := range stlm.Advance {
+			amt, err := num.AmountFromString(ap.Amount)
+			if err != nil {
+				return err
 			}
-			if ap.FormattedReceivedDateTime != nil {
-				advancePaymentReceivedDateTime, err := ParseDate(ap.FormattedReceivedDateTime.DateTimeString)
+			a := &pay.Advance{
+				Amount: amt,
+			}
+			if ap.Date != nil && ap.Date.Date != nil {
+				advancePaymentReceivedDateTime, err := ParseDate(ap.Date.Date.Date)
 				if err != nil {
 					return err
 				}
@@ -55,28 +58,29 @@ func (c *Converter) preparePayment(stlm *ApplicableHeaderTradeSettlement) error 
 	return nil
 }
 
-func getTerms(settlement *ApplicableHeaderTradeSettlement) (*pay.Terms, error) {
+func getTerms(settlement *document.Settlement) (*pay.Terms, error) {
 	terms := &pay.Terms{}
 	var dates []*pay.DueDate
 
-	for _, term := range settlement.SpecifiedTradePaymentTerms {
-		if term.Description != nil {
-			terms.Detail = *term.Description
+	for _, term := range settlement.PaymentTerms {
+		if term.Description != "" {
+			terms.Detail = term.Description
 		}
 
-		if term.DueDateDateTime != nil {
-			dueDateTime, err := ParseDate(term.DueDateDateTime.DateTimeString)
+		if term.DueDate != nil && term.DueDate.Date != nil {
+			dueDateTime, err := ParseDate(term.DueDate.Date.Date)
 			if err != nil {
 				return nil, err
 			}
 			dd := &pay.DueDate{
 				Date: &dueDateTime,
 			}
-			if term.PartialPaymentAmount != nil {
-				dd.Amount, err = num.AmountFromString(*term.PartialPaymentAmount)
+			if term.PartialPayment != "" {
+				amt, err := num.AmountFromString(term.PartialPayment)
 				if err != nil {
 					return nil, err
 				}
+				dd.Amount = amt
 			} else if len(dates) == 0 {
 				p, err := num.PercentageFromString("100%")
 				if err != nil {
@@ -91,8 +95,8 @@ func getTerms(settlement *ApplicableHeaderTradeSettlement) (*pay.Terms, error) {
 	return terms, nil
 }
 
-func getMeans(stlm *ApplicableHeaderTradeSettlement) *pay.Instructions {
-	pm := stlm.SpecifiedTradeSettlementPaymentMeans[0]
+func getMeans(stlm *document.Settlement) *pay.Instructions {
+	pm := stlm.PaymentMeans[0]
 	inst := &pay.Instructions{
 		Key: paymentMeansCode(pm.TypeCode),
 		Ext: tax.Extensions{
@@ -100,37 +104,37 @@ func getMeans(stlm *ApplicableHeaderTradeSettlement) *pay.Instructions {
 		},
 	}
 
-	if pm.Information != nil {
-		inst.Detail = *pm.Information
+	if pm.Information != "" {
+		inst.Detail = pm.Information
 	}
 
-	if pm.ApplicableTradeSettlementFinancialCard != nil {
-		if pm.ApplicableTradeSettlementFinancialCard != nil {
-			card := pm.ApplicableTradeSettlementFinancialCard
+	if pm.Card != nil {
+		if pm.Card != nil {
+			card := pm.Card
 			inst.Card = &pay.Card{
 				// GOBL only stores last 4 digits of card number
 				Last4: card.ID[len(card.ID)-4:],
 			}
-			if card.CardholderName != "" {
-				inst.Card.Holder = card.CardholderName
+			if card.Name != "" {
+				inst.Card.Holder = card.Name
 			}
 		}
 	}
 
-	if pm.PayeePartyCreditorFinancialAccount != nil {
-		ac := pm.PayeePartyCreditorFinancialAccount
-		if ac.IBANID != "" {
+	if pm.Creditor != nil {
+		ac := pm.Creditor
+		if ac.IBAN != "" {
 			inst.CreditTransfer = []*pay.CreditTransfer{
 				{
-					IBAN: ac.IBANID,
+					IBAN: ac.IBAN,
 				},
 			}
 		}
-		if ac.AccountName != "" {
-			inst.CreditTransfer[0].Name = ac.AccountName
+		if ac.Name != "" {
+			inst.CreditTransfer[0].Name = ac.Name
 		}
-		if pm.PayeeSpecifiedCreditorFinancialInstitution != nil {
-			inst.CreditTransfer[0].BIC = pm.PayeeSpecifiedCreditorFinancialInstitution.BICID
+		if pm.CreditorInstitution != nil && pm.CreditorInstitution.BIC != "" {
+			inst.CreditTransfer[0].BIC = pm.CreditorInstitution.BIC
 		}
 	}
 	return inst

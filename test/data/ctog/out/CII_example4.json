@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "019302d2-973e-7cbf-88cb-6bcbb18f3976",
+    "uuid": "0193076b-8dd5-7771-8982-a296bbb1b100",
     "dig": {
       "alg": "sha256",
-      "val": "056702eba65599d57d9883f39668ecc8b492e856392bd2f0f583307648e4a404"
+      "val": "82fc78ee8df5d7f291e141889bbd79a025bf1c6a32247a0772e5d093124a7240"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "019302d2-973e-7d10-a513-e035801355df",
+    "uuid": "0193076b-8dd5-77e7-ad52-c05dd094355d",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",

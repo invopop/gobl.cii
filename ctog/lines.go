@@ -3,6 +3,7 @@ package ctog
 import (
 	"strings"
 
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -11,12 +12,12 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) prepareLines(tsct *SupplyChainTradeTransaction) error {
-	items := tsct.IncludedSupplyChainTradeLineItem
+func (c *Converter) prepareLines(tsct *document.Transaction) error {
+	items := tsct.Lines
 	lines := make([]*bill.Line, 0, len(items))
 
 	for _, it := range items {
-		price, err := num.AmountFromString(it.SpecifiedLineTradeAgreement.NetPriceProductTradePrice.ChargeAmount)
+		price, err := num.AmountFromString(it.Agreement.NetPrice.Amount)
 		if err != nil {
 			return err
 		}
@@ -25,121 +26,99 @@ func (c *Converter) prepareLines(tsct *SupplyChainTradeTransaction) error {
 			//If Quantity is not present, assume 1
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
-				Name:  it.SpecifiedTradeProduct.Name,
+				Name:  it.Product.Name,
 				Price: price,
 			},
 			Taxes: tax.Set{
 				{
-					Category: cbc.Code(it.SpecifiedLineTradeSettlement.ApplicableTradeTax.TypeCode),
+					Category: cbc.Code(it.TradeSettlement.ApplicableTradeTax[0].TypeCode),
 				},
 			},
 		}
 
-		if it.SpecifiedLineTradeDelivery != nil {
-			l.Quantity, err = num.AmountFromString(it.SpecifiedLineTradeDelivery.BilledQuantity.Value)
+		if it.Quantity != nil && it.Quantity.Quantity != nil {
+			l.Quantity, err = num.AmountFromString(it.Quantity.Quantity.Amount)
 			if err != nil {
 				return err
 			}
 		}
 
-		if it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode != "" {
-			u := cbc.Code(it.SpecifiedLineTradeDelivery.BilledQuantity.UnitCode)
+		if it.Quantity.Quantity.UnitCode != "" {
+			u := cbc.Code(it.Quantity.Quantity.UnitCode)
 			l.Item.Unit = *unitFromUNECE(&u)
 		}
 
-		if it.SpecifiedTradeProduct.SellerAssignedID != nil {
-			l.Item.Ref = *it.SpecifiedTradeProduct.SellerAssignedID
+		if it.Product.SellerAssignedID != nil {
+			l.Item.Ref = *it.Product.SellerAssignedID
 		}
 
-		if it.SpecifiedTradeProduct.BuyerAssignedID != nil {
+		if it.Product.BuyerAssignedID != nil {
 			if l.Item.Identities == nil {
 				l.Item.Identities = make([]*org.Identity, 0)
 			}
 			l.Item.Identities = append(l.Item.Identities, &org.Identity{
-				Code: cbc.Code(*it.SpecifiedTradeProduct.BuyerAssignedID),
+				Code: cbc.Code(*it.Product.BuyerAssignedID),
 			})
 		}
 
-		if it.SpecifiedTradeProduct.GlobalID != nil {
+		if it.Product.GlobalID != nil {
 			if l.Item.Identities == nil {
 				l.Item.Identities = make([]*org.Identity, 0)
 			}
 			l.Item.Identities = append(l.Item.Identities, &org.Identity{
 				// This label corresponds to a code from the ISO 6523 ICD List. Mapping is not yet supported
-				Label: it.SpecifiedTradeProduct.GlobalID.SchemeID,
-				Code:  cbc.Code(it.SpecifiedTradeProduct.GlobalID.Value),
+				Label: it.Product.GlobalID.SchemeID,
+				Code:  cbc.Code(it.Product.GlobalID.Value),
 			})
 		}
 
-		if it.SpecifiedTradeProduct.Description != nil {
-			l.Item.Description = *it.SpecifiedTradeProduct.Description
+		if it.Product.Description != nil {
+			l.Item.Description = *it.Product.Description
 		}
 
-		if it.SpecifiedTradeProduct.OriginTradeCountry != nil {
-			l.Item.Origin = l10n.ISOCountryCode(it.SpecifiedTradeProduct.OriginTradeCountry.ID)
+		if it.Product.Origin != nil {
+			l.Item.Origin = l10n.ISOCountryCode(*it.Product.Origin)
 		}
 
-		if len(it.AssociatedDocumentLineDocument.IncludedNote) > 0 {
-			l.Notes = make([]*cbc.Note, 0, len(it.AssociatedDocumentLineDocument.IncludedNote))
-			for _, note := range it.AssociatedDocumentLineDocument.IncludedNote {
+		if it.LineDoc != nil && len(it.LineDoc.Note) > 0 {
+			l.Notes = make([]*cbc.Note, 0, len(it.LineDoc.Note))
+			for _, note := range it.LineDoc.Note {
 				n := &cbc.Note{}
 				if note.Content != "" {
 					n.Text = note.Content
 				}
-				if note.ContentCode != "" {
-					n.Code = note.ContentCode
+				if note.SubjectCode != "" {
+					n.Key = cbc.Key(note.SubjectCode)
 				}
 				l.Notes = append(l.Notes, n)
 			}
 		}
 
-		if it.SpecifiedLineTradeSettlement.ApplicableTradeTax.RateApplicablePercent != "" {
-			if !strings.HasSuffix(it.SpecifiedLineTradeSettlement.ApplicableTradeTax.RateApplicablePercent, "%") {
-				it.SpecifiedLineTradeSettlement.ApplicableTradeTax.RateApplicablePercent += "%"
-			}
-			p, err := num.PercentageFromString(it.SpecifiedLineTradeSettlement.ApplicableTradeTax.RateApplicablePercent)
-			if err != nil {
-				return err
-			}
-			l.Taxes[0].Percent = &p
-		}
-
-		if it.SpecifiedLineTradeSettlement.SpecifiedTradeAllowanceCharge != nil {
-			l, err = getLineCharges(it.SpecifiedLineTradeSettlement.SpecifiedTradeAllowanceCharge, l)
-			if err != nil {
-				return err
-			}
-		}
-
-		if it.SpecifiedLineTradeSettlement.ReceivableSpecifiedTradeAccountingAccount != nil {
-			if l.Notes == nil {
-				l.Notes = make([]*cbc.Note, 0)
-			}
-			l.Notes = append(l.Notes, &cbc.Note{
-				Text: it.SpecifiedLineTradeSettlement.ReceivableSpecifiedTradeAccountingAccount.ID,
-			})
-			if it.SpecifiedLineTradeSettlement.ReceivableSpecifiedTradeAccountingAccount.TypeCode != nil {
-				for i, note := range l.Notes {
-					if note.Text == it.SpecifiedLineTradeSettlement.ReceivableSpecifiedTradeAccountingAccount.ID {
-						l.Notes[i].Key = cbc.Key(*it.SpecifiedLineTradeSettlement.ReceivableSpecifiedTradeAccountingAccount.TypeCode)
-						break
+		if len(it.TradeSettlement.ApplicableTradeTax) > 0 {
+			for i, tax := range it.TradeSettlement.ApplicableTradeTax {
+				if tax.RateApplicablePercent != "" {
+					if !strings.HasSuffix(tax.RateApplicablePercent, "%") {
+						tax.RateApplicablePercent += "%"
 					}
+					p, err := num.PercentageFromString(tax.RateApplicablePercent)
+					if err != nil {
+						return err
+					}
+					l.Taxes[i].Percent = &p
 				}
 			}
 		}
 
-		if it.SpecifiedTradeProduct.DesignatedProductClassification != nil {
-			for _, c := range it.SpecifiedTradeProduct.DesignatedProductClassification {
-				l.Item.Identities = append(l.Item.Identities, &org.Identity{
-					Label: c.ClassCode.ListID,
-					Code:  cbc.Code(c.ClassCode.Value),
-				})
+		if len(it.TradeSettlement.AllowanceCharge) > 0 {
+			l, err = getLineCharges(it.TradeSettlement.AllowanceCharge, l)
+			if err != nil {
+				return err
 			}
 		}
 
-		if it.SpecifiedTradeProduct.ApplicableProductCharacteristic != nil {
+		if len(it.Product.Characteristics) > 0 {
 			l.Item.Meta = make(cbc.Meta)
-			for _, char := range it.SpecifiedTradeProduct.ApplicableProductCharacteristic {
+			for _, char := range it.Product.Characteristics {
 				key := formatKey(char.Description)
 				l.Item.Meta[key] = char.Value
 			}
@@ -153,9 +132,9 @@ func (c *Converter) prepareLines(tsct *SupplyChainTradeTransaction) error {
 }
 
 // getLineCharges parses inline charges and discounts from the CII document
-func getLineCharges(alwcs []*SpecifiedTradeAllowanceCharge, l *bill.Line) (*bill.Line, error) {
+func getLineCharges(alwcs []*document.AllowanceCharge, l *bill.Line) (*bill.Line, error) {
 	for _, ac := range alwcs {
-		if ac.ChargeIndicator.Indicator {
+		if ac.ChargeIndicator.Value {
 			c, err := getLineCharge(ac)
 			if err != nil {
 				return nil, err

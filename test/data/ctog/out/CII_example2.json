@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "019302d2-96ff-743d-9f9f-c143269bd5e0",
+    "uuid": "0193076b-8d95-7d73-9023-b811c7212ba5",
     "dig": {
       "alg": "sha256",
-      "val": "d6f038406f83516ae0b1e301ed27bdc118ad0181b1f9008c1d85271e5c9b2fee"
+      "val": "5add2bd8cde8cb7bc20e0b7133b109b5ac81bbb056e92150df994e54e9d85bd7"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "019302d2-96ff-7486-aa2c-12dda87a93c7",
+    "uuid": "0193076b-8d95-7dbc-9591-46ee996b28ab",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -87,10 +87,6 @@
             {
               "label": "0088",
               "code": "1234567890128"
-            },
-            {
-              "label": "STI",
-              "code": "65434568"
             }
           ],
           "description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
@@ -124,9 +120,6 @@
         "notes": [
           {
             "text": "Scratch on box"
-          },
-          {
-            "text": "BookingCode001"
           }
         ]
       },
@@ -140,10 +133,6 @@
             {
               "label": "0088",
               "code": "1234567890135"
-            },
-            {
-              "label": "STI",
-              "code": "65434567"
             }
           ],
           "price": "3.96",
@@ -160,9 +149,6 @@
         "notes": [
           {
             "text": "Cover is slightly damaged."
-          },
-          {
-            "text": "BookingCode002"
           }
         ]
       },
@@ -176,10 +162,6 @@
             {
               "label": "0088",
               "code": "1234567890142"
-            },
-            {
-              "label": "STI",
-              "code": "65434566"
             }
           ],
           "price": "2.48",
@@ -192,12 +174,7 @@
             "percent": "15%"
           }
         ],
-        "total": "4.96",
-        "notes": [
-          {
-            "text": "BookingCode003"
-          }
-        ]
+        "total": "4.96"
       },
       {
         "i": 4,
@@ -209,10 +186,6 @@
             {
               "label": "0088",
               "code": "1234567890159"
-            },
-            {
-              "label": "STI",
-              "code": "65434565"
             }
           ],
           "price": "25.00",
@@ -225,12 +198,7 @@
             "percent": "0%"
           }
         ],
-        "total": "-25.00",
-        "notes": [
-          {
-            "text": "BookingCode004"
-          }
-        ]
+        "total": "-25.00"
       },
       {
         "i": 5,
@@ -242,10 +210,6 @@
             {
               "label": "0088",
               "code": "1234567890166"
-            },
-            {
-              "label": "STI",
-              "code": "12344325"
             }
           ],
           "price": "0.75",
@@ -261,12 +225,7 @@
             "percent": "25%"
           }
         ],
-        "total": "187.50",
-        "notes": [
-          {
-            "text": "BookingCode005"
-          }
-        ]
+        "total": "187.50"
       }
     ],
     "discounts": [

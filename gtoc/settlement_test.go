@@ -14,7 +14,7 @@ func TestNewSettlement(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, "EUR", doc.Transaction.Settlement.Currency)
-		assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms.Description)
+		assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms[0].Description)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TotalAmount)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TaxBasisTotalAmount)
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
@@ -27,22 +27,23 @@ func TestNewSettlement(t *testing.T) {
 		doc, err := newDocumentFrom("correction-invoice.json")
 		require.NoError(t, err)
 
-		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument.IssuerAssignedID)
-		assert.Equal(t, &Date{Date: "20240213", Format: "102"}, doc.Transaction.Settlement.ReferencedDocument.IssueDate)
+		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument[0].IssuerAssignedID)
+		assert.Equal(t, "20240213", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.Date.Date)
+		assert.Equal(t, "102", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.Date.Format)
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {
 		doc, err := newDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 
-		assert.Equal(t, "30", doc.Transaction.Settlement.PaymentMeans.TypeCode)
+		assert.Equal(t, "30", doc.Transaction.Settlement.PaymentMeans[0].TypeCode)
 
-		assert.Equal(t, "NO9386011117947", doc.Transaction.Settlement.PaymentMeans.Creditor.IBAN)
+		assert.Equal(t, "NO9386011117947", doc.Transaction.Settlement.PaymentMeans[0].Creditor.IBAN)
 
-		assert.Equal(t, "1234", doc.Transaction.Settlement.PaymentMeans.Card.ID)
-		assert.Equal(t, "John Doe", doc.Transaction.Settlement.PaymentMeans.Card.Name)
+		assert.Equal(t, "1234567890", doc.Transaction.Settlement.PaymentTerms[0].Mandate)
+		assert.Equal(t, "DE89370400440532013000", doc.Transaction.Settlement.PaymentMeans[1].Debtor.IBAN)
 
-		assert.Equal(t, "1234567890", doc.Transaction.Settlement.PaymentTerms.Mandate)
-		assert.Equal(t, "DE89370400440532013000", doc.Transaction.Settlement.PaymentMeans.Debtor)
+		assert.Equal(t, "1234", doc.Transaction.Settlement.PaymentMeans[2].Card.ID)
+		assert.Equal(t, "John Doe", doc.Transaction.Settlement.PaymentMeans[2].Card.Name)
 	})
 }

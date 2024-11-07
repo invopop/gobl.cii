@@ -1,6 +1,7 @@
 package ctog
 
 import (
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -18,81 +19,67 @@ const (
 	keyAdditionalDocumentTypeRefPaper         = "ref-paper"
 )
 
-func (c *Converter) prepareOrdering(doc *Document) error {
+func (c *Converter) prepareOrdering(doc *document.Document) error {
 	ord := &bill.Ordering{}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerReference != nil {
-		ord.Code = cbc.Code(*doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.BuyerReference)
+	if doc.Transaction.Agreement.BuyerReference != "" {
+		ord.Code = cbc.Code(doc.Transaction.Agreement.BuyerReference)
 	}
 
 	// Ordering period parsing
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod != nil {
+	if doc.Transaction.Settlement.Period != nil {
 		per := &cal.Period{}
 
-		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.StartDateTime != nil {
-			start, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.StartDateTime.DateTimeString)
+		if doc.Transaction.Settlement.Period.Start != nil && doc.Transaction.Settlement.Period.Start.Date != nil {
+			start, err := ParseDate(doc.Transaction.Settlement.Period.Start.Date.Date)
 			if err != nil {
 				return err
 			}
 			per.Start = start
 		}
 
-		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.EndDateTime != nil {
-			end, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.EndDateTime.DateTimeString)
+		if doc.Transaction.Settlement.Period.End != nil && doc.Transaction.Settlement.Period.End.Date != nil {
+			end, err := ParseDate(doc.Transaction.Settlement.Period.End.Date.Date)
 			if err != nil {
 				return err
 			}
 			per.End = end
 		}
-		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.Description != nil {
-			per.Label = *doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement.BillingSpecifiedPeriod.Description
+		if doc.Transaction.Settlement.Period.Description != nil {
+			per.Label = *doc.Transaction.Settlement.Period.Description
 		}
 		ord.Period = per
 	}
 
 	// Despatch, Receiving and Tender parsing
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument != nil {
+	if doc.Transaction.Delivery.Despatch != nil {
 		ord.Despatch = []*org.DocumentRef{
 			{
-				Code: cbc.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument.IssuerAssignedID),
+				Code: cbc.Code(doc.Transaction.Delivery.Despatch.ID),
 			},
-		}
-		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument.FormattedIssueDateTime != nil {
-			refDate, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DespatchAdviceReferencedDocument.FormattedIssueDateTime.DateTimeString)
-			if err != nil {
-				return err
-			}
-			ord.Despatch[0].IssueDate = &refDate
 		}
 	}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument != nil {
+	if doc.Transaction.Delivery.Receiving != nil {
 		ord.Receiving = []*org.DocumentRef{
 			{
-				Code: cbc.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument.IssuerAssignedID),
+				Code: cbc.Code(doc.Transaction.Delivery.Receiving.ID),
 			},
-		}
-		if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument.FormattedIssueDateTime != nil {
-			refDate, err := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ReceivingAdviceReferencedDocument.FormattedIssueDateTime.DateTimeString)
-			if err != nil {
-				return err
-			}
-			ord.Receiving[0].IssueDate = &refDate
 		}
 	}
 
-	if len(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.AdditionalReferencedDocument) > 0 {
-		for _, ref := range doc.SupplyChainTradeTransaction.ApplicableHeaderTradeAgreement.AdditionalReferencedDocument {
+	if len(doc.Transaction.Agreement.AdditionalDocument) > 0 {
+		for _, ref := range doc.Transaction.Agreement.AdditionalDocument {
 			switch ref.TypeCode {
 			case AdditionalDocumentTypeTender:
 				if ord.Tender == nil {
 					ord.Tender = make([]*org.DocumentRef, 0)
 				}
 				docRef := &org.DocumentRef{
-					Code: cbc.Code(ref.IssuerAssignedID),
+					Code: cbc.Code(ref.ID),
 				}
-				if ref.FormattedIssueDateTime != nil {
-					refDate, err := ParseDate(ref.FormattedIssueDateTime.DateTimeString)
+				if ref.IssueDate != nil {
+					refDate, err := ParseDate(ref.IssueDate.Date.Date)
 					if err != nil {
 						return err
 					}
@@ -105,12 +92,12 @@ func (c *Converter) prepareOrdering(doc *Document) error {
 				}
 				ord.Identities = append(ord.Identities, &org.Identity{
 					Key:  keyAdditionalDocumentTypeInvoiceDataSheet,
-					Code: cbc.Code(ref.IssuerAssignedID),
+					Code: cbc.Code(ref.ID),
 				})
 			default:
 				ord.Identities = append(ord.Identities, &org.Identity{
 					Key:  keyAdditionalDocumentTypeRefPaper,
-					Code: cbc.Code(ref.IssuerAssignedID),
+					Code: cbc.Code(ref.ID),
 				})
 			}
 		}

@@ -1,15 +1,17 @@
 package ctog
 
 import (
-	"encoding/xml"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/invopop/gobl.cii/document"
+	"github.com/nbio/xml"
 )
 
 // loadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func loadTestXMLDoc(name string) (*Document, error) {
+func loadTestXMLDoc(name string) (*document.Document, error) {
 	src, err := os.Open(filepath.Join(getTestDataPath(), name))
 	if err != nil {
 		return nil, err
@@ -24,7 +26,7 @@ func loadTestXMLDoc(name string) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	doc := new(Document)
+	doc := new(document.Document)
 	if err := xml.Unmarshal(inData, doc); err != nil {
 		return nil, err
 	}

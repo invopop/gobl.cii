@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "019302d2-977b-7567-83b5-ec11e0d94f7d",
+    "uuid": "0193076b-8e25-7b8b-884d-e87c733bdecf",
     "dig": {
       "alg": "sha256",
-      "val": "63383cae9471a2c2f8b70febc8357cbbae472b0c35ae9c611ef05af0cf27905b"
+      "val": "2a2d4315109cdf6721d89046b3169875c6460827a255f5b3ef18f9fbce994e19"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "019302d2-977b-75bc-8628-5234a8b3857c",
+    "uuid": "0193076b-8e25-7bbe-9547-f97ec1db0812",
     "type": "standard",
     "code": "INVOICE_test_7",
     "issue_date": "2013-05-13",
@@ -122,6 +122,9 @@
       }
     },
     "payment": {
+      "terms": {
+        "detail": "Payment within 30 days"
+      },
       "instructions": {
         "key": "credit-transfer",
         "credit_transfer": [

@@ -8,6 +8,7 @@ require (
 	github.com/invopop/gobl v0.204.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
+	github.com/nbio/xml v0.0.0-20241028124227-eac89c735a80
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/flimzy/testy v0.14.0

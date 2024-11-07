@@ -12,6 +12,7 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.cii/ctog"
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl.cii/gtoc"
 
 	"github.com/invopop/gobl/bill"
@@ -124,7 +125,7 @@ func TestNewDocumentGOBL(t *testing.T) {
 }
 
 // newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func newDocumentFrom(name string) (*gtoc.Document, error) {
+func newDocumentFrom(name string) (*document.Document, error) {
 	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err

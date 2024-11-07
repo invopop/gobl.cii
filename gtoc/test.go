@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.cii/document"
 )
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
@@ -26,7 +27,7 @@ func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 }
 
 // newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func newDocumentFrom(name string) (*Document, error) {
+func newDocumentFrom(name string) (*document.Document, error) {
 	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err

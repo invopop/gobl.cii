@@ -18,7 +18,7 @@ func TestNewAgreement(t *testing.T) {
 		assert.Equal(t, "Provide One GmbH", doc.Transaction.Agreement.TaxRepresentative.Name)
 		assert.Equal(t, "John Doe", doc.Transaction.Agreement.TaxRepresentative.Contact.PersonName)
 		assert.Equal(t, "+49100200300", doc.Transaction.Agreement.TaxRepresentative.Contact.Phone.CompleteNumber)
-		assert.Equal(t, "billing@example.com", doc.Transaction.Agreement.TaxRepresentative.URIUniversalCommunication.URIID)
+		assert.Equal(t, "billing@example.com", doc.Transaction.Agreement.TaxRepresentative.URIUniversalCommunication.ID.Value)
 		assert.Equal(t, "69190", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.Postcode)
 		assert.Equal(t, "Dietmar-Hopp-Allee", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.LineOne)
 		assert.Equal(t, "16", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.LineTwo)
@@ -39,6 +39,6 @@ func TestNewAgreement(t *testing.T) {
 		doc := converter.GetDocument()
 		assert.Nil(t, err)
 		assert.Equal(t, "PO4711", doc.Transaction.Agreement.BuyerReference)
-		assert.Equal(t, "2013-05", *doc.Transaction.Agreement.Contract)
+		assert.Equal(t, "2013-05", doc.Transaction.Agreement.Contract.ID)
 	})
 }

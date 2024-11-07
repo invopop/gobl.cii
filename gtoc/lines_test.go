@@ -13,14 +13,14 @@ func TestNewLines(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
-		assert.Equal(t, "1", doc.Transaction.Lines[0].ID)
-		assert.Equal(t, "Development services", doc.Transaction.Lines[0].Name)
-		assert.Equal(t, "90.00", doc.Transaction.Lines[0].NetPrice)
-		assert.Equal(t, "20", doc.Transaction.Lines[0].TradeDelivery.Amount)
-		assert.Equal(t, "HUR", doc.Transaction.Lines[0].TradeDelivery.UnitCode)
+		assert.Equal(t, "1", doc.Transaction.Lines[0].LineDoc.ID)
+		assert.Equal(t, "Development services", doc.Transaction.Lines[0].Product.Name)
+		assert.Equal(t, "90.00", doc.Transaction.Lines[0].Agreement.NetPrice.Amount)
+		assert.Equal(t, "20", doc.Transaction.Lines[0].Quantity.Quantity.Amount)
+		assert.Equal(t, "HUR", doc.Transaction.Lines[0].Quantity.Quantity.UnitCode)
 		assert.Equal(t, "VAT", doc.Transaction.Lines[0].TradeSettlement.ApplicableTradeTax[0].TypeCode)
 		assert.Equal(t, "19", doc.Transaction.Lines[0].TradeSettlement.ApplicableTradeTax[0].RateApplicablePercent)
-		assert.Equal(t, "1800.00", doc.Transaction.Lines[0].TradeSettlement.Sum)
+		assert.Equal(t, "1800.00", doc.Transaction.Lines[0].TradeSettlement.Sum.Amount)
 	})
 
 }

@@ -4,6 +4,7 @@ package cii
 import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.cii/ctog"
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl.cii/gtoc"
 )
 
@@ -27,7 +28,7 @@ func (c *Converter) ToGOBL(ciiDoc []byte) (*gobl.Envelope, error) {
 }
 
 // ToCII converts a GOBL envelope to a CII document
-func (c *Converter) ToCII(env *gobl.Envelope) (*gtoc.Document, error) {
+func (c *Converter) ToCII(env *gobl.Envelope) (*document.Document, error) {
 	ciiDoc, err := c.gtoc.ConvertToCII(env)
 	if err != nil {
 		return nil, err

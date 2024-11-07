@@ -1,16 +1,17 @@
 package gtoc
 
 import (
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/tax"
 )
 
-func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
+func newAllowanceCharges(inv *bill.Invoice) []*document.AllowanceCharge {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return nil
 	}
-	ac := make([]*AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
+	ac := make([]*document.AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	for i, c := range inv.Charges {
 		ac[i] = newCharge(c)
 	}
@@ -20,11 +21,11 @@ func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
 	return ac
 }
 
-func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
+func newLineAllowanceCharges(line *bill.Line) []*document.AllowanceCharge {
 	if line.Charges == nil && line.Discounts == nil {
 		return nil
 	}
-	ac := make([]*AllowanceCharge, len(line.Charges)+len(line.Discounts))
+	ac := make([]*document.AllowanceCharge, len(line.Charges)+len(line.Discounts))
 	for i, charge := range line.Charges {
 		ac[i] = makeLineCharge(charge)
 	}
@@ -34,9 +35,9 @@ func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
 	return ac
 }
 
-func newCharge(c *bill.Charge) *AllowanceCharge {
-	ac := &AllowanceCharge{
-		ChargeIndicator: Indicator{Value: true},
+func newCharge(c *bill.Charge) *document.AllowanceCharge {
+	ac := &document.AllowanceCharge{
+		ChargeIndicator: document.Indicator{Value: true},
 		Amount:          c.Amount.String(),
 	}
 	if c.Reason != "" {
@@ -55,9 +56,9 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 	return ac
 }
 
-func newDiscount(d *bill.Discount) *AllowanceCharge {
-	ac := &AllowanceCharge{
-		ChargeIndicator: Indicator{Value: false},
+func newDiscount(d *bill.Discount) *document.AllowanceCharge {
+	ac := &document.AllowanceCharge{
+		ChargeIndicator: document.Indicator{Value: false},
 		Amount:          d.Amount.String(),
 	}
 	if d.Reason != "" {
@@ -76,9 +77,9 @@ func newDiscount(d *bill.Discount) *AllowanceCharge {
 	return ac
 }
 
-func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
-	ac := &AllowanceCharge{
-		ChargeIndicator: Indicator{Value: true},
+func makeLineCharge(c *bill.LineCharge) *document.AllowanceCharge {
+	ac := &document.AllowanceCharge{
+		ChargeIndicator: document.Indicator{Value: true},
 		Amount:          c.Amount.String(),
 	}
 	if c.Reason != "" {
@@ -94,9 +95,9 @@ func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
 	return ac
 }
 
-func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
-	ac := &AllowanceCharge{
-		ChargeIndicator: Indicator{Value: false},
+func makeLineDiscount(d *bill.LineDiscount) *document.AllowanceCharge {
+	ac := &document.AllowanceCharge{
+		ChargeIndicator: document.Indicator{Value: false},
 		Amount:          d.Amount.String(),
 	}
 	if d.Reason != "" {
@@ -112,8 +113,8 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 	return ac
 }
 
-func makeTaxCategory(tax *tax.Combo) *Tax {
-	c := &Tax{}
+func makeTaxCategory(tax *tax.Combo) *document.Tax {
+	c := &document.Tax{}
 	if tax.Category != "" {
 		c.TypeCode = tax.Category.String()
 	}

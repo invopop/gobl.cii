@@ -1,6 +1,7 @@
 package gtoc
 
 import (
+	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
@@ -9,13 +10,15 @@ import (
 
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
 func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
-	c.doc.Transaction.Settlement = &Settlement{
+	c.doc.Transaction.Settlement = &document.Settlement{
 		Currency: string(inv.Currency),
 	}
 	stlm := c.doc.Transaction.Settlement
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		stlm.PaymentTerms = &Terms{
-			Description: inv.Payment.Terms.Detail,
+		stlm.PaymentTerms = []*document.Terms{
+			{
+				Description: inv.Payment.Terms.Detail,
+			},
 		}
 	}
 
@@ -26,11 +29,15 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 	if len(inv.Preceding) > 0 {
 		pre := inv.Preceding[0]
-		stlm.ReferencedDocument = &ReferencedDocument{
-			IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
-			IssueDate: &Date{
-				Date:   formatIssueDate(*pre.IssueDate),
-				Format: "102",
+		stlm.ReferencedDocument = []*document.ReferencedDocument{
+			{
+				IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
+				IssueDate: &document.FormattedIssueDate{
+					Date: &document.Date{
+						Date:   formatIssueDate(*pre.IssueDate),
+						Format: "102",
+					},
+				},
 			},
 		}
 	}
@@ -39,48 +46,82 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	}
 
 	if inv.Delivery != nil && inv.Delivery.Period != nil {
-		stlm.Period = &Period{
-			Start: &Date{
-				Date:   formatIssueDate(inv.Delivery.Period.Start),
-				Format: "102",
+		stlm.Period = &document.Period{
+			Start: &document.IssueDate{
+				Date: &document.Date{
+					Date:   formatIssueDate(inv.Delivery.Period.Start),
+					Format: "102",
+				},
 			},
-			End: &Date{
-				Date:   formatIssueDate(inv.Delivery.Period.End),
-				Format: "102",
+			End: &document.IssueDate{
+				Date: &document.Date{
+					Date:   formatIssueDate(inv.Delivery.Period.End),
+					Format: "102",
+				},
 			},
 		}
 	}
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
-		stlm.PaymentMeans = &PaymentMeans{
-			TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
-			Information: instr.Detail,
-		}
+		means := make([]*document.PaymentMeans, 0)
+
 		if instr.CreditTransfer != nil {
-			stlm.PaymentMeans.Creditor = &Creditor{
-				IBAN:   instr.CreditTransfer[0].IBAN,
-				Name:   instr.CreditTransfer[0].Name,
-				Number: instr.CreditTransfer[0].Number,
+			credit := &document.PaymentMeans{
+				TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
+				Information: instr.Detail,
+				Creditor: &document.Creditor{
+					IBAN:   instr.CreditTransfer[0].IBAN,
+					Name:   instr.CreditTransfer[0].Name,
+					Number: instr.CreditTransfer[0].Number,
+				},
 			}
 			if instr.CreditTransfer[0].BIC != "" {
-				stlm.PaymentMeans.BICID = instr.CreditTransfer[0].BIC
+				credit.CreditorInstitution = &document.CreditorInstitution{
+					BIC: instr.CreditTransfer[0].BIC,
+				}
 			}
+
+			means = append(means, credit)
 		}
+
 		if instr.DirectDebit != nil {
-			stlm.PaymentMeans.Debtor = instr.DirectDebit.Account
-			stlm.CreditorRefID = instr.DirectDebit.Creditor
+			direct := &document.PaymentMeans{
+				TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
+				Information: instr.Detail,
+				Debtor: &document.DebtorAccount{
+					IBAN: instr.DirectDebit.Account,
+				},
+			}
+
+			means = append(means, direct)
+
 			if stlm.PaymentTerms == nil {
-				stlm.PaymentTerms = new(Terms)
+				stlm.PaymentTerms = []*document.Terms{
+					{
+						Mandate: instr.DirectDebit.Ref,
+					},
+				}
+			} else {
+				stlm.PaymentTerms[0].Mandate = instr.DirectDebit.Ref
 			}
-			stlm.PaymentTerms.Mandate = instr.DirectDebit.Ref
+
+			stlm.CreditorRefID = instr.DirectDebit.Creditor
 		}
+
 		if instr.Card != nil {
-			stlm.PaymentMeans.Card = &Card{
-				ID:   instr.Card.Last4,
-				Name: instr.Card.Holder,
+			card := &document.PaymentMeans{
+				TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
+				Information: instr.Detail,
+				Card: &document.Card{
+					ID:   instr.Card.Last4,
+					Name: instr.Card.Holder,
+				},
 			}
+			means = append(means, card)
 		}
+
+		stlm.PaymentMeans = means
 	}
 
 	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
@@ -90,13 +131,13 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	return nil
 }
 
-func newSummary(totals *bill.Totals, currency string) *Summary {
-	s := &Summary{
+func newSummary(totals *bill.Totals, currency string) *document.Summary {
+	s := &document.Summary{
 		TotalAmount:         totals.Total.String(),
 		TaxBasisTotalAmount: totals.Total.String(),
 		GrandTotalAmount:    totals.TotalWithTax.String(),
 		DuePayableAmount:    totals.Payable.String(),
-		TaxTotalAmount: &TaxTotalAmount{
+		TaxTotalAmount: &document.TaxTotalAmount{
 			Amount:   totals.Tax.String(),
 			Currency: currency,
 		},
@@ -113,8 +154,8 @@ func newSummary(totals *bill.Totals, currency string) *Summary {
 	return s
 }
 
-func newTaxes(total *tax.Total) []*Tax {
-	var Taxes []*Tax
+func newTaxes(total *tax.Total) []*document.Tax {
+	var Taxes []*document.Tax
 
 	if total == nil {
 		return nil
@@ -131,12 +172,12 @@ func newTaxes(total *tax.Total) []*Tax {
 	return Taxes
 }
 
-func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
+func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *document.Tax {
 	if rate.Percent == nil {
 		return nil
 	}
 
-	tax := &Tax{
+	tax := &document.Tax{
 		CalculatedAmount:      rate.Amount.String(),
 		TypeCode:              category.Code.String(),
 		BasisAmount:           rate.Base.String(),
@@ -147,8 +188,8 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	return tax
 }
 
-func newPayee(party *org.Party) *Party {
-	payee := &Party{
+func newPayee(party *org.Party) *document.Party {
+	payee := &document.Party{
 		Name:                      party.Name,
 		Contact:                   newContact(party),
 		PostalTradeAddress:        newPostalTradeAddress(party.Addresses),
@@ -156,7 +197,9 @@ func newPayee(party *org.Party) *Party {
 	}
 
 	if party.TaxID != nil {
-		payee.ID = party.TaxID.String()
+		payee.ID = &document.PartyID{
+			Value: party.TaxID.String(),
+		}
 	}
 
 	return payee
