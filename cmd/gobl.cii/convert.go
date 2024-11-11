@@ -52,7 +52,6 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 
 	// Check if input is JSON or XML
 	isJSON := json.Valid(inData)
-	converter := cii.NewConverter()
 
 	var outputData []byte
 
@@ -62,7 +61,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
 		}
 
-		doc, err := converter.ToCII(env)
+		doc, err := cii.ToCII(env)
 		if err != nil {
 			return fmt.Errorf("building XRechnung and Factur-X document: %w", err)
 		}
@@ -73,7 +72,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		// Assume XML if not JSON
-		env, err := converter.ToGOBL(inData)
+		env, err := cii.ToGOBL(inData)
 		if err != nil {
 			return fmt.Errorf("converting CII to GOBL: %w", err)
 		}

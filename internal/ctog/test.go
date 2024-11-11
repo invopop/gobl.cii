@@ -25,8 +25,7 @@ func newDocumentFrom(name string) (*gobl.Envelope, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &Converter{}
-	return c.Convert(inData)
+	return Convert(inData)
 }
 
 // getTestDataPath returns the path to the `test/data/ctog` folder

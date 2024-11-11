@@ -77,11 +77,8 @@ func TestNewDocumentGOBL(t *testing.T) {
 			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			// Create a new converter
-			converter := &ctog.Converter{}
-
 			// Convert CII XML to GOBL
-			goblEnv, err := converter.Convert(xmlData)
+			goblEnv, err := ctog.Convert(xmlData)
 			require.NoError(t, err)
 
 			// Extract the invoice from the envelope
@@ -130,8 +127,7 @@ func newDocumentFrom(name string) (*document.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &gtoc.Converter{}
-	return c.Convert(env)
+	return gtoc.Convert(env)
 }
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder

@@ -17,8 +17,7 @@ func newDocumentFrom(name string) (*document.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &Converter{}
-	return c.Convert(env)
+	return Convert(env)
 }
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder

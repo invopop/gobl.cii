@@ -22,16 +22,11 @@ type Converter struct {
 	doc *document.Document
 }
 
-// NewConverter Builder function
-func NewConverter() *Converter {
+// Convert converts a CII document into a GOBL envelope
+func Convert(xmlData []byte) (*gobl.Envelope, error) {
 	c := new(Converter)
 	c.inv = new(bill.Invoice)
 	c.doc = new(document.Document)
-	return c
-}
-
-// Convert converts a CII document into a GOBL envelope
-func (c *Converter) Convert(xmlData []byte) (*gobl.Envelope, error) {
 	if err := xml.Unmarshal(xmlData, &c.doc); err != nil {
 		return nil, err
 	}

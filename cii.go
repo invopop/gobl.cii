@@ -8,28 +8,14 @@ import (
 	"github.com/invopop/gobl.cii/internal/gtoc"
 )
 
-// Converter is a struct that encapsulates both CtoG and GtoC converters
-type Converter struct {
-	ctog *ctog.Converter
-	gtoc *gtoc.Converter
-}
-
-// NewConverter creates a new Converter instance
-func NewConverter() *Converter {
-	c := new(Converter)
-	c.ctog = ctog.NewConverter()
-	c.gtoc = gtoc.NewConverter()
-	return c
-}
-
 // ToGOBL converts a CII document to a GOBL envelope
-func (c *Converter) ToGOBL(ciiDoc []byte) (*gobl.Envelope, error) {
-	return c.ctog.Convert(ciiDoc)
+func ToGOBL(ciiDoc []byte) (*gobl.Envelope, error) {
+	return ctog.Convert(ciiDoc)
 }
 
 // ToCII converts a GOBL envelope to a CII document
-func (c *Converter) ToCII(env *gobl.Envelope) (*document.Document, error) {
-	ciiDoc, err := c.gtoc.Convert(env)
+func ToCII(env *gobl.Envelope) (*document.Document, error) {
+	ciiDoc, err := gtoc.Convert(env)
 	if err != nil {
 		return nil, err
 	}

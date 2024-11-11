@@ -14,15 +14,10 @@ type Converter struct {
 	doc *document.Document
 }
 
-// NewConverter Builder function
-func NewConverter() *Converter {
+// Convert converts a GOBL envelope into a CIIdocument
+func Convert(env *gobl.Envelope) (*document.Document, error) {
 	c := new(Converter)
 	c.doc = new(document.Document)
-	return c
-}
-
-// Convert converts a GOBL envelope into a CIIdocument
-func (c *Converter) Convert(env *gobl.Envelope) (*document.Document, error) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return nil, fmt.Errorf("invalid type %T", env.Document)
