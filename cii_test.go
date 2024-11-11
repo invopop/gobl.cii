@@ -11,9 +11,9 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.cii/ctog"
 	"github.com/invopop/gobl.cii/document"
-	"github.com/invopop/gobl.cii/gtoc"
+	"github.com/invopop/gobl.cii/internal/ctog"
+	"github.com/invopop/gobl.cii/internal/gtoc"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
@@ -78,10 +78,10 @@ func TestNewDocumentGOBL(t *testing.T) {
 			require.NoError(t, err)
 
 			// Create a new converter
-			converter := ctog.NewConverter()
+			converter := &ctog.Converter{}
 
 			// Convert CII XML to GOBL
-			goblEnv, err := converter.ConvertToGOBL(xmlData)
+			goblEnv, err := converter.Convert(xmlData)
 			require.NoError(t, err)
 
 			// Extract the invoice from the envelope
@@ -131,7 +131,7 @@ func newDocumentFrom(name string) (*document.Document, error) {
 		return nil, err
 	}
 	c := &gtoc.Converter{}
-	return c.ConvertToCII(env)
+	return c.Convert(env)
 }
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder

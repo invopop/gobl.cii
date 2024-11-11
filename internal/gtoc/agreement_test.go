@@ -3,7 +3,6 @@ package gtoc
 import (
 	"testing"
 
-	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,16 +26,9 @@ func TestNewAgreement(t *testing.T) {
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-complete.json")
+		doc, err := newDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 
-		inv := env.Extract().(*bill.Invoice)
-
-		converter := NewConverter()
-		err = converter.newDocument(inv)
-		require.NoError(t, err)
-
-		doc := converter.GetDocument()
 		assert.Nil(t, err)
 		assert.Equal(t, "PO4711", doc.Transaction.Agreement.BuyerReference)
 		assert.Equal(t, "2013-05", doc.Transaction.Agreement.Contract.ID)

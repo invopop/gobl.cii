@@ -11,6 +11,16 @@ import (
 	"github.com/invopop/gobl.cii/document"
 )
 
+// newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
+func newDocumentFrom(name string) (*document.Document, error) {
+	env, err := loadTestEnvelope(name)
+	if err != nil {
+		return nil, err
+	}
+	c := &Converter{}
+	return c.Convert(env)
+}
+
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
 func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 	src, _ := os.Open(filepath.Join(getTestDataPath(), name))
@@ -24,16 +34,6 @@ func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 	}
 
 	return env, nil
-}
-
-// newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func newDocumentFrom(name string) (*document.Document, error) {
-	env, err := loadTestEnvelope(name)
-	if err != nil {
-		return nil, err
-	}
-	c := &Converter{}
-	return c.ConvertToCII(env)
 }
 
 // getTestDataPath returns the path to the `test/data/gtoc` folder

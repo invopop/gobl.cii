@@ -10,18 +10,18 @@ import (
 	"github.com/invopop/gobl/cbc"
 )
 
-// IssueDateFormat is the issue date format in the form YYYYMMDD
-const IssueDateFormat = "102"
+// issueDateFormat is the issue date format in the form YYYYMMDD
+const issueDateFormat = "102"
 
-// NewHeader creates the ExchangedDocument part of a EN 16931 compliant invoice
-func (c *Converter) NewHeader(inv *bill.Invoice) error {
+// newHeader creates the ExchangedDocument part of a EN 16931 compliant invoice
+func (c *Converter) newHeader(inv *bill.Invoice) error {
 	h := &document.Header{
 		ID:       invoiceNumber(inv.Series, inv.Code),
 		TypeCode: inv.Tax.Ext[untdid.ExtKeyDocumentType].String(),
 		IssueDate: &document.IssueDate{
 			DateFormat: &document.Date{
 				Value:  formatIssueDate(inv.IssueDate),
-				Format: IssueDateFormat,
+				Format: issueDateFormat,
 			},
 		},
 	}

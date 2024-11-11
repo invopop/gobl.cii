@@ -3,6 +3,7 @@ package ctog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
@@ -11,14 +12,12 @@ import (
 )
 
 func TestParseCtoGPayment(t *testing.T) {
-	xmlData, err := loadTestXMLDoc("invoice-test-04.xml")
+	e, err := newDocumentFrom("invoice-test-04.xml")
 	require.NoError(t, err)
 
-	c := NewConverter()
-	err = c.NewInvoice(xmlData)
-	require.NoError(t, err)
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
 
-	inv := c.GetInvoice()
 	payment := inv.Payment
 	assert.NotNil(t, payment)
 

@@ -21,13 +21,8 @@ func NewConverter() *Converter {
 	return c
 }
 
-// GetDocument returns the CII document
-func (c *Converter) GetDocument() *document.Document {
-	return c.doc
-}
-
-// ConvertToCII converts a GOBL envelope into a CIIdocument
-func (c *Converter) ConvertToCII(env *gobl.Envelope) (*document.Document, error) {
+// Convert converts a GOBL envelope into a CIIdocument
+func (c *Converter) Convert(env *gobl.Envelope) (*document.Document, error) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return nil, fmt.Errorf("invalid type %T", env.Document)
@@ -52,12 +47,12 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 		},
 	}
 
-	err := c.NewHeader(inv)
+	err := c.newHeader(inv)
 	if err != nil {
 		return err
 	}
 
-	err = c.NewTransaction(inv)
+	err = c.newTransaction(inv)
 	if err != nil {
 		return err
 	}

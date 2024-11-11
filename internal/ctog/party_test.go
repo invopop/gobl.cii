@@ -3,6 +3,7 @@ package ctog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
@@ -12,14 +13,11 @@ import (
 // Define tests for the ParseParty function
 func TestParseCtoGParty(t *testing.T) {
 	t.Run("invoice-test-01.xml", func(t *testing.T) {
-		xmlData, err := loadTestXMLDoc("invoice-test-01.xml")
+		e, err := newDocumentFrom("invoice-test-01.xml")
 		require.NoError(t, err)
 
-		c := NewConverter()
-		err = c.NewInvoice(xmlData)
-		require.NoError(t, err)
-
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
 		seller := inv.Supplier
 		buyer := inv.Customer
@@ -27,7 +25,7 @@ func TestParseCtoGParty(t *testing.T) {
 
 		assert.Equal(t, "Sample Seller", seller.Name)
 		assert.Equal(t, l10n.TaxCountryCode("DE"), seller.TaxID.Country)
-		assert.Equal(t, cbc.Code("DE049120826"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("049120826"), seller.TaxID.Code)
 
 		assert.Equal(t, "Sample Buyer", buyer.Name)
 		assert.Equal(t, "Sample Street 2", buyer.Addresses[0].Street)
@@ -38,20 +36,17 @@ func TestParseCtoGParty(t *testing.T) {
 
 	// With SellerTaxRepresentativeTradeParty
 	t.Run("CII_example2.xml", func(t *testing.T) {
-		xmlData, err := loadTestXMLDoc("CII_example2.xml")
+		e, err := newDocumentFrom("CII_example2.xml")
 		require.NoError(t, err)
 
-		c := NewConverter()
-		err = c.NewInvoice(xmlData)
-		require.NoError(t, err)
-
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
 		seller := inv.Supplier
 		require.NotNil(t, seller)
 
 		assert.NotNil(t, seller.TaxID)
-		assert.Equal(t, cbc.Code("NO967611265MVA"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("967611265MVA"), seller.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
 
 		assert.Equal(t, "Tax handling company AS", seller.Name)
@@ -66,7 +61,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.NotNil(t, supplier)
 
 		assert.Equal(t, "Salescompany ltd.", supplier.Name)
-		assert.Equal(t, cbc.Code("NO123456789MVA"), supplier.TaxID.Code)
+		assert.Equal(t, cbc.Code("123456789MVA"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
 
 		require.Len(t, supplier.Addresses, 1)

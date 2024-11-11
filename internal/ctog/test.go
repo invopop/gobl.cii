@@ -6,12 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/invopop/gobl.cii/document"
-	"github.com/nbio/xml"
+	"github.com/invopop/gobl"
 )
 
-// loadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func loadTestXMLDoc(name string) (*document.Document, error) {
+// newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
+func newDocumentFrom(name string) (*gobl.Envelope, error) {
 	src, err := os.Open(filepath.Join(getTestDataPath(), name))
 	if err != nil {
 		return nil, err
@@ -26,12 +25,8 @@ func loadTestXMLDoc(name string) (*document.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	doc := new(document.Document)
-	if err := xml.Unmarshal(inData, doc); err != nil {
-		return nil, err
-	}
-
-	return doc, err
+	c := &Converter{}
+	return c.Convert(inData)
 }
 
 // getTestDataPath returns the path to the `test/data/ctog` folder

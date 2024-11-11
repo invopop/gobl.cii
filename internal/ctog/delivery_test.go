@@ -3,6 +3,7 @@ package ctog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -10,14 +11,11 @@ import (
 
 func TestParseCtoGDelivery(t *testing.T) {
 	t.Run("CII_example4.xml", func(t *testing.T) {
-		doc, err := loadTestXMLDoc("CII_example4.xml")
+		e, err := newDocumentFrom("CII_example4.xml")
 		require.NoError(t, err)
 
-		c := NewConverter()
-		err = c.NewInvoice(doc)
-		require.NoError(t, err)
-
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
 		delivery := inv.Delivery
 
@@ -33,14 +31,11 @@ func TestParseCtoGDelivery(t *testing.T) {
 	})
 
 	t.Run("CII_example8.xml", func(t *testing.T) {
-		doc, err := loadTestXMLDoc("CII_example8.xml")
+		e, err := newDocumentFrom("CII_example8.xml")
 		require.NoError(t, err)
 
-		c := NewConverter()
-		err = c.NewInvoice(doc)
-		require.NoError(t, err)
-
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
 		delivery := inv.Delivery
 

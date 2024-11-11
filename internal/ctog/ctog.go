@@ -30,13 +30,8 @@ func NewConverter() *Converter {
 	return c
 }
 
-// GetInvoice returns the invoice from the converter
-func (c *Converter) GetInvoice() *bill.Invoice {
-	return c.inv
-}
-
-// ConvertToGOBL converts a CII document into a GOBL envelope
-func (c *Converter) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
+// Convert converts a CII document into a GOBL envelope
+func (c *Converter) Convert(xmlData []byte) (*gobl.Envelope, error) {
 	if err := xml.Unmarshal(xmlData, &c.doc); err != nil {
 		return nil, err
 	}

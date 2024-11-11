@@ -3,6 +3,7 @@ package ctog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
@@ -14,14 +15,11 @@ import (
 func TestParseCtoGLines(t *testing.T) {
 	// Basic Invoice 1
 	t.Run("invoice-test-01.xml", func(t *testing.T) {
-		xmlData, err := loadTestXMLDoc("invoice-test-01.xml")
+		e, err := newDocumentFrom("invoice-test-01.xml")
 		require.NoError(t, err)
 
-		c := NewConverter()
-		err = c.NewInvoice(xmlData)
-		require.NoError(t, err)
-
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
 		lines := inv.Lines
 		require.Len(t, lines, 2)
@@ -48,14 +46,11 @@ func TestParseCtoGLines(t *testing.T) {
 
 	//Basic Invoice 2
 	t.Run("CII_example1.xml", func(t *testing.T) {
-		xmlData, err := loadTestXMLDoc("CII_example1.xml")
+		e, err := newDocumentFrom("CII_example1.xml")
 		require.NoError(t, err)
 
-		c := NewConverter()
-		err = c.NewInvoice(xmlData)
-		require.NoError(t, err)
-
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
 		lines := inv.Lines
 		require.Len(t, lines, 20)
@@ -91,14 +86,11 @@ func TestParseCtoGLines(t *testing.T) {
 
 	// Invoice with Description and Origin Country
 	t.Run("CII_example2.xml", func(t *testing.T) {
-		xmlData, err := loadTestXMLDoc("CII_example2.xml")
+		e, err := newDocumentFrom("CII_example2.xml")
 		require.NoError(t, err)
 
-		c := NewConverter()
-		err = c.NewInvoice(xmlData)
-		require.NoError(t, err)
-
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
 		lines := inv.Lines
 		require.NotEmpty(t, lines)

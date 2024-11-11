@@ -53,6 +53,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	// Check if input is JSON or XML
 	isJSON := json.Valid(inData)
 	converter := cii.NewConverter()
+
 	var outputData []byte
 
 	if isJSON {
