@@ -39,8 +39,7 @@ func main() {
     }
 
     // Prepare the CII document
-    converter := cii.NewConverter()
-    doc, err := converter.ConvertToCII(env)
+    doc, err := cii.ToCII(env)
     if err != nil {
         panic(err)
     }
@@ -72,8 +71,7 @@ func main() {
 		panic(err)
 	}
 
-    converter := cii.NewConverter()
-    env, err := converter.ConvertToGOBL(inData)
+    env, err := cii.ToGOBL(inData)
     if err != nil {
         panic(err)
     }
