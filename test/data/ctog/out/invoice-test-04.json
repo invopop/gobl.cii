@@ -1,0 +1,149 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0193076b-8ec5-76c4-b38d-f2a41d48c788",
+    "dig": {
+      "alg": "sha256",
+      "val": "7d3e9052647d72b4f71e82d597b82293738b6cfcffe989e43bf950ee6ec6f5ab"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "$regime": "DE",
+    "uuid": "0193076b-8ec5-7706-85e7-a49c85cc2e03",
+    "type": "standard",
+    "code": "",
+    "issue_date": "2024-10-01",
+    "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
+    "supplier": {
+      "name": "Sample Seller",
+      "tax_id": {
+        "country": "DE",
+        "code": "250166794"
+      },
+      "addresses": [
+        {
+          "street": "Sample Street 1",
+          "locality": "Sample City",
+          "code": "56000",
+          "country": "DE"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Sample Buyer",
+      "addresses": [
+        {
+          "street": "Sample Street 2",
+          "locality": "Sample City",
+          "code": "56000",
+          "country": "DE"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "1",
+        "item": {
+          "name": "Sample Product",
+          "price": "250.00"
+        },
+        "sum": "250.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "7%"
+          }
+        ],
+        "total": "250.00"
+      },
+      {
+        "i": 2,
+        "quantity": "1",
+        "item": {
+          "name": "Hind",
+          "price": "10.00"
+        },
+        "sum": "10.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "7%"
+          }
+        ],
+        "total": "10.00"
+      }
+    ],
+    "ordering": {
+      "code": "N/A"
+    },
+    "payment": {
+      "payee": {
+        "name": "Sample Payee",
+        "addresses": [
+          {
+            "street": "Sample Street 3",
+            "locality": "Sample City",
+            "code": "56000",
+            "country": "DE"
+          }
+        ]
+      },
+      "terms": {
+        "detail": "Partial Payment",
+        "due_dates": [
+          {
+            "date": "2024-10-01",
+            "amount": "20.00"
+          }
+        ]
+      },
+      "instructions": {
+        "key": "debit-transfer",
+        "detail": "Barzahlung",
+        "credit_transfer": [
+          {
+            "iban": "123456789012345678"
+          }
+        ],
+        "card": {
+          "first6": "",
+          "last4": "3456",
+          "holder": "Schidt"
+        },
+        "ext": {
+          "untdid-payment-means": "42"
+        }
+      }
+    },
+    "totals": {
+      "sum": "260.00",
+      "total": "260.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "base": "260.00",
+                "percent": "7%",
+                "amount": "18.20"
+              }
+            ],
+            "amount": "18.20"
+          }
+        ],
+        "sum": "18.20"
+      },
+      "tax": "18.20",
+      "total_with_tax": "278.20",
+      "payable": "278.20"
+    }
+  }
+}

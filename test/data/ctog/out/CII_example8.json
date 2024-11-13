@@ -1,0 +1,338 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0193076b-8e4f-7107-b126-37698d988997",
+    "dig": {
+      "alg": "sha256",
+      "val": "decf1b1fe673297e57996ce71f592c2c7fbbfb0cae42f86b29ac64291dcb597a"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "$regime": "NL",
+    "uuid": "0193076b-8e4f-714e-8aac-88bebcacb21d",
+    "type": "standard",
+    "code": "1100512149",
+    "issue_date": "2014-11-10",
+    "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
+    "supplier": {
+      "name": "Enexis B.V.",
+      "tax_id": {
+        "country": "NL",
+        "code": "809561074B01"
+      },
+      "addresses": [
+        {
+          "street": "Magistratenlaan 116",
+          "locality": "'S-HERTOGENBOSCH",
+          "code": "5223MB",
+          "country": "NL"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "klantenservice.zakelijk@enexis.nl"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Klant",
+      "addresses": [
+        {
+          "street": "Bedrijfslaan 4",
+          "locality": "ONDERNEMERSTAD",
+          "code": "9999 XX",
+          "country": "NL"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "16000",
+        "item": {
+          "name": "Getransporteerde kWh’s",
+          "price": "0.00880",
+          "unit": "kwh",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
+        },
+        "sum": "140.80000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "140.80000"
+      },
+      {
+        "i": 2,
+        "quantity": "16000",
+        "item": {
+          "name": "Systeemdiensten",
+          "price": "0.00101",
+          "unit": "kwh",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
+        },
+        "sum": "16.16000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "16.16000"
+      },
+      {
+        "i": 3,
+        "quantity": "132",
+        "item": {
+          "name": "Contract transportvermogen",
+          "price": "15.24000",
+          "unit": "kw",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
+        },
+        "sum": "2011.68000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "2011.68000"
+      },
+      {
+        "i": 4,
+        "quantity": "58",
+        "item": {
+          "name": "Maximaal afgenomen vermogen",
+          "price": "1.530000",
+          "unit": "kw",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
+        },
+        "sum": "88.740000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "88.740000"
+      },
+      {
+        "i": 5,
+        "quantity": "1",
+        "item": {
+          "name": "Vastrecht Transportdienst",
+          "price": "441.00",
+          "unit": "mon",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
+        },
+        "sum": "441.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "441.00"
+      },
+      {
+        "i": 6,
+        "quantity": "1",
+        "item": {
+          "name": "Vastrecht Aansluitdienst",
+          "price": "678.00",
+          "unit": "mon",
+          "meta": {
+            "contract-transportvermogen": "132,00 kW",
+            "correctiefactor": "1,0130",
+            "netvlak": "MS-D",
+            "transporttarief": "Netvlak MSD Enexis"
+          }
+        },
+        "sum": "678.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "678.00"
+      },
+      {
+        "i": 7,
+        "quantity": "1",
+        "item": {
+          "name": "Huur Transformatoren",
+          "price": "83.340000",
+          "unit": "mon"
+        },
+        "sum": "83.340000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "83.340000"
+      },
+      {
+        "i": 8,
+        "quantity": "1",
+        "item": {
+          "name": "Huur Schakelinstallaties",
+          "price": "190.310000",
+          "unit": "mon"
+        },
+        "sum": "190.310000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "190.310000"
+      },
+      {
+        "i": 9,
+        "quantity": "1",
+        "item": {
+          "name": "Huur Overige Apparaten",
+          "price": "64.210000",
+          "unit": "mon"
+        },
+        "sum": "64.210000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "64.210000"
+      },
+      {
+        "i": 10,
+        "quantity": "1",
+        "item": {
+          "name": "Huur Meterdiensten",
+          "price": "64.46000",
+          "unit": "mon"
+        },
+        "sum": "64.46000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "64.46000"
+      }
+    ],
+    "ordering": {
+      "identities": [
+        {
+          "key": "invoice-data-sheet",
+          "code": "871694831000290806"
+        }
+      ],
+      "period": {
+        "start": "2014-08-01",
+        "end": "2014-08-31"
+      }
+    },
+    "payment": {
+      "terms": {
+        "detail": "Enexis brengt wettelijke rente in rekening over te laat betaalde\nfacturen. Kijk voor informatie op www.enexis.nl/rentenota",
+        "due_dates": [
+          {
+            "date": "2014-11-24",
+            "amount": "4572.23",
+            "percent": "100%"
+          }
+        ]
+      },
+      "instructions": {
+        "key": "credit-transfer",
+        "credit_transfer": [
+          {
+            "iban": "NL28RBOS0420242228"
+          }
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
+      }
+    },
+    "delivery": {
+      "receiver": {
+        "addresses": [
+          {
+            "street": "Bedrijfslaan 4,",
+            "locality": "ONDERNEMERSTAD",
+            "code": "9999 XX",
+            "country": "NL"
+          }
+        ]
+      }
+    },
+    "totals": {
+      "sum": "3778.70",
+      "total": "3778.70",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "base": "3778.70",
+                "percent": "21%",
+                "amount": "793.53"
+              }
+            ],
+            "amount": "793.53"
+          }
+        ],
+        "sum": "793.53"
+      },
+      "tax": "793.53",
+      "total_with_tax": "4572.23",
+      "payable": "4572.23"
+    },
+    "notes": [
+      {
+        "text": "Periodieke afrekening\nU vindt een toelichting op uw factuur via www.enexis.nl/factuur_grootzakelijk\nOp alle diensten en overeenkomsten zijn de algemene voorwaarden aansluiting en\ntransport grootverbruik elektriciteit, respectievelijk gas van toepassing\nwww.enexis.nl"
+      }
+    ]
+  }
+}

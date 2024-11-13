@@ -1,0 +1,475 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0193076b-8d71-7de8-9b30-e0eccff7d3b6",
+    "dig": {
+      "alg": "sha256",
+      "val": "add8ac0ba405bbf0c2f6bbf8e28be136b7dd7cdd7d8bc2467daec6f11046d40d"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "$regime": "NL",
+    "uuid": "0193076b-8d71-7e4f-b7b8-e23c326aa987",
+    "type": "standard",
+    "code": "12115118",
+    "issue_date": "2015-01-09",
+    "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
+    "supplier": {
+      "name": "De Koksmaat",
+      "tax_id": {
+        "country": "NL",
+        "code": "820098395B01"
+      },
+      "addresses": [
+        {
+          "street": "Postbus 7l",
+          "locality": "Velsen-Noord",
+          "code": "1950 AB",
+          "country": "NL"
+        }
+      ]
+    },
+    "customer": {
+      "name": "ODIN 59",
+      "people": [
+        {
+          "name": {
+            "given": "Dhr. J BLOKKER"
+          }
+        }
+      ],
+      "addresses": [
+        {
+          "street": "POSTBUS 367",
+          "locality": "HEEMSKERK",
+          "code": "1960 AJ",
+          "country": "NL"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "2",
+        "item": {
+          "ref": "166022",
+          "name": "PATAT FRITES 10MM 10KG",
+          "price": "9.95",
+          "unit": "piece"
+        },
+        "sum": "19.90",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "19.90"
+      },
+      {
+        "i": 2,
+        "quantity": "1",
+        "item": {
+          "ref": "661813",
+          "name": "KAAS 50PL. JONG BEL. 1KG",
+          "price": "9.85",
+          "unit": "piece"
+        },
+        "sum": "9.85",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "9.85"
+      },
+      {
+        "i": 3,
+        "quantity": "1",
+        "item": {
+          "ref": "438146",
+          "name": "POT KETCHUP 3 LT",
+          "price": "8.29",
+          "unit": "piece"
+        },
+        "sum": "8.29",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "8.29"
+      },
+      {
+        "i": 4,
+        "quantity": "2",
+        "item": {
+          "ref": "438103",
+          "name": "FRITESSAUS 3 LRR",
+          "price": "7.23",
+          "unit": "piece"
+        },
+        "sum": "14.46",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "14.46"
+      },
+      {
+        "i": 5,
+        "quantity": "1",
+        "item": {
+          "ref": "666955",
+          "name": "KOFFIE BLIK 3,5KG SNELF ",
+          "price": "35.00",
+          "unit": "piece"
+        },
+        "sum": "35.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "35.00"
+      },
+      {
+        "i": 6,
+        "quantity": "1",
+        "item": {
+          "ref": "664871",
+          "name": "KOFFIE 3.5 KG BLIK STAND ",
+          "price": "35.00",
+          "unit": "piece"
+        },
+        "sum": "35.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "35.00"
+      },
+      {
+        "i": 7,
+        "quantity": "1",
+        "item": {
+          "ref": "350257",
+          "name": "SUIKERKLONT",
+          "price": "10.65",
+          "unit": "piece"
+        },
+        "sum": "10.65",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "10.65"
+      },
+      {
+        "i": 8,
+        "quantity": "1",
+        "item": {
+          "ref": "350258",
+          "name": "1 KG UL BLOKJES ",
+          "price": "1.55",
+          "unit": "piece"
+        },
+        "sum": "1.55",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "1.55"
+      },
+      {
+        "i": 9,
+        "quantity": "3",
+        "item": {
+          "ref": "999998",
+          "name": "BLOCKNOTE A5 ",
+          "price": "4.79",
+          "unit": "piece"
+        },
+        "sum": "14.37",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "14.37"
+      },
+      {
+        "i": 10,
+        "quantity": "1",
+        "item": {
+          "ref": "740810",
+          "name": "CHIPS NAT KLEIN ZAKJES",
+          "price": "8.29",
+          "unit": "piece"
+        },
+        "sum": "8.29",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "8.29"
+      },
+      {
+        "i": 11,
+        "quantity": "2",
+        "item": {
+          "ref": "740829",
+          "name": "CHIPS PAP KLEINE ZAKJES",
+          "price": "8.29",
+          "unit": "piece"
+        },
+        "sum": "16.58",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "16.58"
+      },
+      {
+        "i": 12,
+        "quantity": "1",
+        "item": {
+          "ref": "740828",
+          "name": "TR KL PAKJES APPELSAP ",
+          "price": "9.95",
+          "unit": "piece"
+        },
+        "sum": "9.95",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "9.95"
+      },
+      {
+        "i": 13,
+        "quantity": "2",
+        "item": {
+          "ref": "740827",
+          "name": "PK CHOCOLADEMELK ",
+          "price": "1.65",
+          "unit": "piece"
+        },
+        "sum": "3.30",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "3.30"
+      },
+      {
+        "i": 14,
+        "quantity": "1",
+        "item": {
+          "ref": "999996",
+          "name": "KRAT BIER ",
+          "price": "10.80",
+          "unit": "piece"
+        },
+        "sum": "10.80",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "10.80"
+      },
+      {
+        "i": 15,
+        "quantity": "1",
+        "item": {
+          "ref": "999995",
+          "name": "STATIEGELD ",
+          "price": "3.90",
+          "unit": "piece"
+        },
+        "sum": "3.90",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "3.90"
+      },
+      {
+        "i": 16,
+        "quantity": "2",
+        "item": {
+          "ref": "102172",
+          "name": "BLEEK 3 X 750 ML ",
+          "price": "3.80",
+          "unit": "piece"
+        },
+        "sum": "7.60",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "7.60"
+      },
+      {
+        "i": 17,
+        "quantity": "2",
+        "item": {
+          "ref": "999994",
+          "name": "WC PAPIER ",
+          "price": "4.67",
+          "unit": "piece"
+        },
+        "sum": "9.34",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "9.34"
+      },
+      {
+        "i": 18,
+        "quantity": "1",
+        "item": {
+          "ref": "999993",
+          "name": "BALPENNEN 50 ST BLAUW ",
+          "price": "18.63",
+          "unit": "piece"
+        },
+        "sum": "18.63",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "18.63"
+      },
+      {
+        "i": 19,
+        "quantity": "6",
+        "item": {
+          "ref": "999992",
+          "name": "EM FRITUURVET ",
+          "price": "17.02",
+          "unit": "piece"
+        },
+        "sum": "102.12",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "102.12"
+      },
+      {
+        "i": 20,
+        "quantity": "6",
+        "item": {
+          "ref": "175137",
+          "name": "FRITUUR VET 10 KG RETOUR ",
+          "price": "18.33",
+          "unit": "piece"
+        },
+        "sum": "109.98",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "6%"
+          }
+        ],
+        "total": "109.98"
+      }
+    ],
+    "payment": {
+      "terms": {
+        "due_dates": [
+          {
+            "date": "2015-01-09",
+            "amount": "483.49",
+            "percent": "100%"
+          }
+        ]
+      },
+      "instructions": {
+        "key": "credit-transfer",
+        "credit_transfer": [
+          {
+            "iban": "NL57 RABO 0107307510"
+          }
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
+      }
+    },
+    "totals": {
+      "sum": "449.56",
+      "total": "449.56",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "base": "403.19",
+                "percent": "6%",
+                "amount": "24.19"
+              },
+              {
+                "base": "46.37",
+                "percent": "21%",
+                "amount": "9.74"
+              }
+            ],
+            "amount": "33.93"
+          }
+        ],
+        "sum": "33.93"
+      },
+      "tax": "33.93",
+      "total_with_tax": "483.49",
+      "payable": "483.49"
+    },
+    "notes": [
+      {
+        "code": "AAR",
+        "text": "Alle leveringen zijn franco. Alle prijzen zijn incl. BTW. Betalingstermijn: 14 dagen netto. Prijswijzigingen voorbehouden. Op al onze aanbiedingen, leveringen en overeenkomsten zijn van toepassing in de algemene verkoop en leveringsvoorwaarden. Gedeponeerd bij de K.v.K. te Amsterdam 25-04-'85."
+      }
+    ]
+  }
+}

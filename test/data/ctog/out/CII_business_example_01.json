@@ -1,0 +1,171 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0193076b-8d2f-7205-86a4-a959811e81ef",
+    "dig": {
+      "alg": "sha256",
+      "val": "34ee4f10c7a287a8800cfef4153fcf429d73af250ecce318b4bbf11e8b7bb7af"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "$regime": "DE",
+    "uuid": "0193076b-8d2f-724f-ab4f-78811e850b48",
+    "type": "standard",
+    "code": "2016166",
+    "issue_date": "2015-01-09",
+    "currency": "EUR",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
+    "supplier": {
+      "name": "XXX AG",
+      "tax_id": {
+        "country": "DE",
+        "code": "3730230168"
+      },
+      "addresses": [
+        {
+          "street": "Storkower Straße 207",
+          "locality": "Berlin",
+          "code": "10369",
+          "country": "DE"
+        }
+      ]
+    },
+    "customer": {
+      "name": "XXX AG",
+      "people": [
+        {
+          "name": {
+            "given": "XXXX"
+          }
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Storkower Straße 207",
+          "locality": "Berlin",
+          "code": "10369",
+          "country": "DE"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "1.000",
+        "item": {
+          "ref": "846",
+          "name": "Festpreis",
+          "description": "Neues DSL Portfolio 2016",
+          "price": "12122.5900",
+          "unit": "C62"
+        },
+        "sum": "12122.5900",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "19.00%"
+          }
+        ],
+        "total": "12122.5900"
+      },
+      {
+        "i": 2,
+        "quantity": "-1",
+        "item": {
+          "ref": "832",
+          "name": "Abzug",
+          "price": "606.1300",
+          "unit": "C62"
+        },
+        "sum": "-606.1300",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "19.00%"
+          }
+        ],
+        "total": "-606.1300"
+      },
+      {
+        "i": 3,
+        "quantity": "1.000",
+        "item": {
+          "ref": "870",
+          "name": "zzgl. ",
+          "price": "1.5000",
+          "unit": "C62"
+        },
+        "sum": "1.5000",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "19.00%"
+          }
+        ],
+        "total": "1.5000"
+      }
+    ],
+    "payment": {
+      "terms": {
+        "due_dates": [
+          {
+            "date": "2015-01-09",
+            "amount": "13706.37",
+            "percent": "100%"
+          }
+        ]
+      },
+      "instructions": {
+        "key": "credit-transfer",
+        "credit_transfer": [
+          {
+            "iban": "DE12500105170648489890"
+          }
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
+      }
+    },
+    "delivery": {
+      "date": "2016-09-06"
+    },
+    "totals": {
+      "sum": "11517.96",
+      "total": "11517.96",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "base": "11517.96",
+                "percent": "19.00%",
+                "amount": "2188.41"
+              }
+            ],
+            "amount": "2188.41"
+          }
+        ],
+        "sum": "2188.41"
+      },
+      "tax": "2188.41",
+      "total_with_tax": "13706.37",
+      "payable": "13706.37"
+    },
+    "notes": [
+      {
+        "code": "AAR",
+        "text": "This is an example invoice based on data that is used in real business.Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+      },
+      {
+        "text": "Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+      }
+    ]
+  }
+}

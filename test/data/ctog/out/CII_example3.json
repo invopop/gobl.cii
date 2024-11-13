@@ -1,0 +1,153 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0193076b-8db4-77d6-9aad-f36e69bebf4b",
+    "dig": {
+      "alg": "sha256",
+      "val": "048fc895f5f7d782ea3a7481e050d4fbe1a8a103d36e8b4016adea59911c12b3"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "uuid": "0193076b-8db4-7825-9acf-13f6cc862b7b",
+    "type": "standard",
+    "code": "TOSL108",
+    "issue_date": "2013-04-10",
+    "currency": "DKK",
+    "tax": {
+      "ext": {
+        "untdid-document-type": "380"
+      }
+    },
+    "supplier": {
+      "name": "SubscriptionSeller",
+      "tax_id": {
+        "country": "DK",
+        "code": "16356706"
+      },
+      "addresses": [
+        {
+          "street": "Main street 2, Building 4",
+          "locality": "Big city",
+          "code": "54321",
+          "country": "DK"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "antonio@SubscriptionsSeller.dk"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Buyercompany ltd",
+      "identities": [
+        {
+          "label": "0088",
+          "code": "5790000435975"
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Anystreet, Building 1",
+          "locality": "Anytown",
+          "code": "101",
+          "country": "DK"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "1",
+        "item": {
+          "name": "Paper subscription",
+          "description": "Subscription fee 1st quarter",
+          "price": "800.00",
+          "unit": "C62"
+        },
+        "sum": "800.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "25%"
+          }
+        ],
+        "total": "800.00"
+      }
+    ],
+    "charges": [
+      {
+        "i": 1,
+        "reason": "Freight charge",
+        "amount": "100.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "25%"
+          }
+        ],
+        "ext": {
+          "untdid-charge": "FC"
+        }
+      }
+    ],
+    "ordering": {
+      "period": {
+        "start": "2013-01-01",
+        "end": "2013-04-01"
+      }
+    },
+    "payment": {
+      "terms": {
+        "due_dates": [
+          {
+            "date": "2013-05-10",
+            "amount": "1125.00",
+            "percent": "100%"
+          }
+        ]
+      },
+      "instructions": {
+        "key": "credit-transfer",
+        "credit_transfer": [
+          {
+            "iban": "DK1212341234123412"
+          }
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
+      }
+    },
+    "totals": {
+      "sum": "800.00",
+      "charge": "100.00",
+      "total": "900.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "base": "900.00",
+                "percent": "25%",
+                "amount": "225.00"
+              }
+            ],
+            "amount": "225.00"
+          }
+        ],
+        "sum": "225.00"
+      },
+      "tax": "225.00",
+      "total_with_tax": "1125.00",
+      "payable": "1125.00"
+    },
+    "notes": [
+      {
+        "text": "Contract was established through our website"
+      }
+    ]
+  }
+}
