@@ -3,7 +3,6 @@ package cii
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -28,13 +27,11 @@ const (
 	jsonPattern = "*.json"
 )
 
-var update = flag.Bool("update", false, "Update out directory")
-
-func TestNewDocument(t *testing.T) {
+func TestGtoC(t *testing.T) {
 	schema, err := loadSchema("schema.xsd")
 	require.NoError(t, err)
 
-	examples, err := getDataGlob("*.json")
+	examples, err := getDataGlob(jsonPattern)
 	require.NoError(t, err)
 
 	for _, example := range examples {
@@ -54,17 +51,12 @@ func TestNewDocument(t *testing.T) {
 			output, err := loadOutputFile(outName)
 			assert.NoError(t, err)
 
-			if *update {
-				err = saveOutputFile(outName, data)
-				require.NoError(t, err)
-			} else {
-				assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
-			}
+			assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
 		})
 	}
 }
 
-func TestNewDocumentGOBL(t *testing.T) {
+func TestCtoG(t *testing.T) {
 	examples, err := getDataGlob("*.xml")
 	require.NoError(t, err)
 
@@ -111,12 +103,7 @@ func TestNewDocumentGOBL(t *testing.T) {
 			expectedData, err := json.MarshalIndent(expectedInvoice, "", "  ")
 			require.NoError(t, err)
 
-			if *update {
-				err = saveOutputFile(outName, data)
-				require.NoError(t, err)
-			} else {
-				assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
-			}
+			assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
 		})
 	}
 }
@@ -184,16 +171,6 @@ func loadOutputFile(name string) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
-}
-
-func saveOutputFile(name string, data []byte) error {
-	var pattern string
-	if strings.HasSuffix(name, jsonPattern) {
-		pattern = xmlPattern
-	} else {
-		pattern = jsonPattern
-	}
-	return os.WriteFile(filepath.Join(getOutPath(pattern), name), data, 0644)
 }
 
 func getDataGlob(pattern string) ([]string, error) {

@@ -6,13 +6,12 @@ const (
 	RAM              = "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
 	QDT              = "urn:un:unece:uncefact:data:standard:QualifiedDataType:100"
 	UDT              = "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
-	BusinessProcess  = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
-	GuidelineContext = "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0"
+	GuidelineContext = "urn:cen.eu:en16931:2017"
 )
 
 // ExchangedContext defines the structure of the ExchangedDocumentContext of the CII standard
 type ExchangedContext struct {
-	BusinessContext  *ExchangedContextParameter `xml:"ram:BusinessProcessSpecifiedDocumentContextParameter"`
+	BusinessContext  *ExchangedContextParameter `xml:"ram:BusinessProcessSpecifiedDocumentContextParameter,omitempty"`
 	GuidelineContext *ExchangedContextParameter `xml:"ram:GuidelineSpecifiedDocumentContextParameter"`
 }
 

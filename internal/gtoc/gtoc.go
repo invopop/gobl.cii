@@ -37,7 +37,6 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 		QDTNamespace: document.QDT,
 		UDTNamespace: document.UDT,
 		ExchangedContext: &document.ExchangedContext{
-			BusinessContext:  &document.ExchangedContextParameter{ID: document.BusinessProcess},
 			GuidelineContext: &document.ExchangedContextParameter{ID: document.GuidelineContext},
 		},
 	}
