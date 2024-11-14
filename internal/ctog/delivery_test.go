@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,7 +24,7 @@ func TestParseCtoGDelivery(t *testing.T) {
 		require.NotNil(t, delivery.Receiver, "Delivery receiver should not be nil")
 
 		assert.NotEmpty(t, delivery.Receiver.Addresses, "Delivery receiver addresses should not be empty")
-		assert.Equal(t, "9000", delivery.Receiver.Addresses[0].Code, "Delivery receiver post code should match")
+		assert.Equal(t, cbc.Code("9000"), delivery.Receiver.Addresses[0].Code, "Delivery receiver post code should match")
 		assert.Equal(t, "Deliverystreet", delivery.Receiver.Addresses[0].Street, "Delivery receiver street should match")
 		assert.Equal(t, "Deliverycity", delivery.Receiver.Addresses[0].Locality, "Delivery receiver city should match")
 		assert.Equal(t, l10n.ISOCountryCode("DK"), delivery.Receiver.Addresses[0].Country, "Delivery receiver country should match")
@@ -43,7 +44,7 @@ func TestParseCtoGDelivery(t *testing.T) {
 		require.NotNil(t, delivery.Receiver, "Delivery receiver should not be nil")
 		assert.NotEmpty(t, delivery.Receiver.Addresses, "Delivery receiver addresses should not be empty")
 		assert.Equal(t, "Bedrijfslaan 4,", delivery.Receiver.Addresses[0].Street, "Delivery receiver street should match")
-		assert.Equal(t, "9999 XX", delivery.Receiver.Addresses[0].Code, "Delivery receiver post code should match")
+		assert.Equal(t, cbc.Code("9999 XX"), delivery.Receiver.Addresses[0].Code, "Delivery receiver post code should match")
 		assert.Equal(t, "ONDERNEMERSTAD", delivery.Receiver.Addresses[0].Locality, "Delivery receiver city should match")
 		assert.Equal(t, l10n.ISOCountryCode("NL"), delivery.Receiver.Addresses[0].Country, "Delivery receiver country should match")
 	})

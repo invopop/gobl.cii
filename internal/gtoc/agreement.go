@@ -70,7 +70,7 @@ func newPostalTradeAddress(addresses []*org.Address) *document.PostalTradeAddres
 	address := addresses[0]
 
 	a := &document.PostalTradeAddress{
-		Postcode:  address.Code,
+		Postcode:  address.Code.String(),
 		LineOne:   address.Street,
 		LineTwo:   address.Number,
 		City:      address.Locality,
