@@ -12,7 +12,7 @@ import (
 )
 
 // newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func newDocumentFrom(name string) (*document.Document, error) {
+func newDocumentFrom(name string) (*document.Invoice, error) {
 	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
