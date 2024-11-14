@@ -19,7 +19,7 @@ const (
 	keyAdditionalDocumentTypeRefPaper         = "ref-paper"
 )
 
-func (c *Converter) prepareOrdering(doc *document.Document) error {
+func (c *Converter) prepareOrdering(doc *document.Invoice) error {
 	ord := &bill.Ordering{}
 
 	if doc.Transaction.Agreement.BuyerReference != "" {

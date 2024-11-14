@@ -14,7 +14,7 @@ func ToGOBL(ciiDoc []byte) (*gobl.Envelope, error) {
 }
 
 // ToCII converts a GOBL envelope to a CII document
-func ToCII(env *gobl.Envelope) (*document.Document, error) {
+func ToCII(env *gobl.Envelope) (*document.Invoice, error) {
 	ciiDoc, err := gtoc.Convert(env)
 	if err != nil {
 		return nil, err

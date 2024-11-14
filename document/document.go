@@ -5,8 +5,8 @@ import (
 	"github.com/nbio/xml"
 )
 
-// Document is a pseudo-model for containing the XML document being created
-type Document struct {
+// Invoice is a pseudo-model for containing the XML document being created
+type Invoice struct {
 	XMLName           xml.Name          `xml:"rsm:CrossIndustryInvoice"`
 	RSMNamespace      string            `xml:"xmlns:rsm,attr"`
 	RAMNamespace      string            `xml:"xmlns:ram,attr"`
