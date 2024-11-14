@@ -30,7 +30,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "Sample Buyer", buyer.Name)
 		assert.Equal(t, "Sample Street 2", buyer.Addresses[0].Street)
 		assert.Equal(t, "Sample City", buyer.Addresses[0].Locality)
-		assert.Equal(t, "48000", buyer.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("48000"), buyer.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("DE"), buyer.Addresses[0].Country)
 	})
 
@@ -53,7 +53,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.Len(t, seller.Addresses, 1)
 		assert.Equal(t, "Regent street", seller.Addresses[0].Street)
 		assert.Equal(t, "Newtown", seller.Addresses[0].Locality)
-		assert.Equal(t, "202", seller.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("202"), seller.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), seller.Addresses[0].Country)
 
 		// Test parsing of supplier
@@ -69,7 +69,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "Suite 123", supplier.Addresses[0].StreetExtra)
 		assert.Equal(t, "Big city", supplier.Addresses[0].Locality)
 		assert.Equal(t, "RegionA", supplier.Addresses[0].Region)
-		assert.Equal(t, "303", supplier.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("303"), supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), supplier.Addresses[0].Country)
 
 		require.Len(t, supplier.People, 1)

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
@@ -25,7 +26,7 @@ func TestParseCtoGPayment(t *testing.T) {
 	assert.Len(t, payment.Payee.Addresses, 1)
 	assert.Equal(t, "Sample Street 3", payment.Payee.Addresses[0].Street)
 	assert.Equal(t, "Sample City", payment.Payee.Addresses[0].Locality)
-	assert.Equal(t, "56000", payment.Payee.Addresses[0].Code)
+	assert.Equal(t, cbc.Code("56000"), payment.Payee.Addresses[0].Code)
 	assert.Equal(t, l10n.ISOCountryCode("DE"), payment.Payee.Addresses[0].Country)
 
 	assert.NotNil(t, payment.Terms)

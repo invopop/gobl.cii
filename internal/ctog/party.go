@@ -109,7 +109,7 @@ func parseAddress(address *document.PostalTradeAddress) *org.Address {
 	}
 
 	if address.Postcode != "" {
-		addr.Code = address.Postcode
+		addr.Code = cbc.Code(address.Postcode)
 	}
 
 	if address.Region != "" {
