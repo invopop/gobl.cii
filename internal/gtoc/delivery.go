@@ -15,6 +15,7 @@ func (c *Converter) prepareDelivery(inv *bill.Invoice) error {
 				OccurrenceDate: &document.IssueDate{
 					DateFormat: &document.Date{
 						Value: formatIssueDate(*inv.Delivery.Date),
+						Format: issueDateFormat,
 					},
 				},
 			}
