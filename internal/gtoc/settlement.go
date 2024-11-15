@@ -65,10 +65,11 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
 		means := make([]*document.PaymentMeans, 0)
+		typeCode := instr.Ext[untdid.ExtKeyPaymentMeans].String()
 
 		if instr.CreditTransfer != nil {
 			credit := &document.PaymentMeans{
-				TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
+				TypeCode:    typeCode,
 				Information: instr.Detail,
 				Creditor: &document.Creditor{
 					IBAN:   instr.CreditTransfer[0].IBAN,
@@ -87,7 +88,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 		if instr.DirectDebit != nil {
 			direct := &document.PaymentMeans{
-				TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
+				TypeCode:    typeCode,
 				Information: instr.Detail,
 				Debtor: &document.DebtorAccount{
 					IBAN: instr.DirectDebit.Account,
@@ -111,7 +112,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 		if instr.Card != nil {
 			card := &document.PaymentMeans{
-				TypeCode:    instr.Ext[untdid.ExtKeyPaymentMeans].String(),
+				TypeCode:    typeCode,
 				Information: instr.Detail,
 				Card: &document.Card{
 					ID:   instr.Card.Last4,
@@ -119,6 +120,11 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 				},
 			}
 			means = append(means, card)
+		}
+
+		if len(means) == 0 && typeCode == "1" {
+			means = append(means, &document.PaymentMeans{
+				TypeCode: typeCode})
 		}
 
 		stlm.PaymentMeans = means
