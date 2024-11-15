@@ -30,6 +30,7 @@ func (c *Converter) newHeader(inv *bill.Invoice) error {
 		for _, n := range inv.Notes {
 			notes = append(notes, &document.Note{
 				Content: n.Text,
+				SubjectCode: n.Code,
 			})
 		}
 		h.IncludedNote = notes
