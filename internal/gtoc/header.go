@@ -29,7 +29,7 @@ func (c *Converter) newHeader(inv *bill.Invoice) error {
 		notes := make([]*document.Note, 0, len(inv.Notes))
 		for _, n := range inv.Notes {
 			notes = append(notes, &document.Note{
-				Content: n.Text,
+				Content:     n.Text,
 				SubjectCode: n.Code,
 			})
 		}
@@ -49,7 +49,7 @@ func formatIssueDate(d cal.Date) string {
 
 func invoiceNumber(s cbc.Code, c cbc.Code) string {
 	if s == "" {
-		return s.String()
+		return c.String()
 	}
 	return fmt.Sprintf("%s-%s", s, c)
 }
