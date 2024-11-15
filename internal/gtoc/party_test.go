@@ -18,7 +18,7 @@ func TestNewSeller(t *testing.T) {
 		assert.Equal(t, "John Doe", doc.Transaction.Agreement.TaxRepresentative.Contact.PersonName)
 		assert.Equal(t, "+49100200300", doc.Transaction.Agreement.TaxRepresentative.Contact.Phone.CompleteNumber)
 		assert.Equal(t, "69190", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.Postcode)
-		assert.Equal(t, "Dietmar-Hopp-Allee", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.LineOne)
+		assert.Equal(t, "Dietmar-Hopp-Allee 16", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.LineOne)
 		assert.Equal(t, "Walldorf", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.City)
 		assert.Equal(t, "DE", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.CountryID)
 		assert.Equal(t, "billing@example.com", doc.Transaction.Agreement.TaxRepresentative.URIUniversalCommunication.ID.Value)
@@ -37,8 +37,7 @@ func TestNewSeller(t *testing.T) {
 
 		assert.Equal(t, "Sample Consumer", doc.Transaction.Agreement.Buyer.Name)
 		assert.Equal(t, "80939", doc.Transaction.Agreement.Buyer.PostalTradeAddress.Postcode)
-		assert.Equal(t, "Werner-Heisenberg-Allee", doc.Transaction.Agreement.Buyer.PostalTradeAddress.LineOne)
-		assert.Equal(t, "25", doc.Transaction.Agreement.Buyer.PostalTradeAddress.LineTwo)
+		assert.Equal(t, "Werner-Heisenberg-Allee 25", doc.Transaction.Agreement.Buyer.PostalTradeAddress.LineOne)
 		assert.Equal(t, "München", doc.Transaction.Agreement.Buyer.PostalTradeAddress.City)
 		assert.Equal(t, "DE", doc.Transaction.Agreement.Buyer.PostalTradeAddress.CountryID)
 		assert.Equal(t, "email@sample.com", doc.Transaction.Agreement.Buyer.URIUniversalCommunication.ID.Value)
