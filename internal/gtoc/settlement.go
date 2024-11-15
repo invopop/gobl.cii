@@ -35,7 +35,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 				IssueDate: &document.FormattedIssueDate{
 					DateFormat: &document.Date{
 						Value:  formatIssueDate(*pre.IssueDate),
-						Format: "102",
+						Format: issueDateFormat,
 					},
 				},
 			},
@@ -50,13 +50,13 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 			Start: &document.IssueDate{
 				DateFormat: &document.Date{
 					Value:  formatIssueDate(inv.Delivery.Period.Start),
-					Format: "102",
+					Format: issueDateFormat,
 				},
 			},
 			End: &document.IssueDate{
 				DateFormat: &document.Date{
 					Value:  formatIssueDate(inv.Delivery.Period.End),
-					Format: "102",
+					Format: issueDateFormat,
 				},
 			},
 		}
