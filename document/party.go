@@ -3,7 +3,7 @@ package document
 // Party defines the structure of the TradePartyType of the CII standard
 type Party struct {
 	ID                        *PartyID                    `xml:"ram:ID,omitempty"`
-	GlobalID                  []*PartyID                  `xml:"ram:GlobalID,omitempty"`
+	GlobalID                  *PartyID                    `xml:"ram:GlobalID,omitempty"`
 	Name                      string                      `xml:"ram:Name,omitempty"`
 	Description               string                      `xml:"ram:Description,omitempty"`
 	LegalOrganization         *LegalOrganization          `xml:"ram:SpecifiedLegalOrganization,omitempty"`

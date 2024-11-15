@@ -18,6 +18,7 @@
         <ram:LineID>1</ram:LineID>
       </ram:AssociatedDocumentLineDocument>
       <ram:SpecifiedTradeProduct>
+        <ram:GlobalID schemeID="0088">123456789</ram:GlobalID>
         <ram:Name>Development services</ram:Name>
       </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
@@ -64,6 +65,7 @@
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
+        <ram:GlobalID schemeID="0088">123456789</ram:GlobalID>
         <ram:Name>Sample Consumer</ram:Name>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>80939</ram:PostcodeCode>

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/invopop/gobl.cii/document"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
 )
 
@@ -28,6 +29,17 @@ func NewParty(party *org.Party) *document.Party {
 					SchemeID: "VA",
 				},
 			},
+		}
+	}
+
+	if len(party.Identities) > 0 {
+		for _, id := range party.Identities {
+			if id.Ext.Has(iso.ExtKeySchemeID) {
+				p.GlobalID = &document.PartyID{
+					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+					Value:    id.Code.String(),
+				}
+			}
 		}
 	}
 

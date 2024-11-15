@@ -2,6 +2,7 @@ package ctog
 
 import (
 	"github.com/invopop/gobl.cii/document"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -70,18 +71,16 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 	}
 
 	// Global ID is not yet mapped to the ISO 6523 ICD, its identifier is used as the label
-	if len(party.GlobalID) > 0 {
-		for _, id := range party.GlobalID {
-			if id.Value != "" {
-				if p.Identities == nil {
-					p.Identities = make([]*org.Identity, 0)
-				}
-				p.Identities = append(p.Identities, &org.Identity{
-					Label: id.SchemeID,
-					Code:  cbc.Code(id.Value),
-				})
-			}
+	if party.GlobalID != nil {
+		if p.Identities == nil {
+			p.Identities = make([]*org.Identity, 0)
 		}
+		p.Identities = append(p.Identities, &org.Identity{
+			Ext: tax.Extensions{
+				iso.ExtKeySchemeID: tax.ExtValue(party.GlobalID.SchemeID),
+			},
+			Code: cbc.Code(party.GlobalID.Value),
+		})
 	}
 
 	return p

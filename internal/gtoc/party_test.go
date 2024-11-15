@@ -43,5 +43,8 @@ func TestNewSeller(t *testing.T) {
 		assert.Equal(t, "email@sample.com", doc.Transaction.Agreement.Buyer.URIUniversalCommunication.ID.Value)
 		assert.Equal(t, SchemeIDEmail, doc.Transaction.Agreement.Buyer.URIUniversalCommunication.ID.SchemeID)
 		assert.Equal(t, "DE282741168", doc.Transaction.Agreement.Buyer.SpecifiedTaxRegistration[0].ID.Value)
+
+		assert.Equal(t, "123456789", doc.Transaction.Agreement.Buyer.GlobalID.Value)
+		assert.Equal(t, "0088", doc.Transaction.Agreement.Buyer.GlobalID.SchemeID)
 	})
 }
