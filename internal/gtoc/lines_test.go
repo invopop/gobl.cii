@@ -21,6 +21,8 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "VAT", doc.Transaction.Lines[0].TradeSettlement.ApplicableTradeTax[0].TypeCode)
 		assert.Equal(t, "19", doc.Transaction.Lines[0].TradeSettlement.ApplicableTradeTax[0].RateApplicablePercent)
 		assert.Equal(t, "1800.00", doc.Transaction.Lines[0].TradeSettlement.Sum.Amount)
+		assert.Equal(t, "123456789", doc.Transaction.Lines[0].Product.GlobalID.Value)
+		assert.Equal(t, "0088", doc.Transaction.Lines[0].Product.GlobalID.SchemeID)
 	})
 
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
@@ -67,8 +68,10 @@ func (c *Converter) prepareLines(tsct *document.Transaction) error {
 			}
 			l.Item.Identities = append(l.Item.Identities, &org.Identity{
 				// This label corresponds to a code from the ISO 6523 ICD List. Mapping is not yet supported
-				Label: it.Product.GlobalID.SchemeID,
-				Code:  cbc.Code(it.Product.GlobalID.Value),
+				Ext: tax.Extensions{
+					iso.ExtKeySchemeID: tax.ExtValue(it.Product.GlobalID.SchemeID),
+				},
+				Code: cbc.Code(it.Product.GlobalID.Value),
 			})
 		}
 

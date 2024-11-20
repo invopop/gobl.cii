@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0193076b-8db4-77d6-9aad-f36e69bebf4b",
+    "uuid": "01933042-9baf-7a48-94d2-74ba80f07d29",
     "dig": {
       "alg": "sha256",
-      "val": "048fc895f5f7d782ea3a7481e050d4fbe1a8a103d36e8b4016adea59911c12b3"
+      "val": "91dbaf6c3d21067012775d5fec1f989a9b7da58987e5c4c85a0f74800bf4db9f"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0193076b-8db4-7825-9acf-13f6cc862b7b",
+    "uuid": "01933042-9baf-7a97-8993-17b8caaf11e1",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-04-10",
@@ -43,8 +43,10 @@
       "name": "Buyercompany ltd",
       "identities": [
         {
-          "label": "0088",
-          "code": "5790000435975"
+          "code": "5790000435975",
+          "ext": {
+            "iso-scheme-id": "0088"
+          }
         }
       ],
       "addresses": [

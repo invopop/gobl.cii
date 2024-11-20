@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 )
 
 // NewLines generates lines for XInvoice
@@ -55,6 +56,17 @@ func newLine(l *bill.Line) *document.Line {
 			})
 		}
 		lineItem.LineDoc.Note = notes
+	}
+
+	if len(it.Identities) > 0 {
+		for _, id := range it.Identities {
+			if id.Ext.Has(iso.ExtKeySchemeID) {
+				lineItem.Product.GlobalID = &document.GlobalID{
+					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+					Value:    id.Code.String(),
+				}
+			}
+		}
 	}
 
 	return lineItem
