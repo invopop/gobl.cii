@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0193076b-8d95-7d73-9023-b811c7212ba5",
+    "uuid": "01933042-9b7e-752b-a7f8-0b455b75c3c4",
     "dig": {
       "alg": "sha256",
-      "val": "5add2bd8cde8cb7bc20e0b7133b109b5ac81bbb056e92150df994e54e9d85bd7"
+      "val": "c0e77e0ffc168efcf20613d8ee5c9ebb3e283d23240f231bc7333ba68b36c06b"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0193076b-8d95-7dbc-9591-46ee996b28ab",
+    "uuid": "01933042-9b7e-75c6-b055-4f09ccd2a24b",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -44,8 +44,10 @@
       },
       "identities": [
         {
-          "label": "0088",
-          "code": "3456789012098"
+          "code": "3456789012098",
+          "ext": {
+            "iso-scheme-id": "0088"
+          }
         }
       ],
       "people": [
@@ -85,8 +87,10 @@
           "name": "Laptop computer",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890128"
+              "code": "1234567890128",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             }
           ],
           "description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
@@ -131,8 +135,10 @@
           "name": "Returned \"Advanced computing\" book",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890135"
+              "code": "1234567890135",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             }
           ],
           "price": "3.96",
@@ -160,8 +166,10 @@
           "name": "\"Computing for dummies\" book",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890142"
+              "code": "1234567890142",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             }
           ],
           "price": "2.48",
@@ -184,8 +192,10 @@
           "name": "Returned IBM 5150 desktop",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890159"
+              "code": "1234567890159",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             }
           ],
           "price": "25.00",
@@ -208,8 +218,10 @@
           "name": "Network cable",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890166"
+              "code": "1234567890166",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             }
           ],
           "price": "0.75",
@@ -276,8 +288,10 @@
         },
         "identities": [
           {
-            "label": "0088",
-            "code": "1238764941386"
+            "code": "1238764941386",
+            "ext": {
+              "iso-scheme-id": "0088"
+            }
           }
         ],
         "people": [
@@ -340,8 +354,10 @@
       "receiver": {
         "identities": [
           {
-            "label": "0088",
-            "code": "6754238987643"
+            "code": "6754238987643",
+            "ext": {
+              "iso-scheme-id": "0088"
+            }
           }
         ],
         "addresses": [

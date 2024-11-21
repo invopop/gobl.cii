@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
@@ -99,6 +100,8 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900", lines[0].Item.Description)
 		assert.Equal(t, l10n.ISOCountryCode("DE"), lines[0].Item.Origin)
 		assert.Equal(t, "JB007", lines[0].Item.Ref)
+		assert.Equal(t, "1234567890128", lines[0].Item.Identities[0].Code.String())
+		assert.Equal(t, "0088", lines[0].Item.Identities[0].Ext[iso.ExtKeySchemeID].String())
 	})
 
 }

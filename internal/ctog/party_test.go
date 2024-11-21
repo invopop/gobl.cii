@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
@@ -71,14 +72,21 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "RegionA", supplier.Addresses[0].Region)
 		assert.Equal(t, cbc.Code("303"), supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), supplier.Addresses[0].Country)
-
 		require.Len(t, supplier.People, 1)
 		assert.Equal(t, "Antonio Salesmacher", supplier.People[0].Name.Given)
-
 		require.Len(t, supplier.Emails, 1)
 		assert.Equal(t, "antonio@salescompany.no", supplier.Emails[0].Address)
-
 		require.Len(t, supplier.Telephones, 1)
 		assert.Equal(t, "46211230", supplier.Telephones[0].Number)
+
+		customer := inv.Customer
+		require.NotNil(t, customer)
+
+		assert.Equal(t, "The Buyercompany", customer.Name)
+		assert.Equal(t, cbc.Code("987654321MVA"), customer.TaxID.Code)
+		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
+		require.Len(t, customer.Identities, 1)
+		assert.Equal(t, "3456789012098", customer.Identities[0].Code.String())
+		assert.Equal(t, "0088", customer.Identities[0].Ext[iso.ExtKeySchemeID].String())
 	})
 }

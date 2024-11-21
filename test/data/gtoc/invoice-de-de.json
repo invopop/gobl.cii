@@ -72,6 +72,15 @@
 				{
 					"addr": "email@sample.com"
 				}
+			],
+			"identities": [
+				{
+					"ext": 
+						{
+							"iso-scheme-id": "0088"
+						},
+					"code": "123456789"
+				}
 			]
 		},
 		"lines": [
@@ -81,7 +90,15 @@
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
-					"unit": "h"
+					"unit": "h",
+					"identities": [
+						{
+							"ext": {
+								"iso-scheme-id": "0088"
+							},
+							"code": "123456789"
+						}
+					]
 				},
 				"sum": "1800.00",
 				"taxes": [
