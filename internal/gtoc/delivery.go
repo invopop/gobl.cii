@@ -14,7 +14,7 @@ func (c *Converter) prepareDelivery(inv *bill.Invoice) error {
 			d.Event = &document.ChainEvent{
 				OccurrenceDate: &document.IssueDate{
 					DateFormat: &document.Date{
-						Value: formatIssueDate(*inv.Delivery.Date),
+						Value:  formatIssueDate(*inv.Delivery.Date),
 						Format: issueDateFormat,
 					},
 				},
