@@ -93,7 +93,7 @@
       </ram:ShipToTradeParty>
       <ram:ActualDeliverySupplyChainEvent>
         <ram:OccurrenceDateTime>
-          <udt:DateTimeString>20240210</udt:DateTimeString>
+          <udt:DateTimeString format="102">20240210</udt:DateTimeString>
         </ram:OccurrenceDateTime>
       </ram:ActualDeliverySupplyChainEvent>
       <ram:DespatchAdviceReferencedDocument>
@@ -162,6 +162,9 @@
         </ram:CategoryTradeTax>
       </ram:SpecifiedTradeAllowanceCharge>
       <ram:SpecifiedTradePaymentTerms>
+        <ram:DueDateDateTime>
+          <udt:DateTimeString format="102">20130720</udt:DateTimeString>
+        </ram:DueDateDateTime>
         <ram:DirectDebitMandateID>1234567890</ram:DirectDebitMandateID>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
