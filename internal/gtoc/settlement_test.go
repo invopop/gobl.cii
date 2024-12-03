@@ -17,7 +17,7 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms[0].Description)
 		assert.Equal(t, "20240227", doc.Transaction.Settlement.PaymentTerms[0].DueDate.DateFormat.Value)
 		assert.Equal(t, "2000.00", doc.Transaction.Settlement.PaymentTerms[0].PartialPayment)
-		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TotalAmount)
+		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.LineTotalAmount)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TaxBasisTotalAmount)
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.DuePayableAmount)

@@ -166,7 +166,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 func newSummary(totals *bill.Totals, currency string) *document.Summary {
 	s := &document.Summary{
-		TotalAmount:         totals.Total.String(),
+		LineTotalAmount:     totals.Sum.String(),
 		TaxBasisTotalAmount: totals.Total.String(),
 		GrandTotalAmount:    totals.TotalWithTax.String(),
 		DuePayableAmount:    totals.Payable.String(),
