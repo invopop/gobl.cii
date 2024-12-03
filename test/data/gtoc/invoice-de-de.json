@@ -160,7 +160,14 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "lorem ipsum"
+				"detail": "lorem ipsum",
+				"due_dates": [
+					{
+						"date": "2024-02-27",
+						"amount": "2000.00",
+						"currency": "EUR"
+					}
+				]
 			}
 		},
 		"tax": {
