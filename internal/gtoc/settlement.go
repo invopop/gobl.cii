@@ -129,11 +129,6 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 			means = append(means, card)
 		}
 
-		if len(means) == 0 && typeCode == "1" {
-			means = append(means, &document.PaymentMeans{
-				TypeCode: typeCode})
-		}
-
 		stlm.PaymentMeans = means
 	}
 
