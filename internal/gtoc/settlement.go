@@ -223,5 +223,5 @@ func getPaymentMeansCode(instr *pay.Instructions) (string, error) {
 			},
 		}
 	}
-	return instr.Ext[untdid.ExtKeyPaymentMeans].String(), nil
+	return instr.Ext.Get(untdid.ExtKeyPaymentMeans).String(), nil
 }
