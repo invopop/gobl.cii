@@ -47,6 +47,10 @@ func newLine(l *bill.Line) *document.Line {
 		TradeSettlement: newTradeSettlement(l),
 	}
 
+	if it.Description != "" {
+		lineItem.Product.Description = &it.Description
+	}
+
 	if len(l.Notes) > 0 {
 		var notes []*document.Note
 		for _, n := range l.Notes {
