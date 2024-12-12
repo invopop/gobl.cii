@@ -29,7 +29,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 				}
 
 				if !dueDate.Amount.Equals(inv.Totals.Payable) {
-					term.PartialPayment = dueDate.Amount.String()
+					term.PartialPayment = dueDate.Amount.Rescale(2).String()
 				}
 
 				if dueDate.Date != nil {
@@ -166,22 +166,22 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 func newSummary(totals *bill.Totals, currency string) *document.Summary {
 	s := &document.Summary{
-		LineTotalAmount:     totals.Sum.String(),
-		TaxBasisTotalAmount: totals.Total.String(),
-		GrandTotalAmount:    totals.TotalWithTax.String(),
-		DuePayableAmount:    totals.Payable.String(),
+		LineTotalAmount:     totals.Sum.Rescale(2).String(),
+		TaxBasisTotalAmount: totals.Total.Rescale(2).String(),
+		GrandTotalAmount:    totals.TotalWithTax.Rescale(2).String(),
+		DuePayableAmount:    totals.Payable.Rescale(2).String(),
 		TaxTotalAmount: &document.TaxTotalAmount{
-			Amount:   totals.Tax.String(),
+			Amount:   totals.Tax.Rescale(2).String(),
 			Currency: currency,
 		},
 	}
 
 	if totals.Charge != nil {
-		s.Charges = totals.Charge.String()
+		s.Charges = totals.Charge.Rescale(2).String()
 	}
 
 	if totals.Discount != nil {
-		s.Discounts = totals.Discount.String()
+		s.Discounts = totals.Discount.Rescale(2).String()
 	}
 
 	return s
@@ -211,7 +211,7 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *document.Tax {
 	}
 
 	tax := &document.Tax{
-		CalculatedAmount:      rate.Amount.String(),
+		CalculatedAmount:      rate.Amount.Rescale(2).String(),
 		TypeCode:              category.Code.String(),
 		BasisAmount:           rate.Base.String(),
 		CategoryCode:          rate.Ext[untdid.ExtKeyTaxCategory].String(),
