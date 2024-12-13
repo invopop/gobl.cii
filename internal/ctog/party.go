@@ -77,7 +77,7 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 		}
 		p.Identities = append(p.Identities, &org.Identity{
 			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: tax.ExtValue(party.GlobalID.SchemeID),
+				iso.ExtKeySchemeID: cbc.Code(party.GlobalID.SchemeID),
 			},
 			Code: cbc.Code(party.GlobalID.Value),
 		})

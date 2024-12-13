@@ -56,7 +56,7 @@ func newCharge(ac *document.AllowanceCharge) (*bill.Charge, error) {
 	}
 	if ac.ReasonCode != "" {
 		c.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: tax.ExtValue(ac.ReasonCode),
+			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
 		}
 	}
 	if ac.Base != "" {
@@ -107,7 +107,7 @@ func newDiscount(ac *document.AllowanceCharge) (*bill.Discount, error) {
 	}
 	if ac.ReasonCode != "" {
 		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: tax.ExtValue(ac.ReasonCode),
+			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
 		}
 	}
 	if ac.Base != "" {
@@ -157,7 +157,7 @@ func getLineCharge(ac *document.AllowanceCharge) (*bill.LineCharge, error) {
 	}
 	if ac.ReasonCode != "" {
 		c.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: tax.ExtValue(ac.ReasonCode),
+			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
 		}
 	}
 	if ac.Reason != "" {
@@ -186,7 +186,7 @@ func getLineDiscount(ac *document.AllowanceCharge) (*bill.LineDiscount, error) {
 	}
 	if ac.ReasonCode != "" {
 		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: tax.ExtValue(ac.ReasonCode),
+			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
 		}
 	}
 	if ac.Reason != "" {

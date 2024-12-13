@@ -1,11 +1,15 @@
 package gtoc
 
 import (
+	"errors"
+
 	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
+	"github.com/invopop/validation"
 )
 
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
@@ -65,11 +69,14 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
 		means := make([]*document.PaymentMeans, 0)
-		typeCode := instr.Ext[untdid.ExtKeyPaymentMeans].String()
+		pmc, err := getPaymentMeansCode(instr)
+		if err != nil {
+			return err
+		}
 
 		if instr.CreditTransfer != nil {
 			credit := &document.PaymentMeans{
-				TypeCode:    typeCode,
+				TypeCode:    pmc,
 				Information: instr.Detail,
 				Creditor: &document.Creditor{
 					IBAN:   instr.CreditTransfer[0].IBAN,
@@ -88,7 +95,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 		if instr.DirectDebit != nil {
 			direct := &document.PaymentMeans{
-				TypeCode:    typeCode,
+				TypeCode:    pmc,
 				Information: instr.Detail,
 				Debtor: &document.DebtorAccount{
 					IBAN: instr.DirectDebit.Account,
@@ -112,7 +119,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 		if instr.Card != nil {
 			card := &document.PaymentMeans{
-				TypeCode:    typeCode,
+				TypeCode:    pmc,
 				Information: instr.Detail,
 				Card: &document.Card{
 					ID:   instr.Card.Last4,
@@ -120,11 +127,6 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 				},
 			}
 			means = append(means, card)
-		}
-
-		if len(means) == 0 && typeCode == "1" {
-			means = append(means, &document.PaymentMeans{
-				TypeCode: typeCode})
 		}
 
 		stlm.PaymentMeans = means
@@ -209,4 +211,17 @@ func newPayee(party *org.Party) *document.Party {
 	}
 
 	return payee
+}
+
+func getPaymentMeansCode(instr *pay.Instructions) (string, error) {
+	if instr == nil || instr.Ext == nil || instr.Ext[untdid.ExtKeyPaymentMeans].String() == "" {
+		return "", validation.Errors{
+			"instructions": validation.Errors{
+				"ext": validation.Errors{
+					untdid.ExtKeyPaymentMeans.String(): errors.New("required"),
+				},
+			},
+		}
+	}
+	return instr.Ext.Get(untdid.ExtKeyPaymentMeans).String(), nil
 }

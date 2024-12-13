@@ -54,7 +54,7 @@ func (c *Converter) NewInvoice(doc *document.Invoice) error {
 		Customer: c.getParty(doc.Transaction.Agreement.Buyer),
 		Tax: &bill.Tax{
 			Ext: tax.Extensions{
-				untdid.ExtKeyDocumentType: tax.ExtValue(doc.ExchangedDocument.TypeCode),
+				untdid.ExtKeyDocumentType: cbc.Code(doc.ExchangedDocument.TypeCode),
 			},
 		},
 	}
@@ -86,7 +86,7 @@ func (c *Converter) NewInvoice(doc *document.Invoice) error {
 				Text: note.Content,
 			}
 			if note.SubjectCode != "" {
-				n.Code = note.SubjectCode
+				n.Code = cbc.Code(note.SubjectCode)
 			}
 			c.inv.Notes = append(c.inv.Notes, n)
 		}

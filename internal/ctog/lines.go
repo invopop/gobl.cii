@@ -69,7 +69,7 @@ func (c *Converter) prepareLines(tsct *document.Transaction) error {
 			l.Item.Identities = append(l.Item.Identities, &org.Identity{
 				// This label corresponds to a code from the ISO 6523 ICD List. Mapping is not yet supported
 				Ext: tax.Extensions{
-					iso.ExtKeySchemeID: tax.ExtValue(it.Product.GlobalID.SchemeID),
+					iso.ExtKeySchemeID: cbc.Code(it.Product.GlobalID.SchemeID),
 				},
 				Code: cbc.Code(it.Product.GlobalID.Value),
 			})
