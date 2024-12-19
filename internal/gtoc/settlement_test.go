@@ -3,6 +3,7 @@ package gtoc
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -47,5 +48,18 @@ func TestNewSettlement(t *testing.T) {
 
 		assert.Equal(t, "1234", doc.Transaction.Settlement.PaymentMeans[2].Card.ID)
 		assert.Equal(t, "John Doe", doc.Transaction.Settlement.PaymentMeans[2].Card.Name)
+	})
+
+	t.Run("extension errors", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-complete.json")
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		assert.True(t, ok)
+
+		inv.Payment.Instructions.Ext = nil
+
+		_, err = Convert(env)
+		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 }

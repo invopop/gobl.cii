@@ -1,0 +1,33 @@
+name: Test Go
+on: [push]
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+        id: go
+
+      - name: Install Dependencies
+        env:
+          GOPROXY: https://proxy.golang.org,direct
+        run: go mod download
+
+      - name: Test
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # Skipping WASM test, this can be done by CLI
+      #- name: Test WASM
+      #  run: GOOS=js GOARCH=wasm go test ./... -exec=$(go env GOROOT)/misc/wasm/go_js_wasm_exec

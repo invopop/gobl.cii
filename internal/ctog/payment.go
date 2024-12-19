@@ -4,6 +4,7 @@ import (
 	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
@@ -100,7 +101,7 @@ func getMeans(stlm *document.Settlement) *pay.Instructions {
 	inst := &pay.Instructions{
 		Key: paymentMeansCode(pm.TypeCode),
 		Ext: tax.Extensions{
-			untdid.ExtKeyPaymentMeans: tax.ExtValue(pm.TypeCode),
+			untdid.ExtKeyPaymentMeans: cbc.Code(pm.TypeCode),
 		},
 	}
 
