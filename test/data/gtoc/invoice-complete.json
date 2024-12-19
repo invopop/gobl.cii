@@ -80,6 +80,7 @@
 				"quantity": "20",
 				"item": {
 					"name": "Development services",
+					"description": "Development services for project 123",
 					"price": "90.00",
 					"unit": "h"
 				},

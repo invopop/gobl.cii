@@ -19,6 +19,7 @@
       </ram:AssociatedDocumentLineDocument>
       <ram:SpecifiedTradeProduct>
         <ram:Name>Development services</ram:Name>
+        <ram:Description>Development services for project 123</ram:Description>
       </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
         <ram:NetPriceProductTradePrice>
