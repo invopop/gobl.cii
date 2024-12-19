@@ -76,23 +76,25 @@ func newCharge(ac *document.AllowanceCharge) (*bill.Charge, error) {
 		}
 		c.Percent = &p
 	}
-	if ac.Tax.TypeCode != "" {
-		c.Taxes = tax.Set{
-			{
-				Category: cbc.Code(ac.Tax.TypeCode),
-			},
+	if ac.Tax != nil {
+		if ac.Tax.TypeCode != "" {
+			c.Taxes = tax.Set{
+				{
+					Category: cbc.Code(ac.Tax.TypeCode),
+				},
+			}
 		}
-	}
-	// Format percentages
-	if ac.Tax.RateApplicablePercent != "" {
-		if !strings.HasSuffix(ac.Tax.RateApplicablePercent, "%") {
-			ac.Tax.RateApplicablePercent += "%"
+		// Format percentages
+		if ac.Tax.RateApplicablePercent != "" {
+			if !strings.HasSuffix(ac.Tax.RateApplicablePercent, "%") {
+				ac.Tax.RateApplicablePercent += "%"
+			}
+			p, err := num.PercentageFromString(ac.Tax.RateApplicablePercent)
+			if err != nil {
+				return nil, err
+			}
+			c.Taxes[0].Percent = &p
 		}
-		p, err := num.PercentageFromString(ac.Tax.RateApplicablePercent)
-		if err != nil {
-			return nil, err
-		}
-		c.Taxes[0].Percent = &p
 	}
 	return c, nil
 }
@@ -127,23 +129,26 @@ func newDiscount(ac *document.AllowanceCharge) (*bill.Discount, error) {
 		}
 		d.Percent = &p
 	}
-	if ac.Tax.TypeCode != "" {
-		d.Taxes = tax.Set{
-			{
-				Category: cbc.Code(ac.Tax.TypeCode),
-			},
+	if ac.Tax != nil {
+		if ac.Tax.TypeCode != "" {
+			d.Taxes = tax.Set{
+				{
+					Category: cbc.Code(ac.Tax.TypeCode),
+				},
+			}
+		}
+		if ac.Tax.RateApplicablePercent != "" {
+			if !strings.HasSuffix(ac.Tax.RateApplicablePercent, "%") {
+				ac.Tax.RateApplicablePercent += "%"
+			}
+			p, err := num.PercentageFromString(ac.Tax.RateApplicablePercent)
+			if err != nil {
+				return nil, err
+			}
+			d.Taxes[0].Percent = &p
 		}
 	}
-	if ac.Tax.RateApplicablePercent != "" {
-		if !strings.HasSuffix(ac.Tax.RateApplicablePercent, "%") {
-			ac.Tax.RateApplicablePercent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Tax.RateApplicablePercent)
-		if err != nil {
-			return nil, err
-		}
-		d.Taxes[0].Percent = &p
-	}
+
 	return d, nil
 }
 

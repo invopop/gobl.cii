@@ -19,11 +19,36 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	}
 	stlm := c.doc.Transaction.Settlement
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		stlm.PaymentTerms = []*document.Terms{
-			{
-				Description: inv.Payment.Terms.Detail,
-			},
+		description := inv.Payment.Terms.Detail
+		if len(inv.Payment.Terms.DueDates) == 0 {
+			stlm.PaymentTerms = []*document.Terms{
+				{
+					Description: description,
+				},
+			}
+		} else {
+			for _, dueDate := range inv.Payment.Terms.DueDates {
+				term := &document.Terms{
+					Description: description,
+				}
+
+				if !dueDate.Amount.Equals(inv.Totals.Payable) {
+					term.PartialPayment = dueDate.Amount.Rescale(2).String()
+				}
+
+				if dueDate.Date != nil {
+					term.DueDate = &document.IssueDate{
+						DateFormat: &document.Date{
+							Value:  formatIssueDate(*dueDate.Date),
+							Format: issueDateFormat,
+						},
+					}
+				}
+
+				stlm.PaymentTerms = append(stlm.PaymentTerms, term)
+			}
 		}
+
 	}
 
 	if inv.Totals != nil {
@@ -111,7 +136,9 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 					},
 				}
 			} else {
-				stlm.PaymentTerms[0].Mandate = instr.DirectDebit.Ref
+				for _, term := range stlm.PaymentTerms {
+					term.Mandate = instr.DirectDebit.Ref
+				}
 			}
 
 			stlm.CreditorRefID = instr.DirectDebit.Creditor
@@ -141,22 +168,22 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 func newSummary(totals *bill.Totals, currency string) *document.Summary {
 	s := &document.Summary{
-		TotalAmount:         totals.Total.String(),
-		TaxBasisTotalAmount: totals.Total.String(),
-		GrandTotalAmount:    totals.TotalWithTax.String(),
-		DuePayableAmount:    totals.Payable.String(),
+		LineTotalAmount:     totals.Sum.Rescale(2).String(),
+		TaxBasisTotalAmount: totals.Total.Rescale(2).String(),
+		GrandTotalAmount:    totals.TotalWithTax.Rescale(2).String(),
+		DuePayableAmount:    totals.Payable.Rescale(2).String(),
 		TaxTotalAmount: &document.TaxTotalAmount{
-			Amount:   totals.Tax.String(),
+			Amount:   totals.Tax.Rescale(2).String(),
 			Currency: currency,
 		},
 	}
 
 	if totals.Charge != nil {
-		s.Charges = totals.Charge.String()
+		s.Charges = totals.Charge.Rescale(2).String()
 	}
 
 	if totals.Discount != nil {
-		s.Discounts = totals.Discount.String()
+		s.Discounts = totals.Discount.Rescale(2).String()
 	}
 
 	return s
@@ -186,7 +213,7 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *document.Tax {
 	}
 
 	tax := &document.Tax{
-		CalculatedAmount:      rate.Amount.String(),
+		CalculatedAmount:      rate.Amount.Rescale(2).String(),
 		TypeCode:              category.Code.String(),
 		BasisAmount:           rate.Base.String(),
 		CategoryCode:          rate.Ext[untdid.ExtKeyTaxCategory].String(),

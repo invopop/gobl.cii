@@ -113,6 +113,10 @@
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradePaymentTerms>
         <ram:Description>lorem ipsum</ram:Description>
+        <ram:DueDateDateTime>
+          <udt:DateTimeString format="102">20240227</udt:DateTimeString>
+        </ram:DueDateDateTime>
+        <ram:PartialPaymentAmount>2000.00</ram:PartialPaymentAmount>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
