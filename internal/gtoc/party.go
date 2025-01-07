@@ -25,7 +25,7 @@ func NewParty(party *org.Party) *document.Party {
 		p.SpecifiedTaxRegistration = []*document.SpecifiedTaxRegistration{
 			{
 				ID: &document.PartyID{
-					Value:    party.TaxID.String(),
+					Value:    fmt.Sprintf("%s%s", party.TaxID.Country, party.TaxID.Code),
 					SchemeID: "VA",
 				},
 			},
