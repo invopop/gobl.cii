@@ -33,6 +33,11 @@
 					}
 				}
 			],
+			"inboxes": [
+				{
+					"email": "inbox@example.com"
+				}
+			],
 			"addresses": [
 				{
 					"num": "16",

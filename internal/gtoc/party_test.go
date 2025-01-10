@@ -1,6 +1,7 @@
 package gtoc
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,17 +32,18 @@ func TestNewSeller(t *testing.T) {
 		assert.Equal(t, "Main street 34", doc.Transaction.Agreement.Seller.PostalTradeAddress.LineOne)
 		assert.Equal(t, "Big city", doc.Transaction.Agreement.Seller.PostalTradeAddress.City)
 		assert.Equal(t, "NO", doc.Transaction.Agreement.Seller.PostalTradeAddress.CountryID)
-		assert.Equal(t, "antonio@salescompany.no", doc.Transaction.Agreement.Seller.URIUniversalCommunication.ID.Value)
-		assert.Equal(t, SchemeIDEmail, doc.Transaction.Agreement.Seller.URIUniversalCommunication.ID.SchemeID)
+		assert.Equal(t, "antonio@salescompany.no", doc.Transaction.Agreement.Seller.Contact.Email.URIID)
 		assert.Equal(t, "NO123456789MVA", doc.Transaction.Agreement.Seller.SpecifiedTaxRegistration[0].ID.Value)
+		assert.Equal(t, "inbox@example.com", doc.Transaction.Agreement.Seller.URIUniversalCommunication.ID.Value)
+		assert.Equal(t, SchemeIDEmail, doc.Transaction.Agreement.Seller.URIUniversalCommunication.ID.SchemeID)
 
 		assert.Equal(t, "Sample Consumer", doc.Transaction.Agreement.Buyer.Name)
 		assert.Equal(t, "80939", doc.Transaction.Agreement.Buyer.PostalTradeAddress.Postcode)
 		assert.Equal(t, "Werner-Heisenberg-Allee 25", doc.Transaction.Agreement.Buyer.PostalTradeAddress.LineOne)
 		assert.Equal(t, "München", doc.Transaction.Agreement.Buyer.PostalTradeAddress.City)
 		assert.Equal(t, "DE", doc.Transaction.Agreement.Buyer.PostalTradeAddress.CountryID)
-		assert.Equal(t, "email@sample.com", doc.Transaction.Agreement.Buyer.URIUniversalCommunication.ID.Value)
-		assert.Equal(t, SchemeIDEmail, doc.Transaction.Agreement.Buyer.URIUniversalCommunication.ID.SchemeID)
+		fmt.Println(doc.Transaction.Agreement.Buyer.Contact)
+		assert.Equal(t, "email@sample.com", doc.Transaction.Agreement.Buyer.Contact.Email.URIID)
 		assert.Equal(t, "DE282741168", doc.Transaction.Agreement.Buyer.SpecifiedTaxRegistration[0].ID.Value)
 
 		assert.Equal(t, "123456789", doc.Transaction.Agreement.Buyer.GlobalID.Value)

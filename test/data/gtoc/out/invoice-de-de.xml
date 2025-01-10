@@ -48,6 +48,9 @@
           <ram:TelephoneUniversalCommunication>
             <ram:CompleteNumber>46211230</ram:CompleteNumber>
           </ram:TelephoneUniversalCommunication>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>antonio@salescompany.no</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
         </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>303</ram:PostcodeCode>
@@ -58,7 +61,7 @@
           <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">antonio@salescompany.no</ram:URIID>
+          <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">NO123456789MVA</ram:ID>
@@ -67,6 +70,11 @@
       <ram:BuyerTradeParty>
         <ram:GlobalID schemeID="0088">123456789</ram:GlobalID>
         <ram:Name>Sample Consumer</ram:Name>
+        <ram:DefinedTradeContact>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>email@sample.com</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
+        </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>80939</ram:PostcodeCode>
           <ram:LineOne>Werner-Heisenberg-Allee 25</ram:LineOne>
@@ -87,6 +95,9 @@
           <ram:TelephoneUniversalCommunication>
             <ram:CompleteNumber>+49100200300</ram:CompleteNumber>
           </ram:TelephoneUniversalCommunication>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>billing@example.com</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
         </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>69190</ram:PostcodeCode>

@@ -43,26 +43,37 @@ func NewParty(party *org.Party) *document.Party {
 		}
 	}
 
+	if len(party.Inboxes) > 0 {
+		p.URIUniversalCommunication = &document.URIUniversalCommunication{
+			ID: &document.PartyID{
+				Value:    party.Inboxes[0].Email,
+				SchemeID: SchemeIDEmail,
+			},
+		}
+	}
+
 	return p
 }
 
 func newContact(p *org.Party) *document.Contact {
-	if len(p.People) == 0 {
+	if len(p.People) == 0 && len(p.Emails) == 0 && len(p.Telephones) == 0 {
 		return nil
 	}
 
 	c := new(document.Contact)
 	if len(p.People) > 0 {
 		c.PersonName = contactName(p.People[0].Name)
-		if len(p.People[0].Emails) > 0 {
-			c.Email = &document.Email{
-				URIID: p.People[0].Emails[0].Address,
-			}
-		}
 	}
+
 	if len(p.Telephones) > 0 {
 		c.Phone = &document.PhoneNumber{
 			CompleteNumber: p.Telephones[0].Number,
+		}
+	}
+
+	if len(p.Emails) > 0 {
+		c.Email = &document.Email{
+			URIID: p.Emails[0].Address,
 		}
 	}
 
