@@ -35,7 +35,7 @@ func newLine(l *bill.Line) *document.Line {
 		},
 		Agreement: &document.LineAgreement{
 			NetPrice: &document.NetPrice{
-				Amount: it.Price.String(),
+				Amount: it.Price.Rescale(2).String(),
 			},
 		},
 		Quantity: &document.LineDelivery{
@@ -90,7 +90,7 @@ func newTradeSettlement(l *bill.Line) *document.TradeSettlement {
 	stlm := &document.TradeSettlement{
 		ApplicableTradeTax: taxes,
 		Sum: &document.Summation{
-			Amount: l.Total.String(),
+			Amount: l.Total.Rescale(2).String(),
 		},
 	}
 

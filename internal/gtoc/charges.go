@@ -38,14 +38,14 @@ func newLineAllowanceCharges(line *bill.Line) []*document.AllowanceCharge {
 func newCharge(c *bill.Charge) *document.AllowanceCharge {
 	ac := &document.AllowanceCharge{
 		ChargeIndicator: document.Indicator{Value: true},
-		Amount:          c.Amount.String(),
+		Amount:          c.Amount.Rescale(2).String(),
 	}
 	if c.Reason != "" {
 		ac.Reason = c.Reason
 	}
 	ac.ReasonCode = c.Ext.Get(untdid.ExtKeyCharge).String()
 	if c.Percent != nil {
-		p := c.Percent.String()
+		p := c.Percent.StringWithoutSymbol()
 		ac.Percent = p
 	}
 	if c.Taxes != nil {
@@ -57,14 +57,14 @@ func newCharge(c *bill.Charge) *document.AllowanceCharge {
 func newDiscount(d *bill.Discount) *document.AllowanceCharge {
 	ac := &document.AllowanceCharge{
 		ChargeIndicator: document.Indicator{Value: false},
-		Amount:          d.Amount.String(),
+		Amount:          d.Amount.Rescale(2).String(),
 	}
 	if d.Reason != "" {
 		ac.Reason = d.Reason
 	}
 	ac.ReasonCode = d.Ext.Get(untdid.ExtKeyAllowance).String()
 	if d.Percent != nil {
-		p := d.Percent.String()
+		p := d.Percent.StringWithoutSymbol()
 		ac.Percent = p
 	}
 	if d.Taxes != nil {
@@ -76,7 +76,7 @@ func newDiscount(d *bill.Discount) *document.AllowanceCharge {
 func makeLineCharge(c *bill.LineCharge) *document.AllowanceCharge {
 	ac := &document.AllowanceCharge{
 		ChargeIndicator: document.Indicator{Value: true},
-		Amount:          c.Amount.String(),
+		Amount:          c.Amount.Rescale(2).String(),
 	}
 	if c.Reason != "" {
 		ac.Reason = c.Reason
@@ -92,7 +92,7 @@ func makeLineCharge(c *bill.LineCharge) *document.AllowanceCharge {
 func makeLineDiscount(d *bill.LineDiscount) *document.AllowanceCharge {
 	ac := &document.AllowanceCharge{
 		ChargeIndicator: document.Indicator{Value: false},
-		Amount:          d.Amount.String(),
+		Amount:          d.Amount.Rescale(2).String(),
 	}
 	if d.Reason != "" {
 		ac.Reason = d.Reason
