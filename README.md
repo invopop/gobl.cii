@@ -2,6 +2,8 @@
 
 GOBL conversion into Cross Industry Invoice (CII) XML format and vice versa.
 
+[![codecov](https://codecov.io/gh/invopop/gobl.cii/graph/badge.svg?token=H2POAHNRT1)](https://codecov.io/gh/invopop/gobl.cii)
+
 Copyright [Invopop Ltd.](https://invopop.com) 2023. Released publicly under the [Apache License Version 2.0](LICENSE). For commercial licenses, please contact the [dev team at invopop](mailto:dev@invopop.com). To accept contributions to this library, we require transferring copyrights to Invopop Ltd.
 
 ## Usage
