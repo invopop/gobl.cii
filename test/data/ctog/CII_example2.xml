@@ -306,6 +306,9 @@
                     <ram:CountryID>NO</ram:CountryID>
                     <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
                 </ram:PostalTradeAddress>
+                <ram:URIUniversalCommunication>
+                    <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
+                </ram:URIUniversalCommunication>
                 <ram:SpecifiedTaxRegistration>
                     <ram:ID schemeID="VA">NO123456789MVA</ram:ID>
                 </ram:SpecifiedTaxRegistration>

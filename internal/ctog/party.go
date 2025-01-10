@@ -46,6 +46,14 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 		}
 	}
 
+	if party.URIUniversalCommunication != nil {
+		p.Inboxes = []*org.Inbox{
+			{
+				Email: party.URIUniversalCommunication.ID.Value,
+			},
+		}
+	}
+
 	if len(party.SpecifiedTaxRegistration) > 0 {
 		for _, taxReg := range party.SpecifiedTaxRegistration {
 			if taxReg.ID != nil && taxReg.ID.Value != "" {

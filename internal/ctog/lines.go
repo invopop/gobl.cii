@@ -84,9 +84,9 @@ func (c *Converter) prepareLines(tsct *document.Transaction) error {
 		}
 
 		if it.LineDoc != nil && len(it.LineDoc.Note) > 0 {
-			l.Notes = make([]*cbc.Note, 0, len(it.LineDoc.Note))
+			l.Notes = make([]*org.Note, 0, len(it.LineDoc.Note))
 			for _, note := range it.LineDoc.Note {
-				n := &cbc.Note{}
+				n := &org.Note{}
 				if note.Content != "" {
 					n.Text = note.Content
 				}

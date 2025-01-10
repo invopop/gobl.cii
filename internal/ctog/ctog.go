@@ -80,9 +80,9 @@ func (c *Converter) NewInvoice(doc *document.Invoice) error {
 	}
 
 	if len(doc.ExchangedDocument.IncludedNote) > 0 {
-		c.inv.Notes = make([]*cbc.Note, 0, len(doc.ExchangedDocument.IncludedNote))
+		c.inv.Notes = make([]*org.Note, 0, len(doc.ExchangedDocument.IncludedNote))
 		for _, note := range doc.ExchangedDocument.IncludedNote {
-			n := &cbc.Note{
+			n := &org.Note{
 				Text: note.Content,
 			}
 			if note.SubjectCode != "" {

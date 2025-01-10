@@ -64,6 +64,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "Salescompany ltd.", supplier.Name)
 		assert.Equal(t, cbc.Code("123456789MVA"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
+		assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
 
 		require.Len(t, supplier.Addresses, 1)
 		assert.Equal(t, "Main street 34", supplier.Addresses[0].Street)

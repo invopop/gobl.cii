@@ -301,6 +301,11 @@
             }
           }
         ],
+        "inboxes": [
+          {
+            "email": "inbox@example.com"
+          }
+        ],
         "addresses": [
           {
             "street": "Main street 34",
