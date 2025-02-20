@@ -50,7 +50,7 @@ func (c *Converter) prepareLines(tsct *document.Transaction) error {
 		}
 
 		if it.Product.SellerAssignedID != nil {
-			l.Item.Ref = *it.Product.SellerAssignedID
+			l.Item.Ref = cbc.Code(*it.Product.SellerAssignedID)
 		}
 
 		if it.Product.BuyerAssignedID != nil {
