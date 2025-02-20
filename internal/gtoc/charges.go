@@ -4,6 +4,7 @@ import (
 	"github.com/invopop/gobl.cii/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -12,11 +13,12 @@ func newAllowanceCharges(inv *bill.Invoice) []*document.AllowanceCharge {
 		return nil
 	}
 	ac := make([]*document.AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
+	sum := inv.Totals.Sum
 	for i, c := range inv.Charges {
-		ac[i] = newCharge(c)
+		ac[i] = newCharge(c, sum)
 	}
 	for i, d := range inv.Discounts {
-		ac[i+len(inv.Charges)] = newDiscount(d)
+		ac[i+len(inv.Charges)] = newDiscount(d, sum)
 	}
 	return ac
 }
@@ -35,7 +37,7 @@ func newLineAllowanceCharges(line *bill.Line) []*document.AllowanceCharge {
 	return ac
 }
 
-func newCharge(c *bill.Charge) *document.AllowanceCharge {
+func newCharge(c *bill.Charge, base num.Amount) *document.AllowanceCharge {
 	ac := &document.AllowanceCharge{
 		ChargeIndicator: document.Indicator{Value: true},
 		Amount:          c.Amount.Rescale(2).String(),
@@ -43,6 +45,8 @@ func newCharge(c *bill.Charge) *document.AllowanceCharge {
 
 	if c.Base != nil {
 		ac.Base = c.Base.Rescale(2).String()
+	} else {
+		ac.Base = base.Rescale(2).String()
 	}
 
 	if c.Reason != "" {
@@ -59,7 +63,7 @@ func newCharge(c *bill.Charge) *document.AllowanceCharge {
 	return ac
 }
 
-func newDiscount(d *bill.Discount) *document.AllowanceCharge {
+func newDiscount(d *bill.Discount, base num.Amount) *document.AllowanceCharge {
 	ac := &document.AllowanceCharge{
 		ChargeIndicator: document.Indicator{Value: false},
 		Amount:          d.Amount.Rescale(2).String(),
@@ -67,6 +71,8 @@ func newDiscount(d *bill.Discount) *document.AllowanceCharge {
 
 	if d.Base != nil {
 		ac.Base = d.Base.Rescale(2).String()
+	} else {
+		ac.Base = base.Rescale(2).String()
 	}
 
 	if d.Reason != "" {
