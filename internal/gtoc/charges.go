@@ -40,6 +40,11 @@ func newCharge(c *bill.Charge) *document.AllowanceCharge {
 		ChargeIndicator: document.Indicator{Value: true},
 		Amount:          c.Amount.Rescale(2).String(),
 	}
+
+	if c.Base != nil {
+		ac.Base = c.Base.Rescale(2).String()
+	}
+
 	if c.Reason != "" {
 		ac.Reason = c.Reason
 	}
@@ -59,6 +64,11 @@ func newDiscount(d *bill.Discount) *document.AllowanceCharge {
 		ChargeIndicator: document.Indicator{Value: false},
 		Amount:          d.Amount.Rescale(2).String(),
 	}
+
+	if d.Base != nil {
+		ac.Base = d.Base.Rescale(2).String()
+	}
+
 	if d.Reason != "" {
 		ac.Reason = d.Reason
 	}
