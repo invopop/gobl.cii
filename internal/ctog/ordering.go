@@ -26,6 +26,39 @@ func (c *Converter) prepareOrdering(doc *document.Invoice) error {
 		ord.Code = cbc.Code(doc.Transaction.Agreement.BuyerReference)
 	}
 
+	if doc.Transaction.Agreement.Sales != nil {
+		ord.Sales = []*org.DocumentRef{
+			{
+				Code: cbc.Code(doc.Transaction.Agreement.Sales.ID),
+			},
+		}
+	}
+
+	if doc.Transaction.Agreement.Purchase != nil {
+		ord.Purchases = []*org.DocumentRef{
+			{
+				Code: cbc.Code(doc.Transaction.Agreement.Purchase.ID),
+			},
+		}
+	}
+
+	if doc.Transaction.Agreement.Project != nil {
+		ord.Projects = []*org.DocumentRef{
+			{
+				Code:        cbc.Code(doc.Transaction.Agreement.Project.ID),
+				Description: doc.Transaction.Agreement.Project.Name,
+			},
+		}
+	}
+
+	if doc.Transaction.Agreement.Contract != nil {
+		ord.Contracts = []*org.DocumentRef{
+			{
+				Code: cbc.Code(doc.Transaction.Agreement.Contract.ID),
+			},
+		}
+	}
+
 	// Ordering period parsing
 	if doc.Transaction.Settlement.Period != nil {
 		per := &cal.Period{}
@@ -103,7 +136,7 @@ func (c *Converter) prepareOrdering(doc *document.Invoice) error {
 		}
 	}
 
-	if ord.Code != "" || ord.Period != nil || ord.Despatch != nil || ord.Receiving != nil || ord.Tender != nil || ord.Identities != nil {
+	if ord.Code != "" || ord.Period != nil || ord.Despatch != nil || ord.Receiving != nil || ord.Tender != nil || ord.Identities != nil || ord.Sales != nil || ord.Purchases != nil || ord.Projects != nil || ord.Contracts != nil {
 		c.inv.Ordering = ord
 	}
 	return nil
