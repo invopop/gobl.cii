@@ -1,11 +1,11 @@
 package ctog
 
 import (
-	"github.com/invopop/gobl/cbc"
 	"testing"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
