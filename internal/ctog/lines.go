@@ -28,7 +28,7 @@ func (c *Converter) prepareLines(tsct *document.Transaction) error {
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
 				Name:  it.Product.Name,
-				Price: price,
+				Price: &price,
 			},
 			Taxes: tax.Set{
 				{

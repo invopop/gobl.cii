@@ -12,7 +12,7 @@ import (
 )
 
 func (c *Converter) preparePayment(stlm *document.Settlement) error {
-	pymt := &bill.Payment{}
+	pymt := &bill.PaymentDetails{}
 
 	if stlm.Payee != nil {
 		payee := &org.Party{Name: stlm.Payee.Name}

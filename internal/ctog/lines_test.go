@@ -29,7 +29,7 @@ func TestParseCtoGLines(t *testing.T) {
 		priceLine2, _ := num.AmountFromString("149.00")
 
 		assert.Equal(t, "2h Beschaffung + Aufbau des neuen Tisches a 25€/h netto + 7% MwSt.", lines[0].Item.Name)
-		assert.Equal(t, priceLine1, lines[0].Item.Price)
+		assert.Equal(t, priceLine1, *lines[0].Item.Price)
 		assert.Equal(t, num.MakeAmount(1, 0), lines[0].Quantity)
 		assert.Equal(t, "VAT", string(lines[0].Taxes[0].Category))
 		percent, err := num.PercentageFromString("7%")
@@ -37,7 +37,7 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, &percent, lines[0].Taxes[0].Percent)
 
 		assert.Equal(t, "1x Couchtisch inklusive 19% MwSt.", lines[1].Item.Name)
-		assert.Equal(t, priceLine2, lines[1].Item.Price)
+		assert.Equal(t, priceLine2, *lines[1].Item.Price)
 		assert.Equal(t, num.MakeAmount(1, 0), lines[1].Quantity)
 		assert.Equal(t, "VAT", string(lines[1].Taxes[0].Category))
 		percent, err = num.PercentageFromString("19%")
@@ -58,7 +58,7 @@ func TestParseCtoGLines(t *testing.T) {
 		require.Len(t, lines, 20)
 
 		assert.Equal(t, "PATAT FRITES 10MM 10KG", lines[0].Item.Name)
-		assert.Equal(t, num.MakeAmount(995, 2), lines[0].Item.Price)
+		assert.Equal(t, num.MakeAmount(995, 2), *lines[0].Item.Price)
 		assert.Equal(t, org.Unit("piece"), lines[0].Item.Unit)
 		assert.Equal(t, num.MakeAmount(2, 0), lines[0].Quantity)
 		assert.Equal(t, "VAT", string(lines[0].Taxes[0].Category))
@@ -67,7 +67,7 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, &percent, lines[0].Taxes[0].Percent)
 
 		assert.Equal(t, "KAAS 50PL. JONG BEL. 1KG", lines[1].Item.Name)
-		assert.Equal(t, num.MakeAmount(985, 2), lines[1].Item.Price)
+		assert.Equal(t, num.MakeAmount(985, 2), *lines[1].Item.Price)
 		assert.Equal(t, org.Unit("piece"), lines[1].Item.Unit)
 		assert.Equal(t, num.MakeAmount(1, 0), lines[1].Quantity)
 		assert.Equal(t, "VAT", string(lines[1].Taxes[0].Category))
@@ -76,7 +76,7 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, &percent, lines[1].Taxes[0].Percent)
 
 		assert.Equal(t, "POT KETCHUP 3 LT", lines[2].Item.Name)
-		assert.Equal(t, num.MakeAmount(829, 2), lines[2].Item.Price)
+		assert.Equal(t, num.MakeAmount(829, 2), *lines[2].Item.Price)
 		assert.Equal(t, org.Unit("piece"), lines[2].Item.Unit)
 		assert.Equal(t, num.MakeAmount(1, 0), lines[2].Quantity)
 		assert.Equal(t, "VAT", string(lines[2].Taxes[0].Category))
