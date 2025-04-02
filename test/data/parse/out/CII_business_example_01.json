@@ -1,0 +1,171 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "08620626fe7c5395bdaa336f8b8945bcdfe1556a26d2c7ce8795999e9d81102c"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "2016166",
+		"issue_date": "2015-01-09",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "XXX AG",
+			"tax_id": {
+				"country": "DE",
+				"code": "3730230168"
+			},
+			"addresses": [
+				{
+					"street": "Storkower Straße 207",
+					"locality": "Berlin",
+					"code": "10369",
+					"country": "DE"
+				}
+			]
+		},
+		"customer": {
+			"name": "XXX AG",
+			"people": [
+				{
+					"name": {
+						"given": "XXXX"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Storkower Straße 207",
+					"locality": "Berlin",
+					"code": "10369",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1.000",
+				"item": {
+					"ref": "846",
+					"name": "Festpreis",
+					"description": "Neues DSL Portfolio 2016",
+					"price": "12122.5900",
+					"unit": "one"
+				},
+				"sum": "12122.5900",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "12122.5900"
+			},
+			{
+				"i": 2,
+				"quantity": "-1",
+				"item": {
+					"ref": "832",
+					"name": "Abzug",
+					"price": "606.1300",
+					"unit": "one"
+				},
+				"sum": "-606.1300",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "-606.1300"
+			},
+			{
+				"i": 3,
+				"quantity": "1.000",
+				"item": {
+					"ref": "870",
+					"name": "zzgl. ",
+					"price": "1.5000",
+					"unit": "one"
+				},
+				"sum": "1.5000",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "1.5000"
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2015-01-09",
+						"amount": "13706.37",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "DE12500105170648489890"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"delivery": {
+			"date": "2016-09-06"
+		},
+		"totals": {
+			"sum": "11517.96",
+			"total": "11517.96",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"base": "11517.96",
+								"percent": "19.00%",
+								"amount": "2188.41"
+							}
+						],
+						"amount": "2188.41"
+					}
+				],
+				"sum": "2188.41"
+			},
+			"tax": "2188.41",
+			"total_with_tax": "13706.37",
+			"payable": "13706.37"
+		},
+		"notes": [
+			{
+				"code": "AAR",
+				"text": "This is an example invoice based on data that is used in real business.Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+			},
+			{
+				"text": "Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+			}
+		]
+	}
+}

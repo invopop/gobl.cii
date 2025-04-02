@@ -1,0 +1,432 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "95c53881c9917dd7b8fd23c67ada1cda85b3007cb1946ff29486e96f7e53ca31"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "TOSL108",
+		"issue_date": "2013-06-30",
+		"currency": "NOK",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Tax handling company AS",
+			"tax_id": {
+				"country": "NO",
+				"code": "967611265MVA"
+			},
+			"addresses": [
+				{
+					"street": "Regent street",
+					"street_extra": "Front door",
+					"locality": "Newtown",
+					"region": "RegionC",
+					"code": "202",
+					"country": "NO"
+				}
+			]
+		},
+		"customer": {
+			"name": "The Buyercompany",
+			"tax_id": {
+				"country": "NO",
+				"code": "987654321MVA"
+			},
+			"identities": [
+				{
+					"code": "3456789012098",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "John Doe"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Anystreet 8",
+					"street_extra": "Back door",
+					"locality": "Anytown",
+					"region": "RegionB",
+					"code": "101",
+					"country": "NO"
+				}
+			],
+			"emails": [
+				{
+					"addr": "john@buyercompany.no"
+				}
+			],
+			"telephones": [
+				{
+					"num": "5121230"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"ref": "JB007",
+					"name": "Laptop computer",
+					"identities": [
+						{
+							"code": "1234567890128",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						}
+					],
+					"description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
+					"price": "1273.00",
+					"unit": "NAR",
+					"origin": "DE",
+					"meta": {
+						"color": "Black"
+					}
+				},
+				"sum": "1273.00",
+				"discounts": [
+					{
+						"reason": "Damage",
+						"amount": "12.00"
+					}
+				],
+				"charges": [
+					{
+						"reason": "Testing",
+						"amount": "12.00"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"total": "1273.00",
+				"notes": [
+					{
+						"text": "Scratch on box"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "-1",
+				"item": {
+					"ref": "JB008",
+					"name": "Returned \"Advanced computing\" book",
+					"identities": [
+						{
+							"code": "1234567890135",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						}
+					],
+					"price": "3.96",
+					"unit": "NAR"
+				},
+				"sum": "-3.96",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "15%"
+					}
+				],
+				"total": "-3.96",
+				"notes": [
+					{
+						"text": "Cover is slightly damaged."
+					}
+				]
+			},
+			{
+				"i": 3,
+				"quantity": "2",
+				"item": {
+					"ref": "JB009",
+					"name": "\"Computing for dummies\" book",
+					"identities": [
+						{
+							"code": "1234567890142",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						}
+					],
+					"price": "2.48",
+					"unit": "NAR"
+				},
+				"sum": "4.96",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "15%"
+					}
+				],
+				"total": "4.96"
+			},
+			{
+				"i": 4,
+				"quantity": "-1",
+				"item": {
+					"ref": "JB010",
+					"name": "Returned IBM 5150 desktop",
+					"identities": [
+						{
+							"code": "1234567890159",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						}
+					],
+					"price": "25.00",
+					"unit": "NAR"
+				},
+				"sum": "-25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "0%"
+					}
+				],
+				"total": "-25.00"
+			},
+			{
+				"i": 5,
+				"quantity": "250",
+				"item": {
+					"ref": "JB011",
+					"name": "Network cable",
+					"identities": [
+						{
+							"code": "1234567890166",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						}
+					],
+					"price": "0.75",
+					"unit": "m",
+					"meta": {
+						"type": "Cat5"
+					}
+				},
+				"sum": "187.50",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"total": "187.50"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Promotion discount",
+				"amount": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"ext": {
+					"untdid-allowance": "95"
+				}
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Freight",
+				"amount": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"identities": [
+				{
+					"key": "ref-paper",
+					"code": "Doc1"
+				}
+			],
+			"period": {
+				"start": "2013-06-01",
+				"end": "2013-06-30"
+			},
+			"seller": {
+				"name": "Salescompany ltd.",
+				"tax_id": {
+					"country": "NO",
+					"code": "123456789MVA"
+				},
+				"identities": [
+					{
+						"code": "1238764941386",
+						"ext": {
+							"iso-scheme-id": "0088"
+						}
+					}
+				],
+				"people": [
+					{
+						"name": {
+							"given": "Antonio Salesmacher"
+						}
+					}
+				],
+				"inboxes": [
+					{
+						"email": "inbox@example.com"
+					}
+				],
+				"addresses": [
+					{
+						"street": "Main street 34",
+						"street_extra": "Suite 123",
+						"locality": "Big city",
+						"region": "RegionA",
+						"code": "303",
+						"country": "NO"
+					}
+				],
+				"emails": [
+					{
+						"addr": "antonio@salescompany.no"
+					}
+				],
+				"telephones": [
+					{
+						"num": "46211230"
+					}
+				]
+			},
+			"contracts": [
+				{
+					"code": "Contract321"
+				}
+			],
+			"purchases": [
+				{
+					"code": "123"
+				}
+			]
+		},
+		"payment": {
+			"payee": {
+				"name": "Ebeneser Scrooge AS"
+			},
+			"terms": {
+				"detail": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date",
+				"due_dates": [
+					{
+						"date": "2013-07-20",
+						"amount": "1801.78",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "NO9386011117947",
+						"bic": "DNBANOKK"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"identities": [
+					{
+						"code": "6754238987643",
+						"ext": {
+							"iso-scheme-id": "0088"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "Deliverystreet 2",
+						"street_extra": "Side door",
+						"locality": "DeliveryCity",
+						"region": "RegionD",
+						"code": "523427",
+						"country": "NO"
+					}
+				]
+			},
+			"date": "2013-06-15"
+		},
+		"totals": {
+			"sum": "1436.50",
+			"discount": "100.00",
+			"charge": "100.00",
+			"total": "1436.50",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"base": "1460.50",
+								"percent": "25%",
+								"amount": "365.13"
+							},
+							{
+								"base": "1.00",
+								"percent": "15%",
+								"amount": "0.15"
+							},
+							{
+								"base": "-25.00",
+								"percent": "0%",
+								"amount": "0.00"
+							}
+						],
+						"amount": "365.28"
+					}
+				],
+				"sum": "365.28"
+			},
+			"tax": "365.28",
+			"total_with_tax": "1801.78",
+			"payable": "1801.78"
+		},
+		"notes": [
+			{
+				"text": "Ordered in our booth at the convention"
+			}
+		]
+	}
+}
