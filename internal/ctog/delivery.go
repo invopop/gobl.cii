@@ -6,7 +6,7 @@ import (
 )
 
 func (c *Converter) prepareDelivery(del *document.Delivery) error {
-	d := &bill.Delivery{}
+	d := &bill.DeliveryDetails{}
 
 	if del.Receiver != nil {
 		d.Receiver = c.getParty(del.Receiver)

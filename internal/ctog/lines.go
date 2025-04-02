@@ -28,7 +28,7 @@ func (c *Converter) prepareLines(tsct *document.Transaction) error {
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
 				Name:  it.Product.Name,
-				Price: price,
+				Price: &price,
 			},
 			Taxes: tax.Set{
 				{
@@ -50,7 +50,7 @@ func (c *Converter) prepareLines(tsct *document.Transaction) error {
 		}
 
 		if it.Product.SellerAssignedID != nil {
-			l.Item.Ref = *it.Product.SellerAssignedID
+			l.Item.Ref = cbc.Code(*it.Product.SellerAssignedID)
 		}
 
 		if it.Product.BuyerAssignedID != nil {
