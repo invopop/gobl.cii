@@ -58,6 +58,16 @@ func getTypeCode(inv *bill.Invoice) (string, error) {
 	return inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String(), nil
 }
 
+func documentDate(date *cal.Date) *document.Date {
+	if date == nil {
+		return nil
+	}
+	return &document.Date{
+		Value:  formatIssueDate(*date),
+		Format: issueDateFormat,
+	}
+}
+
 func formatIssueDate(d cal.Date) string {
 	if d.IsZero() {
 		return ""

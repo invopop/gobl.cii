@@ -38,10 +38,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 
 				if dueDate.Date != nil {
 					term.DueDate = &document.IssueDate{
-						DateFormat: &document.Date{
-							Value:  formatIssueDate(*dueDate.Date),
-							Format: issueDateFormat,
-						},
+						DateFormat: documentDate(dueDate.Date),
 					}
 				}
 
@@ -62,10 +59,7 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 			{
 				IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
 				IssueDate: &document.FormattedIssueDate{
-					DateFormat: &document.Date{
-						Value:  formatIssueDate(*pre.IssueDate),
-						Format: issueDateFormat,
-					},
+					DateFormat: documentDate(pre.IssueDate),
 				},
 			},
 		}
@@ -77,16 +71,10 @@ func (c *Converter) prepareSettlement(inv *bill.Invoice) error {
 	if inv.Delivery != nil && inv.Delivery.Period != nil {
 		stlm.Period = &document.Period{
 			Start: &document.IssueDate{
-				DateFormat: &document.Date{
-					Value:  formatIssueDate(inv.Delivery.Period.Start),
-					Format: issueDateFormat,
-				},
+				DateFormat: documentDate(&inv.Delivery.Period.Start),
 			},
 			End: &document.IssueDate{
-				DateFormat: &document.Date{
-					Value:  formatIssueDate(inv.Delivery.Period.End),
-					Format: issueDateFormat,
-				},
+				DateFormat: documentDate(&inv.Delivery.Period.End),
 			},
 		}
 	}
