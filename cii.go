@@ -16,6 +16,11 @@ const (
 	NamespaceUDT = "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
 )
 
+// Profile ID codes
+const (
+	ProfileIDPeppolBilling = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
+)
+
 // Context is used to ensure that the generated CII document
 // uses a specific set of Guidline and Business rules when generating
 // the output.
@@ -27,6 +32,12 @@ type Context struct {
 // ContextEN16931 is used for EN 16931 documents, and is the default.
 var ContextEN16931 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017",
+}
+
+// ContextPeppolV3 for Peppol Billing V3.0 context.
+var ContextPeppolV3 = Context{
+	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
+	BusinessID:  ProfileIDPeppolBilling,
 }
 
 // ContextFacturX is used for Factur-X documents.
@@ -41,7 +52,7 @@ var ContextZUGFeRD = ContextFacturX
 // ContextXRechnung is used for XRechnung documents
 var ContextXRechnung = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
-	BusinessID:  "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0",
+	BusinessID:  ProfileIDPeppolBilling,
 }
 
 // ParseInvoice parses a raw XML CII Invoice and converts it into
