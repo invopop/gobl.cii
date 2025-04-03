@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 // Party defines the structure of the TradePartyType of the CII standard
@@ -22,7 +23,7 @@ type Party struct {
 
 // PartyID defines the structure of the ID of the CII standard
 type PartyID struct {
-	SchemeID string `xml:"schemeID,attr"`
+	SchemeID string `xml:"schemeID,attr,omitempty"`
 	Value    string `xml:",chardata"`
 }
 
@@ -80,19 +81,17 @@ func newParty(party *org.Party) *Party {
 		PostalTradeAddress:        newPostalTradeAddress(party.Addresses),
 		URIUniversalCommunication: newEmail(party.Emails),
 	}
-
 	if party.TaxID != nil {
 		// Assumes VAT ID being used instead of possible tax number
 		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
 			{
 				ID: &PartyID{
 					Value:    party.TaxID.String(),
-					SchemeID: "VA",
+					SchemeID: mapGOBLTaxIDScheme(party.TaxID),
 				},
 			},
 		}
 	}
-
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
 			if id.Ext.Has(iso.ExtKeySchemeID) {
@@ -103,7 +102,6 @@ func newParty(party *org.Party) *Party {
 			}
 		}
 	}
-
 	if len(party.Inboxes) > 0 {
 		p.URIUniversalCommunication = &URIUniversalCommunication{
 			ID: &PartyID{
@@ -112,39 +110,55 @@ func newParty(party *org.Party) *Party {
 			},
 		}
 	}
-
 	return p
 }
 
-func newContact(p *org.Party) *Contact {
-	if len(p.People) == 0 && len(p.Emails) == 0 && len(p.Telephones) == 0 {
-		return nil
+func mapGOBLTaxIDScheme(id *tax.Identity) string {
+	s := id.GetScheme()
+	switch s {
+	case tax.CategoryVAT:
+		return "VA"
+	default:
+		// TODO: cover more versions here.
+		return s.String()
 	}
+}
 
+func newContact(p *org.Party) *Contact {
 	c := new(Contact)
 	if len(p.People) > 0 {
-		c.PersonName = contactName(p.People[0].Name)
+		pp := p.People[0]
+		c.PersonName = contactName(pp.Name)
+		if len(pp.Telephones) > 0 {
+			c.Phone = &PhoneNumber{
+				CompleteNumber: pp.Telephones[0].Number,
+			}
+		}
+		if len(pp.Emails) > 0 {
+			c.Email = &Email{
+				URIID: pp.Emails[0].Address,
+			}
+		}
 	}
-
-	if len(p.Telephones) > 0 {
+	if c.Phone == nil && len(p.Telephones) > 0 {
 		c.Phone = &PhoneNumber{
 			CompleteNumber: p.Telephones[0].Number,
 		}
 	}
-
-	if len(p.Emails) > 0 {
+	if c.Email == nil && len(p.Emails) > 0 {
 		c.Email = &Email{
 			URIID: p.Emails[0].Address,
 		}
 	}
-
+	if c.PersonName == "" && c.Email == nil && c.Phone == nil {
+		return nil
+	}
 	return c
 }
 
 func contactName(p *org.Name) string {
 	g := p.Given
 	s := p.Surname
-
 	if g == "" && s == "" {
 		return ""
 	}

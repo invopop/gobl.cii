@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "78a19e2ddd7fe99416ad08165409e229e33339e2d598c0623dfe4f13cd92ae47"
+			"val": "b2360ab38457d501a3b4d4ad30b554bef48f6fa505ea59aaf696c572d7658829"
 		}
 	},
 	"doc": {
@@ -12,7 +12,6 @@
 		"$regime": "DE",
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"code": "",
 		"issue_date": "2024-10-01",
 		"currency": "EUR",
 		"tax": {
