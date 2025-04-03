@@ -118,12 +118,11 @@ There are certain assumptions and lost information in the conversion from CII to
 
 1. GOBL does not currently support additional embedded documents, so the AdditionalReferencedDocument field (BG-24 in EN 16931) is not supported and lost in the conversion.
 2. Payment advances do not include their own tax rate, they use the global tax rate of the invoice.
-3. The field TotalPrepaidAmount (BT-113) in CII is not directly mapped to GOBL, so payment advances must be included in the SpecifiedAdvancePayment field in CII, or they will be lost in conversion.
-4. The fields ReceivableSpecifiedTradeAccountingAccount (BT-133) and DesignatedProductClassification (BT-158) are added as a note to the line, with the type code as the key.
+3. The fields ReceivableSpecifiedTradeAccountingAccount (BT-133) and DesignatedProductClassification (BT-158) are added as a note to the line, with the type code as the key.
 
 ## Development
 
-The main source of information for this project comes from the EN 16931 standard, developed by the EU for electronic invoicing. [Part 1](https://standards.iteh.ai/catalog/standards/cen/4f31d4a9-53eb-4f1a-835e-6f0583cad2bb/en-16931-1-2017) of the standard defines the semantic data model that forms an invoice, but does not provide a concrete implementation. [Part 3.3](https://standards.iteh.ai/catalog/standards/cen/5540f673-0224-44a3-8490-feaf51aa3200/cen-ts-16931-3-3-2020) defines the mappings from the semantic data model to the CII XML format covered in this repository. 
+The main source of information for this project comes from the EN 16931 standard, developed by the EU for electronic invoicing. [Part 1](https://standards.iteh.ai/catalog/standards/cen/4f31d4a9-53eb-4f1a-835e-6f0583cad2bb/en-16931-1-2017) of the standard defines the semantic data model that forms an invoice, but does not provide a concrete implementation. [Part 3.3](https://standards.iteh.ai/catalog/standards/cen/5540f673-0224-44a3-8490-feaf51aa3200/cen-ts-16931-3-3-2020) defines the mappings from the semantic data model to the CII XML format covered in this repository.
 
 Useful links:
 

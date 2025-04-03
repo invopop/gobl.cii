@@ -1,5 +1,11 @@
 name: Test Go
-on: [push]
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+  pull_request:
 jobs:
   test:
     name: Test
@@ -27,7 +33,3 @@ jobs:
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
-      # Skipping WASM test, this can be done by CLI
-      #- name: Test WASM
-      #  run: GOOS=js GOARCH=wasm go test ./... -exec=$(go env GOROOT)/misc/wasm/go_js_wasm_exec

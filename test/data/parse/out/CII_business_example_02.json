@@ -1,0 +1,187 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "22b6368df1fc491d14220c4749d670d6385f9573a76264138f025b1b6ff4a9b9"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "INV000013",
+		"issue_date": "2013-08-25",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "xxxx",
+			"tax_id": {
+				"country": "DE",
+				"code": "1111111"
+			},
+			"addresses": [
+				{
+					"street": "Storkower Straße 207",
+					"locality": "Berlin",
+					"code": "10369",
+					"country": "DE"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyercompany ltd",
+			"identities": [
+				{
+					"code": "1111111111",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Anystreet, Building 1",
+					"locality": "Anytown",
+					"code": "101",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1.0000",
+				"item": {
+					"name": "BPW21",
+					"price": "1.2605",
+					"unit": "one"
+				},
+				"sum": "1.2605",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "1.2605"
+			},
+			{
+				"i": 2,
+				"quantity": "1.0000",
+				"item": {
+					"name": "Poti 100k",
+					"price": "1.2605",
+					"unit": "one"
+				},
+				"sum": "1.2605",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "1.2605"
+			},
+			{
+				"i": 3,
+				"quantity": "1.0000",
+				"item": {
+					"name": "LCD Display 3.5",
+					"price": "7.4790",
+					"unit": "one"
+				},
+				"sum": "7.4790",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "7.4790"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Rabatt",
+				"amount": "0.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"period": {
+				"start": "2013-01-01",
+				"end": "2013-04-01"
+			},
+			"contracts": [
+				{
+					"code": "SUBSCR571"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "11.90",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "DK1212341234123412"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "10.00",
+			"discount": "0.00",
+			"total": "10.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"base": "10.00",
+								"percent": "19.00%",
+								"amount": "1.90"
+							}
+						],
+						"amount": "1.90"
+					}
+				],
+				"sum": "1.90"
+			},
+			"tax": "1.90",
+			"total_with_tax": "11.90",
+			"payable": "11.90"
+		},
+		"notes": [
+			{
+				"code": "REG",
+				"text": "TEXT"
+			}
+		]
+	}
+}
