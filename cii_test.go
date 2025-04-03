@@ -4,6 +4,9 @@ import (
 	"testing"
 
 	cii "github.com/invopop/gobl.cii"
+	"github.com/invopop/gobl/addons/de/xrechnung"
+	"github.com/invopop/gobl/addons/fr/facturx"
+	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +22,20 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 		assert.Nil(t, out.ExchangedContext.BusinessContext)
 	})
 
+	t.Run("with missing addon", func(t *testing.T) {
+		env := loadEnvelope(t, "invoice-complete.json")
+		inv := env.Extract().(*bill.Invoice)
+		inv.SetAddons() // empty
+		_, err := cii.ConvertInvoice(env)
+		assert.ErrorContains(t, err, "gobl invoice missing addon eu-en16931-v2017")
+	})
+
 	t.Run("with Factur-X context", func(t *testing.T) {
+		env := loadEnvelope(t, "invoice-complete.json")
+		inv := env.Extract().(*bill.Invoice)
+		inv.Addons.List = append(inv.Addons.List, facturx.V1)
+		require.NoError(t, inv.Calculate())
+
 		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturX))
 		require.NoError(t, err)
 
@@ -28,6 +44,11 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 	})
 
 	t.Run("with XRechnung context", func(t *testing.T) {
+		env := loadEnvelope(t, "invoice-complete.json")
+		inv := env.Extract().(*bill.Invoice)
+		inv.Addons.List = append(inv.Addons.List, xrechnung.V3)
+		require.NoError(t, inv.Calculate())
+
 		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextXRechnung))
 		require.NoError(t, err)
 
