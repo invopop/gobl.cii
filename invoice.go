@@ -34,23 +34,6 @@ type Tax struct {
 	RateApplicablePercent string `xml:"ram:RateApplicablePercent,omitempty"`
 }
 
-// Summary defines the structure of SpecifiedTradeSettlementHeaderMonetarySummation of the CII standard
-type Summary struct {
-	LineTotalAmount     string          `xml:"ram:LineTotalAmount"`
-	Charges             string          `xml:"ram:ChargeTotalAmount,omitempty"`
-	Discounts           string          `xml:"ram:AllowanceTotalAmount,omitempty"`
-	TaxBasisTotalAmount string          `xml:"ram:TaxBasisTotalAmount"`
-	TaxTotalAmount      *TaxTotalAmount `xml:"ram:TaxTotalAmount"`
-	GrandTotalAmount    string          `xml:"ram:GrandTotalAmount"`
-	DuePayableAmount    string          `xml:"ram:DuePayableAmount"`
-}
-
-// TaxTotalAmount defines the structure of the TaxTotalAmount of the CII standard
-type TaxTotalAmount struct {
-	Amount   string `xml:",chardata"`
-	Currency string `xml:"currencyID,attr"`
-}
-
 // Date defines date in the UDT structure
 type Date struct {
 	Value  string `xml:",chardata"`

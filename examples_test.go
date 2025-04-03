@@ -86,6 +86,7 @@ func TestParseInvoice(t *testing.T) {
 			if inv, ok := env.Extract().(*bill.Invoice); ok {
 				inv.UUID = staticUUID
 			}
+			require.NoError(t, env.Calculate())
 
 			writeEnvelope(dataPath(pathParse, pathOut, outName), env)
 

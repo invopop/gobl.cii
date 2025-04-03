@@ -86,6 +86,24 @@ type Period struct {
 	End         *IssueDate `xml:"ram:EndDateTime"`
 }
 
+// Summary defines the structure of SpecifiedTradeSettlementHeaderMonetarySummation of the CII standard
+type Summary struct {
+	LineTotalAmount     string          `xml:"ram:LineTotalAmount"`
+	Charges             string          `xml:"ram:ChargeTotalAmount,omitempty"`
+	Discounts           string          `xml:"ram:AllowanceTotalAmount,omitempty"`
+	TaxBasisTotalAmount string          `xml:"ram:TaxBasisTotalAmount"`
+	TaxTotalAmount      *TaxTotalAmount `xml:"ram:TaxTotalAmount"`
+	GrandTotalAmount    string          `xml:"ram:GrandTotalAmount"`
+	TotalPrepaidAmount  string          `xml:"ram:TotalPrepaidAmount,omitempty"`
+	DuePayableAmount    string          `xml:"ram:DuePayableAmount"`
+}
+
+// TaxTotalAmount defines the structure of the TaxTotalAmount of the CII standard
+type TaxTotalAmount struct {
+	Amount   string `xml:",chardata"`
+	Currency string `xml:"currencyID,attr"`
+}
+
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
 func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	stlm := &Settlement{
@@ -229,50 +247,45 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 
 func newSummary(totals *bill.Totals, currency string) *Summary {
 	s := &Summary{
-		LineTotalAmount:     totals.Sum.Rescale(2).String(),
-		TaxBasisTotalAmount: totals.Total.Rescale(2).String(),
-		GrandTotalAmount:    totals.TotalWithTax.Rescale(2).String(),
-		DuePayableAmount:    totals.Payable.Rescale(2).String(),
+		LineTotalAmount:     totals.Sum.String(),
+		TaxBasisTotalAmount: totals.Total.String(),
+		GrandTotalAmount:    totals.TotalWithTax.String(),
+		DuePayableAmount:    totals.Payable.String(),
 		TaxTotalAmount: &TaxTotalAmount{
-			Amount:   totals.Tax.Rescale(2).String(),
+			Amount:   totals.Tax.String(),
 			Currency: currency,
 		},
 	}
-
 	if totals.Charge != nil {
-		s.Charges = totals.Charge.Rescale(2).String()
+		s.Charges = totals.Charge.String()
 	}
-
 	if totals.Discount != nil {
-		s.Discounts = totals.Discount.Rescale(2).String()
+		s.Discounts = totals.Discount.String()
 	}
-
+	if totals.Advances != nil {
+		s.TotalPrepaidAmount = totals.Advances.String()
+	}
 	return s
 }
 
 func newTaxes(total *tax.Total) []*Tax {
-	var Taxes []*Tax
-
 	if total == nil {
 		return nil
 	}
-
+	var taxes []*Tax
 	for _, category := range total.Categories {
 		for _, rate := range category.Rates {
 			tax := newTax(rate, category)
-
-			Taxes = append(Taxes, tax)
+			taxes = append(taxes, tax)
 		}
 	}
-
-	return Taxes
+	return taxes
 }
 
 func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	if rate.Percent == nil {
 		return nil
 	}
-
 	tax := &Tax{
 		CalculatedAmount:      rate.Amount.Rescale(2).String(),
 		TypeCode:              category.Code.String(),
@@ -280,7 +293,6 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 		CategoryCode:          rate.Ext[untdid.ExtKeyTaxCategory].String(),
 		RateApplicablePercent: rate.Percent.StringWithoutSymbol(),
 	}
-
 	return tax
 }
 

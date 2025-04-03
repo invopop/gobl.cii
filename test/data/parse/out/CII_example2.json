@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "95c53881c9917dd7b8fd23c67ada1cda85b3007cb1946ff29486e96f7e53ca31"
+			"val": "4f947bf48507c245ff79a81004aa39688f92180f6ea114dd02ff79cb4f546bc4"
 		}
 	},
 	"doc": {
@@ -352,6 +352,12 @@
 					}
 				]
 			},
+			"advances": [
+				{
+					"description": "",
+					"amount": "1000.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"credit_transfer": [
@@ -421,7 +427,9 @@
 			},
 			"tax": "365.28",
 			"total_with_tax": "1801.78",
-			"payable": "1801.78"
+			"payable": "1801.78",
+			"advance": "1000.00",
+			"due": "801.78"
 		},
 		"notes": [
 			{
