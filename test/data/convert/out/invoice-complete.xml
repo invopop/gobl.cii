@@ -35,8 +35,15 @@
           <ram:CategoryCode>S</ram:CategoryCode>
           <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
+        <ram:SpecifiedTradeAllowanceCharge>
+          <ram:ChargeIndicator>
+            <udt:Indicator>false</udt:Indicator>
+          </ram:ChargeIndicator>
+          <ram:CalculationPercent>10</ram:CalculationPercent>
+          <ram:ActualAmount>180.00</ram:ActualAmount>
+        </ram:SpecifiedTradeAllowanceCharge>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
-          <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
+          <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>
         </ram:SpecifiedTradeSettlementLineMonetarySummation>
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
@@ -142,9 +149,9 @@
         </ram:ApplicableTradeSettlementFinancialCard>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
-        <ram:CalculatedAmount>342.19</ram:CalculatedAmount>
+        <ram:CalculatedAmount>307.99</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
-        <ram:BasisAmount>1801.00</ram:BasisAmount>
+        <ram:BasisAmount>1621.00</ram:BasisAmount>
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
@@ -152,7 +159,7 @@
         <ram:ChargeIndicator>
           <udt:Indicator>true</udt:Indicator>
         </ram:ChargeIndicator>
-        <ram:BasisAmount>1800.00</ram:BasisAmount>
+        <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:ActualAmount>11.00</ram:ActualAmount>
         <ram:Reason>Freight</ram:Reason>
         <ram:CategoryTradeTax>
@@ -165,7 +172,7 @@
         <ram:ChargeIndicator>
           <udt:Indicator>false</udt:Indicator>
         </ram:ChargeIndicator>
-        <ram:BasisAmount>1800.00</ram:BasisAmount>
+        <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:ActualAmount>10.00</ram:ActualAmount>
         <ram:ReasonCode>88</ram:ReasonCode>
         <ram:Reason>Promotion discount</ram:Reason>
@@ -182,13 +189,13 @@
         <ram:DirectDebitMandateID>1234567890</ram:DirectDebitMandateID>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-        <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
+        <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>
         <ram:ChargeTotalAmount>11.00</ram:ChargeTotalAmount>
         <ram:AllowanceTotalAmount>10.00</ram:AllowanceTotalAmount>
-        <ram:TaxBasisTotalAmount>1801.00</ram:TaxBasisTotalAmount>
-        <ram:TaxTotalAmount currencyID="EUR">342.19</ram:TaxTotalAmount>
-        <ram:GrandTotalAmount>2143.19</ram:GrandTotalAmount>
-        <ram:DuePayableAmount>2143.19</ram:DuePayableAmount>
+        <ram:TaxBasisTotalAmount>1621.00</ram:TaxBasisTotalAmount>
+        <ram:TaxTotalAmount currencyID="EUR">307.99</ram:TaxTotalAmount>
+        <ram:GrandTotalAmount>1928.99</ram:GrandTotalAmount>
+        <ram:DuePayableAmount>1928.99</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
