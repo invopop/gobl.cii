@@ -80,6 +80,8 @@ func TestParseCtoGParty(t *testing.T) {
 		require.Len(t, supplier.Telephones, 1)
 		assert.Equal(t, "46211230", supplier.Telephones[0].Number)
 
+		assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
+
 		customer := inv.Customer
 		require.NotNil(t, customer)
 
@@ -89,5 +91,18 @@ func TestParseCtoGParty(t *testing.T) {
 		require.Len(t, customer.Identities, 1)
 		assert.Equal(t, "3456789012098", customer.Identities[0].Code.String())
 		assert.Equal(t, "0088", customer.Identities[0].Ext[iso.ExtKeySchemeID].String())
+	})
+
+	t.Run("CII-IN_SE-R-003.xml", func(t *testing.T) {
+		e, err := parseInvoiceFrom(t, "CII-IN_SE-R-003.xml")
+		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		supplier := inv.Supplier
+		require.NotNil(t, supplier)
+
+		assert.Equal(t, "5566778899", supplier.Inboxes[0].Code.String())
+		assert.Equal(t, "0007", supplier.Inboxes[0].Scheme.String())
 	})
 }

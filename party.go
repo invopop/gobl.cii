@@ -76,10 +76,9 @@ func newParty(party *org.Party) *Party {
 		return nil
 	}
 	p := &Party{
-		Name:                      party.Name,
-		Contact:                   newContact(party),
-		PostalTradeAddress:        newPostalTradeAddress(party.Addresses),
-		URIUniversalCommunication: newEmail(party.Emails),
+		Name:               party.Name,
+		Contact:            newContact(party),
+		PostalTradeAddress: newPostalTradeAddress(party.Addresses),
 	}
 	if party.TaxID != nil {
 		// Assumes VAT ID being used instead of possible tax number
@@ -103,11 +102,21 @@ func newParty(party *org.Party) *Party {
 		}
 	}
 	if len(party.Inboxes) > 0 {
-		p.URIUniversalCommunication = &URIUniversalCommunication{
-			ID: &PartyID{
-				Value:    party.Inboxes[0].Email,
-				SchemeID: SchemeIDEmail,
-			},
+		ib := party.Inboxes[0]
+		if ib.Email != "" {
+			p.URIUniversalCommunication = &URIUniversalCommunication{
+				ID: &PartyID{
+					Value:    ib.Email,
+					SchemeID: SchemeIDEmail,
+				},
+			}
+		} else {
+			p.URIUniversalCommunication = &URIUniversalCommunication{
+				ID: &PartyID{
+					Value:    ib.Code.String(),
+					SchemeID: ib.Scheme.String(),
+				},
+			}
 		}
 	}
 	return p
@@ -145,6 +154,7 @@ func newContact(p *org.Party) *Contact {
 			CompleteNumber: p.Telephones[0].Number,
 		}
 	}
+	// Fallback to adding the base company email addresses
 	if c.Email == nil && len(p.Emails) > 0 {
 		c.Email = &Email{
 			URIID: p.Emails[0].Address,

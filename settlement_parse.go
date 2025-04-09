@@ -159,19 +159,20 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 
 	if pm.Creditor != nil {
 		ac := pm.Creditor
+		ct := new(pay.CreditTransfer)
 		if ac.IBAN != "" {
-			inst.CreditTransfer = []*pay.CreditTransfer{
-				{
-					IBAN: ac.IBAN,
-				},
-			}
+			ct.IBAN = ac.IBAN
 		}
 		if ac.Name != "" {
-			inst.CreditTransfer[0].Name = ac.Name
+			ct.Name = ac.Name
+		}
+		if ac.Number != "" {
+			ct.Number = ac.Number
 		}
 		if pm.CreditorInstitution != nil && pm.CreditorInstitution.BIC != "" {
-			inst.CreditTransfer[0].BIC = pm.CreditorInstitution.BIC
+			ct.BIC = pm.CreditorInstitution.BIC
 		}
+		inst.CreditTransfer = append(inst.CreditTransfer, ct)
 	}
 	return inst
 }

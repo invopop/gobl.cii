@@ -45,11 +45,20 @@ func goblNewParty(party *Party) *org.Party {
 		}
 	}
 
-	if party.URIUniversalCommunication != nil {
-		p.Inboxes = []*org.Inbox{
-			{
-				Email: party.URIUniversalCommunication.ID.Value,
-			},
+	if uc := party.URIUniversalCommunication; uc != nil {
+		if uc.ID.SchemeID == SchemeIDEmail {
+			p.Inboxes = []*org.Inbox{
+				{
+					Email: uc.ID.Value,
+				},
+			}
+		} else {
+			p.Inboxes = []*org.Inbox{
+				{
+					Scheme: cbc.Code(uc.ID.SchemeID),
+					Code:   cbc.Code(uc.ID.Value),
+				},
+			}
 		}
 	}
 

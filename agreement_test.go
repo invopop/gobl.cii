@@ -17,7 +17,7 @@ func TestNewAgreement(t *testing.T) {
 		assert.Equal(t, "Provide One GmbH", doc.Transaction.Agreement.TaxRepresentative.Name)
 		assert.Equal(t, "John Doe", doc.Transaction.Agreement.TaxRepresentative.Contact.PersonName)
 		assert.Equal(t, "+49100200300", doc.Transaction.Agreement.TaxRepresentative.Contact.Phone.CompleteNumber)
-		assert.Equal(t, "billing@example.com", doc.Transaction.Agreement.TaxRepresentative.URIUniversalCommunication.ID.Value)
+		assert.Equal(t, "billing@example.com", doc.Transaction.Agreement.TaxRepresentative.Contact.Email.URIID)
 		assert.Equal(t, "69190", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.Postcode)
 		assert.Equal(t, "Dietmar-Hopp-Allee 16", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.LineOne)
 		assert.Equal(t, "Walldorf", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.City)
