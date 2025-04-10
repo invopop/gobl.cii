@@ -106,6 +106,7 @@ func newDiscount(d *bill.Discount, base num.Amount) *AllowanceCharge {
 	if d.Taxes != nil {
 		ac.Tax = makeTaxCategory(d.Taxes[0])
 	}
+
 	return ac
 }
 
@@ -119,7 +120,7 @@ func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
 	}
 	ac.ReasonCode = c.Ext.Get(untdid.ExtKeyCharge).String()
 	if c.Percent != nil {
-		p := c.Percent.String()
+		p := c.Percent.StringWithoutSymbol()
 		ac.Percent = p
 	}
 	return ac
@@ -135,7 +136,7 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 	}
 	ac.ReasonCode = d.Ext.Get(untdid.ExtKeyAllowance).String()
 	if d.Percent != nil {
-		p := d.Percent.String()
+		p := d.Percent.StringWithoutSymbol()
 		ac.Percent = p
 	}
 	return ac

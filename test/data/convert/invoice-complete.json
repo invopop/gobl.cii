@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e0a4817ff43d930348b35252e9c8489e133807a83a510259b3b032dc787bda0e"
+			"val": "4a226b525c934231c61360c47deeec86445807726b9941662e5ac4c3a3852426"
 		}
 	},
 	"doc": {
@@ -95,6 +95,12 @@
 					"unit": "h"
 				},
 				"sum": "1800.00",
+				"discounts": [
+					{
+						"percent": "10%",
+						"amount": "180.00"
+					}
+				],
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -105,7 +111,7 @@
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "1620.00"
 			}
 		],
 		"discounts": [
@@ -188,7 +194,7 @@
 				"due_dates": [
 					{
 						"date": "2013-07-20",
-						"amount": "2143.19",
+						"amount": "1928.99",
 						"percent": "100%"
 					}
 				],
@@ -239,10 +245,10 @@
 			"date": "2024-02-10"
 		},
 		"totals": {
-			"sum": "1800.00",
+			"sum": "1620.00",
 			"discount": "10.00",
 			"charge": "11.00",
-			"total": "1801.00",
+			"total": "1621.00",
 			"taxes": {
 				"categories": [
 					{
@@ -253,19 +259,19 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1801.00",
+								"base": "1621.00",
 								"percent": "19%",
-								"amount": "342.19"
+								"amount": "307.99"
 							}
 						],
-						"amount": "342.19"
+						"amount": "307.99"
 					}
 				],
-				"sum": "342.19"
+				"sum": "307.99"
 			},
-			"tax": "342.19",
-			"total_with_tax": "2143.19",
-			"payable": "2143.19"
+			"tax": "307.99",
+			"total_with_tax": "1928.99",
+			"payable": "1928.99"
 		}
 	}
 }

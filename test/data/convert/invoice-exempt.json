@@ -1,0 +1,154 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "771cfce60236f2d0780ca846b9c952b0c225e4c2fdbb791f2012f07a2b83539a"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017",
+			"fr-facturx-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "93",
+		"issue_date": "2025-04-10",
+		"op_date": "2025-04-10",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"$regime": "DE",
+			"uuid": "01936308-3f83-7000-8792-31150091885b",
+			"name": "CYBERDYNE IT GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"addresses": [
+				{
+					"street": "Am Wassermann 29",
+					"street_extra": "Ehrenfeld",
+					"locality": "Köln",
+					"region": "Nordrhein-Westfalen",
+					"code": "50829",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "juan.moliner@invopop.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Openlane Ltd",
+			"people": [
+				{
+					"name": {
+						"given": "Simon",
+						"surname": "Masrani"
+					}
+				}
+			],
+			"addresses": [
+				{}
+			],
+			"meta": {
+				"chargebee-customer-id": "cbdemo_simon"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Quick charge",
+					"price": "200.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-04-10",
+						"chargebee-date-to": "2025-04-10"
+					}
+				},
+				"sum": "200.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"rate": "exempt",
+						"ext": {
+							"untdid-tax-category": "E"
+						}
+					}
+				],
+				"total": "200.00"
+			}
+		],
+		"ordering": {
+			"period": {
+				"start": "2025-04-10",
+				"end": "2025-04-10"
+			}
+		},
+		"payment": {
+			"advances": [
+				{
+					"date": "2025-04-10",
+					"key": "card",
+					"description": "Card ending 4444",
+					"amount": "200.00",
+					"card": {
+						"last4": "4444"
+					},
+					"meta": {
+						"chargebee-txn-id": "txn_BTUTERUhwzLbROH"
+					}
+				}
+			]
+		},
+		"totals": {
+			"sum": "200.00",
+			"total": "200.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "exempt",
+								"ext": {
+									"untdid-tax-category": "E"
+								},
+								"base": "200.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "200.00",
+			"payable": "200.00",
+			"advance": "200.00",
+			"due": "0.00"
+		},
+		"meta": {
+			"chargebee-doc-id": "93",
+			"chargebee-doc-type": "invoice",
+			"chargebee-site": "cyberdyne-de-test"
+		}
+	},
+	"sigs": [
+		"eyJhbGciOiJFUzI1NiIsImtpZCI6IjQ5YjJjNGU5LTM0NjAtNDQ5ZS05NWRkLTI0MWFjY2JiZjYxNyJ9.eyJ1dWlkIjoiMDE5NjFlYzctMDcxYy03NGFmLTg2OWYtMzY0OTdmOTFjMmNhIiwiZGlnIjp7ImFsZyI6InNoYTI1NiIsInZhbCI6IjFiOGFlMzFkYzViMjYzN2M4M2Y4M2EyYzEzMjJmNDA4NzgzNDgxMDlkNjk1YThhYzAxNGQ1MmVlMzk3ZDdhNjQifX0.64Ibn5v_ltftRObmpQ9vMYEmWFM_nFVxHQkl9_FUDOH4PyUZujAMNwgc-yTW62Q32v9nl-aIQdFdxFCf8-xm2A"
+	]
+}
