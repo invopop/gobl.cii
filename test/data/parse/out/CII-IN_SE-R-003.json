@@ -1,0 +1,202 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "4b10c85ca69617a4b88bdd8a286d78135fd72ad8709ac7d15a1e8c82e0da00a7"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "2018210",
+		"issue_date": "2018-02-08",
+		"currency": "SEK",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Allsälj AB",
+			"identities": [
+				{
+					"country": "SE",
+					"code": "Godkänd för F-skatt"
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0007",
+					"code": "5566778899"
+				}
+			],
+			"addresses": [
+				{
+					"country": "SE"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyercompany ltd",
+			"inboxes": [
+				{
+					"scheme": "0007",
+					"code": "1234512345"
+				}
+			],
+			"addresses": [
+				{
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1000",
+				"item": {
+					"name": "Printing paper",
+					"price": "1.00",
+					"unit": "item"
+				},
+				"sum": "1000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"total": "1000.00"
+			},
+			{
+				"i": 2,
+				"quantity": "100",
+				"item": {
+					"name": "Parker Pen",
+					"price": "5.00",
+					"unit": "item"
+				},
+				"sum": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"total": "500.00"
+			},
+			{
+				"i": 3,
+				"quantity": "500",
+				"item": {
+					"name": "Eraser P-97",
+					"price": "5.00",
+					"unit": "item"
+				},
+				"sum": "2500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "12%"
+					}
+				],
+				"total": "2500.00"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Loyal customer",
+				"base": "0",
+				"percent": "10%",
+				"amount": "0",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"ext": {
+					"untdid-allowance": "95"
+				}
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Packaging",
+				"base": "0",
+				"percent": "10%",
+				"amount": "0",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"ext": {
+					"untdid-charge": "ABL"
+				}
+			}
+		],
+		"ordering": {
+			"code": "Ref 123"
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2018-03-07",
+						"amount": "4675.00",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"bic": "BANKSBIC",
+						"number": "123456"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "4000.00",
+			"discount": "0.00",
+			"charge": "0.00",
+			"total": "4000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"base": "1500.00",
+								"percent": "25%",
+								"amount": "375.00"
+							},
+							{
+								"base": "2500.00",
+								"percent": "12%",
+								"amount": "300.00"
+							}
+						],
+						"amount": "675.00"
+					}
+				],
+				"sum": "675.00"
+			},
+			"tax": "675.00",
+			"total_with_tax": "4675.00",
+			"payable": "4675.00"
+		}
+	}
+}
