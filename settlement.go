@@ -283,15 +283,15 @@ func newTaxes(total *tax.Total) []*Tax {
 }
 
 func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
-	if rate.Percent == nil {
-		return nil
-	}
 	tax := &Tax{
-		CalculatedAmount:      rate.Amount.Rescale(2).String(),
-		TypeCode:              category.Code.String(),
-		BasisAmount:           rate.Base.String(),
-		CategoryCode:          rate.Ext[untdid.ExtKeyTaxCategory].String(),
-		RateApplicablePercent: rate.Percent.StringWithoutSymbol(),
+		CalculatedAmount: rate.Amount.Rescale(2).String(),
+		TypeCode:         category.Code.String(),
+		BasisAmount:      rate.Base.String(),
+		CategoryCode:     rate.Ext[untdid.ExtKeyTaxCategory].String(),
+	}
+
+	if rate.Percent != nil {
+		tax.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
 	}
 	return tax
 }
