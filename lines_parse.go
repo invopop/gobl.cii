@@ -26,7 +26,7 @@ func goblAddLines(in *Transaction, out *bill.Invoice) error {
 			//If Quantity is not present, assume 1
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
-				Name:  it.Product.Name,
+				Name:  strings.TrimSpace(it.Product.Name),
 				Price: &price,
 			},
 			Taxes: tax.Set{
@@ -75,7 +75,7 @@ func goblAddLines(in *Transaction, out *bill.Invoice) error {
 		}
 
 		if it.Product.Description != nil {
-			l.Item.Description = *it.Product.Description
+			l.Item.Description = strings.TrimSpace(*it.Product.Description)
 		}
 
 		if it.Product.Origin != nil {
@@ -87,7 +87,7 @@ func goblAddLines(in *Transaction, out *bill.Invoice) error {
 			for _, note := range it.LineDoc.Note {
 				n := &org.Note{}
 				if note.Content != "" {
-					n.Text = note.Content
+					n.Text = strings.TrimSpace(note.Content)
 				}
 				if note.SubjectCode != "" {
 					n.Key = cbc.Key(note.SubjectCode)

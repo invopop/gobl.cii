@@ -45,10 +45,8 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 
 	// Payment comprised of terms, means and payee. Check tehre is relevant info in at least one of them to create a payment
 	ahts := in.Transaction.Settlement
-	if ahts.HasPayment() {
-		if out.Payment, err = goblNewPaymentDetails(ahts); err != nil {
-			return nil, err
-		}
+	if out.Payment, err = goblNewPaymentDetails(ahts); err != nil {
+		return nil, err
 	}
 
 	if len(in.ExchangedDocument.IncludedNote) > 0 {

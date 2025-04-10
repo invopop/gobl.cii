@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "67a0fb08e655a7861968b17e29dd4fb48b354f28bba5e9ac5e60fb8d6d3a4fbc"
+			"val": "9f86f899846c52e51642b1b90177ab3d038bf0c32b1655807af1a581f342454b"
 		}
 	},
 	"doc": {
@@ -131,7 +131,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "666955",
-					"name": "KOFFIE BLIK 3,5KG SNELF ",
+					"name": "KOFFIE BLIK 3,5KG SNELF",
 					"price": "35.00",
 					"unit": "piece"
 				},
@@ -149,7 +149,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "664871",
-					"name": "KOFFIE 3.5 KG BLIK STAND ",
+					"name": "KOFFIE 3.5 KG BLIK STAND",
 					"price": "35.00",
 					"unit": "piece"
 				},
@@ -185,7 +185,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "350258",
-					"name": "1 KG UL BLOKJES ",
+					"name": "1 KG UL BLOKJES",
 					"price": "1.55",
 					"unit": "piece"
 				},
@@ -203,7 +203,7 @@
 				"quantity": "3",
 				"item": {
 					"ref": "999998",
-					"name": "BLOCKNOTE A5 ",
+					"name": "BLOCKNOTE A5",
 					"price": "4.79",
 					"unit": "piece"
 				},
@@ -257,7 +257,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "740828",
-					"name": "TR KL PAKJES APPELSAP ",
+					"name": "TR KL PAKJES APPELSAP",
 					"price": "9.95",
 					"unit": "piece"
 				},
@@ -275,7 +275,7 @@
 				"quantity": "2",
 				"item": {
 					"ref": "740827",
-					"name": "PK CHOCOLADEMELK ",
+					"name": "PK CHOCOLADEMELK",
 					"price": "1.65",
 					"unit": "piece"
 				},
@@ -293,7 +293,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "999996",
-					"name": "KRAT BIER ",
+					"name": "KRAT BIER",
 					"price": "10.80",
 					"unit": "piece"
 				},
@@ -311,7 +311,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "999995",
-					"name": "STATIEGELD ",
+					"name": "STATIEGELD",
 					"price": "3.90",
 					"unit": "piece"
 				},
@@ -329,7 +329,7 @@
 				"quantity": "2",
 				"item": {
 					"ref": "102172",
-					"name": "BLEEK 3 X 750 ML ",
+					"name": "BLEEK 3 X 750 ML",
 					"price": "3.80",
 					"unit": "piece"
 				},
@@ -347,7 +347,7 @@
 				"quantity": "2",
 				"item": {
 					"ref": "999994",
-					"name": "WC PAPIER ",
+					"name": "WC PAPIER",
 					"price": "4.67",
 					"unit": "piece"
 				},
@@ -365,7 +365,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "999993",
-					"name": "BALPENNEN 50 ST BLAUW ",
+					"name": "BALPENNEN 50 ST BLAUW",
 					"price": "18.63",
 					"unit": "piece"
 				},
@@ -383,7 +383,7 @@
 				"quantity": "6",
 				"item": {
 					"ref": "999992",
-					"name": "EM FRITUURVET ",
+					"name": "EM FRITUURVET",
 					"price": "17.02",
 					"unit": "piece"
 				},
@@ -401,7 +401,7 @@
 				"quantity": "6",
 				"item": {
 					"ref": "175137",
-					"name": "FRITUUR VET 10 KG RETOUR ",
+					"name": "FRITUUR VET 10 KG RETOUR",
 					"price": "18.33",
 					"unit": "piece"
 				},

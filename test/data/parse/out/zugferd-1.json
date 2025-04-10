@@ -1,0 +1,293 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "0617fcd7a086396f2eb925a2d3106a5366a6724fb50edf22dbfe50884d474054"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "471102",
+		"issue_date": "2018-06-05",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Lieferant GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "123456789"
+			},
+			"identities": [
+				{
+					"country": "DE",
+					"code": "201/113/40209"
+				},
+				{
+					"code": "4000001123452",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Lieferantenstraße 20",
+					"locality": "München",
+					"code": "80333",
+					"country": "DE"
+				}
+			]
+		},
+		"customer": {
+			"name": "Kunden AG Mitte",
+			"addresses": [
+				{
+					"street": "Kundenstraße 15",
+					"locality": "Frankfurt",
+					"code": "69876",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "3.0000",
+				"item": {
+					"ref": "KR3M",
+					"name": "Kunstrasen grün 3m breit",
+					"identities": [
+						{
+							"code": ""
+						},
+						{
+							"code": "4012345001235",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						}
+					],
+					"description": "300cm x 100 cm",
+					"price": "3.3333",
+					"unit": "m2"
+				},
+				"sum": "9.9999",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "9.9999",
+				"notes": [
+					{
+						"text": "Wir erlauben uns Ihnen folgende Positionen aus der Lieferung Nr. 2018-51112 in Rechnung zu stellen:"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "5.0000",
+				"item": {
+					"ref": "SFK5",
+					"name": "Schweinesteak",
+					"identities": [
+						{
+							"code": ""
+						},
+						{
+							"code": "4000050986428",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						}
+					],
+					"description": "aus Deutschland",
+					"price": "5.5000",
+					"unit": "kg"
+				},
+				"sum": "27.5000",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "7.00%"
+					}
+				],
+				"total": "27.5000"
+			},
+			{
+				"i": 3,
+				"quantity": "20.0000",
+				"item": {
+					"ref": "GTRWA5",
+					"name": "Mineralwasser Medium 12 x 1,0l PET",
+					"identities": [
+						{
+							"code": ""
+						},
+						{
+							"code": "4000001234561",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						}
+					],
+					"price": "5.4900",
+					"unit": "piece"
+				},
+				"sum": "109.8000",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "7.00%"
+					}
+				],
+				"total": "109.8000"
+			},
+			{
+				"i": 4,
+				"quantity": "20.0000",
+				"item": {
+					"ref": "PFA5",
+					"name": "Pfand",
+					"identities": [
+						{
+							"code": ""
+						},
+						{
+							"code": "4000001234578",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						}
+					],
+					"price": "2.7700",
+					"unit": "one"
+				},
+				"sum": "55.4000",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				],
+				"total": "55.4000"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Sondernachlass",
+				"base": "10.00",
+				"amount": "1.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.00%"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"reason": "Sondernachlass",
+				"base": "137.30",
+				"amount": "13.73",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "7.00%"
+					}
+				]
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Versandkosten",
+				"base": "137.30",
+				"amount": "5.80",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "7.00%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "2013-471331"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"detail": "Zahlbar innerhalb 30 Tagen netto bis 04.07.2018, 3% Skonto innerhalb 10 Tagen bis 15.06.2018"
+			},
+			"advances": [
+				{
+					"description": "",
+					"amount": "50.00"
+				}
+			]
+		},
+		"delivery": {
+			"date": "2018-06-03"
+		},
+		"totals": {
+			"sum": "202.70",
+			"discount": "14.73",
+			"charge": "5.80",
+			"total": "193.77",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"base": "64.40",
+								"percent": "19.00%",
+								"amount": "12.24"
+							},
+							{
+								"base": "129.37",
+								"percent": "7.00%",
+								"amount": "9.06"
+							}
+						],
+						"amount": "21.29"
+					}
+				],
+				"sum": "21.29"
+			},
+			"tax": "21.29",
+			"total_with_tax": "215.06",
+			"payable": "215.06",
+			"advance": "50.00",
+			"due": "165.06"
+		},
+		"notes": [
+			{
+				"text": "\nRechnung gemäß Bestellung Nr. 2018-471331 vom 01.03.2018.\n\n      "
+			},
+			{
+				"code": "AAK",
+				"text": "\nEs bestehen Rabatt- und Bonusvereinbarungen.\n\n      "
+			},
+			{
+				"code": "REG",
+				"text": "Lieferant GmbH\nLieferantenstraße 20\n80333 München\nDeutschland\nGeschäftsführer: Hans Muster\nHandelsregisternummer: H A 123\n\n      "
+			}
+		]
+	}
+}

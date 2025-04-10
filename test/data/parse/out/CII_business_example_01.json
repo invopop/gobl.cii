@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c7e84d11233f8d557d44a8c0ec042508a1c31ad9d0bc4a10b852f5f433772f27"
+			"val": "17a3ab89b9d8e3af06c3de77f2ca9e03cd226d2df9051a52a612c23074d9c656"
 		}
 	},
 	"doc": {
@@ -96,7 +96,7 @@
 				"quantity": "1.000",
 				"item": {
 					"ref": "870",
-					"name": "zzgl. ",
+					"name": "zzgl.",
 					"price": "1.5000",
 					"unit": "one"
 				},
