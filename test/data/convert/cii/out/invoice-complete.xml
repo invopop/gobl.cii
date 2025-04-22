@@ -41,6 +41,7 @@
           </ram:ChargeIndicator>
           <ram:CalculationPercent>10</ram:CalculationPercent>
           <ram:ActualAmount>180.00</ram:ActualAmount>
+          <ram:Reason>just beacuse</ram:Reason>
         </ram:SpecifiedTradeAllowanceCharge>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
           <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>
@@ -183,7 +184,6 @@
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20130720</udt:DateTimeString>
         </ram:DueDateDateTime>
-        <ram:DirectDebitMandateID>1234567890</ram:DirectDebitMandateID>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>

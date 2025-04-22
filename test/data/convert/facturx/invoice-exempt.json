@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "771cfce60236f2d0780ca846b9c952b0c225e4c2fdbb791f2012f07a2b83539a"
+			"val": "5b00fa29332b24c9eaf6768c6ba957bb6c07f7a63069f379dd5d90420a86d5ca"
 		}
 	},
 	"doc": {
@@ -58,13 +58,7 @@
 						"surname": "Masrani"
 					}
 				}
-			],
-			"addresses": [
-				{}
-			],
-			"meta": {
-				"chargebee-customer-id": "cbdemo_simon"
-			}
+			]
 		},
 		"lines": [
 			{
@@ -107,9 +101,6 @@
 					"amount": "200.00",
 					"card": {
 						"last4": "4444"
-					},
-					"meta": {
-						"chargebee-txn-id": "txn_BTUTERUhwzLbROH"
 					}
 				}
 			]
@@ -141,11 +132,6 @@
 			"payable": "200.00",
 			"advance": "200.00",
 			"due": "0.00"
-		},
-		"meta": {
-			"chargebee-doc-id": "93",
-			"chargebee-doc-type": "invoice",
-			"chargebee-site": "cyberdyne-de-test"
 		}
 	},
 	"sigs": [

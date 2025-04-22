@@ -91,24 +91,12 @@
       </ram:BuyerTradeParty>
       <ram:SellerTaxRepresentativeTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
-        <ram:DefinedTradeContact>
-          <ram:PersonName>John Doe</ram:PersonName>
-          <ram:TelephoneUniversalCommunication>
-            <ram:CompleteNumber>+49100200300</ram:CompleteNumber>
-          </ram:TelephoneUniversalCommunication>
-          <ram:EmailURIUniversalCommunication>
-            <ram:URIID>billing@example.com</ram:URIID>
-          </ram:EmailURIUniversalCommunication>
-        </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>69190</ram:PostcodeCode>
           <ram:LineOne>Dietmar-Hopp-Allee 16</ram:LineOne>
           <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
-        <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="0007">111111125</ram:URIID>
-        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
         </ram:SpecifiedTaxRegistration>
@@ -125,11 +113,9 @@
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradePaymentTerms>
-        <ram:Description>lorem ipsum</ram:Description>
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20240227</udt:DateTimeString>
         </ram:DueDateDateTime>
-        <ram:PartialPaymentAmount>2000.00</ram:PartialPaymentAmount>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>

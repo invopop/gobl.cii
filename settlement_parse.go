@@ -33,7 +33,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 		}
 		pymt.Payee = payee
 	}
-	if len(stlm.PaymentTerms) > 0 {
+	if stlm.PaymentTerms != nil {
 		terms, err := goblNewTerms(stlm)
 		if err != nil {
 			return nil, err
@@ -89,26 +89,20 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 	terms := &pay.Terms{}
 	var dates []*pay.DueDate
 
-	for _, term := range settlement.PaymentTerms {
-		if term.Description != "" {
-			terms.Detail = term.Description
+	if settlement.PaymentTerms != nil {
+		if settlement.PaymentTerms.Description != "" {
+			terms.Detail = settlement.PaymentTerms.Description
 		}
 
-		if term.DueDate != nil && term.DueDate.DateFormat != nil {
-			dueDateTime, err := parseDate(term.DueDate.DateFormat.Value)
+		if settlement.PaymentTerms.DueDate != nil && settlement.PaymentTerms.DueDate.DateFormat != nil {
+			dueDateTime, err := parseDate(settlement.PaymentTerms.DueDate.DateFormat.Value)
 			if err != nil {
 				return nil, err
 			}
 			dd := &pay.DueDate{
 				Date: &dueDateTime,
 			}
-			if term.PartialPayment != "" {
-				amt, err := num.AmountFromString(term.PartialPayment)
-				if err != nil {
-					return nil, err
-				}
-				dd.Amount = amt
-			} else if len(dates) == 0 {
+			if len(dates) == 0 {
 				p, err := num.PercentageFromString("100%")
 				if err != nil {
 					return nil, err

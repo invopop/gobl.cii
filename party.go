@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/regimes/fr"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -49,8 +50,8 @@ type SpecifiedTaxRegistration struct {
 
 // LegalOrganization defines the structure of the SpecifiedLegalOrganization of the CII standard
 type LegalOrganization struct {
-	ID   string `xml:"ram:ID"`
-	Name string `xml:"ram:TradingBusinessName"`
+	ID   *PartyID `xml:"ram:ID"`
+	Name string   `xml:"ram:TradingBusinessName"`
 }
 
 // Contact defines the structure of the DefinedTradeContact of the CII standard
@@ -93,10 +94,23 @@ func newParty(party *org.Party) *Party {
 	}
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
+
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				p.GlobalID = &PartyID{
 					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
 					Value:    id.Code.String(),
+				}
+			}
+
+			// Hardcoded for chorus-pro.
+			// As SIREN and SIRET are allways 0002, we can add the schemeID this way and not force the user to add the extension.
+			if id.Type == fr.IdentityTypeSIREN || id.Type == fr.IdentityTypeSIRET {
+				p.LegalOrganization = &LegalOrganization{
+					ID: &PartyID{
+						SchemeID: "0002",
+						Value:    id.Code.String(),
+					},
+					Name: party.Alias,
 				}
 			}
 		}

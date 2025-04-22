@@ -12,7 +12,7 @@ import (
 )
 
 func TestConvertInvoiceWithContext(t *testing.T) {
-	env := loadEnvelope(t, "invoice-complete.json")
+	env := loadEnvelope(t, "cii/invoice-complete.json")
 
 	t.Run("with default context", func(t *testing.T) {
 		out, err := cii.ConvertInvoice(env)
@@ -23,7 +23,7 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 	})
 
 	t.Run("with missing addon", func(t *testing.T) {
-		env := loadEnvelope(t, "invoice-complete.json")
+		env := loadEnvelope(t, "cii/invoice-complete.json")
 		inv := env.Extract().(*bill.Invoice)
 		inv.SetAddons() // empty
 		_, err := cii.ConvertInvoice(env)
@@ -31,7 +31,7 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 	})
 
 	t.Run("with Factur-X context", func(t *testing.T) {
-		env := loadEnvelope(t, "invoice-complete.json")
+		env := loadEnvelope(t, "cii/invoice-complete.json")
 		inv := env.Extract().(*bill.Invoice)
 		inv.Addons.List = append(inv.Addons.List, facturx.V1)
 		require.NoError(t, inv.Calculate())
@@ -44,7 +44,7 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 	})
 
 	t.Run("with XRechnung context", func(t *testing.T) {
-		env := loadEnvelope(t, "invoice-complete.json")
+		env := loadEnvelope(t, "cii/invoice-complete.json")
 		inv := env.Extract().(*bill.Invoice)
 		inv.Addons.List = append(inv.Addons.List, xrechnung.V3)
 		require.NoError(t, inv.Calculate())

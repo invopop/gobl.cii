@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -18,9 +17,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/lestrrat-go/libxml2"
-	"github.com/lestrrat-go/libxml2/xsd"
 )
 
 const (
@@ -37,31 +33,68 @@ const (
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
 func TestConvertInvoice(t *testing.T) {
-	schema, err := loadSchema("schema.xsd")
+	convertPath := filepath.Join(dataPath(), pathConvert)
+
+	// Get all folders inside convert
+	folders, err := os.ReadDir(convertPath)
 	require.NoError(t, err)
 
-	examples := findSourceFiles(t, pathConvert, pathPatternJSON)
-	for _, example := range examples {
-		inName := filepath.Base(example)
-		outName := strings.Replace(inName, ".json", ".xml", 1)
+	for _, folder := range folders {
+		if !folder.IsDir() {
+			continue
+		}
 
-		t.Run(inName, func(t *testing.T) {
-			out, err := newInvoiceFrom(t, inName)
-			require.NoError(t, err)
+		format := folder.Name()
+		var ctx cii.Context
 
-			data, err := out.Bytes()
-			require.NoError(t, err)
+		// Set the context based on the folder name
+		switch format {
+		case "facturx":
+			ctx = cii.ContextFacturX
+		case "xrechnung":
+			ctx = cii.ContextXRechnung
+		case "peppol":
+			ctx = cii.ContextPeppolV3
+		case "cii":
+			ctx = cii.ContextEN16931
+		default:
+			t.Logf("Skipping unknown format folder: %s", format)
+			continue
+		}
 
-			if *updateOut {
-				err = os.WriteFile(outputFilepath(pathConvert, outName), data, 0644)
-				require.NoError(t, err)
-				err = validateXML(schema, data)
-				require.NoError(t, err)
+		t.Run(format, func(t *testing.T) {
+			// Find all JSON files in this format's folder
+			examples := findSourceFiles(t, filepath.Join(pathConvert, format), pathPatternJSON)
+
+			for _, example := range examples {
+				inName := filepath.Base(example)
+				outName := strings.Replace(inName, ".json", ".xml", 1)
+
+				t.Run(inName, func(t *testing.T) {
+					// Load and convert using the format-specific context
+					env := loadEnvelope(t, filepath.Join(format, inName))
+					out, err := cii.ConvertInvoice(env, cii.WithContext(ctx))
+					require.NoError(t, err)
+
+					data, err := out.Bytes()
+					require.NoError(t, err)
+
+					if *updateOut {
+						// Create the output directory if it doesn't exist
+						outDir := filepath.Join(dataPath(), pathConvert, format, pathOut)
+						require.NoError(t, os.MkdirAll(outDir, 0755))
+
+						err = os.WriteFile(filepath.Join(outDir, outName), data, 0644)
+						require.NoError(t, err)
+						err = cii.ValidateXML(data, format)
+						require.NoError(t, err)
+					}
+
+					// Load the expected output
+					output := loadOutputFile(t, filepath.Join(pathConvert, format), outName)
+					assert.Equal(t, string(output), string(data), "Output should match the expected XML. Update with --update flag.")
+				})
 			}
-
-			output := loadOutputFile(t, pathConvert, outName)
-
-			assert.Equal(t, string(output), string(data), "Output should match the expected XML. Update with --update flag.")
 		})
 	}
 }
@@ -182,31 +215,6 @@ func writeEnvelope(path string, env *gobl.Envelope) {
 	}
 }
 
-func loadSchema(name string) (*xsd.Schema, error) {
-	return xsd.ParseFromFile(filepath.Join(schemaPath(), name))
-}
-
-// validateXML validates a XML document against a XSD Schema
-func validateXML(schema *xsd.Schema, data []byte) error {
-	xmlDoc, err := libxml2.Parse(data)
-	if err != nil {
-		return err
-	}
-
-	err = schema.Validate(xmlDoc)
-	if err != nil {
-		// Collect all errors into a single error message
-		errors := err.(xsd.SchemaValidationError).Errors()
-		var errorMessages []string
-		for _, e := range errors {
-			errorMessages = append(errorMessages, e.Error())
-		}
-		return fmt.Errorf("validation errors: %s", strings.Join(errorMessages, ",\n ")) // Return all errors as a single error
-	}
-
-	return nil
-}
-
 func outputFilepath(path, name string) string {
 	return filepath.Join(dataPath(path, pathOut, name))
 }
@@ -229,35 +237,7 @@ func findSourceFiles(t *testing.T, path, pattern string) []string {
 	return files
 }
 
-func schemaPath() string {
-	return filepath.Join(dataPath(), "schema")
-}
-
 func dataPath(files ...string) string {
-	files = append([]string{rootFolder(), "test", "data"}, files...)
+	files = append([]string{cii.RootFolder(), "test", "data"}, files...)
 	return filepath.Join(files...)
-}
-
-func rootFolder() string {
-	cwd, _ := os.Getwd()
-	for !isRootFolder(cwd) {
-		cwd = removeLastEntry(cwd)
-	}
-	return cwd
-}
-
-func isRootFolder(dir string) bool {
-	files, _ := os.ReadDir(dir)
-	for _, file := range files {
-		if file.Name() == "go.mod" {
-			return true
-		}
-	}
-	return false
-}
-
-func removeLastEntry(dir string) string {
-	lastEntry := "/" + filepath.Base(dir)
-	i := strings.LastIndex(dir, lastEntry)
-	return dir[:i]
 }
