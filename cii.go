@@ -36,7 +36,7 @@ type Context struct {
 }
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
-var ContextEN16931v2017 = Context{
+var ContextEN16931V2017 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017",
 	Addons:      []cbc.Key{en16931.V2017},
 }
@@ -86,7 +86,7 @@ func ParseInvoice(data []byte) (*gobl.Envelope, error) {
 // ready to be serialized into an XML data object.
 func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 	o := &options{
-		context: ContextEN16931v2017,
+		context: ContextEN16931V2017,
 	}
 	for _, opt := range opts {
 		opt(o)
