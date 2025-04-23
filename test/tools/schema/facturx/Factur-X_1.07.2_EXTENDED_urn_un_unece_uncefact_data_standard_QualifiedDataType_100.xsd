@@ -3,12 +3,28 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     targetNamespace="urn:un:unece:uncefact:data:standard:QualifiedDataType:100"
     elementFormDefault="qualified">
+  <xs:simpleType name="AccountingAccountTypeCodeContentType">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  <xs:complexType name="AccountingAccountTypeCodeType">
+    <xs:simpleContent>
+      <xs:extension base="qdt:AccountingAccountTypeCodeContentType"/>
+    </xs:simpleContent>
+  </xs:complexType>
   <xs:simpleType name="AllowanceChargeReasonCodeContentType">
     <xs:restriction base="xs:token"/>
   </xs:simpleType>
   <xs:complexType name="AllowanceChargeReasonCodeType">
     <xs:simpleContent>
       <xs:extension base="qdt:AllowanceChargeReasonCodeContentType"/>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="ContactTypeCodeContentType">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  <xs:complexType name="ContactTypeCodeType">
+    <xs:simpleContent>
+      <xs:extension base="qdt:ContactTypeCodeContentType"/>
     </xs:simpleContent>
   </xs:complexType>
   <xs:simpleType name="CountryIDContentType">
@@ -25,6 +41,14 @@
   <xs:complexType name="CurrencyCodeType">
     <xs:simpleContent>
       <xs:extension base="qdt:CurrencyCodeContentType"/>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="DeliveryTermsCodeContentType">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  <xs:complexType name="DeliveryTermsCodeType">
+    <xs:simpleContent>
+      <xs:extension base="qdt:DeliveryTermsCodeContentType"/>
     </xs:simpleContent>
   </xs:complexType>
   <xs:simpleType name="DocumentCodeContentType">
@@ -50,6 +74,22 @@
         </xs:complexType>
       </xs:element>
     </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="LineStatusCodeContentType">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  <xs:complexType name="LineStatusCodeType">
+    <xs:simpleContent>
+      <xs:extension base="qdt:LineStatusCodeContentType"/>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="PartyRoleCodeContentType">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  <xs:complexType name="PartyRoleCodeType">
+    <xs:simpleContent>
+      <xs:extension base="qdt:PartyRoleCodeContentType"/>
+    </xs:simpleContent>
   </xs:complexType>
   <xs:simpleType name="PaymentMeansCodeContentType">
     <xs:restriction base="xs:token"/>
@@ -89,6 +129,14 @@
   <xs:complexType name="TimeReferenceCodeType">
     <xs:simpleContent>
       <xs:extension base="qdt:TimeReferenceCodeContentType"/>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:simpleType name="TransportModeCodeContentType">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  <xs:complexType name="TransportModeCodeType">
+    <xs:simpleContent>
+      <xs:extension base="qdt:TransportModeCodeContentType"/>
     </xs:simpleContent>
   </xs:complexType>
 </xs:schema>

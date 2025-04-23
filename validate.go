@@ -2,6 +2,7 @@ package cii
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -40,21 +41,26 @@ type SVRL struct {
 func ValidateXML(xmlData []byte, format string) error {
 
 	// First validate against base CII schema
-	baseSchema, err := xsd.ParseFromFile(filepath.Join(RootFolder(), schemaPath, "cii", schemaFile))
-	if err != nil {
-		return fmt.Errorf("loading base CII schema: %w", err)
-	}
-	if err := validateAgainstSchema(baseSchema, xmlData); err != nil {
-		return fmt.Errorf("base CII validation failed: %w", err)
+	if format != "cii" {
+		baseSchema, err := xsd.ParseFromFile(filepath.Join(RootFolder(), schemaPath, "cii", schemaFile))
+		if err != nil {
+			return fmt.Errorf("loading base CII schema: %w", err)
+		}
+		if err := validateAgainstSchema(baseSchema, xmlData); err != nil {
+			return fmt.Errorf("base CII validation failed: %w", err)
+		}
 	}
 
-	// Then validate against format-specific schema
-	formatSchema, err := xsd.ParseFromFile(filepath.Join(RootFolder(), schemaPath, format, schemaFile))
-	if err != nil {
-		return fmt.Errorf("loading format schema: %w", err)
-	}
-	if err := validateAgainstSchema(formatSchema, xmlData); err != nil {
-		return fmt.Errorf("format-specific validation failed: %w", err)
+	// Then validate against format-specific schema if the schema exists
+	path := filepath.Join(RootFolder(), schemaPath, format, schemaFile)
+	if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+		formatSchema, err := xsd.ParseFromFile(path)
+		if err != nil {
+			return fmt.Errorf("loading format schema: %w", err)
+		}
+		if err := validateAgainstSchema(formatSchema, xmlData); err != nil {
+			return fmt.Errorf("format-specific validation failed: %w", err)
+		}
 	}
 
 	// Finally run schematron validation

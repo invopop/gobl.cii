@@ -30,10 +30,10 @@ type PartyID struct {
 
 // PostalTradeAddress defines the structure of the PostalTradeAddress of the CII standard
 type PostalTradeAddress struct {
-	Postcode  string `xml:"ram:PostcodeCode"`
-	LineOne   string `xml:"ram:LineOne"`
+	Postcode  string `xml:"ram:PostcodeCode,omitempty"`
+	LineOne   string `xml:"ram:LineOne,omitempty"`
 	LineTwo   string `xml:"ram:LineTwo,omitempty"`
-	City      string `xml:"ram:CityName"`
+	City      string `xml:"ram:CityName,omitempty"`
 	CountryID string `xml:"ram:CountryID"`
 	Region    string `xml:"ram:CountrySubDivisionName,omitempty"`
 }

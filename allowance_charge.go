@@ -1,7 +1,9 @@
 package cii
 
 import (
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
@@ -142,14 +144,19 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 	return ac
 }
 
-func makeTaxCategory(tax *tax.Combo) *Tax {
+func makeTaxCategory(t *tax.Combo) *Tax {
 	c := new(Tax)
-	if tax.Category != "" {
-		c.TypeCode = tax.Category.String()
+	if t.Category != "" {
+		c.TypeCode = t.Category.String()
 	}
-	c.CategoryCode = tax.Ext.Get(untdid.ExtKeyTaxCategory).String()
-	if tax.Percent != nil {
-		c.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
+	cat := t.Ext.Get(untdid.ExtKeyTaxCategory)
+	c.CategoryCode = cat.String()
+	c.RateApplicablePercent = "0"
+	if t.Percent != nil {
+		c.RateApplicablePercent = t.Percent.StringWithoutSymbol()
+	}
+	if cat == en16931.TaxCategoryExempt {
+		c.ExemptionReasonCode = t.Ext.Get(cef.ExtKeyVATEX).String()
 	}
 	return c
 }

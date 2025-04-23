@@ -31,6 +31,7 @@ type Tax struct {
 	TypeCode              string `xml:"ram:TypeCode,omitempty"`
 	BasisAmount           string `xml:"ram:BasisAmount,omitempty"`
 	CategoryCode          string `xml:"ram:CategoryCode,omitempty"`
+	ExemptionReasonCode   string `xml:"ram:ExemptionReasonCode,omitempty"`
 	RateApplicablePercent string `xml:"ram:RateApplicablePercent,omitempty"`
 }
 

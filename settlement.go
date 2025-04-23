@@ -3,7 +3,9 @@ package cii
 import (
 	"errors"
 
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
@@ -269,17 +271,21 @@ func newTaxes(total *tax.Total) []*Tax {
 }
 
 func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
-	tax := &Tax{
+	cat := rate.Ext.Get(untdid.ExtKeyTaxCategory)
+	t := &Tax{
 		CalculatedAmount: rate.Amount.Rescale(2).String(),
 		TypeCode:         category.Code.String(),
 		BasisAmount:      rate.Base.String(),
-		CategoryCode:     rate.Ext[untdid.ExtKeyTaxCategory].String(),
+		CategoryCode:     cat.String(),
 	}
-
+	t.RateApplicablePercent = "0"
 	if rate.Percent != nil {
-		tax.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
+		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
 	}
-	return tax
+	if cat == en16931.TaxCategoryExempt {
+		t.ExemptionReasonCode = rate.Ext.Get(cef.ExtKeyVATEX).String()
+	}
+	return t
 }
 
 func newPayee(party *org.Party) *Party {
