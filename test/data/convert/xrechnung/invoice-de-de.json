@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "cf9444a73b622c0ae98c31a12defdaa5a0c8954827ac0ec1587f4f1eccfe980f"
+			"val": "00bb2b55b949c3f5ef5ccaf766a9687bbae9a80e8e3318670cb6139c9d4eea7b"
 		}
 	},
 	"doc": {
@@ -31,6 +31,20 @@
 				"country": "DE",
 				"code": "111111125"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "Alvaro",
+						"surname": "Garcia"
+					},
+					"role": "Sales",
+					"telephones": [
+						{
+							"num": "+4915159990591"
+						}
+					]
+				}
+			],
 			"addresses": [
 				{
 					"num": "16",

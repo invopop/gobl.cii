@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "aad2d9e1907f373aefbae533842e632f696df5fad616a7ca680b08a43e477521"
+			"val": "056874efbda37633f8abab5abb3f905afa4304fbba5d6de84c2d33b3c46ee696"
 		}
 	},
 	"doc": {
@@ -34,6 +34,14 @@
 				"country": "DE",
 				"code": "111111125"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "Alvaro",
+						"surname": "Garcia"
+					}
+				}
+			],
 			"addresses": [
 				{
 					"num": "16",
@@ -46,6 +54,11 @@
 			"emails": [
 				{
 					"addr": "billing@example.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+4915159990591"
 				}
 			]
 		},

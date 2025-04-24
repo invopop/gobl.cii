@@ -121,9 +121,10 @@ func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
 		ac.Reason = c.Reason
 	}
 	ac.ReasonCode = c.Ext.Get(untdid.ExtKeyCharge).String()
-	if c.Percent != nil {
+	if c.Percent != nil && c.Base != nil {
 		p := c.Percent.StringWithoutSymbol()
 		ac.Percent = p
+		ac.Base = c.Base.Rescale(2).String()
 	}
 	return ac
 }
@@ -137,9 +138,10 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 		ac.Reason = d.Reason
 	}
 	ac.ReasonCode = d.Ext.Get(untdid.ExtKeyAllowance).String()
-	if d.Percent != nil {
+	if d.Percent != nil && d.Base != nil {
 		p := d.Percent.StringWithoutSymbol()
 		ac.Percent = p
+		ac.Base = d.Base.Rescale(2).String()
 	}
 	return ac
 }

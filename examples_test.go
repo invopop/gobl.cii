@@ -79,14 +79,15 @@ func TestConvertInvoice(t *testing.T) {
 					data, err := out.Bytes()
 					require.NoError(t, err)
 
+					err = cii.ValidateXML(data, format)
+					require.NoError(t, err)
+
 					if *updateOut {
 						// Create the output directory if it doesn't exist
 						outDir := filepath.Join(dataPath(), pathConvert, format, pathOut)
 						require.NoError(t, os.MkdirAll(outDir, 0755))
 
 						err = os.WriteFile(filepath.Join(outDir, outName), data, 0644)
-						require.NoError(t, err)
-						err = cii.ValidateXML(data, format)
 						require.NoError(t, err)
 					}
 

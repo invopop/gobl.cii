@@ -54,6 +54,9 @@
           <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">billing@example.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
         </ram:SpecifiedTaxRegistration>
@@ -71,6 +74,9 @@
           <ram:CityName>München</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>
         </ram:SpecifiedTaxRegistration>

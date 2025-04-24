@@ -44,7 +44,6 @@
           <ram:ChargeIndicator>
             <udt:Indicator>false</udt:Indicator>
           </ram:ChargeIndicator>
-          <ram:CalculationPercent>10</ram:CalculationPercent>
           <ram:ActualAmount>180.00</ram:ActualAmount>
           <ram:Reason>Special discount</ram:Reason>
         </ram:SpecifiedTradeAllowanceCharge>
@@ -58,6 +57,10 @@
       <ram:SellerTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
         <ram:DefinedTradeContact>
+          <ram:PersonName>Alvaro Garcia</ram:PersonName>
+          <ram:TelephoneUniversalCommunication>
+            <ram:CompleteNumber>+4915159990591</ram:CompleteNumber>
+          </ram:TelephoneUniversalCommunication>
           <ram:EmailURIUniversalCommunication>
             <ram:URIID>billing@example.com</ram:URIID>
           </ram:EmailURIUniversalCommunication>
@@ -68,6 +71,9 @@
           <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">billing@example.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
         </ram:SpecifiedTaxRegistration>
@@ -86,6 +92,9 @@
           <ram:CountryID>ES</ram:CountryID>
           <ram:CountrySubDivisionName>Madrid</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">billing@example.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">ESB98602642</ram:ID>
         </ram:SpecifiedTaxRegistration>

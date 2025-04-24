@@ -57,6 +57,7 @@ type LegalOrganization struct {
 // Contact defines the structure of the DefinedTradeContact of the CII standard
 type Contact struct {
 	PersonName string       `xml:"ram:PersonName,omitempty"`
+	Department string       `xml:"ram:DepartmentName,omitempty"`
 	Phone      *PhoneNumber `xml:"ram:TelephoneUniversalCommunication,omitempty"`
 	Email      *Email       `xml:"ram:EmailURIUniversalCommunication,omitempty"`
 }
@@ -115,7 +116,17 @@ func newParty(party *org.Party) *Party {
 			}
 		}
 	}
-	if len(party.Inboxes) > 0 {
+	if len(party.Emails) > 0 {
+		ib := party.Emails[0]
+		if ib.Address != "" {
+			p.URIUniversalCommunication = &URIUniversalCommunication{
+				ID: &PartyID{
+					Value:    ib.Address,
+					SchemeID: SchemeIDEmail,
+				},
+			}
+		}
+	} else if len(party.Inboxes) > 0 {
 		ib := party.Inboxes[0]
 		if ib.Email != "" {
 			p.URIUniversalCommunication = &URIUniversalCommunication{
@@ -162,6 +173,7 @@ func newContact(p *org.Party) *Contact {
 				URIID: pp.Emails[0].Address,
 			}
 		}
+		c.Department = pp.Role
 	}
 	if c.Phone == nil && len(p.Telephones) > 0 {
 		c.Phone = &PhoneNumber{
