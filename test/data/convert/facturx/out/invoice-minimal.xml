@@ -2,14 +2,14 @@
 <rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
   <rsm:ExchangedDocumentContext>
     <ram:GuidelineSpecifiedDocumentContextParameter>
-      <ram:ID>urn:cen.eu:en16931:2017</ram:ID>
+      <ram:ID>urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended</ram:ID>
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
     <ram:ID>SAMPLE-001</ram:ID>
-    <ram:TypeCode>389</ram:TypeCode>
+    <ram:TypeCode>380</ram:TypeCode>
     <ram:IssueDateTime>
-      <udt:DateTimeString format="102">20240213</udt:DateTimeString>
+      <udt:DateTimeString format="102">20240515</udt:DateTimeString>
     </ram:IssueDateTime>
   </rsm:ExchangedDocument>
   <rsm:SupplyChainTradeTransaction>
@@ -40,14 +40,10 @@
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:BuyerReference>XR-2024-2</ram:BuyerReference>
+      <ram:BuyerReference>N/A</ram:BuyerReference>
       <ram:SellerTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
         <ram:DefinedTradeContact>
-          <ram:PersonName>John Doe</ram:PersonName>
-          <ram:TelephoneUniversalCommunication>
-            <ram:CompleteNumber>+49100200300</ram:CompleteNumber>
-          </ram:TelephoneUniversalCommunication>
           <ram:EmailURIUniversalCommunication>
             <ram:URIID>billing@example.com</ram:URIID>
           </ram:EmailURIUniversalCommunication>
@@ -58,6 +54,9 @@
           <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">billing@example.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
         </ram:SpecifiedTaxRegistration>
@@ -75,6 +74,9 @@
           <ram:CityName>München</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>
         </ram:SpecifiedTaxRegistration>

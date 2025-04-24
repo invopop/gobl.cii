@@ -61,7 +61,13 @@ func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 	}
 	if inv.Ordering != nil {
 		if inv.Ordering.Seller != nil {
-			agmt.TaxRepresentative = agmt.Seller
+			agmt.TaxRepresentative = &Party{
+				ID:                       agmt.Seller.ID,
+				Name:                     agmt.Seller.Name,
+				PostalTradeAddress:       agmt.Seller.PostalTradeAddress,
+				SpecifiedTaxRegistration: agmt.Seller.SpecifiedTaxRegistration,
+			}
+
 			agmt.Seller = newParty(inv.Ordering.Seller)
 		}
 		if len(inv.Ordering.Contracts) > 0 {

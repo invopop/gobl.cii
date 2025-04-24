@@ -3,7 +3,9 @@ package cii
 import (
 	"errors"
 
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
@@ -20,7 +22,7 @@ type Settlement struct {
 	Tax                []*Tax                `xml:"ram:ApplicableTradeTax"`
 	Period             *Period               `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	AllowanceCharges   []*AllowanceCharge    `xml:"ram:SpecifiedTradeAllowanceCharge,omitempty"`
-	PaymentTerms       []*Terms              `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`
+	PaymentTerms       *Terms                `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`
 	Summary            *Summary              `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
 	ReferencedDocument []*ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
 	Advance            []*Advance            `xml:"ram:SpecifiedAdvancePayment,omitempty"`
@@ -28,10 +30,9 @@ type Settlement struct {
 
 // Terms defines the structure of SpecifiedTradePaymentTerms of the CII standard
 type Terms struct {
-	Description    string     `xml:"ram:Description,omitempty"`
-	DueDate        *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
-	Mandate        string     `xml:"ram:DirectDebitMandateID,omitempty"`
-	PartialPayment string     `xml:"ram:PartialPaymentAmount,omitempty"`
+	Description string     `xml:"ram:Description,omitempty"`
+	DueDate     *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
+	Mandate     string     `xml:"ram:DirectDebitMandateID,omitempty"`
 }
 
 // PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard
@@ -112,29 +113,19 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	if inv.Payment != nil && inv.Payment.Terms != nil {
 		description := inv.Payment.Terms.Detail
 		if len(inv.Payment.Terms.DueDates) == 0 {
-			stlm.PaymentTerms = []*Terms{
-				{
+			if description != "" {
+				stlm.PaymentTerms = &Terms{
 					Description: description,
-				},
+				}
 			}
 		} else {
-			for _, dueDate := range inv.Payment.Terms.DueDates {
-				term := &Terms{
-					Description: description,
-				}
-
-				if !dueDate.Amount.Equals(inv.Totals.Payable) {
-					term.PartialPayment = dueDate.Amount.Rescale(2).String()
-				}
-
-				if dueDate.Date != nil {
-					term.DueDate = &IssueDate{
-						DateFormat: documentDate(dueDate.Date),
-					}
-				}
-
-				stlm.PaymentTerms = append(stlm.PaymentTerms, term)
+			stlm.PaymentTerms = &Terms{
+				DueDate: &IssueDate{
+					DateFormat: documentDate(inv.Payment.Terms.DueDates[0].Date),
+				},
+				Description: inv.Payment.Terms.DueDates[0].Notes,
 			}
+
 		}
 
 	}
@@ -209,14 +200,8 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 			means = append(means, direct)
 
 			if stlm.PaymentTerms == nil {
-				stlm.PaymentTerms = []*Terms{
-					{
-						Mandate: instr.DirectDebit.Ref,
-					},
-				}
-			} else {
-				for _, term := range stlm.PaymentTerms {
-					term.Mandate = instr.DirectDebit.Ref
+				stlm.PaymentTerms = &Terms{
+					Mandate: instr.DirectDebit.Ref,
 				}
 			}
 
@@ -256,6 +241,9 @@ func newSummary(totals *bill.Totals, currency string) *Summary {
 			Currency: currency,
 		},
 	}
+	if totals.Due != nil {
+		s.DuePayableAmount = totals.Due.String()
+	}
 	if totals.Charge != nil {
 		s.Charges = totals.Charge.String()
 	}
@@ -283,17 +271,21 @@ func newTaxes(total *tax.Total) []*Tax {
 }
 
 func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
-	tax := &Tax{
+	cat := rate.Ext.Get(untdid.ExtKeyTaxCategory)
+	t := &Tax{
 		CalculatedAmount: rate.Amount.Rescale(2).String(),
 		TypeCode:         category.Code.String(),
 		BasisAmount:      rate.Base.String(),
-		CategoryCode:     rate.Ext[untdid.ExtKeyTaxCategory].String(),
+		CategoryCode:     cat.String(),
 	}
-
+	t.RateApplicablePercent = "0"
 	if rate.Percent != nil {
-		tax.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
+		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
 	}
-	return tax
+	if cat == en16931.TaxCategoryExempt {
+		t.ExemptionReasonCode = rate.Ext.Get(cef.ExtKeyVATEX).String()
+	}
+	return t
 }
 
 func newPayee(party *org.Party) *Party {

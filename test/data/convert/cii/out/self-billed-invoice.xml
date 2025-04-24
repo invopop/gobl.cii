@@ -7,9 +7,9 @@
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
     <ram:ID>SAMPLE-001</ram:ID>
-    <ram:TypeCode>380</ram:TypeCode>
+    <ram:TypeCode>389</ram:TypeCode>
     <ram:IssueDateTime>
-      <udt:DateTimeString format="102">20240515</udt:DateTimeString>
+      <udt:DateTimeString format="102">20240213</udt:DateTimeString>
     </ram:IssueDateTime>
   </rsm:ExchangedDocument>
   <rsm:SupplyChainTradeTransaction>
@@ -40,10 +40,14 @@
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:BuyerReference>N/A</ram:BuyerReference>
+      <ram:BuyerReference>XR-2024-2</ram:BuyerReference>
       <ram:SellerTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
         <ram:DefinedTradeContact>
+          <ram:PersonName>John Doe</ram:PersonName>
+          <ram:TelephoneUniversalCommunication>
+            <ram:CompleteNumber>+49100200300</ram:CompleteNumber>
+          </ram:TelephoneUniversalCommunication>
           <ram:EmailURIUniversalCommunication>
             <ram:URIID>billing@example.com</ram:URIID>
           </ram:EmailURIUniversalCommunication>
@@ -54,6 +58,9 @@
           <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">billing@example.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
         </ram:SpecifiedTaxRegistration>
@@ -71,6 +78,9 @@
           <ram:CityName>München</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>
         </ram:SpecifiedTaxRegistration>
@@ -86,6 +96,9 @@
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
+      <ram:SpecifiedTradePaymentTerms>
+        <ram:Description>lorem ipsum</ram:Description>
+      </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>1800.00</ram:TaxBasisTotalAmount>
