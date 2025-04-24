@@ -1,6 +1,7 @@
 package cii
 
 import (
+	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -64,7 +65,7 @@ func ValidateXML(xmlData []byte, format string) error {
 	}
 
 	// Finally run schematron validation
-	if err := validateWithSchematron(xmlData, filepath.Join(RootFolder(), schematronPath, format, styleFile)); err != nil {
+	if err := validateWithSchematron(xmlData, filepath.Join(RootFolder(), schematronPath, format)); err != nil {
 		return fmt.Errorf("schematron validation failed: %w", err)
 	}
 
@@ -105,18 +106,34 @@ func validateWithSchematron(xmlData []byte, stylesheetPath string) error {
 	tmpFile.Close()
 
 	// Run the schematron validation
-	cmd := exec.Command(filepath.Join(RootFolder(), transformPath),
+	cmd := exec.Command(
+		"docker",
+		"run",
+		"-v",
+		tmpFile.Name()+":"+tmpFile.Name(),
+		"-v",
+		stylesheetPath+":"+stylesheetPath, // Mount the stylesheet path and not the file as there may be extra files in the directory
+		"saxon",                           // TODO: update this when we publish the docker image
 		"-s:"+tmpFile.Name(),
-		"-xsl:"+stylesheetPath)
+		"-xsl:"+filepath.Join(stylesheetPath, styleFile),
+	)
 
-	output, err := cmd.Output()
+	var out bytes.Buffer
+	var errOut bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &errOut
+
+	// Execute the command
+	err = cmd.Run()
 	if err != nil {
+		// Handle errors, print stderr if available
+		fmt.Println("Stderr:", errOut.String())
 		return fmt.Errorf("running schematron validation: %w", err)
 	}
 
 	// Parse the validation results
 	var result SVRL
-	if err := xml.Unmarshal(output, &result); err != nil {
+	if err := xml.Unmarshal(out.Bytes(), &result); err != nil {
 		return fmt.Errorf("parsing schematron output: %w", err)
 	}
 
