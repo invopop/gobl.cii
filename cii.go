@@ -35,8 +35,8 @@ type Context struct {
 	Addons      []cbc.Key
 }
 
-// ContextEN16931 is used for EN 16931 documents, and is the default.
-var ContextEN16931 = Context{
+// ContextEN16931V2017 is used for EN 16931 documents, and is the default.
+var ContextEN16931V2017 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017",
 	Addons:      []cbc.Key{en16931.V2017},
 }
@@ -48,21 +48,21 @@ var ContextPeppolV3 = Context{
 	Addons:      []cbc.Key{en16931.V2017},
 }
 
-// ContextFacturX is used for Factur-X documents.
-var ContextFacturX = Context{
+// ContextFacturXV1 is used for Factur-X V1 documents.
+var ContextFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
 	Addons:      []cbc.Key{facturx.V1},
 }
 
-// ContextZUGFeRD is the context used for ZUGFeRD documents which is identical to
+// ContextZUGFeRDV2 is the context used for ZUGFeRD documents which is identical to
 // FacturX
-var ContextZUGFeRD = Context{
+var ContextZUGFeRDV2 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
 	Addons:      []cbc.Key{zugferd.V2},
 }
 
-// ContextXRechnung is used for XRechnung documents
-var ContextXRechnung = Context{
+// ContextXRechnungV3 is used for XRechnung documents
+var ContextXRechnungV3 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Addons:      []cbc.Key{xrechnung.V3},
@@ -86,7 +86,7 @@ func ParseInvoice(data []byte) (*gobl.Envelope, error) {
 // ready to be serialized into an XML data object.
 func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 	o := &options{
-		context: ContextEN16931,
+		context: ContextEN16931V2017,
 	}
 	for _, opt := range opts {
 		opt(o)
