@@ -79,7 +79,7 @@ func TestParseInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			// Convert CII XML to GOBL
-			env, err := cii.ParseInvoice(xmlData)
+			env, err := cii.Parse(xmlData)
 			require.NoError(t, err)
 
 			env.Head.UUID = staticUUID
@@ -140,7 +140,7 @@ func parseInvoiceFrom(t *testing.T, name string) (*gobl.Envelope, error) {
 	if err != nil {
 		require.NoError(t, err)
 	}
-	return cii.ParseInvoice(data)
+	return cii.Parse(data)
 }
 
 // loadEnvelope returns a GOBL Envelope from a file in the `test/data/convert` folder
