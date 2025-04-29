@@ -72,7 +72,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		// Assume XML if not JSON
-		env, err := cii.ParseInvoice(inData)
+		env, err := cii.Parse(inData)
 		if err != nil {
 			return fmt.Errorf("converting CII to GOBL: %w", err)
 		}

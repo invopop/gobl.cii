@@ -79,7 +79,7 @@ func main() {
 		panic(err)
 	}
 
-    env, err := cii.ParseInvoice(data)
+    env, err := cii.Parse(data)
     if err != nil {
         panic(err)
     }
@@ -111,7 +111,9 @@ gobl.cii convert ./test/data/invoice-sample.json
 ```
 
 ## Testing
+
 ### testify
+
 The library uses testify for testing. To run the tests, you can use the following command:
 
 ```bash
