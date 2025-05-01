@@ -278,7 +278,11 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 		BasisAmount:      rate.Base.String(),
 		CategoryCode:     cat.String(),
 	}
-	t.RateApplicablePercent = "0"
+
+	// TODO: add BR-E-5 explanation
+	if category.Code == tax.CategoryVAT {
+		t.RateApplicablePercent = "0"
+	}
 	if rate.Percent != nil {
 		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
 	}
@@ -289,17 +293,16 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 }
 
 func newPayee(party *org.Party) *Party {
+	// Reflects rules from CII-SR-352 to 364 and CII-SR-364
+	// These rules are warnings but have been added as they produce cleaner invoices
+	p := newParty(party)
 	payee := &Party{
-		Name:                      party.Name,
-		Contact:                   newContact(party),
-		PostalTradeAddress:        newPostalTradeAddress(party.Addresses),
-		URIUniversalCommunication: newEmail(party.Emails),
+		Name: p.Name,
+		ID:   p.ID,
 	}
 
-	if party.TaxID != nil {
-		payee.ID = &PartyID{
-			Value: party.TaxID.String(),
-		}
+	if payee.ID != nil {
+		payee.GlobalID = p.GlobalID
 	}
 
 	return payee

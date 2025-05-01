@@ -57,9 +57,6 @@
           <ram:CountryID>DE</ram:CountryID>
           <ram:CountrySubDivisionName>Nordrhein-Westfalen</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
-        <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">juan.moliner@invopop.com</ram:URIID>
-        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
         </ram:SpecifiedTaxRegistration>

@@ -18,6 +18,7 @@
         <ram:LineID>1</ram:LineID>
       </ram:AssociatedDocumentLineDocument>
       <ram:SpecifiedTradeProduct>
+        <ram:GlobalID schemeID="0088">123456789</ram:GlobalID>
         <ram:Name>Development services</ram:Name>
       </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
@@ -34,52 +35,41 @@
           <ram:CategoryCode>S</ram:CategoryCode>
           <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
-        <ram:SpecifiedTradeAllowanceCharge>
-          <ram:ChargeIndicator>
-            <udt:Indicator>true</udt:Indicator>
-          </ram:ChargeIndicator>
-          <ram:ActualAmount>12.00</ram:ActualAmount>
-          <ram:Reason>Testing</ram:Reason>
-        </ram:SpecifiedTradeAllowanceCharge>
-        <ram:SpecifiedTradeAllowanceCharge>
-          <ram:ChargeIndicator>
-            <udt:Indicator>false</udt:Indicator>
-          </ram:ChargeIndicator>
-          <ram:ActualAmount>12.00</ram:ActualAmount>
-          <ram:Reason>Damage</ram:Reason>
-        </ram:SpecifiedTradeAllowanceCharge>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
           <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
         </ram:SpecifiedTradeSettlementLineMonetarySummation>
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:BuyerReference>XR-2024-3</ram:BuyerReference>
+      <ram:BuyerReference>XR-2024-2</ram:BuyerReference>
       <ram:SellerTradeParty>
-        <ram:Name>Provide One GmbH</ram:Name>
+        <ram:Name>Salescompany ltd.</ram:Name>
         <ram:DefinedTradeContact>
-          <ram:PersonName>John Doe</ram:PersonName>
+          <ram:PersonName>Antonio Salesmacher</ram:PersonName>
           <ram:TelephoneUniversalCommunication>
-            <ram:CompleteNumber>+49100200300</ram:CompleteNumber>
+            <ram:CompleteNumber>46211230</ram:CompleteNumber>
           </ram:TelephoneUniversalCommunication>
           <ram:EmailURIUniversalCommunication>
-            <ram:URIID>billing@example.com</ram:URIID>
+            <ram:URIID>antonio@salescompany.no</ram:URIID>
           </ram:EmailURIUniversalCommunication>
         </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
-          <ram:PostcodeCode>69190</ram:PostcodeCode>
-          <ram:LineOne>Dietmar-Hopp-Allee 16</ram:LineOne>
-          <ram:CityName>Walldorf</ram:CityName>
-          <ram:CountryID>DE</ram:CountryID>
+          <ram:PostcodeCode>303</ram:PostcodeCode>
+          <ram:LineOne>Main street 34</ram:LineOne>
+          <ram:LineTwo>Suite 123</ram:LineTwo>
+          <ram:CityName>Big city</ram:CityName>
+          <ram:CountryID>NO</ram:CountryID>
+          <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">billing@example.com</ram:URIID>
+          <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
-          <ram:ID schemeID="VA">DE111111125</ram:ID>
+          <ram:ID schemeID="VA">NO123456789MVA</ram:ID>
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
+        <ram:GlobalID schemeID="0088">123456789</ram:GlobalID>
         <ram:Name>Sample Consumer</ram:Name>
         <ram:DefinedTradeContact>
           <ram:EmailURIUniversalCommunication>
@@ -93,9 +83,24 @@
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
+          <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
         </ram:URIUniversalCommunication>
+        <ram:SpecifiedTaxRegistration>
+          <ram:ID schemeID="VA">DE282741168</ram:ID>
+        </ram:SpecifiedTaxRegistration>
       </ram:BuyerTradeParty>
+      <ram:SellerTaxRepresentativeTradeParty>
+        <ram:Name>Provide One GmbH</ram:Name>
+        <ram:PostalTradeAddress>
+          <ram:PostcodeCode>69190</ram:PostcodeCode>
+          <ram:LineOne>Dietmar-Hopp-Allee 16</ram:LineOne>
+          <ram:CityName>Walldorf</ram:CityName>
+          <ram:CountryID>DE</ram:CountryID>
+        </ram:PostalTradeAddress>
+        <ram:SpecifiedTaxRegistration>
+          <ram:ID schemeID="VA">DE111111125</ram:ID>
+        </ram:SpecifiedTaxRegistration>
+      </ram:SellerTaxRepresentativeTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
@@ -108,7 +113,9 @@
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradePaymentTerms>
-        <ram:Description>lorem ipsum</ram:Description>
+        <ram:DueDateDateTime>
+          <udt:DateTimeString format="102">20240227</udt:DateTimeString>
+        </ram:DueDateDateTime>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>

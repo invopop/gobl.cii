@@ -3,24 +3,13 @@ package cii
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/lestrrat-go/libxml2"
 	"github.com/lestrrat-go/libxml2/xsd"
-)
-
-const (
-	schemaPath     = "test/tools/schema"
-	schematronPath = "test/tools/schematron"
-	transformPath  = "test/tools/saxon/transform"
-
-	schemaFile = "schema.xsd"
-	styleFile  = "stylesheet.xslt"
 )
 
 // FailedAssert represents a failed assertion from schematron validation
@@ -28,7 +17,7 @@ type FailedAssert struct {
 	ID       string `xml:"id,attr"`
 	Text     string `xml:"text"`
 	Role     string `xml:"role,attr"`
-	Flag     string `xml:"flag,attr"`
+	Flag     flag   `xml:"flag,attr"`
 	Location string `xml:"location,attr"`
 }
 
@@ -38,41 +27,20 @@ type SVRL struct {
 	FailedAsserts []FailedAssert `xml:"http://purl.oclc.org/dsdl/svrl failed-assert"`
 }
 
-// ValidateXML validates an XML document against the specified format's rules
-func ValidateXML(xmlData []byte, format string) error {
+type flag string
 
-	// First validate against base CII schema
-	if format != "cii" {
-		baseSchema, err := xsd.ParseFromFile(filepath.Join(RootFolder(), schemaPath, "cii", schemaFile))
-		if err != nil {
-			return fmt.Errorf("loading base CII schema: %w", err)
-		}
-		if err := validateAgainstSchema(baseSchema, xmlData); err != nil {
-			return fmt.Errorf("base CII validation failed: %w", err)
-		}
+const (
+	flagFatal      flag   = "fatal"
+	imageName      string = "saxon"
+	dockerfilePath string = "/tools/saxon"
+)
+
+// ValidateAgainstSchema validates an XML document against the specified schema
+func ValidateAgainstSchema(data []byte, schemaPath string) error {
+	schema, err := xsd.ParseFromFile(schemaPath)
+	if err != nil {
+		return fmt.Errorf("loading format schema: %w", err)
 	}
-
-	// Then validate against format-specific schema if the schema exists
-	path := filepath.Join(RootFolder(), schemaPath, format, schemaFile)
-	if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
-		formatSchema, err := xsd.ParseFromFile(path)
-		if err != nil {
-			return fmt.Errorf("loading format schema: %w", err)
-		}
-		if err := validateAgainstSchema(formatSchema, xmlData); err != nil {
-			return fmt.Errorf("format-specific validation failed: %w", err)
-		}
-	}
-
-	// Finally run schematron validation
-	if err := validateWithSchematron(xmlData, filepath.Join(RootFolder(), schematronPath, format)); err != nil {
-		return fmt.Errorf("schematron validation failed: %w", err)
-	}
-
-	return nil
-}
-
-func validateAgainstSchema(schema *xsd.Schema, data []byte) error {
 	xmlDoc, err := libxml2.Parse(data)
 	if err != nil {
 		return err
@@ -92,7 +60,8 @@ func validateAgainstSchema(schema *xsd.Schema, data []byte) error {
 	return nil
 }
 
-func validateWithSchematron(xmlData []byte, stylesheetPath string) error {
+// ValidateWithSchematron validates an XML document against the specified stylesheet
+func ValidateWithSchematron(xmlData []byte, stylesheetPath string) error {
 	// Create a temporary file for the XML data
 	tmpFile, err := os.CreateTemp("", "validation-*.xml")
 	if err != nil {
@@ -105,6 +74,11 @@ func validateWithSchematron(xmlData []byte, stylesheetPath string) error {
 	}
 	tmpFile.Close()
 
+	// Build the Saxon Docker image if it doesn't exist
+	if err := buildSaxon(); err != nil {
+		return err
+	}
+
 	// Run the schematron validation
 	cmd := exec.Command(
 		"docker",
@@ -113,9 +87,9 @@ func validateWithSchematron(xmlData []byte, stylesheetPath string) error {
 		tmpFile.Name()+":"+tmpFile.Name(),
 		"-v",
 		stylesheetPath+":"+stylesheetPath, // Mount the stylesheet path and not the file as there may be extra files in the directory
-		"saxon",                           // TODO: update this when we publish the docker image
+		imageName,
 		"-s:"+tmpFile.Name(),
-		"-xsl:"+filepath.Join(stylesheetPath, styleFile),
+		"-xsl:"+stylesheetPath,
 	)
 
 	var out bytes.Buffer
@@ -141,9 +115,46 @@ func validateWithSchematron(xmlData []byte, stylesheetPath string) error {
 	if len(result.FailedAsserts) > 0 {
 		var errors []string
 		for _, assert := range result.FailedAsserts {
-			errors = append(errors, fmt.Sprintf("%s: %s (location: %s)", assert.ID, assert.Text, assert.Location))
+			if assert.Flag == flagFatal {
+				errors = append(errors, fmt.Sprintf("%s: %s (location: %s)", assert.ID, assert.Text, assert.Location))
+			}
 		}
 		return fmt.Errorf("schematron validation failed:\n%s", strings.Join(errors, "\n"))
+	}
+
+	return nil
+}
+
+func buildSaxon() error {
+	// Check if the Saxon Docker image already exists
+	cmd := exec.Command("docker", "images", "-q", imageName)
+	output, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("checking for Saxon image: %w", err)
+	}
+
+	// If the image already exists, no need to build it
+	if len(output) > 0 {
+		return nil
+	}
+
+	// Get the path to the Dockerfile
+	dockerfilePath := RootFolder() + "/tools/saxon"
+
+	// Build the Docker image
+	buildCmd := exec.Command(
+		"docker",
+		"build",
+		"-t",
+		imageName,
+		dockerfilePath,
+	)
+
+	var stderr bytes.Buffer
+	buildCmd.Stderr = &stderr
+
+	if err := buildCmd.Run(); err != nil {
+		return fmt.Errorf("building Saxon Docker image: %w, stderr: %s", err, stderr.String())
 	}
 
 	return nil

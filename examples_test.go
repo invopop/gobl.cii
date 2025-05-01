@@ -3,7 +3,9 @@ package cii_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -29,73 +31,66 @@ const (
 	staticUUID uuid.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 )
 
+const (
+	schemaPath     = "tools/schema"
+	schematronPath = "tools/schematron"
+
+	schemaFile    = "schema.xsd"
+	styleFile     = "stylesheet.xslt"
+	defaultFormat = "en16931"
+)
+
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
-func TestConvertInvoice(t *testing.T) {
-	convertPath := filepath.Join(dataPath(), pathConvert)
+func TestConvertFacturXInvoice(t *testing.T) {
+	testConvertInvoiceFormat(t, "facturx", cii.ContextFacturX)
+}
 
-	// Get all folders inside convert
-	folders, err := os.ReadDir(convertPath)
-	require.NoError(t, err)
+func TestConvertXRechnungInvoice(t *testing.T) {
+	testConvertInvoiceFormat(t, "xrechnung", cii.ContextXRechnung)
+}
 
-	for _, folder := range folders {
-		if !folder.IsDir() {
-			continue
-		}
+func TestConvertPeppolInvoice(t *testing.T) {
+	testConvertInvoiceFormat(t, "peppol", cii.ContextPeppolV3)
+}
 
-		format := folder.Name()
-		var ctx cii.Context
+func TestConvertEN16931Invoice(t *testing.T) {
+	testConvertInvoiceFormat(t, "en16931", cii.ContextEN16931)
+}
 
-		// Set the context based on the folder name
-		switch format {
-		case "facturx":
-			ctx = cii.ContextFacturX
-		case "xrechnung":
-			ctx = cii.ContextXRechnung
-		case "peppol":
-			ctx = cii.ContextPeppolV3
-		case "cii":
-			ctx = cii.ContextEN16931
-		default:
-			t.Logf("Skipping unknown format folder: %s", format)
-			continue
-		}
+func testConvertInvoiceFormat(t *testing.T, folder string, ctx cii.Context) {
+	// Find all JSON files in this format's folder
+	examples := findSourceFiles(t, filepath.Join(pathConvert, folder), pathPatternJSON)
 
-		t.Run(format, func(t *testing.T) {
-			// Find all JSON files in this format's folder
-			examples := findSourceFiles(t, filepath.Join(pathConvert, format), pathPatternJSON)
+	for _, example := range examples {
+		inName := filepath.Base(example)
+		outName := strings.Replace(inName, ".json", ".xml", 1)
 
-			for _, example := range examples {
-				inName := filepath.Base(example)
-				outName := strings.Replace(inName, ".json", ".xml", 1)
+		t.Run(inName, func(t *testing.T) {
+			// Load and convert using the format-specific context
+			env := loadEnvelope(t, filepath.Join(folder, inName))
+			out, err := cii.ConvertInvoice(env, cii.WithContext(ctx))
+			require.NoError(t, err)
 
-				t.Run(inName, func(t *testing.T) {
-					// Load and convert using the format-specific context
-					env := loadEnvelope(t, filepath.Join(format, inName))
-					out, err := cii.ConvertInvoice(env, cii.WithContext(ctx))
-					require.NoError(t, err)
+			data, err := out.Bytes()
+			require.NoError(t, err)
 
-					data, err := out.Bytes()
-					require.NoError(t, err)
+			err = validateXML(data, folder)
+			require.NoError(t, err)
 
-					err = cii.ValidateXML(data, format)
-					require.NoError(t, err)
+			if *updateOut {
+				// Create the output directory if it doesn't exist
+				outDir := filepath.Join(dataPath(), pathConvert, folder, pathOut)
+				require.NoError(t, os.MkdirAll(outDir, 0755))
 
-					if *updateOut {
-						// Create the output directory if it doesn't exist
-						outDir := filepath.Join(dataPath(), pathConvert, format, pathOut)
-						require.NoError(t, os.MkdirAll(outDir, 0755))
-
-						err = os.WriteFile(filepath.Join(outDir, outName), data, 0644)
-						require.NoError(t, err)
-					}
-
-					// Load the expected output
-					output := loadOutputFile(t, filepath.Join(pathConvert, format), outName)
-					assert.Equal(t, string(output), string(data), "Output should match the expected XML. Update with --update flag.")
-				})
+				err = os.WriteFile(filepath.Join(outDir, outName), data, 0644)
+				require.NoError(t, err)
 			}
+
+			// Load the expected output
+			output := loadOutputFile(t, filepath.Join(pathConvert, folder), outName)
+			assert.Equal(t, string(output), string(data), "Output should match the expected XML. Update with --update flag.")
 		})
 	}
 }
@@ -241,4 +236,30 @@ func findSourceFiles(t *testing.T, path, pattern string) []string {
 func dataPath(files ...string) string {
 	files = append([]string{cii.RootFolder(), "test", "data"}, files...)
 	return filepath.Join(files...)
+}
+
+// ValidateXML validates an XML document against the specified format's rules
+func validateXML(xmlData []byte, format string) error {
+
+	// First validate against base EN16931 schema
+	if format != defaultFormat {
+		if err := cii.ValidateAgainstSchema(xmlData, filepath.Join(cii.RootFolder(), schemaPath, defaultFormat, schemaFile)); err != nil {
+			return fmt.Errorf("base EN16931 validation failed: %w", err)
+		}
+	}
+
+	// Then validate against format-specific schema if the schema exist
+	schemaPath := filepath.Join(cii.RootFolder(), schemaPath, format, schemaFile)
+	if _, err := os.Stat(schemaPath); !errors.Is(err, os.ErrNotExist) {
+		if err := cii.ValidateAgainstSchema(xmlData, schemaPath); err != nil {
+			return fmt.Errorf("format-specific validation failed: %w", err)
+		}
+	}
+
+	// Finally run schematron validation
+	if err := cii.ValidateWithSchematron(xmlData, filepath.Join(cii.RootFolder(), schematronPath, format, styleFile)); err != nil {
+		return fmt.Errorf("schematron validation failed: %w", err)
+	}
+
+	return nil
 }

@@ -62,7 +62,7 @@
           <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">antonio@salescompany.no</ram:URIID>
+          <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">NO123456789MVA</ram:ID>
@@ -83,7 +83,7 @@
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
+          <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>

@@ -72,6 +72,9 @@ type Email struct {
 	URIID string `xml:"ram:URIID,omitempty"`
 }
 
+// SchemeIDEmail represents the Scheme ID for email addresses
+const SchemeIDEmail = "EM"
+
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
 func newParty(party *org.Party) *Party {
 	if party == nil {
@@ -116,34 +119,8 @@ func newParty(party *org.Party) *Party {
 			}
 		}
 	}
-	if len(party.Emails) > 0 {
-		ib := party.Emails[0]
-		if ib.Address != "" {
-			p.URIUniversalCommunication = &URIUniversalCommunication{
-				ID: &PartyID{
-					Value:    ib.Address,
-					SchemeID: SchemeIDEmail,
-				},
-			}
-		}
-	} else if len(party.Inboxes) > 0 {
-		ib := party.Inboxes[0]
-		if ib.Email != "" {
-			p.URIUniversalCommunication = &URIUniversalCommunication{
-				ID: &PartyID{
-					Value:    ib.Email,
-					SchemeID: SchemeIDEmail,
-				},
-			}
-		} else {
-			p.URIUniversalCommunication = &URIUniversalCommunication{
-				ID: &PartyID{
-					Value:    ib.Code.String(),
-					SchemeID: ib.Scheme.String(),
-				},
-			}
-		}
-	}
+
+	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
 	return p
 }
 
@@ -205,4 +182,26 @@ func contactName(p *org.Name) string {
 		return g
 	}
 	return fmt.Sprintf("%s %s", g, s)
+}
+
+func newURIUniversalCommunication(inboxes []*org.Inbox) *URIUniversalCommunication {
+	if len(inboxes) == 0 {
+		return nil
+	}
+	ib := inboxes[0]
+	if ib.Email != "" {
+		return &URIUniversalCommunication{
+			ID: &PartyID{
+				Value:    ib.Email,
+				SchemeID: SchemeIDEmail,
+			},
+		}
+	} else {
+		return &URIUniversalCommunication{
+			ID: &PartyID{
+				Value:    ib.Code.String(),
+				SchemeID: ib.Scheme.String(),
+			},
+		}
+	}
 }

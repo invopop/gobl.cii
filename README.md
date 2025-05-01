@@ -117,6 +117,7 @@ The library uses testify for testing. To run the tests, you can use the followin
 ```bash
 go test
 ```
+For testing you need to install docker as we run Saxon in a container.
 
 ## Considerations
 
