@@ -156,7 +156,6 @@
         <ram:ChargeIndicator>
           <udt:Indicator>true</udt:Indicator>
         </ram:ChargeIndicator>
-        <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:ActualAmount>11.00</ram:ActualAmount>
         <ram:Reason>Freight</ram:Reason>
         <ram:CategoryTradeTax>
@@ -169,7 +168,6 @@
         <ram:ChargeIndicator>
           <udt:Indicator>false</udt:Indicator>
         </ram:ChargeIndicator>
-        <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:ActualAmount>10.00</ram:ActualAmount>
         <ram:ReasonCode>88</ram:ReasonCode>
         <ram:Reason>Promotion discount</ram:Reason>

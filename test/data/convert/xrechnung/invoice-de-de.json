@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "00bb2b55b949c3f5ef5ccaf766a9687bbae9a80e8e3318670cb6139c9d4eea7b"
+			"val": "b3b2f4decab1f69c49803bb73d50ca7a032e66df8d18a66a7cf27e9a221e330e"
 		}
 	},
 	"doc": {
@@ -31,12 +31,6 @@
 				"country": "DE",
 				"code": "111111125"
 			},
-			"inboxes": [
-				{
-					"scheme": "VA",
-					"code": "DE111111125"
-				}
-			],
 			"people": [
 				{
 					"name": {
@@ -49,6 +43,12 @@
 							"num": "+4915159990591"
 						}
 					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "VA",
+					"code": "DE111111125"
 				}
 			],
 			"addresses": [

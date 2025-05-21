@@ -77,8 +77,6 @@ func testConvertInvoiceFormat(t *testing.T, folder string, ctx cii.Context) {
 			data, err := out.Bytes()
 			require.NoError(t, err)
 
-			fmt.Println(string(data))
-
 			err = validateXML(data, folder)
 			require.NoError(t, err)
 
@@ -176,6 +174,7 @@ func parseInvoiceFrom(t *testing.T, name string) (*gobl.Envelope, error) {
 }
 
 // loadEnvelope returns a GOBL Envelope from a file in the `test/data/convert` folder
+// TODO: edit this function to accept a context
 func loadEnvelope(t *testing.T, name string) *gobl.Envelope {
 	t.Helper()
 	path := dataPath(pathConvert, name)
