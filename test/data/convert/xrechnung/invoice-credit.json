@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "850af1e5ceb4ee86fcd08e13214f16a58a89af2079752f8eb70392735e90d0b8"
+			"val": "fa7af0d11be0f02a5234750d9c8e3b0e1d177a6cbd4635159274b80eb2debe37"
 		}
 	},
 	"doc": {
@@ -50,6 +50,12 @@
 					]
 				}
 			],
+			"inboxes": [
+				{
+					"scheme": "9920",
+					"code": "ESB85905495"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Maarweg 167",
@@ -77,6 +83,12 @@
 						"given": "IT",
 						"surname": "Team"
 					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "9920",
+					"code": "ESB85905495"
 				}
 			],
 			"addresses": [

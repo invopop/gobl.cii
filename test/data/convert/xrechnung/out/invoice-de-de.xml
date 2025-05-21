@@ -70,7 +70,7 @@
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">billing@example.com</ram:URIID>
+          <ram:URIID schemeID="VA">DE111111125</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
@@ -79,6 +79,7 @@
       <ram:BuyerTradeParty>
         <ram:Name>Sample Consumer</ram:Name>
         <ram:DefinedTradeContact>
+          <ram:PersonName>John Doe</ram:PersonName>
           <ram:EmailURIUniversalCommunication>
             <ram:URIID>email@sample.com</ram:URIID>
           </ram:EmailURIUniversalCommunication>
@@ -90,7 +91,7 @@
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">email@sample.com</ram:URIID>
+          <ram:URIID schemeID="VA">DE282741168</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>
@@ -103,7 +104,7 @@
       <ram:SpecifiedTradeSettlementPaymentMeans>
         <ram:TypeCode>58</ram:TypeCode>
         <ram:PayeePartyCreditorFinancialAccount>
-          <ram:IBANID>DE89370400440532013000</ram:IBANID>
+          <ram:IBANID>AE040192342142341231432</ram:IBANID>
           <ram:AccountName>Random Bank Co.</ram:AccountName>
         </ram:PayeePartyCreditorFinancialAccount>
       </ram:SpecifiedTradeSettlementPaymentMeans>

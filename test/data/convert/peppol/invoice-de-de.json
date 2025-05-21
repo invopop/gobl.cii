@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2617bca9f43ca96bf5827a678582a64055acfc05241e29a2af561fac6f8dae6b"
+			"val": "c6c1059a345885eb7c58ed4087eed25fffbf6249b08016645aa5a603916b5844"
 		}
 	},
 	"doc": {
@@ -16,7 +16,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "SAMPLE",
-		"code": "001",
+		"code": "003",
 		"issue_date": "2024-02-13",
 		"currency": "EUR",
 		"tax": {
@@ -40,8 +40,9 @@
 			],
 			"inboxes": [
 				{
-					"scheme": "0007",
-					"code": "111111125"
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "ESB85905495"
 				}
 			],
 			"addresses": [
@@ -74,13 +75,15 @@
 				{
 					"code": "123456789",
 					"ext": {
-						"iso-scheme-id": "0088"
+						"iso-scheme-id": "0042"
 					}
 				}
 			],
 			"inboxes": [
 				{
-					"email": "inbox@example.com"
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "X3157928M"
 				}
 			],
 			"addresses": [
@@ -108,7 +111,7 @@
 						{
 							"code": "123456789",
 							"ext": {
-								"iso-scheme-id": "0088"
+								"iso-scheme-id": "0042"
 							}
 						}
 					],
@@ -138,16 +141,6 @@
 					"code": "123456789MVA",
 					"scheme": "VAT"
 				},
-				"identities": [
-					{
-						"label": "CompanyID",
-						"code": "123456789"
-					},
-					{
-						"label": "0088",
-						"code": "1238764941386"
-					}
-				],
 				"people": [
 					{
 						"name": {
@@ -157,7 +150,9 @@
 				],
 				"inboxes": [
 					{
-						"email": "inbox@example.com"
+						"key": "peppol",
+						"scheme": "9920",
+						"code": "X3157928M"
 					}
 				],
 				"addresses": [

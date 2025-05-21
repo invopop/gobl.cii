@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/lestrrat-go/libxml2"
@@ -30,9 +31,7 @@ type SVRL struct {
 type flag string
 
 const (
-	flagFatal      flag   = "fatal"
-	imageName      string = "saxon"
-	dockerfilePath string = "/tools/saxon"
+	flagFatal flag = "fatal"
 )
 
 // ValidateAgainstSchema validates an XML document against the specified schema
@@ -74,23 +73,18 @@ func ValidateWithSchematron(xmlData []byte, stylesheetPath string) error {
 	}
 	tmpFile.Close()
 
-	// Build the Saxon Docker image if it doesn't exist
-	if err := buildSaxon(); err != nil {
-		return err
-	}
+	// Get the directory containing the stylesheet
+	stylesheetDir := filepath.Dir(stylesheetPath)
 
-	// Run the schematron validation
+	// Run the schematron validation using xslt3
 	cmd := exec.Command(
-		"docker",
-		"run",
-		"-v",
-		tmpFile.Name()+":"+tmpFile.Name(),
-		"-v",
-		stylesheetPath+":"+stylesheetPath, // Mount the stylesheet path and not the file as there may be extra files in the directory
-		imageName,
+		"xslt3",
 		"-s:"+tmpFile.Name(),
 		"-xsl:"+stylesheetPath,
 	)
+
+	// Set the working directory to the stylesheet directory so relative paths work
+	cmd.Dir = stylesheetDir
 
 	var out bytes.Buffer
 	var errOut bytes.Buffer
@@ -119,42 +113,9 @@ func ValidateWithSchematron(xmlData []byte, stylesheetPath string) error {
 				errors = append(errors, fmt.Sprintf("%s: %s (location: %s)", assert.ID, assert.Text, assert.Location))
 			}
 		}
-		return fmt.Errorf("schematron validation failed:\n%s", strings.Join(errors, "\n"))
-	}
-
-	return nil
-}
-
-func buildSaxon() error {
-	// Check if the Saxon Docker image already exists
-	cmd := exec.Command("docker", "images", "-q", imageName)
-	output, err := cmd.Output()
-	if err != nil {
-		return fmt.Errorf("checking for Saxon image: %w", err)
-	}
-
-	// If the image already exists, no need to build it
-	if len(output) > 0 {
-		return nil
-	}
-
-	// Get the path to the Dockerfile
-	dockerfilePath := RootFolder() + "/tools/saxon"
-
-	// Build the Docker image
-	buildCmd := exec.Command(
-		"docker",
-		"build",
-		"-t",
-		imageName,
-		dockerfilePath,
-	)
-
-	var stderr bytes.Buffer
-	buildCmd.Stderr = &stderr
-
-	if err := buildCmd.Run(); err != nil {
-		return fmt.Errorf("building Saxon Docker image: %w, stderr: %s", err, stderr.String())
+		if len(errors) > 0 {
+			return fmt.Errorf("schematron validation failed:\n%s", strings.Join(errors, "\n"))
+		}
 	}
 
 	return nil

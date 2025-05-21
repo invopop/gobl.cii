@@ -64,7 +64,7 @@
           <ram:CountrySubDivisionName>NRW</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">billing@random.com</ram:URIID>
+          <ram:URIID schemeID="9920">ESB85905495</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE111111125</ram:ID>
@@ -85,7 +85,7 @@
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">rechnung@random.com</ram:URIID>
+          <ram:URIID schemeID="9920">ESB85905495</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE269642919</ram:ID>
@@ -110,9 +110,6 @@
           <ram:CityName>Stuttgart</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
-        <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">rechnung@random.com</ram:URIID>
-        </ram:URIUniversalCommunication>
       </ram:ShipToTradeParty>
     </ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>

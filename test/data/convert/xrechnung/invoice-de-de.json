@@ -31,6 +31,12 @@
 				"country": "DE",
 				"code": "111111125"
 			},
+			"inboxes": [
+				{
+					"scheme": "VA",
+					"code": "DE111111125"
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -66,6 +72,20 @@
 				"country": "DE",
 				"code": "282741168"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "John",
+						"surname": "Doe"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "VA",
+					"code": "DE282741168"
+				}
+			],
 			"addresses": [
 				{
 					"num": "25",
@@ -116,7 +136,7 @@
 				"key": "credit-transfer+sepa",
 				"credit_transfer": [
 					{
-						"iban": "DE89370400440532013000",
+						"iban": "AE040192342142341231432",
 						"name": "Random Bank Co."
 					}
 				],

@@ -31,7 +31,7 @@ func (c *convertOpts) cmd() *cobra.Command {
 
 	cmd.Flags().StringVar(&c.context, "context", "en16931", "Output format (en16931, facturx, xrechnung, peppol)")
 	cmd.Flags().StringVar(&c.schemaPath, "schema", "", "Path to the schema file")
-	cmd.Flags().StringVar(&c.schematronPath, "schematron", "", "Path to the schematron file")
+	cmd.Flags().StringVar(&c.schematronPath, "schematron", "", "Path to the schematron file (xslt or sef)")
 
 	return cmd
 }

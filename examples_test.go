@@ -34,9 +34,10 @@ const (
 const (
 	schemaPath     = "tools/schema"
 	schematronPath = "tools/schematron"
+	compiledPath   = "compiled"
 
 	schemaFile    = "schema.xsd"
-	styleFile     = "stylesheet.xslt"
+	styleFile     = "stylesheet.sef"
 	defaultFormat = "en16931"
 )
 
@@ -75,6 +76,8 @@ func testConvertInvoiceFormat(t *testing.T, folder string, ctx cii.Context) {
 
 			data, err := out.Bytes()
 			require.NoError(t, err)
+
+			fmt.Println(string(data))
 
 			err = validateXML(data, folder)
 			require.NoError(t, err)
@@ -240,7 +243,6 @@ func dataPath(files ...string) string {
 
 // ValidateXML validates an XML document against the specified format's rules
 func validateXML(xmlData []byte, format string) error {
-
 	// First validate against base EN16931 schema
 	if format != defaultFormat {
 		if err := cii.ValidateAgainstSchema(xmlData, filepath.Join(cii.RootFolder(), schemaPath, defaultFormat, schemaFile)); err != nil {
@@ -257,7 +259,7 @@ func validateXML(xmlData []byte, format string) error {
 	}
 
 	// Finally run schematron validation
-	if err := cii.ValidateWithSchematron(xmlData, filepath.Join(cii.RootFolder(), schematronPath, format, styleFile)); err != nil {
+	if err := cii.ValidateWithSchematron(xmlData, filepath.Join(cii.RootFolder(), schematronPath, format, compiledPath, styleFile)); err != nil {
 		return fmt.Errorf("schematron validation failed: %w", err)
 	}
 

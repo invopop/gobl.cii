@@ -84,6 +84,7 @@
           <ram:PostcodeCode>80939</ram:PostcodeCode>
           <ram:LineOne>Werner-Heisenberg-Allee 25</ram:LineOne>
           <ram:CityName>München</ram:CityName>
+          <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>

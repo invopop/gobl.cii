@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "856e5bb9e8a7d41549cd93eb36014eca6f8be5002f167c764077b13d60661d87"
+			"val": "2c696cde182934dcfb145d61bb15bdcbe598be244bbdc2b8a9ab0372aca5be95"
 		}
 	},
 	"doc": {
@@ -38,6 +38,13 @@
 					}
 				}
 			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "ESB85905495"
+				}
+			],
 			"addresses": [
 				{
 					"num": "16",
@@ -60,6 +67,13 @@
 		},
 		"customer": {
 			"name": "Sample Consumer",
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "X3157928M"
+				}
+			],
 			"addresses": [
 				{
 					"num": "25",

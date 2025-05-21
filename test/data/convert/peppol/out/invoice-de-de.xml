@@ -9,7 +9,7 @@
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
-    <ram:ID>SAMPLE-001</ram:ID>
+    <ram:ID>SAMPLE-003</ram:ID>
     <ram:TypeCode>380</ram:TypeCode>
     <ram:IssueDateTime>
       <udt:DateTimeString format="102">20240213</udt:DateTimeString>
@@ -21,7 +21,7 @@
         <ram:LineID>1</ram:LineID>
       </ram:AssociatedDocumentLineDocument>
       <ram:SpecifiedTradeProduct>
-        <ram:GlobalID schemeID="0088">123456789</ram:GlobalID>
+        <ram:GlobalID schemeID="0042">123456789</ram:GlobalID>
         <ram:Name>Development services</ram:Name>
       </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
@@ -65,14 +65,14 @@
           <ram:CountrySubDivisionName>RegionA</ram:CountrySubDivisionName>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
+          <ram:URIID schemeID="9920">X3157928M</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">NO123456789MVA</ram:ID>
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
-        <ram:GlobalID schemeID="0088">123456789</ram:GlobalID>
+        <ram:GlobalID schemeID="0042">123456789</ram:GlobalID>
         <ram:Name>Sample Consumer</ram:Name>
         <ram:DefinedTradeContact>
           <ram:EmailURIUniversalCommunication>
@@ -86,7 +86,7 @@
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="EM">inbox@example.com</ram:URIID>
+          <ram:URIID schemeID="9920">X3157928M</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>
