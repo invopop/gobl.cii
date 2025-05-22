@@ -45,11 +45,11 @@ const (
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
 func TestConvertFacturXInvoice(t *testing.T) {
-	testConvertInvoiceFormat(t, "facturx", cii.ContextFacturX)
+	testConvertInvoiceFormat(t, "facturx", cii.ContextFacturXV1)
 }
 
 func TestConvertXRechnungInvoice(t *testing.T) {
-	testConvertInvoiceFormat(t, "xrechnung", cii.ContextXRechnung)
+	testConvertInvoiceFormat(t, "xrechnung", cii.ContextXRechnungV3)
 }
 
 func TestConvertPeppolInvoice(t *testing.T) {
@@ -57,7 +57,7 @@ func TestConvertPeppolInvoice(t *testing.T) {
 }
 
 func TestConvertEN16931Invoice(t *testing.T) {
-	testConvertInvoiceFormat(t, "en16931", cii.ContextEN16931)
+	testConvertInvoiceFormat(t, "en16931", cii.ContextEN16931V2017)
 }
 
 func testConvertInvoiceFormat(t *testing.T, folder string, ctx cii.Context) {
@@ -109,7 +109,7 @@ func TestParseInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			// Convert CII XML to GOBL
-			env, err := cii.ParseInvoice(xmlData)
+			env, err := cii.Parse(xmlData)
 			require.NoError(t, err)
 
 			env.Head.UUID = staticUUID
@@ -170,7 +170,7 @@ func parseInvoiceFrom(t *testing.T, name string) (*gobl.Envelope, error) {
 	if err != nil {
 		require.NoError(t, err)
 	}
-	return cii.ParseInvoice(data)
+	return cii.Parse(data)
 }
 
 // loadEnvelope returns a GOBL Envelope from a file in the `test/data/convert` folder

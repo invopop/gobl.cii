@@ -45,13 +45,13 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	var ctx cii.Context
 	switch c.context {
 	case "facturx":
-		ctx = cii.ContextFacturX
+		ctx = cii.ContextFacturXV1
 	case "xrechnung":
-		ctx = cii.ContextXRechnung
+		ctx = cii.ContextXRechnungV3
 	case "peppol":
 		ctx = cii.ContextPeppolV3
 	case "en16931":
-		ctx = cii.ContextEN16931
+		ctx = cii.ContextEN16931V2017
 	default:
 		return fmt.Errorf("unsupported context: %s", c.context)
 	}
@@ -116,7 +116,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		// Assume XML if not JSON
-		env, err := cii.ParseInvoice(inData)
+		env, err := cii.Parse(inData)
 		if err != nil {
 			return fmt.Errorf("converting CII to GOBL: %w", err)
 		}

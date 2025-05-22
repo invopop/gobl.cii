@@ -30,7 +30,7 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 
 	t.Run("with Factur-X context", func(t *testing.T) {
 		env := loadEnvelope(t, "facturx/invoice-complete.json")
-		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturX))
+		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXV1))
 		require.NoError(t, err)
 
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended", out.ExchangedContext.GuidelineContext.ID)
@@ -39,7 +39,7 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 
 	t.Run("with XRechnung context", func(t *testing.T) {
 		env := loadEnvelope(t, "xrechnung/invoice-de-de.json")
-		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextXRechnung))
+		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextXRechnungV3))
 		require.NoError(t, err)
 
 		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0", out.ExchangedContext.GuidelineContext.ID)

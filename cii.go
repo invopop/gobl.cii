@@ -2,7 +2,10 @@
 package cii
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
+	"io"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/de/xrechnung"
@@ -11,6 +14,16 @@ import (
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+)
+
+var (
+	// ErrUnknownDocumentType is returned when the document type
+	// is not recognized during parsing.
+	ErrUnknownDocumentType = fmt.Errorf("unknown document type")
+
+	// ErrUnsupportedDocumentType is returned when the document type
+	// is not supported for conversion.
+	ErrUnsupportedDocumentType = fmt.Errorf("unsupported document type")
 )
 
 // CII namespaces
@@ -35,8 +48,8 @@ type Context struct {
 	Addons      []cbc.Key
 }
 
-// ContextEN16931 is used for EN 16931 documents, and is the default.
-var ContextEN16931 = Context{
+// ContextEN16931V2017 is used for EN 16931 documents, and is the default.
+var ContextEN16931V2017 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017",
 	Addons:      []cbc.Key{en16931.V2017},
 }
@@ -48,62 +61,88 @@ var ContextPeppolV3 = Context{
 	Addons:      []cbc.Key{en16931.V2017},
 }
 
-// ContextFacturX is used for Factur-X documents.
-var ContextFacturX = Context{
+// ContextFacturXV1 is used for Factur-X V1 documents.
+var ContextFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
 	Addons:      []cbc.Key{facturx.V1},
 }
 
 // ContextZUGFeRD is the context used for ZUGFeRD documents.
-var ContextZUGFeRD = Context{
+var ContextZUGFeRDV2 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended",
 	Addons:      []cbc.Key{zugferd.V2},
 }
 
-// ContextXRechnung is used for XRechnung documents
-var ContextXRechnung = Context{
+// ContextXRechnungV3 is used for XRechnung documents
+var ContextXRechnungV3 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Addons:      []cbc.Key{xrechnung.V3},
 }
 
-// ParseInvoice parses a raw XML CII Invoice and converts it into
-// a GOBL envelope.
-func ParseInvoice(data []byte) (*gobl.Envelope, error) {
-	env := gobl.NewEnvelope()
-	inv, err := parseInvoice(data)
+// Parse parses a raw XML CII document and converts it into
+// a GOBL envelope. If the type is unsupported, an
+// ErrUnknownDocumentType is provided.
+func Parse(data []byte) (*gobl.Envelope, error) {
+	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err
 	}
-	if err := env.Insert(inv); err != nil {
+
+	env := gobl.NewEnvelope()
+	var res any
+	switch ns {
+	case NamespaceRSM:
+		res, err = parseInvoice(data)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, ErrUnknownDocumentType
+	}
+
+	if err := env.Insert(res); err != nil {
 		return nil, err
 	}
 	return env, nil
 }
 
-// ConvertInvoice takes a gobl Invoice and converts it into a CII Invoice
+// Convert takes a gobl envelope and converts it into a CII document
 // ready to be serialized into an XML data object.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	o := &options{
-		context: ContextEN16931,
+		context: ContextEN16931V2017,
 	}
 	for _, opt := range opts {
 		opt(o)
 	}
 
-	inv, ok := env.Extract().(*bill.Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected bill/invoice, got %T", env.Extract())
-	}
-
-	// Check addons
-	for _, ao := range o.context.Addons {
-		if !ao.In(inv.GetAddons()...) {
-			return nil, fmt.Errorf("gobl invoice missing addon %s", ao)
+	switch doc := env.Extract().(type) {
+	case *bill.Invoice:
+		// Check addons
+		for _, ao := range o.context.Addons {
+			if !ao.In(doc.GetAddons()...) {
+				return nil, fmt.Errorf("gobl invoice missing addon %s", ao)
+			}
 		}
+		return newInvoice(doc, o.context)
+	default:
+		return nil, ErrUnsupportedDocumentType
 	}
+}
 
-	return newInvoice(inv, o.context)
+// ConvertInvoice is a convenience function that converts a GOBL envelope
+// containing an invoice into a CII Invoice.
+func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Convert(env, opts...)
+	if err != nil {
+		return nil, err
+	}
+	inv, ok := doc.(*Invoice)
+	if !ok {
+		return nil, fmt.Errorf("expected invoice, got %T", doc)
+	}
+	return inv, nil
 }
 
 type options struct {
@@ -119,4 +158,22 @@ func WithContext(context Context) Option {
 	return func(o *options) {
 		o.context = context
 	}
+}
+
+func extractRootNamespace(data []byte) (string, error) {
+	dc := xml.NewDecoder(bytes.NewReader(data))
+	for {
+		tk, err := dc.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("error parsing XML: %w", err)
+		}
+		switch t := tk.(type) {
+		case xml.StartElement:
+			return t.Name.Space, nil // Extract and return the namespace
+		}
+	}
+	return "", ErrUnknownDocumentType
 }
