@@ -3,9 +3,6 @@ package cii
 import (
 	"encoding/xml"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/invopop/gobl/cal"
@@ -57,28 +54,4 @@ func invoiceNumber(s cbc.Code, c cbc.Code) string {
 		return c.String()
 	}
 	return fmt.Sprintf("%s-%s", s, c)
-}
-
-func RootFolder() string {
-	cwd, _ := os.Getwd()
-	for !isRootFolder(cwd) {
-		cwd = removeLastEntry(cwd)
-	}
-	return cwd
-}
-
-func isRootFolder(dir string) bool {
-	files, _ := os.ReadDir(dir)
-	for _, file := range files {
-		if file.Name() == "go.mod" {
-			return true
-		}
-	}
-	return false
-}
-
-func removeLastEntry(dir string) string {
-	lastEntry := "/" + filepath.Base(dir)
-	i := strings.LastIndex(dir, lastEntry)
-	return dir[:i]
 }

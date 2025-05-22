@@ -67,7 +67,7 @@ var ContextFacturXV1 = Context{
 	Addons:      []cbc.Key{facturx.V1},
 }
 
-// ContextZUGFeRD is the context used for ZUGFeRD documents.
+// ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
 var ContextZUGFeRDV2 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended",
 	Addons:      []cbc.Key{zugferd.V2},

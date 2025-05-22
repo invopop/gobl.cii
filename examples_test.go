@@ -236,7 +236,7 @@ func findSourceFiles(t *testing.T, path, pattern string) []string {
 }
 
 func dataPath(files ...string) string {
-	files = append([]string{cii.RootFolder(), "test", "data"}, files...)
+	files = append([]string{rootFolder(), "test", "data"}, files...)
 	return filepath.Join(files...)
 }
 
@@ -244,13 +244,13 @@ func dataPath(files ...string) string {
 func validateXML(xmlData []byte, format string) error {
 	// First validate against base EN16931 schema
 	if format != defaultFormat {
-		if err := cii.ValidateAgainstSchema(xmlData, filepath.Join(cii.RootFolder(), schemaPath, defaultFormat, schemaFile)); err != nil {
+		if err := cii.ValidateAgainstSchema(xmlData, filepath.Join(rootFolder(), schemaPath, defaultFormat, schemaFile)); err != nil {
 			return fmt.Errorf("base EN16931 validation failed: %w", err)
 		}
 	}
 
 	// Then validate against format-specific schema if the schema exist
-	schemaPath := filepath.Join(cii.RootFolder(), schemaPath, format, schemaFile)
+	schemaPath := filepath.Join(rootFolder(), schemaPath, format, schemaFile)
 	if _, err := os.Stat(schemaPath); !errors.Is(err, os.ErrNotExist) {
 		if err := cii.ValidateAgainstSchema(xmlData, schemaPath); err != nil {
 			return fmt.Errorf("format-specific validation failed: %w", err)
@@ -258,9 +258,34 @@ func validateXML(xmlData []byte, format string) error {
 	}
 
 	// Finally run schematron validation
-	if err := cii.ValidateWithSchematron(xmlData, filepath.Join(cii.RootFolder(), schematronPath, format, compiledPath, styleFile)); err != nil {
+	if err := cii.ValidateWithSchematron(xmlData, filepath.Join(rootFolder(), schematronPath, format, compiledPath, styleFile)); err != nil {
 		return fmt.Errorf("schematron validation failed: %w", err)
 	}
 
 	return nil
+}
+
+// rootFolder returns the root folder of the project
+func rootFolder() string {
+	cwd, _ := os.Getwd()
+	for !isrootFolder(cwd) {
+		cwd = removeLastEntry(cwd)
+	}
+	return cwd
+}
+
+func isrootFolder(dir string) bool {
+	files, _ := os.ReadDir(dir)
+	for _, file := range files {
+		if file.Name() == "go.mod" {
+			return true
+		}
+	}
+	return false
+}
+
+func removeLastEntry(dir string) string {
+	lastEntry := "/" + filepath.Base(dir)
+	i := strings.LastIndex(dir, lastEntry)
+	return dir[:i]
 }

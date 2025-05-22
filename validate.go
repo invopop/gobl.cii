@@ -66,12 +66,14 @@ func ValidateWithSchematron(xmlData []byte, stylesheetPath string) error {
 	if err != nil {
 		return fmt.Errorf("creating temporary file: %w", err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer os.Remove(tmpFile.Name()) //nolint:errcheck
 
 	if _, err := tmpFile.Write(xmlData); err != nil {
 		return fmt.Errorf("writing to temporary file: %w", err)
 	}
-	tmpFile.Close()
+	if err := tmpFile.Close(); err != nil {
+		return fmt.Errorf("closing temporary file: %w", err)
+	}
 
 	// Get the directory containing the stylesheet
 	stylesheetDir := filepath.Dir(stylesheetPath)

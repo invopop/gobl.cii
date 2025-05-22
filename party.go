@@ -196,7 +196,7 @@ func newURIUniversalCommunication(inboxes []*org.Inbox) *URIUniversalCommunicati
 				SchemeID: SchemeIDEmail,
 			},
 		}
-	} else {
+	} else if ib.Code != "" {
 		return &URIUniversalCommunication{
 			ID: &PartyID{
 				Value:    ib.Code.String(),
@@ -204,4 +204,5 @@ func newURIUniversalCommunication(inboxes []*org.Inbox) *URIUniversalCommunicati
 			},
 		}
 	}
+	return nil
 }
