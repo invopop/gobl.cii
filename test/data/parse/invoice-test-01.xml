@@ -9,7 +9,7 @@
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
-    <ram:ID></ram:ID>
+    <ram:ID>TEST-001</ram:ID>
     <ram:TypeCode>380</ram:TypeCode>
     <ram:IssueDateTime>
       <udt:DateTimeString format="102">20241001</udt:DateTimeString>
@@ -71,6 +71,16 @@
     <ram:ApplicableHeaderTradeAgreement>
       <ram:BuyerReference>N/A</ram:BuyerReference>
       <ram:SellerTradeParty>
+        <ram:DefinedTradeContact>
+          <ram:PersonName>Alvaro Garcia</ram:PersonName>
+          <ram:DepartmentName>Sales</ram:DepartmentName>
+          <ram:TelephoneUniversalCommunication>
+            <ram:CompleteNumber>+4915159990591</ram:CompleteNumber>
+          </ram:TelephoneUniversalCommunication>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>billing@example.com</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
+        </ram:DefinedTradeContact>
         <ram:Name>Sample Seller</ram:Name>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>56000</ram:PostcodeCode>
@@ -78,6 +88,9 @@
           <ram:CityName>Sample City</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="VA">DE049120826</ram:URIID>
+        </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE049120826</ram:ID>
         </ram:SpecifiedTaxRegistration>
@@ -91,6 +104,9 @@
           <ram:CityName>Sample City</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="VA">DE208156390</ram:URIID>
+        </ram:URIUniversalCommunication>
       </ram:BuyerTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
@@ -113,7 +129,6 @@
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
-      <ram:SpecifiedTradePaymentTerms></ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>5125.21</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>5125.21</ram:TaxBasisTotalAmount>

@@ -12,7 +12,7 @@ import (
 )
 
 func TestConvertInvoiceWithContext(t *testing.T) {
-	env := loadEnvelope(t, "cii/invoice-complete.json")
+	env := loadEnvelope(t, "en16931/invoice-complete.json")
 
 	t.Run("with default context", func(t *testing.T) {
 		out, err := cii.ConvertInvoice(env)
@@ -23,7 +23,7 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 	})
 
 	t.Run("with missing addon", func(t *testing.T) {
-		env := loadEnvelope(t, "cii/invoice-complete.json")
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
 		inv := env.Extract().(*bill.Invoice)
 		inv.SetAddons() // empty
 		_, err := cii.ConvertInvoice(env)

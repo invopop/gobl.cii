@@ -8,6 +8,8 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
+//TODO: Parse Legal organization
+
 func goblNewParty(party *Party) *org.Party {
 	p := &org.Party{
 		Name: party.Name,

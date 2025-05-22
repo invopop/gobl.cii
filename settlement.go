@@ -33,6 +33,7 @@ type Terms struct {
 	Description string     `xml:"ram:Description,omitempty"`
 	DueDate     *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
 	Mandate     string     `xml:"ram:DirectDebitMandateID,omitempty"`
+	// TODO: add ammount and percent. Check cardinality
 }
 
 // PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard

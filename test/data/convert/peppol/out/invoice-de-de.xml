@@ -72,7 +72,7 @@
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
-        <ram:GlobalID schemeID="0042">123456789</ram:GlobalID>
+        <ram:GlobalID schemeID="0088">0847976000005</ram:GlobalID>
         <ram:Name>Sample Consumer</ram:Name>
         <ram:DefinedTradeContact>
           <ram:EmailURIUniversalCommunication>
