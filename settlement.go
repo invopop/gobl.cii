@@ -22,7 +22,7 @@ type Settlement struct {
 	Tax                []*Tax                `xml:"ram:ApplicableTradeTax"`
 	Period             *Period               `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	AllowanceCharges   []*AllowanceCharge    `xml:"ram:SpecifiedTradeAllowanceCharge,omitempty"`
-	PaymentTerms       *Terms                `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`
+	PaymentTerms       []*Terms              `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`
 	Summary            *Summary              `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
 	ReferencedDocument []*ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
 	Advance            []*Advance            `xml:"ram:SpecifiedAdvancePayment,omitempty"`
@@ -33,7 +33,8 @@ type Terms struct {
 	Description string     `xml:"ram:Description,omitempty"`
 	DueDate     *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
 	Mandate     string     `xml:"ram:DirectDebitMandateID,omitempty"`
-	// TODO: add ammount and percent. Check cardinality
+	Amount      string     `xml:"ram:PartialPaymentAmount,omitempty"`
+	Percent     string     `xml:"ram:PartialPaymentPercent,omitempty"`
 }
 
 // PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard
@@ -115,18 +116,44 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		description := inv.Payment.Terms.Detail
 		if len(inv.Payment.Terms.DueDates) == 0 {
 			if description != "" {
-				stlm.PaymentTerms = &Terms{
-					Description: description,
+				stlm.PaymentTerms = []*Terms{
+					{
+						Description: description,
+					},
 				}
 			}
 		} else {
-			stlm.PaymentTerms = &Terms{
-				DueDate: &IssueDate{
-					DateFormat: documentDate(inv.Payment.Terms.DueDates[0].Date),
-				},
-				Description: inv.Payment.Terms.DueDates[0].Notes,
-			}
+			stlm.PaymentTerms = []*Terms{}
+			for _, dueDate := range inv.Payment.Terms.DueDates {
+				term := &Terms{}
 
+				// Append description
+				if description != "" {
+					term.Description = description
+				}
+
+				// Append notes to description
+				if dueDate.Notes != "" {
+					if term.Description != "" {
+						term.Description += " " + dueDate.Notes
+					} else {
+						term.Description = dueDate.Notes
+					}
+				}
+
+				// no need to set percent because if percent is set then ammount is calculated
+				if !dueDate.Amount.Equals(inv.Totals.Payable) {
+					term.Amount = dueDate.Amount.Rescale(2).String()
+				}
+
+				if dueDate.Date != nil {
+					term.DueDate = &IssueDate{
+						DateFormat: documentDate(dueDate.Date),
+					}
+				}
+
+				stlm.PaymentTerms = append(stlm.PaymentTerms, term)
+			}
 		}
 
 	}
@@ -201,8 +228,14 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 			means = append(means, direct)
 
 			if stlm.PaymentTerms == nil {
-				stlm.PaymentTerms = &Terms{
-					Mandate: instr.DirectDebit.Ref,
+				stlm.PaymentTerms = []*Terms{
+					{
+						Mandate: instr.DirectDebit.Ref,
+					},
+				}
+			} else {
+				for _, term := range stlm.PaymentTerms {
+					term.Mandate = instr.DirectDebit.Ref
 				}
 			}
 

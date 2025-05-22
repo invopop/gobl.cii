@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fa0869eb1273071da21184a8816aa8dd9454cd1e0ec5615445d0f14b9baa1786"
+			"val": "98a535564a1c73108bfed745d8b6657281654974d8a10d5d4fa364bc2e720458"
 		}
 	},
 	"doc": {
@@ -12,6 +12,7 @@
 		"$regime": "DE",
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
+		"code": "TEST-04",
 		"issue_date": "2024-10-01",
 		"currency": "EUR",
 		"tax": {
@@ -25,6 +26,19 @@
 				"country": "DE",
 				"code": "250166794"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "Alvaro Garcia"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "VA",
+					"code": "DE250166794"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Sample Street 1",
@@ -32,10 +46,26 @@
 					"code": "56000",
 					"country": "DE"
 				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+4915159990591"
+				}
 			]
 		},
 		"customer": {
 			"name": "Sample Buyer",
+			"inboxes": [
+				{
+					"scheme": "VA",
+					"code": "DE208156390"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Sample Street 2",
@@ -99,8 +129,7 @@
 				"due_dates": [
 					{
 						"date": "2024-10-01",
-						"amount": "278.20",
-						"percent": "100%"
+						"amount": "20.00"
 					}
 				]
 			},

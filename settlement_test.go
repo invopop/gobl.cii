@@ -16,8 +16,8 @@ func TestNewSettlement(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, "EUR", doc.Transaction.Settlement.Currency)
-		assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms.Description)
-		assert.Equal(t, "20240227", doc.Transaction.Settlement.PaymentTerms.DueDate.DateFormat.Value)
+		assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms[0].Description)
+		assert.Equal(t, "20240227", doc.Transaction.Settlement.PaymentTerms[0].DueDate.DateFormat.Value)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.LineTotalAmount)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TaxBasisTotalAmount)
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
@@ -43,7 +43,7 @@ func TestNewSettlement(t *testing.T) {
 
 		assert.Equal(t, "NO9386011117947", doc.Transaction.Settlement.PaymentMeans[0].Creditor.IBAN)
 
-		assert.Equal(t, "1234567890", doc.Transaction.Settlement.PaymentTerms.Mandate)
+		assert.Equal(t, "1234567890", doc.Transaction.Settlement.PaymentTerms[0].Mandate)
 		assert.Equal(t, "DE89370400440532013000", doc.Transaction.Settlement.PaymentMeans[1].Debtor.IBAN)
 
 		assert.Equal(t, "1234", doc.Transaction.Settlement.PaymentMeans[2].Card.ID)

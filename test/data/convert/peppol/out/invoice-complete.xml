@@ -187,6 +187,7 @@
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20130720</udt:DateTimeString>
         </ram:DueDateDateTime>
+        <ram:DirectDebitMandateID>1234567890</ram:DirectDebitMandateID>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>
