@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4b10c85ca69617a4b88bdd8a286d78135fd72ad8709ac7d15a1e8c82e0da00a7"
+			"val": "2bd91771244f34b9704ceef0c5dc081cec4df7fa5b598ea708314b0763c13776"
 		}
 	},
 	"doc": {
@@ -44,7 +44,7 @@
 			"inboxes": [
 				{
 					"scheme": "0007",
-					"code": "1234512345"
+					"code": "8020028711"
 				}
 			],
 			"addresses": [
@@ -150,8 +150,7 @@
 				"due_dates": [
 					{
 						"date": "2018-03-07",
-						"amount": "4675.00",
-						"percent": "100%"
+						"amount": "0.00"
 					}
 				]
 			},

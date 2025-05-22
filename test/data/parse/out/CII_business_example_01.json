@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "17a3ab89b9d8e3af06c3de77f2ca9e03cd226d2df9051a52a612c23074d9c656"
+			"val": "eb9a4bc1c50cdd28a74018f97c3d8f49dbc78eda49f0891b264edf75c0ea50ad"
 		}
 	},
 	"doc": {
@@ -115,8 +115,7 @@
 				"due_dates": [
 					{
 						"date": "2015-01-09",
-						"amount": "13706.37",
-						"percent": "100%"
+						"amount": "0.00"
 					}
 				]
 			},

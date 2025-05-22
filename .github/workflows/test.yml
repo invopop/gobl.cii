@@ -26,6 +26,14 @@ jobs:
           GOPROXY: https://proxy.golang.org,direct
         run: go mod download
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install XSLT3 globally
+        run: npm install -g xslt3
+
       - name: Test
         run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
 

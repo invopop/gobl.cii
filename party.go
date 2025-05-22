@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/regimes/fr"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -29,10 +30,10 @@ type PartyID struct {
 
 // PostalTradeAddress defines the structure of the PostalTradeAddress of the CII standard
 type PostalTradeAddress struct {
-	Postcode  string `xml:"ram:PostcodeCode"`
-	LineOne   string `xml:"ram:LineOne"`
+	Postcode  string `xml:"ram:PostcodeCode,omitempty"`
+	LineOne   string `xml:"ram:LineOne,omitempty"`
 	LineTwo   string `xml:"ram:LineTwo,omitempty"`
-	City      string `xml:"ram:CityName"`
+	City      string `xml:"ram:CityName,omitempty"`
 	CountryID string `xml:"ram:CountryID"`
 	Region    string `xml:"ram:CountrySubDivisionName,omitempty"`
 }
@@ -49,13 +50,14 @@ type SpecifiedTaxRegistration struct {
 
 // LegalOrganization defines the structure of the SpecifiedLegalOrganization of the CII standard
 type LegalOrganization struct {
-	ID   string `xml:"ram:ID"`
-	Name string `xml:"ram:TradingBusinessName"`
+	ID   *PartyID `xml:"ram:ID"`
+	Name string   `xml:"ram:TradingBusinessName"`
 }
 
 // Contact defines the structure of the DefinedTradeContact of the CII standard
 type Contact struct {
 	PersonName string       `xml:"ram:PersonName,omitempty"`
+	Department string       `xml:"ram:DepartmentName,omitempty"`
 	Phone      *PhoneNumber `xml:"ram:TelephoneUniversalCommunication,omitempty"`
 	Email      *Email       `xml:"ram:EmailURIUniversalCommunication,omitempty"`
 }
@@ -69,6 +71,9 @@ type PhoneNumber struct {
 type Email struct {
 	URIID string `xml:"ram:URIID,omitempty"`
 }
+
+// SchemeIDEmail represents the Scheme ID for email addresses
+const SchemeIDEmail = "EM"
 
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
 func newParty(party *org.Party) *Party {
@@ -93,32 +98,29 @@ func newParty(party *org.Party) *Party {
 	}
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
+
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				p.GlobalID = &PartyID{
 					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
 					Value:    id.Code.String(),
 				}
 			}
-		}
-	}
-	if len(party.Inboxes) > 0 {
-		ib := party.Inboxes[0]
-		if ib.Email != "" {
-			p.URIUniversalCommunication = &URIUniversalCommunication{
-				ID: &PartyID{
-					Value:    ib.Email,
-					SchemeID: SchemeIDEmail,
-				},
-			}
-		} else {
-			p.URIUniversalCommunication = &URIUniversalCommunication{
-				ID: &PartyID{
-					Value:    ib.Code.String(),
-					SchemeID: ib.Scheme.String(),
-				},
+
+			// Hardcoded for chorus-pro.
+			// As SIREN and SIRET are allways 0002, we can add the schemeID this way and not force the user to add the extension.
+			if id.Type == fr.IdentityTypeSIREN || id.Type == fr.IdentityTypeSIRET {
+				p.LegalOrganization = &LegalOrganization{
+					ID: &PartyID{
+						SchemeID: "0002",
+						Value:    id.Code.String(),
+					},
+					Name: party.Alias,
+				}
 			}
 		}
 	}
+
+	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
 	return p
 }
 
@@ -148,6 +150,7 @@ func newContact(p *org.Party) *Contact {
 				URIID: pp.Emails[0].Address,
 			}
 		}
+		c.Department = pp.Role
 	}
 	if c.Phone == nil && len(p.Telephones) > 0 {
 		c.Phone = &PhoneNumber{
@@ -179,4 +182,27 @@ func contactName(p *org.Name) string {
 		return g
 	}
 	return fmt.Sprintf("%s %s", g, s)
+}
+
+func newURIUniversalCommunication(inboxes []*org.Inbox) *URIUniversalCommunication {
+	if len(inboxes) == 0 {
+		return nil
+	}
+	ib := inboxes[0]
+	if ib.Email != "" {
+		return &URIUniversalCommunication{
+			ID: &PartyID{
+				Value:    ib.Email,
+				SchemeID: SchemeIDEmail,
+			},
+		}
+	} else if ib.Code != "" {
+		return &URIUniversalCommunication{
+			ID: &PartyID{
+				Value:    ib.Code.String(),
+				SchemeID: ib.Scheme.String(),
+			},
+		}
+	}
+	return nil
 }
