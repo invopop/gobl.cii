@@ -43,8 +43,9 @@ xslt3 -s:peppol-bis-invoice-3/rules/sch/PEPPOL-EN16931-CII.sch -xsl:schxslt-1.10
 To increase the speed at which tests are run we have precompiled XSLT to SEF files which can be used by xslt3. 
 To do this we need to run this command:
 ```bash
-xslt3  -xsl:stylesheet.xsl -export:compiled/stylesheet.sef -nogo
+xslt3  -xsl:stylesheet.xsl -export:compiled/stylesheet.sef -nogo -relocate:yes
 ```
+`-relocate` is specially important for facturx
 
 ## xslt3
 
