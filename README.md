@@ -112,14 +112,12 @@ gobl.cii convert ./test/data/invoice-sample.json
 
 ## Testing
 
-### testify
-
 The library uses testify for testing. To run the tests, you can use the following command:
 
 ```bash
 go test
 ```
-For testing you need to install docker as we run Saxon in a container.
+For certain tests you may need to install the npm xslt3 package as we use it for schematron validation.
 
 ## Considerations
 

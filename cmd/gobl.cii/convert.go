@@ -46,6 +46,8 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	switch c.context {
 	case "facturx":
 		ctx = cii.ContextFacturXV1
+	case "zugferd":
+		ctx = cii.ContextZUGFeRDV2
 	case "xrechnung":
 		ctx = cii.ContextXRechnungV3
 	case "peppol":
