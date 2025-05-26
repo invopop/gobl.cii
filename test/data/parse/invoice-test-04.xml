@@ -9,7 +9,7 @@
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
-    <ram:ID></ram:ID>
+    <ram:ID>TEST-04</ram:ID>
     <ram:TypeCode>380</ram:TypeCode>
     <ram:IssueDateTime>
       <udt:DateTimeString format="102">20241001</udt:DateTimeString>
@@ -72,6 +72,16 @@
       <ram:BuyerReference>N/A</ram:BuyerReference>
       <ram:SellerTradeParty>
         <ram:Name>Sample Seller</ram:Name>
+         <ram:DefinedTradeContact>
+          <ram:PersonName>Alvaro Garcia</ram:PersonName>
+          <ram:DepartmentName>Sales</ram:DepartmentName>
+          <ram:TelephoneUniversalCommunication>
+            <ram:CompleteNumber>+4915159990591</ram:CompleteNumber>
+          </ram:TelephoneUniversalCommunication>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>billing@example.com</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
+        </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>56000</ram:PostcodeCode>
           <ram:LineOne>Sample Street 1</ram:LineOne>
@@ -81,6 +91,9 @@
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE250166794</ram:ID>
         </ram:SpecifiedTaxRegistration>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="VA">DE250166794</ram:URIID>
+        </ram:URIUniversalCommunication>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
         <ram:Name>Sample Buyer</ram:Name>
@@ -90,6 +103,9 @@
           <ram:CityName>Sample City</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="VA">DE208156390</ram:URIID>
+        </ram:URIUniversalCommunication>
       </ram:BuyerTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
@@ -132,7 +148,6 @@
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>7</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
-      <ram:SpecifiedTradePaymentTerms></ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>242.99</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>242.99</ram:TaxBasisTotalAmount>
@@ -140,6 +155,9 @@
         <ram:GrandTotalAmount>260.00</ram:GrandTotalAmount>
         <ram:DuePayableAmount>260.00</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+      <ram:CreditorReferenceID>
+        <ram:ID schemeID="VA">DE250166794</ram:ID>
+      </ram:CreditorReferenceID>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
 </rsm:CrossIndustryInvoice>
