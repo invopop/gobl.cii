@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"path/filepath"
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
@@ -30,8 +29,6 @@ func (c *convertOpts) cmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&c.context, "context", "en16931", "Output format (en16931, facturx, xrechnung, peppol)")
-	cmd.Flags().StringVar(&c.schemaPath, "schema", "", "Path to the schema file")
-	cmd.Flags().StringVar(&c.schematronPath, "schematron", "", "Path to the schematron file (xslt or sef)")
 
 	return cmd
 }
@@ -97,25 +94,6 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("generating %s xml: %w", c.context, err)
 		}
 
-		if c.schemaPath != "" {
-			schemaPath, err := filepath.Abs(c.schemaPath)
-			if err != nil {
-				return fmt.Errorf("resolving schema path: %w", err)
-			}
-			if err := cii.ValidateAgainstSchema(outputData, schemaPath); err != nil {
-				return fmt.Errorf("validation failed: %w", err)
-			}
-		}
-
-		if c.schematronPath != "" {
-			schematronPath, err := filepath.Abs(c.schematronPath)
-			if err != nil {
-				return fmt.Errorf("resolving schematron path: %w", err)
-			}
-			if err := cii.ValidateWithSchematron(outputData, schematronPath); err != nil {
-				return fmt.Errorf("validation failed: %w", err)
-			}
-		}
 	} else {
 		// Assume XML if not JSON
 		env, err := cii.Parse(inData)

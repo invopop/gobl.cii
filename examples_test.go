@@ -3,11 +3,13 @@ package cii_test
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -16,6 +18,8 @@ import (
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
+	"github.com/lestrrat-go/libxml2"
+	"github.com/lestrrat-go/libxml2/xsd"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -244,7 +248,7 @@ func dataPath(files ...string) string {
 func validateXML(xmlData []byte, format string) error {
 	// First validate against base EN16931 schema
 	if format != defaultFormat {
-		if err := cii.ValidateAgainstSchema(xmlData, filepath.Join(rootFolder(), schemaPath, defaultFormat, schemaFile)); err != nil {
+		if err := validateAgainstSchema(xmlData, filepath.Join(rootFolder(), schemaPath, defaultFormat, schemaFile)); err != nil {
 			return fmt.Errorf("base EN16931 validation failed: %w", err)
 		}
 	}
@@ -252,13 +256,13 @@ func validateXML(xmlData []byte, format string) error {
 	// Then validate against format-specific schema if the schema exist
 	schemaPath := filepath.Join(rootFolder(), schemaPath, format, schemaFile)
 	if _, err := os.Stat(schemaPath); !errors.Is(err, os.ErrNotExist) {
-		if err := cii.ValidateAgainstSchema(xmlData, schemaPath); err != nil {
+		if err := validateAgainstSchema(xmlData, schemaPath); err != nil {
 			return fmt.Errorf("format-specific validation failed: %w", err)
 		}
 	}
 
 	// Finally run schematron validation
-	if err := cii.ValidateWithSchematron(xmlData, filepath.Join(rootFolder(), schematronPath, format, compiledPath, styleFile)); err != nil {
+	if err := validateAgainstSchematron(xmlData, filepath.Join(rootFolder(), schematronPath, format, compiledPath, styleFile)); err != nil {
 		return fmt.Errorf("schematron validation failed: %w", err)
 	}
 
@@ -288,4 +292,112 @@ func removeLastEntry(dir string) string {
 	lastEntry := "/" + filepath.Base(dir)
 	i := strings.LastIndex(dir, lastEntry)
 	return dir[:i]
+}
+
+// FailedAssert represents a failed assertion from schematron validation
+type FailedAssert struct {
+	ID       string `xml:"id,attr"`
+	Text     string `xml:"text"`
+	Role     string `xml:"role,attr"`
+	Flag     string `xml:"flag,attr"`
+	Location string `xml:"location,attr"`
+}
+
+// SVRL represents the schematron validation result
+type SVRL struct {
+	XMLName       xml.Name       `xml:"schematron-output"`
+	FailedAsserts []FailedAssert `xml:"http://purl.oclc.org/dsdl/svrl failed-assert"`
+}
+
+const (
+	flagFatal = "fatal"
+)
+
+// ValidateAgainstSchema validates an XML document against the specified schema
+func validateAgainstSchema(data []byte, schemaPath string) error {
+	schema, err := xsd.ParseFromFile(schemaPath)
+	if err != nil {
+		return fmt.Errorf("loading format schema: %w", err)
+	}
+	xmlDoc, err := libxml2.Parse(data)
+	if err != nil {
+		return err
+	}
+
+	err = schema.Validate(xmlDoc)
+	if err != nil {
+		// Collect all errors into a single error message
+		errors := err.(xsd.SchemaValidationError).Errors()
+		var errorMessages []string
+		for _, e := range errors {
+			errorMessages = append(errorMessages, e.Error())
+		}
+		return fmt.Errorf("validation errors: %s", strings.Join(errorMessages, ",\n "))
+	}
+
+	return nil
+}
+
+// ValidateWithSchematron validates an XML document against the specified stylesheet
+func validateAgainstSchematron(xmlData []byte, stylesheetPath string) error {
+	// Create a temporary file for the XML data
+	tmpFile, err := os.CreateTemp("", "validation-*.xml")
+	if err != nil {
+		return fmt.Errorf("creating temporary file: %w", err)
+	}
+	defer os.Remove(tmpFile.Name()) //nolint:errcheck
+
+	if _, err := tmpFile.Write(xmlData); err != nil {
+		return fmt.Errorf("writing to temporary file: %w", err)
+	}
+	if err := tmpFile.Close(); err != nil {
+		return fmt.Errorf("closing temporary file: %w", err)
+	}
+
+	// Get the directory containing the stylesheet
+	stylesheetDir := filepath.Dir(stylesheetPath)
+
+	// Run the schematron validation using xslt3
+	cmd := exec.Command(
+		"xslt3",
+		"-s:"+tmpFile.Name(),
+		"-xsl:"+stylesheetPath,
+	)
+
+	// Set the working directory to the stylesheet directory so relative paths work
+	cmd.Dir = stylesheetDir
+
+	var out bytes.Buffer
+	var errOut bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &errOut
+
+	// Execute the command
+	err = cmd.Run()
+	if err != nil {
+		// Handle errors, print stderr if available
+		fmt.Println("Stderr:", errOut.String())
+		return fmt.Errorf("running schematron validation: %w", err)
+	}
+
+	// Parse the validation results
+	var result SVRL
+	if err := xml.Unmarshal(out.Bytes(), &result); err != nil {
+		return fmt.Errorf("parsing schematron output: %w", err)
+	}
+
+	// Check for failed assertions
+	if len(result.FailedAsserts) > 0 {
+		var errors []string
+		for _, assert := range result.FailedAsserts {
+			if assert.Flag == flagFatal {
+				errors = append(errors, fmt.Sprintf("%s: %s (location: %s)", assert.ID, assert.Text, assert.Location))
+			}
+		}
+		if len(errors) > 0 {
+			return fmt.Errorf("schematron validation failed:\n%s", strings.Join(errors, "\n"))
+		}
+	}
+
+	return nil
 }
