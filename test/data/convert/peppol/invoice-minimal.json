@@ -1,0 +1,137 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "2c64fff4b6d1a502acf7de42e1f61784e822e48cb179f23b1da9fec8394fb83b"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "SAMPLE",
+		"code": "001",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Provide One GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "ESB85905495"
+				}
+			],
+			"addresses": [
+				{
+					"num": "16",
+					"street": "Dietmar-Hopp-Allee",
+					"locality": "Walldorf",
+					"code": "69190",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"tax_id": {
+				"country": "DE",
+				"code": "282741168"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "X3157928M"
+				}
+			],
+			"addresses": [
+				{
+					"num": "25",
+					"street": "Werner-Heisenberg-Allee",
+					"locality": "München",
+					"code": "80939",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20",
+				"item": {
+					"name": "Development services",
+					"price": "90.00",
+					"unit": "h"
+				},
+				"sum": "1800.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1800.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"detail": "lorem ipsum"
+			}
+		},
+		"totals": {
+			"sum": "1800.00",
+			"total": "1800.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1800.00",
+								"percent": "19%",
+								"amount": "342.00"
+							}
+						],
+						"amount": "342.00"
+					}
+				],
+				"sum": "342.00"
+			},
+			"tax": "342.00",
+			"total_with_tax": "2142.00",
+			"payable": "2142.00"
+		}
+	}
+}

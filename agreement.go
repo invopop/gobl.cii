@@ -37,11 +37,8 @@ type IssuerID struct {
 	ID string `xml:"ram:IssuerAssignedID,omitempty"`
 }
 
-// SchemeIDEmail represents the Scheme ID for email addresses
-const SchemeIDEmail = "EM"
-
 const (
-	defaultBuyerReference = "N/A"
+	defaultBuyerReference = "NA"
 )
 
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
@@ -61,7 +58,15 @@ func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 	}
 	if inv.Ordering != nil {
 		if inv.Ordering.Seller != nil {
-			agmt.TaxRepresentative = agmt.Seller
+			// Reflects rules from CII-SR-282 to 291
+			// These rules are warnings but have been added as they produce cleaner invoices
+			agmt.TaxRepresentative = &Party{
+				ID:                       agmt.Seller.ID,
+				Name:                     agmt.Seller.Name,
+				PostalTradeAddress:       agmt.Seller.PostalTradeAddress,
+				SpecifiedTaxRegistration: agmt.Seller.SpecifiedTaxRegistration,
+			}
+
 			agmt.Seller = newParty(inv.Ordering.Seller)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
@@ -110,17 +115,4 @@ func newPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {
 	}
 
 	return a
-}
-
-func newEmail(emails []*org.Email) *URIUniversalCommunication {
-	if len(emails) == 0 {
-		return nil
-	}
-	e := &URIUniversalCommunication{
-		ID: &PartyID{
-			Value:    emails[0].Address,
-			SchemeID: SchemeIDEmail,
-		},
-	}
-	return e
 }
