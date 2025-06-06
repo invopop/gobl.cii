@@ -38,7 +38,7 @@ type IssuerID struct {
 }
 
 const (
-	defaultBuyerReference = "N/A"
+	defaultBuyerReference = "NA"
 )
 
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
