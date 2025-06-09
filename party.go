@@ -101,7 +101,8 @@ func newParty(party *org.Party) *Party {
 			if id.Type == fr.IdentityTypeSIREN || id.Type == fr.IdentityTypeSIRET {
 				p.LegalOrganization = &LegalOrganization{
 					ID: &PartyID{
-						Value: id.Code.String(),
+						Value:    id.Code.String(),
+						SchemeID: "1",
 					},
 					Name: party.Alias,
 				}
