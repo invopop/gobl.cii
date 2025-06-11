@@ -12,9 +12,7 @@ import (
 
 type convertOpts struct {
 	*rootOpts
-	context        string
-	schemaPath     string
-	schematronPath string
+	context string
 }
 
 func convert(o *rootOpts) *convertOpts {
