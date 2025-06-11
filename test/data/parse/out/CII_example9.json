@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a785829a183f927fff8f985de7a9e5f0635c3e74b74cc381f35d2a85dbf1eff1"
+			"val": "fc76b1afd9fb717026145ef3b576b3b250ea36398ee259cdcd1530e886a99959"
 		}
 	},
 	"doc": {
@@ -41,7 +41,7 @@
 			],
 			"telephones": [
 				{
-					"num": " 033-4549055"
+					"num": "033-4549055"
 				}
 			]
 		},
