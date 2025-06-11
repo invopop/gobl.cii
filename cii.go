@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
+	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -78,6 +79,12 @@ var ContextXRechnungV3 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Addons:      []cbc.Key{xrechnung.V3},
+}
+
+// ContextChorusProV1 is used for Chorus Pro V1 documents.
+var ContextChorusProV1 = Context{
+	GuidelineID: "A1", // Default framework type
+	Addons:      []cbc.Key{choruspro.V1},
 }
 
 // Parse parses a raw XML CII document and converts it into

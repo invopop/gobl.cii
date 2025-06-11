@@ -118,6 +118,7 @@ The library uses testify for testing. To run the tests, you can use the followin
 go test
 ```
 For certain tests you may need to install the npm xslt3 package as we use it for schematron validation.
+Call the tests with the `--validate` flag to run schema and schematron validations
 
 ## Considerations
 

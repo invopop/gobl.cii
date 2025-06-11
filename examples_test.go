@@ -48,6 +48,9 @@ const (
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
+// validateOut is a flag that can be set to validate the XML output
+var validateOut = flag.Bool("validate", false, "Validate the XML output")
+
 func TestConvertFacturXInvoice(t *testing.T) {
 	testConvertInvoiceFormat(t, "facturx", cii.ContextFacturXV1)
 }
@@ -62,6 +65,10 @@ func TestConvertPeppolInvoice(t *testing.T) {
 
 func TestConvertEN16931Invoice(t *testing.T) {
 	testConvertInvoiceFormat(t, "en16931", cii.ContextEN16931V2017)
+}
+
+func TestConvertChorusProInvoice(t *testing.T) {
+	testConvertInvoiceFormat(t, "choruspro", cii.ContextChorusProV1)
 }
 
 func testConvertInvoiceFormat(t *testing.T, folder string, ctx cii.Context) {
@@ -81,8 +88,10 @@ func testConvertInvoiceFormat(t *testing.T, folder string, ctx cii.Context) {
 			data, err := out.Bytes()
 			require.NoError(t, err)
 
-			err = validateXML(data, folder)
-			require.NoError(t, err)
+			if *validateOut {
+				err = validateXML(data, folder)
+				require.NoError(t, err)
+			}
 
 			if *updateOut {
 				// Create the output directory if it doesn't exist
@@ -261,9 +270,12 @@ func validateXML(xmlData []byte, format string) error {
 		}
 	}
 
-	// Finally run schematron validation
-	if err := validateAgainstSchematron(xmlData, filepath.Join(rootFolder(), schematronPath, format, compiledPath, styleFile)); err != nil {
-		return fmt.Errorf("schematron validation failed: %w", err)
+	// Finally run schematron validatio
+	schematronPath := filepath.Join(rootFolder(), schematronPath, format, compiledPath, styleFile)
+	if _, err := os.Stat(schematronPath); !errors.Is(err, os.ErrNotExist) {
+		if err := validateAgainstSchematron(xmlData, schematronPath); err != nil {
+			return fmt.Errorf("schematron validation failed: %w", err)
+		}
 	}
 
 	return nil

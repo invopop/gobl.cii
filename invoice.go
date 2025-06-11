@@ -1,6 +1,9 @@
 package cii
 
 import (
+	"slices"
+
+	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/bill"
 	"github.com/nbio/xml"
 )
@@ -54,7 +57,7 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 		QDTNamespace: NamespaceQDT,
 		UDTNamespace: NamespaceUDT,
 		ExchangedContext: &ExchangedContext{
-			GuidelineContext: &ExchangedContextParameter{ID: context.GuidelineID},
+			GuidelineContext: &ExchangedContextParameter{ID: extractGuidelineID(inv, context)},
 		},
 	}
 	if context.BusinessID != "" {
@@ -88,4 +91,16 @@ func (out *Invoice) addTransaction(inv *bill.Invoice) error {
 	}
 	out.Transaction.Delivery = newDelivery(inv)
 	return nil
+}
+
+func extractGuidelineID(inv *bill.Invoice, context Context) string {
+	guidelineID := context.GuidelineID
+
+	// For Chorus Pro, we need to extract the guideline ID from the tax extension
+	if slices.Contains(context.Addons, choruspro.V1) {
+		if inv != nil && inv.Tax != nil && inv.Tax.Ext.Has(choruspro.ExtKeyFramework) {
+			guidelineID = inv.Tax.Ext.Get(choruspro.ExtKeyFramework).String()
+		}
+	}
+	return guidelineID
 }

@@ -3,6 +3,7 @@ package cii
 import (
 	"fmt"
 
+	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/regimes/fr"
@@ -85,6 +86,16 @@ func newParty(party *org.Party) *Party {
 		Contact:            newContact(party),
 		PostalTradeAddress: newPostalTradeAddress(party.Addresses),
 	}
+
+	// For Chorus Pro, we need to extract the scheme ID from the tax extension
+	if party.Ext.Has(choruspro.ExtKeyScheme) {
+		p.LegalOrganization = &LegalOrganization{
+			ID: &PartyID{
+				SchemeID: party.Ext.Get(choruspro.ExtKeyScheme).String(),
+			},
+		}
+	}
+
 	if party.TaxID != nil {
 		// Assumes VAT ID being used instead of possible tax number
 		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
@@ -95,32 +106,23 @@ func newParty(party *org.Party) *Party {
 				},
 			},
 		}
+		// Add ID for Chorus Pro
+		if p.LegalOrganization != nil {
+			p.LegalOrganization.ID.Value = party.TaxID.String()
+		}
 	}
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
-			if id.Type == fr.IdentityTypeSIREN || id.Type == fr.IdentityTypeSIRET {
-				p.LegalOrganization = &LegalOrganization{
-					ID: &PartyID{
-						Value:    id.Code.String(),
-						SchemeID: "1",
-					},
-					Name: party.Alias,
-				}
-			}
-
 			if id.Ext.Has(iso.ExtKeySchemeID) {
-
-				if p.LegalOrganization != nil {
-					// If the legal organization is already set, we can add the scheme ID to the ID. Only for french public entities.
-					p.LegalOrganization.ID.SchemeID = id.Ext[iso.ExtKeySchemeID].String()
-				} else {
-					p.GlobalID = &PartyID{
-						SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
-						Value:    id.Code.String(),
-					}
+				p.GlobalID = &PartyID{
+					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+					Value:    id.Code.String(),
 				}
 			}
-
+			// Add ID for Chorus Pro
+			if id.Type == fr.IdentityTypeSIRET && p.LegalOrganization != nil {
+				p.LegalOrganization.ID.Value = id.Code.String()
+			}
 		}
 	}
 
