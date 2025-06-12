@@ -2,6 +2,7 @@ package cii
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
@@ -135,7 +136,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 				// Append notes to description
 				if dueDate.Notes != "" {
 					if term.Description != "" {
-						term.Description += " " + dueDate.Notes
+						term.Description = strings.Join([]string{term.Description, dueDate.Notes}, ". ")
 					} else {
 						term.Description = dueDate.Notes
 					}

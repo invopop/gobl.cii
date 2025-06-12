@@ -1,6 +1,8 @@
 package cii
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -91,7 +93,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	for _, term := range settlement.PaymentTerms {
 		if term.Description != "" {
-			terms.Detail += term.Description
+			terms.Detail = strings.Join([]string{terms.Detail, term.Description}, ". ")
 		}
 
 		if term.DueDate != nil && term.DueDate.DateFormat != nil {
