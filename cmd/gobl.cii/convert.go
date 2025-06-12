@@ -49,6 +49,8 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		ctx = cii.ContextPeppolV3
 	case "en16931":
 		ctx = cii.ContextEN16931V2017
+	case "choruspro":
+		ctx = cii.ContextChorusProV1
 	default:
 		return fmt.Errorf("unsupported context: %s", c.context)
 	}

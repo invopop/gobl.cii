@@ -313,10 +313,9 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 		CategoryCode:     cat.String(),
 	}
 
-	// TODO: add BR-E-5 explanation
-	if category.Code == tax.CategoryVAT {
-		t.RateApplicablePercent = "0"
-	}
+	// BR-E-05, BR-AG-05, BR-AF-05, BR-AE-05, BR-Z-05
+	t.RateApplicablePercent = "0"
+
 	if rate.Percent != nil {
 		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
 	}
