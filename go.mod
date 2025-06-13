@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.4
 
 require (
-	github.com/invopop/gobl v0.217.2-0.20250611161148-355e6c17e45f
+	github.com/invopop/gobl v0.218.0
 	github.com/invopop/validation v0.8.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
