@@ -2,7 +2,7 @@
 <rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
   <rsm:ExchangedDocumentContext>
     <ram:GuidelineSpecifiedDocumentContextParameter>
-      <ram:ID>urn:cen.eu:en16931:2017</ram:ID>
+      <ram:ID>urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended</ram:ID>
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
@@ -39,8 +39,8 @@
           <ram:ChargeIndicator>
             <udt:Indicator>false</udt:Indicator>
           </ram:ChargeIndicator>
-          <ram:CalculationPercent>10</ram:CalculationPercent>
           <ram:ActualAmount>180.00</ram:ActualAmount>
+          <ram:Reason>just beacuse</ram:Reason>
         </ram:SpecifiedTradeAllowanceCharge>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
           <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>
@@ -156,7 +156,6 @@
         <ram:ChargeIndicator>
           <udt:Indicator>true</udt:Indicator>
         </ram:ChargeIndicator>
-        <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:ActualAmount>11.00</ram:ActualAmount>
         <ram:Reason>Freight</ram:Reason>
         <ram:CategoryTradeTax>
@@ -169,7 +168,6 @@
         <ram:ChargeIndicator>
           <udt:Indicator>false</udt:Indicator>
         </ram:ChargeIndicator>
-        <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:ActualAmount>10.00</ram:ActualAmount>
         <ram:ReasonCode>88</ram:ReasonCode>
         <ram:Reason>Promotion discount</ram:Reason>

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "771cfce60236f2d0780ca846b9c952b0c225e4c2fdbb791f2012f07a2b83539a"
+			"val": "904bc92453a0d9e5ef2c6b98abdf94738ce15a4f72a831671ff693419e7a8a7e"
 		}
 	},
 	"doc": {
@@ -60,11 +60,15 @@
 				}
 			],
 			"addresses": [
-				{}
-			],
-			"meta": {
-				"chargebee-customer-id": "cbdemo_simon"
-			}
+				{
+					"street": "Am Wassermann 29",
+					"street_extra": "Ehrenfeld",
+					"locality": "Köln",
+					"region": "Nordrhein-Westfalen",
+					"code": "50829",
+					"country": "DE"
+				}
+			]
 		},
 		"lines": [
 			{
@@ -85,6 +89,7 @@
 						"cat": "VAT",
 						"rate": "exempt",
 						"ext": {
+							"cef-vatex": "VATEX-EU-132",
 							"untdid-tax-category": "E"
 						}
 					}
@@ -107,9 +112,6 @@
 					"amount": "200.00",
 					"card": {
 						"last4": "4444"
-					},
-					"meta": {
-						"chargebee-txn-id": "txn_BTUTERUhwzLbROH"
 					}
 				}
 			]
@@ -125,6 +127,7 @@
 							{
 								"key": "exempt",
 								"ext": {
+									"cef-vatex": "VATEX-EU-132",
 									"untdid-tax-category": "E"
 								},
 								"base": "200.00",
@@ -141,11 +144,6 @@
 			"payable": "200.00",
 			"advance": "200.00",
 			"due": "0.00"
-		},
-		"meta": {
-			"chargebee-doc-id": "93",
-			"chargebee-doc-type": "invoice",
-			"chargebee-site": "cyberdyne-de-test"
 		}
 	},
 	"sigs": [

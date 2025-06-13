@@ -3,8 +3,10 @@ package cii
 import (
 	"fmt"
 
+	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/regimes/fr"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -29,10 +31,10 @@ type PartyID struct {
 
 // PostalTradeAddress defines the structure of the PostalTradeAddress of the CII standard
 type PostalTradeAddress struct {
-	Postcode  string `xml:"ram:PostcodeCode"`
-	LineOne   string `xml:"ram:LineOne"`
+	Postcode  string `xml:"ram:PostcodeCode,omitempty"`
+	LineOne   string `xml:"ram:LineOne,omitempty"`
 	LineTwo   string `xml:"ram:LineTwo,omitempty"`
-	City      string `xml:"ram:CityName"`
+	City      string `xml:"ram:CityName,omitempty"`
 	CountryID string `xml:"ram:CountryID"`
 	Region    string `xml:"ram:CountrySubDivisionName,omitempty"`
 }
@@ -49,13 +51,14 @@ type SpecifiedTaxRegistration struct {
 
 // LegalOrganization defines the structure of the SpecifiedLegalOrganization of the CII standard
 type LegalOrganization struct {
-	ID   string `xml:"ram:ID"`
-	Name string `xml:"ram:TradingBusinessName"`
+	ID   *PartyID `xml:"ram:ID"`
+	Name string   `xml:"ram:TradingBusinessName"`
 }
 
 // Contact defines the structure of the DefinedTradeContact of the CII standard
 type Contact struct {
 	PersonName string       `xml:"ram:PersonName,omitempty"`
+	Department string       `xml:"ram:DepartmentName,omitempty"`
 	Phone      *PhoneNumber `xml:"ram:TelephoneUniversalCommunication,omitempty"`
 	Email      *Email       `xml:"ram:EmailURIUniversalCommunication,omitempty"`
 }
@@ -70,6 +73,9 @@ type Email struct {
 	URIID string `xml:"ram:URIID,omitempty"`
 }
 
+// SchemeIDEmail represents the Scheme ID for email addresses
+const SchemeIDEmail = "EM"
+
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
 func newParty(party *org.Party) *Party {
 	if party == nil {
@@ -80,6 +86,16 @@ func newParty(party *org.Party) *Party {
 		Contact:            newContact(party),
 		PostalTradeAddress: newPostalTradeAddress(party.Addresses),
 	}
+
+	// For Chorus Pro, we need to extract the scheme ID from the tax extension
+	if party.Ext.Has(choruspro.ExtKeyScheme) {
+		p.LegalOrganization = &LegalOrganization{
+			ID: &PartyID{
+				SchemeID: party.Ext.Get(choruspro.ExtKeyScheme).String(),
+			},
+		}
+	}
+
 	if party.TaxID != nil {
 		// Assumes VAT ID being used instead of possible tax number
 		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
@@ -90,6 +106,10 @@ func newParty(party *org.Party) *Party {
 				},
 			},
 		}
+		// Add ID for Chorus Pro
+		if p.LegalOrganization != nil {
+			p.LegalOrganization.ID.Value = party.TaxID.String()
+		}
 	}
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
@@ -99,26 +119,14 @@ func newParty(party *org.Party) *Party {
 					Value:    id.Code.String(),
 				}
 			}
-		}
-	}
-	if len(party.Inboxes) > 0 {
-		ib := party.Inboxes[0]
-		if ib.Email != "" {
-			p.URIUniversalCommunication = &URIUniversalCommunication{
-				ID: &PartyID{
-					Value:    ib.Email,
-					SchemeID: SchemeIDEmail,
-				},
-			}
-		} else {
-			p.URIUniversalCommunication = &URIUniversalCommunication{
-				ID: &PartyID{
-					Value:    ib.Code.String(),
-					SchemeID: ib.Scheme.String(),
-				},
+			// Add ID for Chorus Pro
+			if id.Type == fr.IdentityTypeSIRET && p.LegalOrganization != nil {
+				p.LegalOrganization.ID.Value = id.Code.String()
 			}
 		}
 	}
+
+	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
 	return p
 }
 
@@ -148,6 +156,7 @@ func newContact(p *org.Party) *Contact {
 				URIID: pp.Emails[0].Address,
 			}
 		}
+		c.Department = pp.Role
 	}
 	if c.Phone == nil && len(p.Telephones) > 0 {
 		c.Phone = &PhoneNumber{
@@ -179,4 +188,27 @@ func contactName(p *org.Name) string {
 		return g
 	}
 	return fmt.Sprintf("%s %s", g, s)
+}
+
+func newURIUniversalCommunication(inboxes []*org.Inbox) *URIUniversalCommunication {
+	if len(inboxes) == 0 {
+		return nil
+	}
+	ib := inboxes[0]
+	if ib.Email != "" {
+		return &URIUniversalCommunication{
+			ID: &PartyID{
+				Value:    ib.Email,
+				SchemeID: SchemeIDEmail,
+			},
+		}
+	} else if ib.Code != "" {
+		return &URIUniversalCommunication{
+			ID: &PartyID{
+				Value:    ib.Code.String(),
+				SchemeID: ib.Scheme.String(),
+			},
+		}
+	}
+	return nil
 }

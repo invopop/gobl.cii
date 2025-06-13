@@ -9,7 +9,7 @@ import (
 
 func TestNewLines(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		doc, err := newInvoiceFrom(t, "invoice-de-de.json")
+		doc, err := newInvoiceFrom(t, "en16931/invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)

@@ -11,14 +11,13 @@ import (
 
 func TestNewSettlement(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		doc, err := newInvoiceFrom(t, "invoice-de-de.json")
+		doc, err := newInvoiceFrom(t, "en16931/invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
 		assert.Equal(t, "EUR", doc.Transaction.Settlement.Currency)
 		assert.Equal(t, "lorem ipsum", doc.Transaction.Settlement.PaymentTerms[0].Description)
 		assert.Equal(t, "20240227", doc.Transaction.Settlement.PaymentTerms[0].DueDate.DateFormat.Value)
-		assert.Equal(t, "2000.00", doc.Transaction.Settlement.PaymentTerms[0].PartialPayment)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.LineTotalAmount)
 		assert.Equal(t, "1800.00", doc.Transaction.Settlement.Summary.TaxBasisTotalAmount)
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
@@ -28,7 +27,7 @@ func TestNewSettlement(t *testing.T) {
 	})
 
 	t.Run("correction-invoice.json", func(t *testing.T) {
-		doc, err := newInvoiceFrom(t, "correction-invoice.json")
+		doc, err := newInvoiceFrom(t, "en16931/correction-invoice.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument[0].IssuerAssignedID)
@@ -37,7 +36,7 @@ func TestNewSettlement(t *testing.T) {
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		doc, err := newInvoiceFrom(t, "invoice-complete.json")
+		doc, err := newInvoiceFrom(t, "en16931/invoice-complete.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "30", doc.Transaction.Settlement.PaymentMeans[0].TypeCode)
@@ -52,7 +51,7 @@ func TestNewSettlement(t *testing.T) {
 	})
 
 	t.Run("extension errors", func(t *testing.T) {
-		env := loadEnvelope(t, "invoice-complete.json")
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 

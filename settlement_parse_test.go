@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,8 +32,7 @@ func TestParseCtoGPayment(t *testing.T) {
 	assert.Equal(t, "Partial Payment", payment.Terms.Detail)
 	assert.Len(t, payment.Terms.DueDates, 1)
 	assert.Equal(t, "2024-10-01", payment.Terms.DueDates[0].Date.String())
-	expectedAmount, _ := num.AmountFromString("20.00")
-	assert.Equal(t, expectedAmount, payment.Terms.DueDates[0].Amount)
+	assert.Equal(t, "20.00", payment.Terms.DueDates[0].Amount.String())
 
 	assert.NotNil(t, payment.Instructions)
 	assert.Equal(t, pay.MeansKeyDebitTransfer, payment.Instructions.Key)

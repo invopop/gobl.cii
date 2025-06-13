@@ -4,24 +4,28 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b00574ba1902fbfb9fe02dca8bdcb238ab62ae3c34dbe94c7117033f05d1a32d"
+			"val": "92178e982e0e935c779c87149d95dd7aed268b3d1323b2e99d084b67e852cdb8"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
 		"$addons": [
-			"eu-en16931-v2017"
+			"eu-en16931-v2017",
+			"fr-facturx-v1"
+		],
+		"$tags": [
+			"self-billed"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "SAMPLE",
 		"code": "001",
-		"issue_date": "2024-05-15",
+		"issue_date": "2024-02-13",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"untdid-document-type": "380"
+				"untdid-document-type": "389"
 			}
 		},
 		"supplier": {
@@ -30,6 +34,14 @@
 				"country": "DE",
 				"code": "111111125"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "John",
+						"surname": "Doe"
+					}
+				}
+			],
 			"addresses": [
 				{
 					"num": "16",
@@ -42,6 +54,11 @@
 			"emails": [
 				{
 					"addr": "billing@example.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+49100200300"
 				}
 			]
 		},
@@ -79,6 +96,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"rate": "standard",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -88,6 +106,14 @@
 				"total": "1800.00"
 			}
 		],
+		"ordering": {
+			"code": "XR-2024-2"
+		},
+		"payment": {
+			"terms": {
+				"detail": "lorem ipsum"
+			}
+		},
 		"totals": {
 			"sum": "1800.00",
 			"total": "1800.00",
@@ -97,6 +123,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},

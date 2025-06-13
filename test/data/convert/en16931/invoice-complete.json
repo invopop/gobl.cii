@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4a226b525c934231c61360c47deeec86445807726b9941662e5ac4c3a3852426"
+			"val": "7b7a6e0dde6ebf1164cd0d56e6c74afacce33025ad67d8e4777c19d98867f929"
 		}
 	},
 	"doc": {
@@ -97,6 +97,7 @@
 				"sum": "1800.00",
 				"discounts": [
 					{
+						"reason": "just beacuse",
 						"percent": "10%",
 						"amount": "180.00"
 					}

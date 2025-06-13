@@ -13,7 +13,7 @@ import (
 
 func TestNewHeader(t *testing.T) {
 	t.Run("should contain the header info from standard invoice", func(t *testing.T) {
-		doc, err := newInvoiceFrom(t, "invoice-de-de.json")
+		doc, err := newInvoiceFrom(t, "en16931/invoice-de-de.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
@@ -23,7 +23,7 @@ func TestNewHeader(t *testing.T) {
 		assert.Equal(t, "102", doc.ExchangedDocument.IssueDate.DateFormat.Format)
 	})
 	t.Run("document type extension", func(t *testing.T) {
-		env := loadEnvelope(t, "invoice-de-de.json")
+		env := loadEnvelope(t, "en16931/invoice-de-de.json")
 		inv := env.Extract().(*bill.Invoice)
 
 		out, err := cii.ConvertInvoice(env)
@@ -42,7 +42,7 @@ func TestNewHeader(t *testing.T) {
 	})
 
 	t.Run("should contain the header info from credit note", func(t *testing.T) {
-		doc, err := newInvoiceFrom(t, "credit-note.json")
+		doc, err := newInvoiceFrom(t, "en16931/credit-note.json")
 		require.NoError(t, err)
 
 		assert.Nil(t, err)
@@ -53,7 +53,7 @@ func TestNewHeader(t *testing.T) {
 	})
 
 	t.Run("should return self billed type code for self billed invoice", func(t *testing.T) {
-		doc, err := newInvoiceFrom(t, "self-billed-invoice.json")
+		doc, err := newInvoiceFrom(t, "en16931/self-billed-invoice.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "389", doc.ExchangedDocument.TypeCode)

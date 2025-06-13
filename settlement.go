@@ -2,8 +2,11 @@ package cii
 
 import (
 	"errors"
+	"strings"
 
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
@@ -28,10 +31,11 @@ type Settlement struct {
 
 // Terms defines the structure of SpecifiedTradePaymentTerms of the CII standard
 type Terms struct {
-	Description    string     `xml:"ram:Description,omitempty"`
-	DueDate        *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
-	Mandate        string     `xml:"ram:DirectDebitMandateID,omitempty"`
-	PartialPayment string     `xml:"ram:PartialPaymentAmount,omitempty"`
+	Description string     `xml:"ram:Description,omitempty"`
+	DueDate     *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
+	Mandate     string     `xml:"ram:DirectDebitMandateID,omitempty"`
+	Amount      string     `xml:"ram:PartialPaymentAmount,omitempty"`
+	Percent     string     `xml:"ram:PartialPaymentPercent,omitempty"`
 }
 
 // PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard
@@ -112,19 +116,35 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	if inv.Payment != nil && inv.Payment.Terms != nil {
 		description := inv.Payment.Terms.Detail
 		if len(inv.Payment.Terms.DueDates) == 0 {
-			stlm.PaymentTerms = []*Terms{
-				{
-					Description: description,
-				},
+			if description != "" {
+				stlm.PaymentTerms = []*Terms{
+					{
+						Description: description,
+					},
+				}
 			}
 		} else {
+			stlm.PaymentTerms = []*Terms{}
 			for _, dueDate := range inv.Payment.Terms.DueDates {
-				term := &Terms{
-					Description: description,
+				term := &Terms{}
+
+				// Append description
+				if description != "" {
+					term.Description = description
 				}
 
+				// Append notes to description
+				if dueDate.Notes != "" {
+					if term.Description != "" {
+						term.Description = strings.Join([]string{term.Description, dueDate.Notes}, ". ")
+					} else {
+						term.Description = dueDate.Notes
+					}
+				}
+
+				// no need to set percent because if percent is set then ammount is calculated
 				if !dueDate.Amount.Equals(inv.Totals.Payable) {
-					term.PartialPayment = dueDate.Amount.Rescale(2).String()
+					term.Amount = dueDate.Amount.Rescale(2).String()
 				}
 
 				if dueDate.Date != nil {
@@ -256,6 +276,9 @@ func newSummary(totals *bill.Totals, currency string) *Summary {
 			Currency: currency,
 		},
 	}
+	if totals.Due != nil {
+		s.DuePayableAmount = totals.Due.String()
+	}
 	if totals.Charge != nil {
 		s.Charges = totals.Charge.String()
 	}
@@ -283,31 +306,37 @@ func newTaxes(total *tax.Total) []*Tax {
 }
 
 func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
-	tax := &Tax{
+	cat := rate.Ext.Get(untdid.ExtKeyTaxCategory)
+	t := &Tax{
 		CalculatedAmount: rate.Amount.Rescale(2).String(),
 		TypeCode:         category.Code.String(),
 		BasisAmount:      rate.Base.String(),
-		CategoryCode:     rate.Ext[untdid.ExtKeyTaxCategory].String(),
+		CategoryCode:     cat.String(),
 	}
 
+	// BR-E-05, BR-AG-05, BR-AF-05, BR-AE-05, BR-Z-05
+	t.RateApplicablePercent = "0"
+
 	if rate.Percent != nil {
-		tax.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
+		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
 	}
-	return tax
+	if cat == en16931.TaxCategoryExempt {
+		t.ExemptionReasonCode = rate.Ext.Get(cef.ExtKeyVATEX).String()
+	}
+	return t
 }
 
 func newPayee(party *org.Party) *Party {
+	// Reflects rules from CII-SR-352 to 364 and CII-SR-364
+	// These rules are warnings but have been added as they produce cleaner invoices
+	p := newParty(party)
 	payee := &Party{
-		Name:                      party.Name,
-		Contact:                   newContact(party),
-		PostalTradeAddress:        newPostalTradeAddress(party.Addresses),
-		URIUniversalCommunication: newEmail(party.Emails),
+		Name: p.Name,
+		ID:   p.ID,
 	}
 
-	if party.TaxID != nil {
-		payee.ID = &PartyID{
-			Value: party.TaxID.String(),
-		}
+	if payee.ID != nil {
+		payee.GlobalID = p.GlobalID
 	}
 
 	return payee

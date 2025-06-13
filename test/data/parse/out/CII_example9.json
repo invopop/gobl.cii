@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "806d5e6fe5a86c3e602ae6f5f5c98445e3e8c5865cad5bbbf6f61135559d87dc"
+			"val": "fc76b1afd9fb717026145ef3b576b3b250ea36398ee259cdcd1530e886a99959"
 		}
 	},
 	"doc": {
@@ -41,7 +41,7 @@
 			],
 			"telephones": [
 				{
-					"num": " 033-4549055"
+					"num": "033-4549055"
 				}
 			]
 		},
@@ -90,8 +90,7 @@
 				"due_dates": [
 					{
 						"date": "2015-04-15",
-						"amount": "177.87",
-						"percent": "100%"
+						"amount": "0.00"
 					}
 				]
 			},

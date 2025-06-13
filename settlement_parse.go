@@ -1,6 +1,8 @@
 package cii
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -91,7 +93,11 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	for _, term := range settlement.PaymentTerms {
 		if term.Description != "" {
-			terms.Detail = term.Description
+			if terms.Detail != "" {
+				terms.Detail = strings.Join([]string{terms.Detail, term.Description}, ". ")
+			} else {
+				terms.Detail = term.Description
+			}
 		}
 
 		if term.DueDate != nil && term.DueDate.DateFormat != nil {
@@ -102,14 +108,14 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 			dd := &pay.DueDate{
 				Date: &dueDateTime,
 			}
-			if term.PartialPayment != "" {
-				amt, err := num.AmountFromString(term.PartialPayment)
+			if term.Amount != "" {
+				amt, err := num.AmountFromString(term.Amount)
 				if err != nil {
 					return nil, err
 				}
 				dd.Amount = amt
-			} else if len(dates) == 0 {
-				p, err := num.PercentageFromString("100%")
+			} else if term.Percent != "" {
+				p, err := num.PercentageFromString(term.Percent)
 				if err != nil {
 					return nil, err
 				}
@@ -118,6 +124,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 			dates = append(dates, dd)
 		}
 	}
+
 	terms.DueDates = dates
 
 	if len(terms.DueDates) == 0 &&

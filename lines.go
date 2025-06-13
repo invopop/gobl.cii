@@ -162,10 +162,6 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	var taxes []*Tax
 	for _, tax := range l.Taxes {
 		t := makeTaxCategory(tax)
-		if tax.Percent != nil {
-			t.RateApplicablePercent = tax.Percent.StringWithoutSymbol()
-		}
-
 		taxes = append(taxes, t)
 	}
 

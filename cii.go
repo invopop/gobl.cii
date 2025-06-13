@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
+	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -67,10 +68,9 @@ var ContextFacturXV1 = Context{
 	Addons:      []cbc.Key{facturx.V1},
 }
 
-// ContextZUGFeRDV2 is the context used for ZUGFeRD documents which is identical to
-// FacturX
+// ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
 var ContextZUGFeRDV2 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
+	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended",
 	Addons:      []cbc.Key{zugferd.V2},
 }
 
@@ -79,6 +79,12 @@ var ContextXRechnungV3 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Addons:      []cbc.Key{xrechnung.V3},
+}
+
+// ContextChorusProV1 is used for Chorus Pro V1 documents.
+var ContextChorusProV1 = Context{
+	GuidelineID: "A1", // Default framework type
+	Addons:      []cbc.Key{choruspro.V1},
 }
 
 // Parse parses a raw XML CII document and converts it into
