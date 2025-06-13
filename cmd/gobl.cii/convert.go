@@ -26,7 +26,7 @@ func (c *convertOpts) cmd() *cobra.Command {
 		RunE:  c.runE,
 	}
 
-	cmd.Flags().StringVar(&c.context, "context", "en16931", "Output format (en16931, facturx, xrechnung, peppol)")
+	cmd.Flags().StringVar(&c.context, "context", "en16931", "Output format (en16931, facturx, xrechnung, peppol, choruspro, zugferd)")
 
 	return cmd
 }
