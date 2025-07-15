@@ -37,10 +37,6 @@ type IssuerID struct {
 	ID string `xml:"ram:IssuerAssignedID,omitempty"`
 }
 
-const (
-	defaultBuyerReference = "NA"
-)
-
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
 func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 	out.Transaction.Agreement = new(Agreement)
