@@ -47,8 +47,6 @@ func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 	agmt := out.Transaction.Agreement
 	if inv.Ordering != nil && inv.Ordering.Code != "" {
 		agmt.BuyerReference = inv.Ordering.Code.String()
-	} else {
-		agmt.BuyerReference = defaultBuyerReference
 	}
 	if supplier := inv.Supplier; supplier != nil {
 		agmt.Seller = newParty(supplier)
