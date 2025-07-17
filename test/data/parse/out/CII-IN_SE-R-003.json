@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2bd91771244f34b9704ceef0c5dc081cec4df7fa5b598ea708314b0763c13776"
+			"val": "d15435931ebda25982b1f18e4837f552c0d6009f14bab916b3a41bc5b2b3c7fd"
 		}
 	},
 	"doc": {
@@ -24,7 +24,7 @@
 			"identities": [
 				{
 					"country": "SE",
-					"code": "Godkänd för F-skatt"
+					"code": "1234567890"
 				}
 			],
 			"inboxes": [
@@ -150,7 +150,8 @@
 				"due_dates": [
 					{
 						"date": "2018-03-07",
-						"amount": "0.00"
+						"amount": "4675.00",
+						"percent": "100%"
 					}
 				]
 			},

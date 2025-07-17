@@ -26,7 +26,7 @@ func TestParseCtoGParty(t *testing.T) {
 
 		assert.Equal(t, "Sample Seller", seller.Name)
 		assert.Equal(t, l10n.TaxCountryCode("DE"), seller.TaxID.Country)
-		assert.Equal(t, cbc.Code("049120826"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("282741168"), seller.TaxID.Code)
 
 		assert.Equal(t, "Sample Buyer", buyer.Name)
 		assert.Equal(t, "Sample Street 2", buyer.Addresses[0].Street)
@@ -88,9 +88,11 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "The Buyercompany", customer.Name)
 		assert.Equal(t, cbc.Code("987654321MVA"), customer.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
-		require.Len(t, customer.Identities, 1)
-		assert.Equal(t, "3456789012098", customer.Identities[0].Code.String())
-		assert.Equal(t, "0088", customer.Identities[0].Ext[iso.ExtKeySchemeID].String())
+		require.Len(t, customer.Identities, 2)
+		assert.Equal(t, "987654321", customer.Identities[0].Code.String())
+		assert.Equal(t, l10n.ISOCountryCode("NO"), customer.Identities[0].Country)
+		assert.Equal(t, "3456789012098", customer.Identities[1].Code.String())
+		assert.Equal(t, "0088", customer.Identities[1].Ext[iso.ExtKeySchemeID].String())
 	})
 
 	t.Run("CII-IN_SE-R-003.xml", func(t *testing.T) {

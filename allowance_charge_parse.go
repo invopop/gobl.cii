@@ -74,6 +74,14 @@ func goblNewCharge(ac *AllowanceCharge) (*bill.Charge, error) {
 			return nil, err
 		}
 		c.Percent = &p
+	} else if c.Base != nil && !c.Amount.IsZero() {
+		// Calculate percent from amount and base
+		if !c.Base.IsZero() {
+			// Calculate percentage: (amount / base) * 100
+			ratio := c.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(*c.Base)
+			percent := num.PercentageFromAmount(ratio)
+			c.Percent = &percent
+		}
 	}
 	if ac.Tax != nil {
 		if ac.Tax.TypeCode != "" {
@@ -127,6 +135,14 @@ func goblNewDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
 			return nil, err
 		}
 		d.Percent = &p
+	} else if d.Base != nil && !d.Amount.IsZero() {
+		// Calculate percent from amount and base
+		if !d.Base.IsZero() {
+			// Calculate percentage: (amount / base) * 100
+			ratio := d.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(*d.Base)
+			percent := num.PercentageFromAmount(ratio)
+			d.Percent = &percent
+		}
 	}
 	if ac.Tax != nil {
 		if ac.Tax.TypeCode != "" {
@@ -176,6 +192,15 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 			return nil, err
 		}
 		c.Percent = &p
+	} else if ac.Base != "" && ac.Amount != "" {
+		// Calculate percent from amount and base
+		base, err := num.AmountFromString(ac.Base)
+		if err == nil && !base.IsZero() {
+			// Calculate percentage: (amount / base) * 100
+			ratio := c.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(base)
+			percent := num.PercentageFromAmount(ratio)
+			c.Percent = &percent
+		}
 	}
 	return c, nil
 }
@@ -205,6 +230,15 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 			return nil, err
 		}
 		d.Percent = &p
+	} else if ac.Base != "" && ac.Amount != "" {
+		// Calculate percent from amount and base
+		base, err := num.AmountFromString(ac.Base)
+		if err == nil && !base.IsZero() {
+			// Calculate percentage: (amount / base) * 100
+			ratio := d.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(base)
+			percent := num.PercentageFromAmount(ratio)
+			d.Percent = &percent
+		}
 	}
 	return d, nil
 }

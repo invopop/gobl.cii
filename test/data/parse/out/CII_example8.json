@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1c1a21020dbedb3e1f3f1f722e72abe136ecbe5bd0e8d1e8011462708c1e6a8b"
+			"val": "7b1c43b2fbb287f9be7088040b5cc70350761ed5c383da76b3bc36fda47ab951"
 		}
 	},
 	"doc": {
@@ -26,6 +26,12 @@
 				"country": "NL",
 				"code": "809561074B01"
 			},
+			"identities": [
+				{
+					"country": "NL",
+					"code": "17131139"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Magistratenlaan 116",
@@ -277,7 +283,8 @@
 				"due_dates": [
 					{
 						"date": "2014-11-24",
-						"amount": "0.00"
+						"amount": "4572.23",
+						"percent": "100%"
 					}
 				]
 			},
