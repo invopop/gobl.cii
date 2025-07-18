@@ -63,6 +63,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 				}
 				a.Date = &advancePaymentReceivedDateTime
 			}
+			a.Description = "Specified Advance Payment"
 			pymt.Advances = append(pymt.Advances, a)
 		}
 	} else if stlm.Summary.TotalPrepaidAmount != "" {
@@ -72,7 +73,8 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 			return nil, err
 		}
 		a := &pay.Advance{
-			Amount: amt,
+			Description: "Total Prepaid Ammount",
+			Amount:      amt,
 		}
 		pymt.Advances = append(pymt.Advances, a)
 	}
@@ -114,14 +116,23 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 					return nil, err
 				}
 				dd.Amount = amt
+				if dd.Amount != num.AmountZero {
+					dates = append(dates, dd)
+				}
 			} else if term.Percent != "" {
 				p, err := num.PercentageFromString(term.Percent)
 				if err != nil {
 					return nil, err
 				}
 				dd.Percent = &p
+				if dd.Percent != &num.PercentageZero {
+					dates = append(dates, dd)
+				}
+			} else {
+				p := num.PercentageFromAmount(num.MakeAmount(100, 0))
+				dd.Percent = &p
+				dates = append(dates, dd)
 			}
-			dates = append(dates, dd)
 		}
 	}
 

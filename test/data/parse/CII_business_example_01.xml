@@ -127,7 +127,7 @@
       <ram:SellerTradeParty>
         <ram:Name>XXX AG</ram:Name>
         <ram:SpecifiedLegalOrganization>
-          <ram:ID>57151520</ram:ID>
+          <ram:ID>282741168</ram:ID>
         </ram:SpecifiedLegalOrganization>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>10369</ram:PostcodeCode>
@@ -136,7 +136,7 @@
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:SpecifiedTaxRegistration>
-          <ram:ID schemeID="VA">DE37/302/30168</ram:ID>
+          <ram:ID schemeID="VA">DE28/274/1168</ram:ID>
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>

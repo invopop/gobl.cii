@@ -9,10 +9,10 @@
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
-    <ram:ID>TEST-001</ram:ID>
+    <ram:ID>SAMPLE-001</ram:ID>
     <ram:TypeCode>380</ram:TypeCode>
     <ram:IssueDateTime>
-      <udt:DateTimeString format="102">20241001</udt:DateTimeString>
+      <udt:DateTimeString format="102">20220201</udt:DateTimeString>
     </ram:IssueDateTime>
   </rsm:ExchangedDocument>
   <rsm:SupplyChainTradeTransaction>
@@ -21,41 +21,15 @@
         <ram:LineID>1</ram:LineID>
       </ram:AssociatedDocumentLineDocument>
       <ram:SpecifiedTradeProduct>
-        <ram:Name>2h Beschaffung + Aufbau des neuen Tisches a 25€/h netto + 7% MwSt.</ram:Name>
+        <ram:Name>Development services</ram:Name>
       </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
         <ram:NetPriceProductTradePrice>
-          <ram:ChargeAmount>5350.00</ram:ChargeAmount>
+          <ram:ChargeAmount>90.00</ram:ChargeAmount>
         </ram:NetPriceProductTradePrice>
       </ram:SpecifiedLineTradeAgreement>
       <ram:SpecifiedLineTradeDelivery>
-        <ram:BilledQuantity unitCode="">1</ram:BilledQuantity>
-      </ram:SpecifiedLineTradeDelivery>
-      <ram:SpecifiedLineTradeSettlement>
-        <ram:ApplicableTradeTax>
-          <ram:TypeCode>VAT</ram:TypeCode>
-          <ram:CategoryCode>S</ram:CategoryCode>
-          <ram:RateApplicablePercent>7</ram:RateApplicablePercent>
-        </ram:ApplicableTradeTax>
-        <ram:SpecifiedTradeSettlementLineMonetarySummation>
-          <ram:LineTotalAmount>5350.00</ram:LineTotalAmount>
-        </ram:SpecifiedTradeSettlementLineMonetarySummation>
-      </ram:SpecifiedLineTradeSettlement>
-    </ram:IncludedSupplyChainTradeLineItem>
-    <ram:IncludedSupplyChainTradeLineItem>
-      <ram:AssociatedDocumentLineDocument>
-        <ram:LineID>2</ram:LineID>
-      </ram:AssociatedDocumentLineDocument>
-      <ram:SpecifiedTradeProduct>
-        <ram:Name>1x Couchtisch inklusive 19% MwSt.</ram:Name>
-      </ram:SpecifiedTradeProduct>
-      <ram:SpecifiedLineTradeAgreement>
-        <ram:NetPriceProductTradePrice>
-          <ram:ChargeAmount>149.00</ram:ChargeAmount>
-        </ram:NetPriceProductTradePrice>
-      </ram:SpecifiedLineTradeAgreement>
-      <ram:SpecifiedLineTradeDelivery>
-        <ram:BilledQuantity unitCode="">1</ram:BilledQuantity>
+        <ram:BilledQuantity unitCode="HUR">20</ram:BilledQuantity>
       </ram:SpecifiedLineTradeDelivery>
       <ram:SpecifiedLineTradeSettlement>
         <ram:ApplicableTradeTax>
@@ -63,14 +37,22 @@
           <ram:CategoryCode>S</ram:CategoryCode>
           <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
+        <ram:SpecifiedTradeAllowanceCharge>
+          <ram:ChargeIndicator>
+            <udt:Indicator>false</udt:Indicator>
+          </ram:ChargeIndicator>
+          <ram:ActualAmount>180.00</ram:ActualAmount>
+          <ram:Reason>Special discount</ram:Reason>
+        </ram:SpecifiedTradeAllowanceCharge>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
-          <ram:LineTotalAmount>149.00</ram:LineTotalAmount>
+          <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>
         </ram:SpecifiedTradeSettlementLineMonetarySummation>
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:BuyerReference>N/A</ram:BuyerReference>
+      <ram:BuyerReference>E2025003242</ram:BuyerReference>
       <ram:SellerTradeParty>
+        <ram:Name>Provide One GmbH</ram:Name>
         <ram:DefinedTradeContact>
           <ram:PersonName>Alvaro Garcia</ram:PersonName>
           <ram:DepartmentName>Sales</ram:DepartmentName>
@@ -81,60 +63,70 @@
             <ram:URIID>billing@example.com</ram:URIID>
           </ram:EmailURIUniversalCommunication>
         </ram:DefinedTradeContact>
-        <ram:Name>Sample Seller</ram:Name>
         <ram:PostalTradeAddress>
-          <ram:PostcodeCode>56000</ram:PostcodeCode>
-          <ram:LineOne>Sample Street 1</ram:LineOne>
-          <ram:CityName>Sample City</ram:CityName>
+          <ram:PostcodeCode>69190</ram:PostcodeCode>
+          <ram:LineOne>Dietmar-Hopp-Allee 16</ram:LineOne>
+          <ram:CityName>Walldorf</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
         <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="VA">DE049120826</ram:URIID>
+          <ram:URIID schemeID="VA">DE111111125</ram:URIID>
+        </ram:URIUniversalCommunication>
+        <ram:SpecifiedTaxRegistration>
+          <ram:ID schemeID="VA">DE111111125</ram:ID>
+        </ram:SpecifiedTaxRegistration>
+      </ram:SellerTradeParty>
+      <ram:BuyerTradeParty>
+        <ram:Name>Sample Consumer</ram:Name>
+        <ram:DefinedTradeContact>
+          <ram:PersonName>John Doe</ram:PersonName>
+          <ram:EmailURIUniversalCommunication>
+            <ram:URIID>email@sample.com</ram:URIID>
+          </ram:EmailURIUniversalCommunication>
+        </ram:DefinedTradeContact>
+        <ram:PostalTradeAddress>
+          <ram:PostcodeCode>80939</ram:PostcodeCode>
+          <ram:LineOne>Werner-Heisenberg-Allee 25</ram:LineOne>
+          <ram:CityName>München</ram:CityName>
+          <ram:CountryID>DE</ram:CountryID>
+        </ram:PostalTradeAddress>
+        <ram:URIUniversalCommunication>
+          <ram:URIID schemeID="VA">DE282741168</ram:URIID>
         </ram:URIUniversalCommunication>
         <ram:SpecifiedTaxRegistration>
           <ram:ID schemeID="VA">DE282741168</ram:ID>
         </ram:SpecifiedTaxRegistration>
-      </ram:SellerTradeParty>
-      <ram:BuyerTradeParty>
-        <ram:ID>DE208156390</ram:ID>
-        <ram:Name>Sample Buyer</ram:Name>
-        <ram:PostalTradeAddress>
-          <ram:PostcodeCode>48000</ram:PostcodeCode>
-          <ram:LineOne>Sample Street 2</ram:LineOne>
-          <ram:CityName>Sample City</ram:CityName>
-          <ram:CountryID>DE</ram:CountryID>
-        </ram:PostalTradeAddress>
-        <ram:URIUniversalCommunication>
-          <ram:URIID schemeID="VA">DE208156390</ram:URIID>
-        </ram:URIUniversalCommunication>
       </ram:BuyerTradeParty>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
       <ram:SpecifiedTradeSettlementPaymentMeans>
-        <ram:TypeCode>1</ram:TypeCode>
+        <ram:TypeCode>58</ram:TypeCode>
+        <ram:PayeePartyCreditorFinancialAccount>
+          <ram:IBANID>AE040192342142341231432</ram:IBANID>
+          <ram:AccountName>Random Bank Co.</ram:AccountName>
+        </ram:PayeePartyCreditorFinancialAccount>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
-        <ram:CalculatedAmount>350.00</ram:CalculatedAmount>
+        <ram:CalculatedAmount>307.80</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
-        <ram:BasisAmount>5000.00</ram:BasisAmount>
-        <ram:CategoryCode>S</ram:CategoryCode>
-        <ram:RateApplicablePercent>7</ram:RateApplicablePercent>
-      </ram:ApplicableTradeTax>
-      <ram:ApplicableTradeTax>
-        <ram:CalculatedAmount>23.79</ram:CalculatedAmount>
-        <ram:TypeCode>VAT</ram:TypeCode>
-        <ram:BasisAmount>125.21</ram:BasisAmount>
+        <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
+      <ram:SpecifiedTradePaymentTerms>
+        <ram:DueDateDateTime>
+          <udt:DateTimeString format="102">20220201</udt:DateTimeString>
+        </ram:DueDateDateTime>
+        <ram:PartialPaymentAmount>963.90</ram:PartialPaymentAmount>
+      </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-        <ram:LineTotalAmount>5125.21</ram:LineTotalAmount>
-        <ram:TaxBasisTotalAmount>5125.21</ram:TaxBasisTotalAmount>
-        <ram:TaxTotalAmount currencyID="EUR">373.79</ram:TaxTotalAmount>
-        <ram:GrandTotalAmount>5499.00</ram:GrandTotalAmount>
-        <ram:DuePayableAmount>5499.00</ram:DuePayableAmount>
+        <ram:LineTotalAmount>1620.00</ram:LineTotalAmount>
+        <ram:TaxBasisTotalAmount>1620.00</ram:TaxBasisTotalAmount>
+        <ram:TaxTotalAmount currencyID="EUR">307.80</ram:TaxTotalAmount>
+        <ram:GrandTotalAmount>1927.80</ram:GrandTotalAmount>
+        <ram:DuePayableAmount>1927.80</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
