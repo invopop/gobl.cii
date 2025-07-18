@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3e251dd2b86eda283aa41c754e1233f70490312d321b0a7aa3f6ec5b119b7d03"
+			"val": "9c9c5598c6d1bee90ae4089136a8a14bafffd93449cfa4f217882cacf98e49b0"
 		}
 	},
 	"doc": {
@@ -125,6 +125,9 @@
 				"total": "1620.00"
 			}
 		],
+		"ordering": {
+			"code": "E2025003242"
+		},
 		"payment": {
 			"instructions": {
 				"key": "credit-transfer+sepa",

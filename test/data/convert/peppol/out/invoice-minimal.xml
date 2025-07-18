@@ -43,7 +43,6 @@
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
-      <ram:BuyerReference>NA</ram:BuyerReference>
       <ram:SellerTradeParty>
         <ram:Name>Provide One GmbH</ram:Name>
         <ram:DefinedTradeContact>
@@ -84,6 +83,9 @@
           <ram:ID schemeID="VA">DE282741168</ram:ID>
         </ram:SpecifiedTaxRegistration>
       </ram:BuyerTradeParty>
+      <ram:BuyerOrderReferencedDocument>
+        <ram:IssuerAssignedID>E2025003242</ram:IssuerAssignedID>
+      </ram:BuyerOrderReferencedDocument>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery></ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
