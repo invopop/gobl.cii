@@ -13,8 +13,6 @@ import (
 const (
 	percentageCalculationFactor = 10000
 	percentageCalculationScale  = 2
-	fullPercentageAmount        = 100
-	fullPercentageScale         = 0
 )
 
 func goblAddChargesAndDiscounts(stlm *Settlement, out *bill.Invoice) error {
