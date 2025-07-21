@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d5a5cf5d1c6df95dd7c16d5015e31b078cf48a49db300f88499bb016f2c5ca76"
+			"val": "dfa4cdc38e116d599b0c04e4f52a95eb61c0dc33e9a4e4ff3ff2f665cae1691f"
 		}
 	},
 	"doc": {
@@ -24,8 +24,14 @@
 			"name": "xxxx",
 			"tax_id": {
 				"country": "DE",
-				"code": "1111111"
+				"code": "282741168"
 			},
+			"identities": [
+				{
+					"country": "DE",
+					"code": "111111111"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Storkower Straße 207",
@@ -136,7 +142,8 @@
 				"due_dates": [
 					{
 						"date": "2013-05-10",
-						"amount": "0.00"
+						"amount": "11.90",
+						"percent": "100%"
 					}
 				]
 			},

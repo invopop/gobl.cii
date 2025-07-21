@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7b331c70f4cdc22f5ff59d4a9f786ccdbfe5df7f8ce31d362f28246653d32312"
+			"val": "f93a5979daa9637f55c205037527305d8c3f67713beb99e67d3a7e31b454c8b2"
 		}
 	},
 	"doc": {
@@ -43,6 +43,10 @@
 				"code": "987654321MVA"
 			},
 			"identities": [
+				{
+					"country": "NO",
+					"code": "987654321"
+				},
 				{
 					"code": "3456789012098",
 					"ext": {
@@ -288,6 +292,10 @@
 				},
 				"identities": [
 					{
+						"country": "NO",
+						"code": "123456789"
+					},
+					{
 						"code": "1238764941386",
 						"ext": {
 							"iso-scheme-id": "0088"
@@ -347,13 +355,14 @@
 				"due_dates": [
 					{
 						"date": "2013-07-20",
-						"amount": "0.00"
+						"amount": "1801.78",
+						"percent": "100%"
 					}
 				]
 			},
 			"advances": [
 				{
-					"description": "",
+					"description": "Advance Payment",
 					"amount": "1000.00"
 				}
 			],

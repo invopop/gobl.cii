@@ -92,6 +92,25 @@ func goblNewParty(party *Party) *org.Party {
 		}
 	}
 
+	// Handle LegalOrganization ID
+	if party.LegalOrganization != nil && party.LegalOrganization.ID != nil && party.LegalOrganization.ID.Value != "" {
+		if p.Identities == nil {
+			p.Identities = make([]*org.Identity, 0)
+		}
+		identity := &org.Identity{
+			Code: cbc.Code(party.LegalOrganization.ID.Value),
+		}
+		if party.PostalTradeAddress != nil {
+			identity.Country = l10n.ISOCountryCode(party.PostalTradeAddress.CountryID)
+		}
+		if party.LegalOrganization.ID.SchemeID != "" {
+			identity.Ext = tax.Extensions{
+				iso.ExtKeySchemeID: cbc.Code(party.LegalOrganization.ID.SchemeID),
+			}
+		}
+		p.Identities = append(p.Identities, identity)
+	}
+
 	// Global ID is not yet mapped to the ISO 6523 ICD, its identifier is used as the label
 	if party.GlobalID != nil {
 		if p.Identities == nil {

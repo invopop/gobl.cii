@@ -48,11 +48,11 @@ func goblAddLines(in *Transaction, out *bill.Invoice) error {
 			l.Item.Unit = goblUnitFromUNECE(u)
 		}
 
-		if it.Product.SellerAssignedID != nil {
+		if it.Product.SellerAssignedID != nil && *it.Product.SellerAssignedID != "" {
 			l.Item.Ref = cbc.Code(*it.Product.SellerAssignedID)
 		}
 
-		if it.Product.BuyerAssignedID != nil {
+		if it.Product.BuyerAssignedID != nil && *it.Product.BuyerAssignedID != "" {
 			if l.Item.Identities == nil {
 				l.Item.Identities = make([]*org.Identity, 0)
 			}

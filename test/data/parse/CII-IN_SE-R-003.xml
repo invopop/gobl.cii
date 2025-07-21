@@ -123,9 +123,6 @@
 				<ram:SpecifiedTaxRegistration>
 					<ram:ID schemeID="VAT">SE123456789001</ram:ID>
 				</ram:SpecifiedTaxRegistration>
-				<ram:SpecifiedTaxRegistration>
-					<ram:ID schemeID="FC">Godkänd för F-skatt</ram:ID>
-				</ram:SpecifiedTaxRegistration>
 			</ram:SellerTradeParty>
 
 			<ram:BuyerTradeParty>
