@@ -12,6 +12,12 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
+const (
+	advancePaymentDescription = "Advance Payment"
+	fullPercentageAmount      = 100
+	fullPercentageScale       = 0
+)
+
 var paymentMeansMap = map[string]cbc.Key{
 	"10": pay.MeansKeyCash,
 	"20": pay.MeansKeyCheque,
@@ -63,7 +69,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 				}
 				a.Date = &advancePaymentReceivedDateTime
 			}
-			a.Description = "Specified Advance Payment"
+			a.Description = advancePaymentDescription
 			pymt.Advances = append(pymt.Advances, a)
 		}
 	} else if stlm.Summary.TotalPrepaidAmount != "" {
@@ -73,7 +79,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 			return nil, err
 		}
 		a := &pay.Advance{
-			Description: "Total Prepaid Ammount",
+			Description: advancePaymentDescription,
 			Amount:      amt,
 		}
 		pymt.Advances = append(pymt.Advances, a)
@@ -125,11 +131,11 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 					return nil, err
 				}
 				dd.Percent = &p
-				if dd.Percent != &num.PercentageZero {
+				if dd.Percent != nil && *dd.Percent != num.PercentageZero {
 					dates = append(dates, dd)
 				}
 			} else {
-				p := num.PercentageFromAmount(num.MakeAmount(100, 0))
+				p := num.PercentageFromAmount(num.MakeAmount(fullPercentageAmount, fullPercentageScale))
 				dd.Percent = &p
 				dates = append(dates, dd)
 			}

@@ -10,6 +10,13 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
+const (
+	percentageCalculationFactor = 10000
+	percentageCalculationScale  = 2
+	fullPercentageAmount        = 100
+	fullPercentageScale         = 0
+)
+
 func goblAddChargesAndDiscounts(stlm *Settlement, out *bill.Invoice) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
@@ -78,7 +85,7 @@ func goblNewCharge(ac *AllowanceCharge) (*bill.Charge, error) {
 		// Calculate percent from amount and base
 		if !c.Base.IsZero() {
 			// Calculate percentage: (amount / base) * 100
-			ratio := c.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(*c.Base)
+			ratio := c.Amount.Multiply(num.MakeAmount(percentageCalculationFactor, percentageCalculationScale)).Divide(*c.Base)
 			percent := num.PercentageFromAmount(ratio)
 			c.Percent = &percent
 		}
@@ -139,7 +146,7 @@ func goblNewDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
 		// Calculate percent from amount and base
 		if !d.Base.IsZero() {
 			// Calculate percentage: (amount / base) * 100
-			ratio := d.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(*d.Base)
+			ratio := d.Amount.Multiply(num.MakeAmount(percentageCalculationFactor, percentageCalculationScale)).Divide(*d.Base)
 			percent := num.PercentageFromAmount(ratio)
 			d.Percent = &percent
 		}
@@ -197,7 +204,7 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		base, err := num.AmountFromString(ac.Base)
 		if err == nil && !base.IsZero() {
 			// Calculate percentage: (amount / base) * 100
-			ratio := c.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(base)
+			ratio := c.Amount.Multiply(num.MakeAmount(percentageCalculationFactor, percentageCalculationScale)).Divide(base)
 			percent := num.PercentageFromAmount(ratio)
 			c.Percent = &percent
 		}
@@ -235,7 +242,7 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		base, err := num.AmountFromString(ac.Base)
 		if err == nil && !base.IsZero() {
 			// Calculate percentage: (amount / base) * 100
-			ratio := d.Amount.Multiply(num.MakeAmount(10000, 2)).Divide(base)
+			ratio := d.Amount.Multiply(num.MakeAmount(percentageCalculationFactor, percentageCalculationScale)).Divide(base)
 			percent := num.PercentageFromAmount(ratio)
 			d.Percent = &percent
 		}
