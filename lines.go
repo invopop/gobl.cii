@@ -81,6 +81,7 @@ type Quantity struct {
 // TradeSettlement defines the structure of the SpecifiedLineTradeSettlement of the CII standard
 type TradeSettlement struct {
 	ApplicableTradeTax []*Tax             `xml:"ram:ApplicableTradeTax"`
+	Period             *Period            `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	AllowanceCharge    []*AllowanceCharge `xml:"ram:SpecifiedTradeAllowanceCharge,omitempty"`
 	Sum                *Summation         `xml:"ram:SpecifiedTradeSettlementLineMonetarySummation"`
 }
@@ -170,6 +171,23 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 		Sum: &Summation{
 			Amount: l.Total.Rescale(2).String(),
 		},
+	}
+
+	if l.Period != nil {
+		stlm.Period = &Period{
+			Start: &IssueDate{
+				DateFormat: &Date{
+					Value:  formatIssueDate(l.Period.Start),
+					Format: issueDateFormat,
+				},
+			},
+			End: &IssueDate{
+				DateFormat: &Date{
+					Value:  formatIssueDate(l.Period.End),
+					Format: issueDateFormat,
+				},
+			},
+		}
 	}
 
 	if len(l.Charges) > 0 || len(l.Discounts) > 0 {

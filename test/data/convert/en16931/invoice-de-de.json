@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2617bca9f43ca96bf5827a678582a64055acfc05241e29a2af561fac6f8dae6b"
+			"val": "4beb1de471e2d9321496757d73a038432bc95d61b802556cdf732c2f92928771"
 		}
 	},
 	"doc": {
@@ -102,6 +102,10 @@
 			{
 				"i": 1,
 				"quantity": "20",
+				"period": {
+					"start": "2024-09-12",
+					"end": "2024-10-12"
+				},
 				"item": {
 					"name": "Development services",
 					"identities": [

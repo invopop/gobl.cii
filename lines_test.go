@@ -23,6 +23,8 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "1800.00", doc.Transaction.Lines[0].TradeSettlement.Sum.Amount)
 		assert.Equal(t, "123456789", doc.Transaction.Lines[0].Product.GlobalID.Value)
 		assert.Equal(t, "0088", doc.Transaction.Lines[0].Product.GlobalID.SchemeID)
+		assert.Equal(t, "20240912", doc.Transaction.Lines[0].TradeSettlement.Period.Start.DateFormat.Value)
+		assert.Equal(t, "20241012", doc.Transaction.Lines[0].TradeSettlement.Period.End.DateFormat.Value)
 	})
 
 }
