@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "eb9a4bc1c50cdd28a74018f97c3d8f49dbc78eda49f0891b264edf75c0ea50ad"
+			"val": "aaf1ae9ea73cd9691f562b31a7ca10cfbc3ce0acf05e77a0bd1faf3e9fa9b74e"
 		}
 	},
 	"doc": {
@@ -24,8 +24,14 @@
 			"name": "XXX AG",
 			"tax_id": {
 				"country": "DE",
-				"code": "3730230168"
+				"code": "282741168"
 			},
+			"identities": [
+				{
+					"country": "DE",
+					"code": "282741168"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Storkower Straße 207",
@@ -115,7 +121,8 @@
 				"due_dates": [
 					{
 						"date": "2015-01-09",
-						"amount": "0.00"
+						"amount": "13706.37",
+						"percent": "100%"
 					}
 				]
 			},

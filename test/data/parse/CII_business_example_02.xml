@@ -27,7 +27,7 @@
         </ram:IncludedNote>
     </rsm:ExchangedDocument>
     <rsm:SupplyChainTradeTransaction>
-	
+
         <ram:IncludedSupplyChainTradeLineItem>
             <ram:AssociatedDocumentLineDocument>
                 <ram:LineID>1</ram:LineID>
@@ -55,7 +55,7 @@
                 </ram:SpecifiedTradeSettlementLineMonetarySummation>
             </ram:SpecifiedLineTradeSettlement>
         </ram:IncludedSupplyChainTradeLineItem>
-		
+
 		        <ram:IncludedSupplyChainTradeLineItem>
             <ram:AssociatedDocumentLineDocument>
                 <ram:LineID>2</ram:LineID>
@@ -83,7 +83,7 @@
                 </ram:SpecifiedTradeSettlementLineMonetarySummation>
             </ram:SpecifiedLineTradeSettlement>
         </ram:IncludedSupplyChainTradeLineItem>
-		
+
 		        <ram:IncludedSupplyChainTradeLineItem>
             <ram:AssociatedDocumentLineDocument>
                 <ram:LineID>3</ram:LineID>
@@ -111,7 +111,7 @@
                 </ram:SpecifiedTradeSettlementLineMonetarySummation>
             </ram:SpecifiedLineTradeSettlement>
         </ram:IncludedSupplyChainTradeLineItem>
-		
+
         <ram:ApplicableHeaderTradeAgreement>
             <ram:SellerTradeParty>
                 <ram:Name>xxxx</ram:Name>
@@ -127,7 +127,7 @@
                     <ram:CountryID>DE</ram:CountryID>
                 </ram:PostalTradeAddress>
                 <ram:SpecifiedTaxRegistration>
-                    <ram:ID schemeID="VA">DE1111111</ram:ID>
+                    <ram:ID schemeID="VA">DE282741168</ram:ID>
                 </ram:SpecifiedTaxRegistration>
             </ram:SellerTradeParty>
             <ram:BuyerTradeParty>

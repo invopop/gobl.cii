@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "aa8aa1fcb06de9dc2f24b530a82edce827011c723c3effd4fb7ea72518ddbfa5"
+			"val": "bcfcf31b0277550e93086e14be860d11e5fbf00fc676eb99dc35f1fff8ababfe"
 		}
 	},
 	"doc": {
@@ -26,6 +26,10 @@
 				"code": "16356706"
 			},
 			"identities": [
+				{
+					"country": "DK",
+					"code": "DK16356706"
+				},
 				{
 					"code": "5790000436101",
 					"ext": {
@@ -155,7 +159,8 @@
 				"due_dates": [
 					{
 						"date": "2013-05-10",
-						"amount": "0.00"
+						"amount": "4675.00",
+						"percent": "100%"
 					}
 				]
 			},

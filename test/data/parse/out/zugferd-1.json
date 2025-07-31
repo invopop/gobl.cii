@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0617fcd7a086396f2eb925a2d3106a5366a6724fb50edf22dbfe50884d474054"
+			"val": "9f1ad44f31e244fe4a5cbc284621c54a32cbaf4cf840caf45b8e37a9e1bfb647"
 		}
 	},
 	"doc": {
@@ -24,7 +24,7 @@
 			"name": "Lieferant GmbH",
 			"tax_id": {
 				"country": "DE",
-				"code": "123456789"
+				"code": "282741168"
 			},
 			"identities": [
 				{
@@ -67,9 +67,6 @@
 					"name": "Kunstrasen grün 3m breit",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4012345001235",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -102,9 +99,6 @@
 					"name": "Schweinesteak",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000050986428",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -132,9 +126,6 @@
 					"name": "Mineralwasser Medium 12 x 1,0l PET",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000001234561",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -161,9 +152,6 @@
 					"name": "Pfand",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000001234578",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -188,6 +176,7 @@
 				"i": 1,
 				"reason": "Sondernachlass",
 				"base": "10.00",
+				"percent": "10.00%",
 				"amount": "1.00",
 				"taxes": [
 					{
@@ -200,6 +189,7 @@
 				"i": 2,
 				"reason": "Sondernachlass",
 				"base": "137.30",
+				"percent": "10.00%",
 				"amount": "13.73",
 				"taxes": [
 					{
@@ -214,7 +204,8 @@
 				"i": 1,
 				"reason": "Versandkosten",
 				"base": "137.30",
-				"amount": "5.80",
+				"percent": "4.22%",
+				"amount": "5.79",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -236,7 +227,7 @@
 			},
 			"advances": [
 				{
-					"description": "",
+					"description": "Advance Payment",
 					"amount": "50.00"
 				}
 			]
@@ -247,8 +238,8 @@
 		"totals": {
 			"sum": "202.70",
 			"discount": "14.73",
-			"charge": "5.80",
-			"total": "193.77",
+			"charge": "5.79",
+			"total": "193.76",
 			"taxes": {
 				"categories": [
 					{
@@ -260,7 +251,7 @@
 								"amount": "12.24"
 							},
 							{
-								"base": "129.37",
+								"base": "129.36",
 								"percent": "7.00%",
 								"amount": "9.06"
 							}
