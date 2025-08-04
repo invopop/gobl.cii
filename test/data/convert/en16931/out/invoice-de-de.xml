@@ -131,8 +131,9 @@
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>1800.00</ram:TaxBasisTotalAmount>
         <ram:TaxTotalAmount currencyID="EUR">342.00</ram:TaxTotalAmount>
+        <ram:RoundingAmount>0.01</ram:RoundingAmount>
         <ram:GrandTotalAmount>2142.00</ram:GrandTotalAmount>
-        <ram:DuePayableAmount>2142.00</ram:DuePayableAmount>
+        <ram:DuePayableAmount>2142.01</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
