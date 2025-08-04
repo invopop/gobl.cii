@@ -97,6 +97,7 @@ type Summary struct {
 	Discounts           string          `xml:"ram:AllowanceTotalAmount,omitempty"`
 	TaxBasisTotalAmount string          `xml:"ram:TaxBasisTotalAmount"`
 	TaxTotalAmount      *TaxTotalAmount `xml:"ram:TaxTotalAmount"`
+	RoundingAmount      string          `xml:"ram:RoundingAmount,omitempty"`
 	GrandTotalAmount    string          `xml:"ram:GrandTotalAmount"`
 	TotalPrepaidAmount  string          `xml:"ram:TotalPrepaidAmount,omitempty"`
 	DuePayableAmount    string          `xml:"ram:DuePayableAmount"`
@@ -288,6 +289,11 @@ func newSummary(totals *bill.Totals, currency string) *Summary {
 	if totals.Advances != nil {
 		s.TotalPrepaidAmount = totals.Advances.String()
 	}
+
+	if totals.Rounding != nil {
+		s.RoundingAmount = totals.Rounding.String()
+	}
+
 	return s
 }
 
