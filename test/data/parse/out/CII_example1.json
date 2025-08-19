@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0de00bfa0164716351e2e3a2e14a749d4b72c1632bf9f42548cbf0d6cd6ced37"
+			"val": "f9ffce95bec13d12aa3fb16798a2ea92129fbb59a1674f2fe23535e03a2f289c"
 		}
 	},
 	"doc": {
@@ -26,6 +26,12 @@
 				"country": "NL",
 				"code": "820098395B01"
 			},
+			"identities": [
+				{
+					"country": "NL",
+					"code": "57151520"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Postbus 7l",
@@ -420,7 +426,8 @@
 				"due_dates": [
 					{
 						"date": "2015-01-09",
-						"amount": "0.00"
+						"amount": "483.49",
+						"percent": "100%"
 					}
 				]
 			},

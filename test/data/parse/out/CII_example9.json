@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fc76b1afd9fb717026145ef3b576b3b250ea36398ee259cdcd1530e886a99959"
+			"val": "961412de08e643bb9c3e7d2329cc4c880eda1a2c56861991a8fd0754291f590e"
 		}
 	},
 	"doc": {
@@ -26,6 +26,12 @@
 				"country": "NL",
 				"code": "809163160B01"
 			},
+			"identities": [
+				{
+					"country": "NL",
+					"code": "32081330 Amersfoort"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Lindeboomseweg 41",
@@ -90,7 +96,8 @@
 				"due_dates": [
 					{
 						"date": "2015-04-15",
-						"amount": "0.00"
+						"amount": "177.87",
+						"percent": "100%"
 					}
 				]
 			},

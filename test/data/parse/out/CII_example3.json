@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "515b93ddc901bd73961afb10a8b8d456feb704dfe7a203e7fc5c5205821f8d95"
+			"val": "5afded8a57ade52f2571384cf6dd3c43e9e2addbc5ed0744747db2c6c2e98dcb"
 		}
 	},
 	"doc": {
@@ -25,6 +25,12 @@
 				"country": "DK",
 				"code": "16356706"
 			},
+			"identities": [
+				{
+					"country": "DK",
+					"code": "DK16356706"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Main street 2, Building 4",
@@ -110,7 +116,8 @@
 				"due_dates": [
 					{
 						"date": "2013-05-10",
-						"amount": "0.00"
+						"amount": "1125.00",
+						"percent": "100%"
 					}
 				]
 			},
