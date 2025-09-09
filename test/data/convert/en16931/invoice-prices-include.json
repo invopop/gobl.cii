@@ -1,0 +1,502 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "0cd8d31ac2ab201145a63845ea780b7a80ea27d6fac3dfedff23e3283cd96906"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017",
+			"de-xrechnung-v3"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "R00005199",
+		"issue_date": "2025-09-05",
+		"op_date": "2025-09-05",
+		"currency": "EUR",
+		"tax": {
+			"prices_include": "VAT",
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"uuid": "019354d0-11b6-7000-a434-7f0b88e8f4ce",
+			"name": "Provide One GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Alvaro Garcia"
+					},
+					"emails": [
+						{
+							"addr": "billing@example.com"
+						}
+					],
+					"telephones": [
+						{
+							"num": "+4915159990591"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"email": "billing@example.com"
+				}
+			],
+			"addresses": [
+				{
+					"num": "16",
+					"street": "Dietmar-Hopp-Allee",
+					"locality": "Walldorf",
+					"code": "69190",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"tax_id": {
+				"country": "DE",
+				"code": "282741168"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "John",
+						"surname": "Doe"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9930",
+					"code": "DE282741168"
+				}
+			],
+			"addresses": [
+				{
+					"num": "25",
+					"street": "Werner-Heisenberg-Allee",
+					"locality": "München",
+					"code": "80939",
+					"country": "DE"
+				}
+			],
+			"meta": {
+				"chargebee-customer-id": "19AGk2UmIyN2X1pkh"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTcntMUsWONKn1gnU",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTU1VVUsWKhvw1btd",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 3,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTLm1wUsWL19f1eDE",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 4,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription 778mgUsWLz8a1bs8",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 5,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTcntMUsWPDrH1hnt",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 6,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription 778mgUsWMIta1cJM",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 7,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTcPYyUsWOenD1gFR",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 8,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTcPYyUsWMf1s1e1k",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 9,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTM5qDUsWOzJD1gmL",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 10,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription 199E0EUsWNSwv1fQO",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			},
+			{
+				"i": 11,
+				"quantity": "1.000",
+				"period": {
+					"start": "2025-09-01",
+					"end": "2025-09-30"
+				},
+				"item": {
+					"name": "Wallbox Grundgebühr inkl. Wartung",
+					"description": "Subscription BTLm1wUsWO9MI1hgk",
+					"price": "25.00",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-09-01",
+						"chargebee-date-to": "2025-09-30"
+					}
+				},
+				"sum": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "25.00"
+			}
+		],
+		"ordering": {
+			"code": "NA",
+			"purchases": [
+				{
+					"code": "john.doe-sample.com"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-09-05",
+						"amount": "275.00",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"detail": "Bank Transfer",
+				"credit_transfer": [
+					{
+						"iban": "AE040192342142341231432"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "275.00",
+			"tax_included": "43.91",
+			"total": "231.09",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "231.11",
+								"percent": "19.0%",
+								"amount": "43.91"
+							}
+						],
+						"amount": "43.91"
+					}
+				],
+				"sum": "43.91"
+			},
+			"tax": "43.91",
+			"total_with_tax": "275.00",
+			"payable": "275.00"
+		},
+		"notes": [
+			{
+				"text": "\u003ccenter\u003e\u003cbr /\u003eProvide One GmbH | Dietmar-Hopp-Allee 16 | 69190 Walldorf | Deutschland\n\u003cbr /\u003eTel.: +4915159990591 | Fax: +49 711 12345679 | E-Mail: billing@example.com | www.example.com \n\u003cbr /\u003eBankverbindung: Random Bank Co. | IBAN: AE04 0192 3421 4234 1231 432 | BIC: DEUTDEHHXXX\n\u003cbr /\u003eHandelsregister: Amtsgericht Stuttgart HRB 123456 | Steuer-Nr.: 12/345/67890 | USt-ID Nr.: DE111111125\u003cbr /\u003eGeschäftsführer: Alvaro Garcia\n\u003c/center\u003e",
+				"meta": {
+					"chargebee-entity-id": "",
+					"chargebee-entity-type": ""
+				}
+			}
+		],
+		"meta": {
+			"chargebee-doc-id": "R00005199",
+			"chargebee-doc-type": "invoice",
+			"chargebee-site": "example-company"
+		}
+	}
+}
