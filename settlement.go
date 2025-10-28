@@ -205,7 +205,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		}
 
 		// Fill in credit transfer details if available
-		if instr.CreditTransfer != nil && len(instr.CreditTransfer) > 0 {
+		if len(instr.CreditTransfer) > 0 {
 			pm.Creditor = &Creditor{
 				IBAN:   instr.CreditTransfer[0].IBAN,
 				Name:   instr.CreditTransfer[0].Name,
