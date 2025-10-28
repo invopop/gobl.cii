@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2bd91771244f34b9704ceef0c5dc081cec4df7fa5b598ea708314b0763c13776"
+			"val": "7ff9fdeee2cb11bbd85c89cd8a73c56362ef84dceb151a4ebcb1a60857e094c6"
 		}
 	},
 	"doc": {
@@ -24,7 +24,7 @@
 			"identities": [
 				{
 					"country": "SE",
-					"code": "Godkänd för F-skatt"
+					"code": "Godknd fr F-skatt"
 				}
 			],
 			"inboxes": [
@@ -66,6 +66,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -83,6 +84,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -100,6 +102,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "12%"
 					}
 				],
@@ -116,6 +119,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -134,6 +138,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -178,11 +183,13 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"base": "1500.00",
 								"percent": "25%",
 								"amount": "375.00"
 							},
 							{
+								"key": "standard",
 								"base": "2500.00",
 								"percent": "12%",
 								"amount": "300.00"

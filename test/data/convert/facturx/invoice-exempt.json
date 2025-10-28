@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "904bc92453a0d9e5ef2c6b98abdf94738ce15a4f72a831671ff693419e7a8a7e"
+			"val": "5ba485d91232fd769187ee70708d8919956191d2248d147e012685ad84305e5a"
 		}
 	},
 	"doc": {
@@ -87,7 +87,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "exempt",
+						"key": "exempt",
 						"ext": {
 							"cef-vatex": "VATEX-EU-132",
 							"untdid-tax-category": "E"
@@ -104,6 +104,15 @@
 			}
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-05-10",
+						"amount": "200.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"advances": [
 				{
 					"date": "2025-04-10",

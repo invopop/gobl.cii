@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1805a25b104248e6c0d628df75c84e711ea9f1d2c6ed8bcd65877f5b18b94295"
+			"val": "e16f80025f62c8694c1e0f95f57cfa74f650db5795943a2cca9c9c65b8966f27"
 		}
 	},
 	"doc": {
@@ -121,7 +121,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -135,6 +136,15 @@
 			"code": "E2025003242"
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2022-03-01",
+						"amount": "1927.80",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer+sepa",
 				"credit_transfer": [

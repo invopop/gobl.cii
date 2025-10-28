@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bb7588a45936d907343816a4f43b5c1c788c5cdde5e934f3370495f03eae90da"
+			"val": "2b1defaf04933229b54a0c20441551e2e4eccfe8db2a8b8335f2b32b88f27a2a"
 		}
 	},
 	"doc": {
@@ -107,7 +107,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "20%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -118,6 +119,15 @@
 			}
 		],
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2022-03-01",
+						"amount": "1944.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"advances": [
 				{
 					"description": "Paid in full",
