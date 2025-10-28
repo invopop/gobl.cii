@@ -45,10 +45,10 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "NO9386011117947", doc.Transaction.Settlement.PaymentMeans[0].Creditor.IBAN)
 
 		assert.Equal(t, "1234567890", doc.Transaction.Settlement.PaymentTerms[0].Mandate)
-		assert.Equal(t, "DE89370400440532013000", doc.Transaction.Settlement.PaymentMeans[1].Debtor.IBAN)
+		assert.Equal(t, "DE89370400440532013000", doc.Transaction.Settlement.PaymentMeans[0].Debtor.IBAN)
 
-		assert.Equal(t, "1234", doc.Transaction.Settlement.PaymentMeans[2].Card.ID)
-		assert.Equal(t, "John Doe", doc.Transaction.Settlement.PaymentMeans[2].Card.Name)
+		assert.Equal(t, "1234", doc.Transaction.Settlement.PaymentMeans[0].Card.ID)
+		assert.Equal(t, "John Doe", doc.Transaction.Settlement.PaymentMeans[0].Card.Name)
 	})
 
 	t.Run("extension errors", func(t *testing.T) {
