@@ -11,9 +11,6 @@
     <ram:IssueDateTime>
       <udt:DateTimeString format="102">20250905</udt:DateTimeString>
     </ram:IssueDateTime>
-    <ram:IncludedNote>
-      <ram:Content>&lt;center&gt;&lt;br /&gt;Provide One GmbH | Dietmar-Hopp-Allee 16 | 69190 Walldorf | Deutschland&#xA;&lt;br /&gt;Tel.: +4915159990591 | Fax: +49 711 12345679 | E-Mail: billing@example.com | www.example.com &#xA;&lt;br /&gt;Bankverbindung: Random Bank Co. | IBAN: AE04 0192 3421 4234 1231 432 | BIC: DEUTDEHHXXX&#xA;&lt;br /&gt;Handelsregister: Amtsgericht Stuttgart HRB 123456 | Steuer-Nr.: 12/345/67890 | USt-ID Nr.: DE111111125&lt;br /&gt;Geschäftsführer: Alvaro Garcia&#xA;&lt;/center&gt;</ram:Content>
-    </ram:IncludedNote>
   </rsm:ExchangedDocument>
   <rsm:SupplyChainTradeTransaction>
     <ram:IncludedSupplyChainTradeLineItem>
