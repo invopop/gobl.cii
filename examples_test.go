@@ -82,9 +82,6 @@ func testConvertInvoiceFormat(t *testing.T, folder string, ctx cii.Context) {
 		t.Run(inName, func(t *testing.T) {
 			// Load and convert using the format-specific context
 			env := loadEnvelope(t, filepath.Join(folder, inName))
-			inv, ok := env.Extract().(*bill.Invoice)
-			require.True(t, ok)
-			require.NoError(t, inv.RemoveIncludedTaxes())
 			out, err := cii.ConvertInvoice(env, cii.WithContext(ctx))
 			require.NoError(t, err)
 
