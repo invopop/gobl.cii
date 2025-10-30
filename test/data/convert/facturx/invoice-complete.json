@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d0a7562a1db23c4d54f5b7446ae74cc94a29339572050c8542bb2104463a95e7"
+			"val": "d8dca1e68ea250974638f1f72f080fa5f1e5825f146f24ebca80c2f751212f5e"
 		}
 	},
 	"doc": {
@@ -106,7 +106,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -124,7 +125,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -144,7 +146,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -189,6 +192,14 @@
 					{
 						"label": "0088",
 						"code": "2298740918237"
+					}
+				],
+				"addresses": [
+					{
+						"street": "Main Street 1",
+						"locality": "Oslo",
+						"code": "0010",
+						"country": "NO"
 					}
 				]
 			},

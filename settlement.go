@@ -193,41 +193,36 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
-		means := make([]*PaymentMeans, 0)
 		pmc, err := getPaymentMeansCode(instr)
 		if err != nil {
 			return nil, err
 		}
 
-		if instr.CreditTransfer != nil {
-			credit := &PaymentMeans{
-				TypeCode:    pmc,
-				Information: instr.Detail,
-				Creditor: &Creditor{
-					IBAN:   instr.CreditTransfer[0].IBAN,
-					Name:   instr.CreditTransfer[0].Name,
-					Number: instr.CreditTransfer[0].Number,
-				},
+		// Always create a PaymentMeans with at least the payment code
+		pm := &PaymentMeans{
+			TypeCode:    pmc,
+			Information: instr.Detail,
+		}
+
+		// Fill in credit transfer details if available
+		if len(instr.CreditTransfer) > 0 {
+			pm.Creditor = &Creditor{
+				IBAN:   instr.CreditTransfer[0].IBAN,
+				Name:   instr.CreditTransfer[0].Name,
+				Number: instr.CreditTransfer[0].Number,
 			}
 			if instr.CreditTransfer[0].BIC != "" {
-				credit.CreditorInstitution = &CreditorInstitution{
+				pm.CreditorInstitution = &CreditorInstitution{
 					BIC: instr.CreditTransfer[0].BIC,
 				}
 			}
-
-			means = append(means, credit)
 		}
 
+		// Fill in direct debit details if available
 		if instr.DirectDebit != nil {
-			direct := &PaymentMeans{
-				TypeCode:    pmc,
-				Information: instr.Detail,
-				Debtor: &DebtorAccount{
-					IBAN: instr.DirectDebit.Account,
-				},
+			pm.Debtor = &DebtorAccount{
+				IBAN: instr.DirectDebit.Account,
 			}
-
-			means = append(means, direct)
 
 			if stlm.PaymentTerms == nil {
 				stlm.PaymentTerms = []*Terms{
@@ -244,19 +239,16 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 			stlm.CreditorRefID = instr.DirectDebit.Creditor
 		}
 
+		// Fill in card details if available
 		if instr.Card != nil {
-			card := &PaymentMeans{
-				TypeCode:    pmc,
-				Information: instr.Detail,
-				Card: &Card{
-					ID:   instr.Card.Last4,
-					Name: instr.Card.Holder,
-				},
+			pm.Card = &Card{
+				ID:   instr.Card.Last4,
+				Name: instr.Card.Holder,
 			}
-			means = append(means, card)
 		}
 
-		stlm.PaymentMeans = means
+		// Always append the payment means since we have at least the payment code
+		stlm.PaymentMeans = []*PaymentMeans{pm}
 	}
 
 	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {

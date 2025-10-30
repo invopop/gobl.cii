@@ -30,6 +30,8 @@ github.com/invopop/gobl v0.217.2-0.20250611161148-355e6c17e45f h1:t09jgqn5flRQW/
 github.com/invopop/gobl v0.217.2-0.20250611161148-355e6c17e45f/go.mod h1:RDgv26Zs8PyVq7gHU17fqyX0tWifCEdPQzoz3dNtEv0=
 github.com/invopop/gobl v0.218.0 h1:2IFMx0Y/XeNgM9XfyGbdB7RX7RCQrCFuyAzWJP1TtxA=
 github.com/invopop/gobl v0.218.0/go.mod h1:RDgv26Zs8PyVq7gHU17fqyX0tWifCEdPQzoz3dNtEv0=
+github.com/invopop/gobl v0.301.0 h1:xh19rH1FbokNhcMB+dw+IGshM+xGFnS5zDvm8gbgLyk=
+github.com/invopop/gobl v0.301.0/go.mod h1:RDgv26Zs8PyVq7gHU17fqyX0tWifCEdPQzoz3dNtEv0=
 github.com/invopop/jsonschema v0.13.0 h1:KvpoAJWEjR3uD9Kbm2HWJmqsEaHt8lBUpd0qHcIi21E=
 github.com/invopop/jsonschema v0.13.0/go.mod h1:ffZ5Km5SWWRAIN6wbDXItl95euhFz2uON45H2qjYt+0=
 github.com/invopop/validation v0.8.0 h1:e5hXHGnONHImgJdonIpNbctg1hlWy1ncaHoVIQ0JWuw=

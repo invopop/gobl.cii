@@ -132,6 +132,12 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 				return nil, fmt.Errorf("gobl invoice missing addon %s", ao)
 			}
 		}
+
+		// Removes included taxes as they are not supported in CII
+		if err := doc.RemoveIncludedTaxes(); err != nil {
+			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
+		}
+
 		return newInvoice(doc, o.context)
 	default:
 		return nil, ErrUnsupportedDocumentType

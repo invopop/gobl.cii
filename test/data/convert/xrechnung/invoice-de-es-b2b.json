@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9c9c5598c6d1bee90ae4089136a8a14bafffd93449cfa4f217882cacf98e49b0"
+			"val": "608420413aec7a26b207359fe5975068232523b13f8df09e95d05e7b4f9b73c7"
 		}
 	},
 	"doc": {
@@ -116,7 +116,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "exempt+reverse-charge",
+						"key": "reverse-charge",
 						"ext": {
 							"untdid-tax-category": "AE"
 						}
@@ -129,6 +129,15 @@
 			"code": "E2025003242"
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2022-03-01",
+						"amount": "1620.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer+sepa",
 				"credit_transfer": [
@@ -151,7 +160,7 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "exempt+reverse-charge",
+								"key": "reverse-charge",
 								"ext": {
 									"untdid-tax-category": "AE"
 								},

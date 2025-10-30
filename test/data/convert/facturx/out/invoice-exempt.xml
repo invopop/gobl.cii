@@ -86,6 +86,11 @@
         <ram:ExemptionReasonCode>VATEX-EU-132</ram:ExemptionReasonCode>
         <ram:RateApplicablePercent>0</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
+      <ram:SpecifiedTradePaymentTerms>
+        <ram:DueDateDateTime>
+          <udt:DateTimeString format="102">20250510</udt:DateTimeString>
+        </ram:DueDateDateTime>
+      </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>200.00</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>200.00</ram:TaxBasisTotalAmount>

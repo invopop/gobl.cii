@@ -26,7 +26,7 @@
       </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
         <ram:NetPriceProductTradePrice>
-          <ram:ChargeAmount>234.00</ram:ChargeAmount>
+          <ram:ChargeAmount>196.6387</ram:ChargeAmount>
         </ram:NetPriceProductTradePrice>
       </ram:SpecifiedLineTradeAgreement>
       <ram:SpecifiedLineTradeDelivery>
@@ -39,7 +39,7 @@
           <ram:RateApplicablePercent>19.0</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>
-          <ram:LineTotalAmount>1638.00</ram:LineTotalAmount>
+          <ram:LineTotalAmount>1376.47</ram:LineTotalAmount>
         </ram:SpecifiedTradeSettlementLineMonetarySummation>
       </ram:SpecifiedLineTradeSettlement>
     </ram:IncludedSupplyChainTradeLineItem>
@@ -138,7 +138,7 @@
         </ram:DueDateDateTime>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-        <ram:LineTotalAmount>1638.00</ram:LineTotalAmount>
+        <ram:LineTotalAmount>1376.47</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>1376.47</ram:TaxBasisTotalAmount>
         <ram:TaxTotalAmount currencyID="EUR">261.53</ram:TaxTotalAmount>
         <ram:GrandTotalAmount>1638.00</ram:GrandTotalAmount>
