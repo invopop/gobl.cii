@@ -10,9 +10,7 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
-		"$addons": [
-			"eu-en16931-v2017"
-		],
+		"$addons": ["eu-en16931-v2017"],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "corrective",
 		"series": "COR",
@@ -115,7 +113,7 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "lorem ipsum"
+				"notes": "lorem ipsum"
 			}
 		},
 		"totals": {

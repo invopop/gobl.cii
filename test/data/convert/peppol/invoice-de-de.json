@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bae5d066d54676c11d845ef4aac412213a5a6ebeffc816697dc5fe82441d1ec8"
+			"val": "eff0a80dd01248ae7b853aa309390616a6154e5e1a3e014d2b4d43776569c8d4"
 		}
 	},
 	"doc": {
@@ -180,14 +180,14 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "lorem ipsum",
 				"due_dates": [
 					{
 						"date": "2024-02-27",
 						"amount": "2000.00",
 						"currency": "EUR"
 					}
-				]
+				],
+				"notes": "lorem ipsum"
 			}
 		},
 		"totals": {
