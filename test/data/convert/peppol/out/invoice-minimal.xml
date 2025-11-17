@@ -97,9 +97,6 @@
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
-      <ram:SpecifiedTradePaymentTerms>
-        <ram:Description>lorem ipsum</ram:Description>
-      </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>
         <ram:TaxBasisTotalAmount>1800.00</ram:TaxBasisTotalAmount>

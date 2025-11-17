@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "51b4b6e5dc10da61f47f90b6d8e67165cbda2365a3e86ee127825595e79d507f"
+			"val": "6c2b275544067b2dd08419ee853178417538be5ebf0345af8c95ae4141880788"
 		}
 	},
 	"doc": {
@@ -350,13 +350,13 @@
 				"name": "Ebeneser Scrooge AS"
 			},
 			"terms": {
-				"detail": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date",
 				"due_dates": [
 					{
 						"date": "2013-07-20",
 						"amount": "0.00"
 					}
-				]
+				],
+				"notes": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date"
 			},
 			"advances": [
 				{

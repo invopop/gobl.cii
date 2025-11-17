@@ -115,7 +115,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		Currency: string(inv.Currency),
 	}
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		description := inv.Payment.Terms.Detail
+		description := inv.Payment.Terms.Notes
 		if len(inv.Payment.Terms.DueDates) == 0 {
 			if description != "" {
 				stlm.PaymentTerms = []*Terms{

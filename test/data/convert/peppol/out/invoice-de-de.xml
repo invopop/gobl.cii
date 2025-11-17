@@ -116,7 +116,6 @@
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradePaymentTerms>
-        <ram:Description>lorem ipsum</ram:Description>
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20240227</udt:DateTimeString>
         </ram:DueDateDateTime>
