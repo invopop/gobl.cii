@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e55d97dbe9f86aa3d2dbde78ece2d5006f363c83585b5ab40cd22d1e7ccc849b"
+			"val": "b9ea295a4a84352cafaf05c049602ed39298a3b16648fabb3c23d78d1e98b455"
 		}
 	},
 	"doc": {
@@ -239,7 +239,7 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "Zahlbar innerhalb 30 Tagen netto bis 04.07.2018, 3% Skonto innerhalb 10 Tagen bis 15.06.2018"
+				"notes": "Zahlbar innerhalb 30 Tagen netto bis 04.07.2018, 3% Skonto innerhalb 10 Tagen bis 15.06.2018"
 			},
 			"advances": [
 				{

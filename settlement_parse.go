@@ -93,10 +93,10 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	for _, term := range settlement.PaymentTerms {
 		if term.Description != "" {
-			if terms.Detail != "" {
-				terms.Detail = strings.Join([]string{terms.Detail, term.Description}, ". ")
+			if terms.Notes != "" {
+				terms.Notes = strings.Join([]string{terms.Notes, term.Description}, ". ")
 			} else {
-				terms.Detail = term.Description
+				terms.Notes = term.Description
 			}
 		}
 
@@ -130,7 +130,6 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 	if len(terms.DueDates) == 0 &&
 		terms.Notes == "" &&
 		terms.Key == "" &&
-		terms.Detail == "" &&
 		len(terms.Ext) == 0 {
 		return nil, nil
 	}

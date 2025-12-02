@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2fba2c922d614d5001674b1f09e1b7ea4a70f1f59017a80825f0893571673773"
+			"val": "4dc9f104008d0c56015604f304a28c3d90e88c158702e407e536fdbcc528e1c6"
 		}
 	},
 	"doc": {
@@ -130,7 +130,7 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "Payment within 30 days"
+				"notes": "Payment within 30 days"
 			},
 			"instructions": {
 				"key": "credit-transfer",

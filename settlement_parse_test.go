@@ -29,7 +29,7 @@ func TestParseCtoGPayment(t *testing.T) {
 	assert.Equal(t, l10n.ISOCountryCode("DE"), payment.Payee.Addresses[0].Country)
 
 	assert.NotNil(t, payment.Terms)
-	assert.Equal(t, "Partial Payment", payment.Terms.Detail)
+	assert.Equal(t, "Partial Payment", payment.Terms.Notes)
 	assert.Len(t, payment.Terms.DueDates, 1)
 	assert.Equal(t, "2024-10-01", payment.Terms.DueDates[0].Date.String())
 	assert.Equal(t, "20.00", payment.Terms.DueDates[0].Amount.String())

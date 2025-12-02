@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "09654ae175d46ad045cc17bb3c96e1173951b2520d17f6eff98f702ce6af7b70"
+			"val": "4e7eb7fc18ed9064b46e97880f0fe05f39b05dd6abd4bb0d1868aa80c7eeffac"
 		}
 	},
 	"doc": {
@@ -117,7 +117,7 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "lorem ipsum"
+				"notes": "lorem ipsum"
 			}
 		},
 		"totals": {

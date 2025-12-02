@@ -178,6 +178,7 @@
         </ram:CategoryTradeTax>
       </ram:SpecifiedTradeAllowanceCharge>
       <ram:SpecifiedTradePaymentTerms>
+        <ram:Description>2 % discount if paid within 2 days&#xA;            Penalty percentage 10% from due date</ram:Description>
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20130720</udt:DateTimeString>
         </ram:DueDateDateTime>
