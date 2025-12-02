@@ -37,7 +37,8 @@ const (
 
 // Profile ID codes
 const (
-	ProfileIDPeppolBilling = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
+	ProfileIDPeppolBilling       = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
+	ProfileIDPeppolFranceBilling = "urn:peppol:france:billing:regulated"
 )
 
 // Context is used to ensure that the generated CII document
@@ -65,6 +66,27 @@ var ContextPeppolV3 = Context{
 // ContextFacturXV1 is used for Factur-X V1 documents.
 var ContextFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
+	Addons:      []cbc.Key{facturx.V1},
+}
+
+// ContextPeppolFranceFacturX is used for Peppol France Factur-X documents.
+var ContextPeppolFranceFacturX = Context{
+	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
+	BusinessID:  ProfileIDPeppolFranceBilling,
+	Addons:      []cbc.Key{facturx.V1},
+}
+
+// ContextPeppolFranceCIUS is used for Peppol France CIUS documents.
+var ContextPeppolFranceCIUS = Context{
+	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
+	BusinessID:  ProfileIDPeppolFranceBilling,
+	Addons:      []cbc.Key{facturx.V1},
+}
+
+// ContextPeppolFranceExtended is used for Peppol France CIUS documents.
+var ContextPeppolFranceExtended = Context{
+	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
+	BusinessID:  ProfileIDPeppolFranceBilling,
 	Addons:      []cbc.Key{facturx.V1},
 }
 
