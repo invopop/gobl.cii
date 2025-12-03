@@ -121,6 +121,7 @@ var ContextXRechnungV3 = Context{
 // ContextChorusProV1 is used for Chorus Pro V1 documents.
 var ContextChorusProV1 = Context{
 	GuidelineID: "A1", // Default framework type
+	Version:     VersionD16B,
 	Addons:      []cbc.Key{choruspro.V1},
 }
 
