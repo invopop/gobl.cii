@@ -79,7 +79,7 @@ var ContextFacturXV1 = Context{
 	Addons:      []cbc.Key{facturx.V1},
 }
 
-// ContextPeppolFranceFacturX is used for Peppol France Factur-X documents.
+// ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
 var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
@@ -87,7 +87,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	Addons:      []cbc.Key{facturx.V1},
 }
 
-// ContextPeppolFranceCIUS is used for Peppol France CIUS documents.
+// ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
 var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
@@ -95,7 +95,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	Addons:      []cbc.Key{facturx.V1},
 }
 
-// ContextPeppolFranceExtended is used for Peppol France CIUS documents.
+// ContextPeppolFranceExtendedV1 is used for Peppol France CIUS documents.
 var ContextPeppolFranceExtendedV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
