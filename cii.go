@@ -41,18 +41,26 @@ const (
 	ProfileIDPeppolFranceBilling = "urn:peppol:france:billing:regulated"
 )
 
+// CII Versions
+const (
+	VersionD16B string = "D16B"
+	VersionD22B string = "D22B"
+)
+
 // Context is used to ensure that the generated CII document
 // uses a specific set of Guidline and Business rules when generating
 // the output.
 type Context struct {
 	GuidelineID string
 	BusinessID  string
+	Version     string
 	Addons      []cbc.Key
 }
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
 var ContextEN16931V2017 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017",
+	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
 }
 
@@ -60,39 +68,45 @@ var ContextEN16931V2017 = Context{
 var ContextPeppolV3 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	BusinessID:  ProfileIDPeppolBilling,
+	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
 }
 
 // ContextFacturXV1 is used for Factur-X V1 documents.
 var ContextFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
+	Version:     VersionD16B,
 	Addons:      []cbc.Key{facturx.V1},
 }
 
 // ContextPeppolFranceFacturX is used for Peppol France Factur-X documents.
-var ContextPeppolFranceFacturX = Context{
+var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
+	Version:     VersionD16B,
 	Addons:      []cbc.Key{facturx.V1},
 }
 
 // ContextPeppolFranceCIUS is used for Peppol France CIUS documents.
-var ContextPeppolFranceCIUS = Context{
+var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
+	Version:     VersionD22B,
 	Addons:      []cbc.Key{facturx.V1},
 }
 
 // ContextPeppolFranceExtended is used for Peppol France CIUS documents.
-var ContextPeppolFranceExtended = Context{
+var ContextPeppolFranceExtendedV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
+	Version:     VersionD22B,
 	Addons:      []cbc.Key{facturx.V1},
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
 var ContextZUGFeRDV2 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended",
+	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
 }
 
@@ -100,6 +114,7 @@ var ContextZUGFeRDV2 = Context{
 var ContextXRechnungV3 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
+	Version:     VersionD16B,
 	Addons:      []cbc.Key{xrechnung.V3},
 }
 
