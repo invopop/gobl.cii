@@ -27,6 +27,7 @@ type Settlement struct {
 	Summary            *Summary              `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
 	ReferencedDocument []*ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
 	Advance            []*Advance            `xml:"ram:SpecifiedAdvancePayment,omitempty"`
+	Cost               *Cost                 `xml:"ram:ReceivableSpecifiedTradeAccountingAccount,omitempty"`
 }
 
 // Terms defines the structure of SpecifiedTradePaymentTerms of the CII standard
@@ -107,6 +108,11 @@ type Summary struct {
 type TaxTotalAmount struct {
 	Amount   string `xml:",chardata"`
 	Currency string `xml:"currencyID,attr"`
+}
+
+// Cost defines the Buyer accounting reference cost code to associate with the invoice.
+type Cost struct {
+	ID string `xml:"ram:ID"`
 }
 
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
@@ -253,6 +259,25 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 
 	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
 		stlm.AllowanceCharges = newAllowanceCharges(inv)
+	}
+
+	if len(inv.Lines) > 0 {
+		// Only set the cost code if all lines have the same cost code assigned
+		hasSameCostCode := true
+		prevCostCode := inv.Lines[0].Cost
+		for i := 1; i < len(inv.Lines); i++ {
+			line := inv.Lines[i]
+			if line.Cost != prevCostCode {
+				hasSameCostCode = false
+				break
+			}
+		}
+
+		if hasSameCostCode && !prevCostCode.IsEmpty() {
+			stlm.Cost = &Cost{
+				ID: prevCostCode.String(),
+			}
+		}
 	}
 
 	return stlm, nil
