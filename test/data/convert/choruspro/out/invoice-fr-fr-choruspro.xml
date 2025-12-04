@@ -51,7 +51,6 @@
         <ram:Name>Provide One Inc.</ram:Name>
         <ram:SpecifiedLegalOrganization>
           <ram:ID schemeID="1">73282932012345</ram:ID>
-          <ram:TradingBusinessName></ram:TradingBusinessName>
         </ram:SpecifiedLegalOrganization>
         <ram:DefinedTradeContact>
           <ram:EmailURIUniversalCommunication>
@@ -73,7 +72,6 @@
         <ram:Name>Sample Consumer</ram:Name>
         <ram:SpecifiedLegalOrganization>
           <ram:ID schemeID="1">35600000012345</ram:ID>
-          <ram:TradingBusinessName></ram:TradingBusinessName>
         </ram:SpecifiedLegalOrganization>
         <ram:DefinedTradeContact>
           <ram:EmailURIUniversalCommunication>

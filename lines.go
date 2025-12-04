@@ -84,6 +84,7 @@ type TradeSettlement struct {
 	Period             *Period            `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	AllowanceCharge    []*AllowanceCharge `xml:"ram:SpecifiedTradeAllowanceCharge,omitempty"`
 	Sum                *Summation         `xml:"ram:SpecifiedTradeSettlementLineMonetarySummation"`
+	Cost               *Cost              `xml:"ram:ReceivableSpecifiedTradeAccountingAccount,omitempty"`
 }
 
 // Summation defines the structure of the SpecifiedTradeSettlementLineMonetarySummation of the CII standard
@@ -192,6 +193,12 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 
 	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
 		stlm.AllowanceCharge = newLineAllowanceCharges(l)
+	}
+
+	if !l.Cost.IsEmpty() {
+		stlm.Cost = &Cost{
+			ID: l.Cost.String(),
+		}
 	}
 
 	return stlm

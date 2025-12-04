@@ -13,8 +13,8 @@ import (
 const issueDateFormat = "102"
 
 // Bytes returns the XML representation of the document in bytes
-func (d *Invoice) Bytes() ([]byte, error) {
-	bytes, err := xml.MarshalIndent(d, "", "  ")
+func (out *Invoice) Bytes() ([]byte, error) {
+	bytes, err := xml.MarshalIndent(out, "", "  ")
 	if err != nil {
 		return nil, err
 	}
