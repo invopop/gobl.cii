@@ -126,18 +126,25 @@ func goblAddLines(in *Transaction, out *bill.Invoice) error {
 			}
 		}
 
-		// Line settlement cost code takes precedence over agreement settlement cost code
-		if it.TradeSettlement.Cost != nil {
-			l.Cost = cbc.Code(it.TradeSettlement.Cost.ID)
-		} else if in.Settlement != nil && in.Settlement.Cost != nil {
-			l.Cost = cbc.Code(in.Settlement.Cost.ID)
-		}
+		l.Cost = getLineCostCode(in, it)
 
 		lines = append(lines, l)
 	}
 
 	out.Lines = lines
 	return nil
+}
+
+// getLineCostCode retrieves the cost code for a line item
+func getLineCostCode(in *Transaction, it *Line) cbc.Code {
+	// Line settlement cost code takes precedence over agreement settlement cost code
+	if it.TradeSettlement.Cost != nil {
+		return cbc.Code(it.TradeSettlement.Cost.ID)
+	} else if in.Settlement != nil && in.Settlement.Cost != nil {
+		return cbc.Code(in.Settlement.Cost.ID)
+	}
+
+	return cbc.CodeEmpty
 }
 
 // getLineCharges parses inline charges and discounts from the CII document

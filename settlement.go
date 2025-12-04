@@ -119,6 +119,7 @@ type Cost struct {
 func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	stlm := &Settlement{
 		Currency: string(inv.Currency),
+		Cost:     newCost(inv.Lines),
 	}
 	if inv.Payment != nil && inv.Payment.Terms != nil {
 		description := inv.Payment.Terms.Notes
@@ -263,12 +264,17 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		stlm.AllowanceCharges = newAllowanceCharges(inv)
 	}
 
-	if len(inv.Lines) > 0 {
+	return stlm, nil
+}
+
+// newCost creates the Cost structure if all lines have the same cost code assigned
+func newCost(lines []*bill.Line) *Cost {
+	if len(lines) > 0 {
 		// Only set the cost code if all lines have the same cost code assigned
 		hasSameCostCode := true
-		prevCostCode := inv.Lines[0].Cost
-		for i := 1; i < len(inv.Lines); i++ {
-			line := inv.Lines[i]
+		prevCostCode := lines[0].Cost
+		for i := 1; i < len(lines); i++ {
+			line := lines[i]
 			if line.Cost != prevCostCode {
 				hasSameCostCode = false
 				break
@@ -276,13 +282,13 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		}
 
 		if hasSameCostCode && !prevCostCode.IsEmpty() {
-			stlm.Cost = &Cost{
+			return &Cost{
 				ID: prevCostCode.String(),
 			}
 		}
 	}
 
-	return stlm, nil
+	return nil
 }
 
 func newSummary(totals *bill.Totals, currency string) *Summary {
