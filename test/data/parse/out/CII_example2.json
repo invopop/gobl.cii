@@ -355,13 +355,13 @@
 				"name": "Ebeneser Scrooge AS"
 			},
 			"terms": {
-				"detail": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date",
 				"due_dates": [
 					{
 						"date": "2013-07-20",
 						"amount": "0.00"
 					}
-				]
+				],
+				"notes": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date"
 			},
 			"advances": [
 				{

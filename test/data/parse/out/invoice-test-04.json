@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8bd8b807fa64f2dd0344c8fff180f9e848d1c82fd3862cf954ce7cf7995065fe"
+			"val": "5d8038b1bf7c4f4dd51f68e769e8653557c2672d6512e18da0531d2e01b7b5cf"
 		}
 	},
 	"doc": {
@@ -127,13 +127,13 @@
 				]
 			},
 			"terms": {
-				"detail": "Partial Payment",
 				"due_dates": [
 					{
 						"date": "2024-10-01",
 						"amount": "20.00"
 					}
-				]
+				],
+				"notes": "Partial Payment"
 			},
 			"instructions": {
 				"key": "debit-transfer",

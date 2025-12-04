@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1891129d136d676a8b5c601c8dd1f6285a47e2b895dbee66fcfc1c80b50b8d64"
+			"val": "710d05e4f14ffdb28d2eb213be18b1b6379142662c40dfd4b7dcba62859403af"
 		}
 	},
 	"doc": {
@@ -457,12 +457,12 @@
 			},
 			"instructions": {
 				"key": "credit-transfer",
-				"detail": "Bank Transfer",
 				"credit_transfer": [
 					{
 						"iban": "AE040192342142341231432"
 					}
 				],
+				"notes": "Bank Transfer",
 				"ext": {
 					"untdid-payment-means": "30"
 				}

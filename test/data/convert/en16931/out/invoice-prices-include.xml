@@ -451,7 +451,6 @@
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
       <ram:SpecifiedTradeSettlementPaymentMeans>
         <ram:TypeCode>30</ram:TypeCode>
-        <ram:Information>Bank Transfer</ram:Information>
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>AE040192342142341231432</ram:IBANID>
         </ram:PayeePartyCreditorFinancialAccount>

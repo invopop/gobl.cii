@@ -121,7 +121,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		Currency: string(inv.Currency),
 	}
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		description := inv.Payment.Terms.Detail
+		description := inv.Payment.Terms.Notes
 		if len(inv.Payment.Terms.DueDates) == 0 {
 			if description != "" {
 				stlm.PaymentTerms = []*Terms{
@@ -226,8 +226,10 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 
 		// Fill in direct debit details if available
 		if instr.DirectDebit != nil {
-			pm.Debtor = &DebtorAccount{
-				IBAN: instr.DirectDebit.Account,
+			if instr.DirectDebit.Account != "" {
+				pm.Debtor = &DebtorAccount{
+					IBAN: instr.DirectDebit.Account,
+				}
 			}
 
 			if stlm.PaymentTerms == nil {
