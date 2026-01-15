@@ -118,7 +118,6 @@
         <ram:TypeCode>30</ram:TypeCode>
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>DE12345678901234567890</ram:IBANID>
-          <ram:AccountName>Random Bank</ram:AccountName>
           <ram:ProprietaryID>12345678901234567890</ram:ProprietaryID>
         </ram:PayeePartyCreditorFinancialAccount>
         <ram:PayeeSpecifiedCreditorFinancialInstitution>

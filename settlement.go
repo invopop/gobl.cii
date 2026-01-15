@@ -208,7 +208,6 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		if len(instr.CreditTransfer) > 0 {
 			pm.Creditor = &Creditor{
 				IBAN:   instr.CreditTransfer[0].IBAN,
-				Name:   instr.CreditTransfer[0].Name,
 				Number: instr.CreditTransfer[0].Number,
 			}
 			if instr.CreditTransfer[0].BIC != "" {

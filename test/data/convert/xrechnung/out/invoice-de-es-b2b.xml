@@ -107,7 +107,6 @@
         <ram:TypeCode>58</ram:TypeCode>
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>AE040192342142341231432</ram:IBANID>
-          <ram:AccountName>Random Bank Co.</ram:AccountName>
         </ram:PayeePartyCreditorFinancialAccount>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
