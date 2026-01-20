@@ -1,11 +1,11 @@
 package cii
 
 import (
+	"encoding/xml"
 	"slices"
 
 	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/bill"
-	"github.com/nbio/xml"
 )
 
 // Invoice is a pseudo-model for containing the XML document being created

@@ -1,19 +1,26 @@
 package cii
 
 import (
-	"github.com/nbio/xml"
-
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
+	"github.com/invopop/xmlctx"
 )
 
 func parseInvoice(data []byte) (*bill.Invoice, error) {
+
 	in := new(Invoice)
-	if err := xml.Unmarshal(data, in); err != nil {
+	if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(
+		map[string]string{
+			"rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
+			"ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
+			"qdt": "urn:un:unece:uncefact:data:standard:QualifiedDataType:100",
+			"udt": "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100",
+		},
+	)); err != nil {
 		return nil, err
 	}
 	return goblInvoice(in)

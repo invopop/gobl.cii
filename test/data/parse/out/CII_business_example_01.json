@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "641033b7934a08a79b57b392b44cb439068ef709f171080c6149251a980caec4"
+			"val": "bba4cdc799d8974c87b34fc1081ecc27c29d2ef07d8e923377516cf515ff6350"
 		}
 	},
 	"doc": {
@@ -164,10 +164,10 @@
 		"notes": [
 			{
 				"code": "AAR",
-				"text": "This is an example invoice based on data that is used in real business.Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+				"text": "This is an example invoice based on data that is used in real business.Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich."
 			},
 			{
-				"text": "Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.\n      "
+				"text": "Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich."
 			}
 		]
 	}
