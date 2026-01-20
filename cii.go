@@ -37,8 +37,9 @@ const (
 
 // Profile ID codes
 const (
-	ProfileIDPeppolBilling       = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
-	ProfileIDPeppolFranceBilling = "urn:peppol:france:billing:regulated"
+	ProfileIDPeppolBilling                   = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
+	ProfileIDPeppolFranceBillingRegulated    = "urn:peppol:france:billing:regulated"
+	ProfileIDPeppolFranceBillingNonRegulated = "urn:peppol:france:billing:non-regulated"
 )
 
 // CII Versions
@@ -82,7 +83,7 @@ var ContextFacturXV1 = Context{
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
 var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
+	BusinessID:  ProfileIDPeppolFranceBillingRegulated,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{facturx.V1},
 }
@@ -90,17 +91,17 @@ var ContextPeppolFranceFacturXV1 = Context{
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
 var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
+	BusinessID:  ProfileIDPeppolFranceBillingRegulated,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{facturx.V1},
+	Addons:      []cbc.Key{en16931.V2017},
 }
 
 // ContextPeppolFranceExtendedV1 is used for Peppol France CIUS documents.
 var ContextPeppolFranceExtendedV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
+	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
+	BusinessID:  ProfileIDPeppolFranceBillingRegulated,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{facturx.V1},
+	Addons:      []cbc.Key{en16931.V2017},
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
