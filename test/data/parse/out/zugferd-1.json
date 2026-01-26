@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b9ea295a4a84352cafaf05c049602ed39298a3b16648fabb3c23d78d1e98b455"
+			"val": "38c509e042894d01c2779fecef117d3a5b17a2696503df3e6d6c6476d99fd789"
 		}
 	},
 	"doc": {
@@ -287,15 +287,15 @@
 		},
 		"notes": [
 			{
-				"text": "\nRechnung gemäß Bestellung Nr. 2018-471331 vom 01.03.2018.\n\n      "
+				"text": "Rechnung gemäß Bestellung Nr. 2018-471331 vom 01.03.2018."
 			},
 			{
 				"code": "AAK",
-				"text": "\nEs bestehen Rabatt- und Bonusvereinbarungen.\n\n      "
+				"text": "Es bestehen Rabatt- und Bonusvereinbarungen."
 			},
 			{
 				"code": "REG",
-				"text": "Lieferant GmbH\nLieferantenstraße 20\n80333 München\nDeutschland\nGeschäftsführer: Hans Muster\nHandelsregisternummer: H A 123\n\n      "
+				"text": "Lieferant GmbH\nLieferantenstraße 20\n80333 München\nDeutschland\nGeschäftsführer: Hans Muster\nHandelsregisternummer: H A 123"
 			}
 		]
 	}
