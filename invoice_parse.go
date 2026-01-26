@@ -15,10 +15,10 @@ func parseInvoice(data []byte) (*bill.Invoice, error) {
 	in := new(Invoice)
 	if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(
 		map[string]string{
-			"rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
-			"ram": "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
-			"qdt": "urn:un:unece:uncefact:data:standard:QualifiedDataType:100",
-			"udt": "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100",
+			"rsm": NamespaceRSM,
+			"ram": NamespaceRAM,
+			"qdt": NamespaceQDT,
+			"udt": NamespaceUDT,
 		},
 	)); err != nil {
 		return nil, err
