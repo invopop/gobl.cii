@@ -1,11 +1,11 @@
 module github.com/invopop/gobl.cii
 
-go 1.25.5
+go 1.24.4
 
 require (
 	github.com/invopop/gobl v0.303.0
 	github.com/invopop/validation v0.8.0
-	github.com/invopop/xmlctx v0.10.0
+	github.com/invopop/xmlctx v0.13.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
 	github.com/spf13/cobra v1.9.1
