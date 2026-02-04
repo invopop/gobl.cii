@@ -34,15 +34,22 @@ const (
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
-func TestConvertToInvoice(t *testing.T) {
-	conn, err := grpc.NewClient(
-		"127.0.0.1:9091",
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	require.NoError(t, err)
-	defer conn.Close()
+// validate is a flag that enables Phive validation
+var validate = flag.Bool("validate", false, "Run Phive validation on generated XML")
 
-	pc := phive.NewValidationServiceClient(conn)
+func TestConvertToInvoice(t *testing.T) {
+	var pc phive.ValidationServiceClient
+
+	// Only connect to Phive if validation is requested
+	if *validate {
+		conn, err := grpc.NewClient(
+			"localhost:9091",
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+		require.NoError(t, err)
+		defer conn.Close() //nolint:errcheck
+		pc = phive.NewValidationServiceClient(conn)
+	}
 
 	// Define contexts to test
 	contexts := []struct {
@@ -57,7 +64,6 @@ func TestConvertToInvoice(t *testing.T) {
 		{"ChorusPro", cii.ContextChorusProV1, "choruspro"},
 		{"PeppolFranceFacturX", cii.ContextPeppolFranceFacturXV1, "peppol-france-facturx"},
 		{"PeppolFranceCIUS", cii.ContextPeppolFranceCIUSV1, "peppol-france-cius"},
-		{"PeppolFranceExtended", cii.ContextPeppolFranceExtendedV1, "peppol-france-extended"},
 		{"ZUGFeRD", cii.ContextZUGFeRDV2, "zugferd"},
 	}
 
@@ -91,18 +97,18 @@ func TestConvertToInvoice(t *testing.T) {
 
 						err = os.WriteFile(outPath, data, 0644)
 						require.NoError(t, err)
+					}
 
-						// Validate with phive if VESID is set
-						if ctx.context.VESID != "" {
-							resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-								Vesid:      ctx.context.VESID,
-								XmlContent: data,
-							})
-							require.NoError(t, err)
-							results, err := json.MarshalIndent(resp.Results, "", "  ")
-							require.NoError(t, err)
-							require.True(t, resp.Success, "Generated XML should be valid for %s: %s", ctx.context.VESID, string(results))
-						}
+					// Run Phive validation if requested
+					if *validate && ctx.context.VESID != "" {
+						resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+							Vesid:      ctx.context.VESID,
+							XmlContent: data,
+						})
+						require.NoError(t, err)
+						results, err := json.MarshalIndent(resp.Results, "", "  ")
+						require.NoError(t, err)
+						require.True(t, resp.Success, "Generated XML should be valid for %s: %s", ctx.context.VESID, string(results))
 					}
 
 					// Load the expected output

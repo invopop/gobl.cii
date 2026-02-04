@@ -132,13 +132,19 @@ Run tests with:
 go test ./...
 ```
 
-To update test fixtures and validate XML output using [Phive](https://github.com/invopop/phoss), run:
+To update test fixtures:
 
 ```bash
 go test ./... -update
 ```
 
-This requires a running Phive service on `127.0.0.1:9091` for validation
+To validate XML output using [Phive](https://github.com/invopop/phoss):
+
+```bash
+go test ./... -validate
+```
+
+Validation requires a running Phive service on `127.0.0.1:9091`
 
 ## Considerations
 
