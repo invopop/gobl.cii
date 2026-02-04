@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "608420413aec7a26b207359fe5975068232523b13f8df09e95d05e7b4f9b73c7"
+			"val": "4ff8b8f9595460a14957c3d5c172021b0eca0991bce2c0740bf83cf48c798d07"
 		}
 	},
 	"doc": {
@@ -44,8 +44,8 @@
 			],
 			"inboxes": [
 				{
-					"scheme": "VA",
-					"code": "DE111111125"
+					"key": "email",
+					"email": "billing@example.com"
 				}
 			],
 			"addresses": [
@@ -118,6 +118,7 @@
 						"cat": "VAT",
 						"key": "reverse-charge",
 						"ext": {
+							"cef-vatex": "VATEX-EU-AE",
 							"untdid-tax-category": "AE"
 						}
 					}
@@ -162,6 +163,7 @@
 							{
 								"key": "reverse-charge",
 								"ext": {
+									"cef-vatex": "VATEX-EU-AE",
 									"untdid-tax-category": "AE"
 								},
 								"base": "1620.00",

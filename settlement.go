@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -319,7 +318,8 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	if rate.Percent != nil {
 		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
 	}
-	if cat == en16931.TaxCategoryExempt {
+	// Set exemption reason code from extensions if provided
+	if rate.Ext.Has(cef.ExtKeyVATEX) {
 		t.ExemptionReasonCode = rate.Ext.Get(cef.ExtKeyVATEX).String()
 	}
 	return t

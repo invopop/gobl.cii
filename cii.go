@@ -55,6 +55,8 @@ type Context struct {
 	BusinessID  string
 	Version     string
 	Addons      []cbc.Key
+	// VESID is the Validation Exchange Specification ID used for validation
+	VESID string
 }
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
@@ -62,6 +64,7 @@ var ContextEN16931V2017 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017",
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
+	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
 // ContextPeppolV3 for Peppol Billing V3.0 context.
@@ -70,6 +73,7 @@ var ContextPeppolV3 = Context{
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
+	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
 // ContextFacturXV1 is used for Factur-X V1 documents.
@@ -77,6 +81,7 @@ var ContextFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{facturx.V1},
+	VESID:       "fr.factur-x:extended:1.0.7-2",
 }
 
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
@@ -84,7 +89,8 @@ var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{facturx.V1},
+	Addons:      []cbc.Key{en16931.V2017},
+	VESID:       "fr.factur-x:en16931:1.0.7-2",
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
@@ -92,15 +98,8 @@ var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{facturx.V1},
-}
-
-// ContextPeppolFranceExtendedV1 is used for Peppol France CIUS documents.
-var ContextPeppolFranceExtendedV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
-	Version:     VersionD22B,
-	Addons:      []cbc.Key{facturx.V1},
+	Addons:      []cbc.Key{en16931.V2017},
+	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
@@ -108,6 +107,7 @@ var ContextZUGFeRDV2 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended",
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
+	VESID:       "de.zugferd:extended:2.3.2",
 }
 
 // ContextXRechnungV3 is used for XRechnung documents
@@ -116,6 +116,7 @@ var ContextXRechnungV3 = Context{
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{xrechnung.V3},
+	VESID:       "de.xrechnung:cii:3.0.2",
 }
 
 // ContextChorusProV1 is used for Chorus Pro V1 documents.
@@ -123,6 +124,7 @@ var ContextChorusProV1 = Context{
 	GuidelineID: "A1", // Default framework type
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{choruspro.V1},
+	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
 // Parse parses a raw XML CII document and converts it into

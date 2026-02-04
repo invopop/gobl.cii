@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e16f80025f62c8694c1e0f95f57cfa74f650db5795943a2cca9c9c65b8966f27"
+			"val": "4c9269d3cead2b78129aa7378bb229d1e2743664f2434ed35b2ee3b0557b2617"
 		}
 	},
 	"doc": {
@@ -47,8 +47,8 @@
 			],
 			"inboxes": [
 				{
-					"scheme": "VA",
-					"code": "DE111111125"
+					"key": "email",
+					"email": "billing@example.com"
 				}
 			],
 			"addresses": [
@@ -82,8 +82,8 @@
 			],
 			"inboxes": [
 				{
-					"scheme": "VA",
-					"code": "DE282741168"
+					"key": "email",
+					"email": "customer@example.com"
 				}
 			],
 			"addresses": [

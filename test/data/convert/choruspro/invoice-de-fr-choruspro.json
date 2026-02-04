@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "eb509ee313472ff823b097bb9e75610cd84535ea4276e1b044b73cb2f50ac23a"
+			"val": "b0ce5843d768fce708556f62c0b20d54dda3c6fdea4cae14921aefb3894cda8a"
 		}
 	},
 	"doc": {
@@ -60,7 +60,10 @@
 			"identities": [
 				{
 					"type": "SIRET",
-					"code": "73282932012345"
+					"code": "73282932012345",
+					"ext": {
+						"iso-scheme-id": "0009"
+					}
 				}
 			],
 			"addresses": [

@@ -56,10 +56,22 @@ func main() {
 }
 ```
 
-Contexts are also supported during conversion to ensure the out contains additional Guideline and Business context details. For example, to generate an XRechnung context:
+Contexts are supported to include specific Guideline and Business rules. Available contexts include:
+
+- `ContextEN16931V2017` (default)
+- `ContextPeppolV3`
+- `ContextFacturXV1`
+- `ContextXRechnungV3`
+- `ContextZUGFeRDV2`
+- `ContextChorusProV1`
+- `ContextPeppolFranceFacturXV1`
+- `ContextPeppolFranceCIUSV1`
+- `ContextPeppolFranceExtendedV1`
+
+Example:
 
 ```go
-doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextXRechnung))
+doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextXRechnungV3))
 ```
 
 #### Parsing CII Invoice into GOBL
@@ -100,26 +112,39 @@ The GOBL to CII tool includes a command-line helper. You can install it manually
 go install ./cmd/gobl.cii
 ```
 
-Once installed, usage is straightforward. The tool automatically detects the input file type and performs the appropriate conversion:
-
-- If the input is a JSON file (GOBL format), it will convert it to CII XML.
-- If the input is an XML file (CII format), it will convert it to GOBL JSON.
-
-For example:
+Usage:
 
 ```bash
-gobl.cii convert ./test/data/invoice-sample.json
+gobl.cii convert <input> <output> [--context <format>]
+```
+
+The tool automatically detects the input file type (JSON/XML) and performs the appropriate conversion. Optionally specify a context format:
+
+```bash
+gobl.cii convert invoice.json invoice.xml --context xrechnung
 ```
 
 ## Testing
 
-The library uses testify for testing. To run the tests, you can use the following command:
+Run tests with:
 
 ```bash
-go test
+go test ./...
 ```
-For certain tests you may need to install the npm xslt3 package as we use it for schematron validation.
-Call the tests with the `--validate` flag to run schema and schematron validations
+
+To update test fixtures:
+
+```bash
+go test ./... -update
+```
+
+To validate XML output using [Phive](https://github.com/invopop/phoss):
+
+```bash
+go test ./... -validate
+```
+
+Validation requires a running Phive service on `127.0.0.1:9091`
 
 ## Considerations
 
