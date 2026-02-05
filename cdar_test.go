@@ -77,6 +77,27 @@ func TestUnmarshalCDARSpecific(t *testing.T) {
 	}
 }
 
+func TestUnmarshalInvoice(t *testing.T) {
+	// Test that UnmarshalInvoice correctly unmarshals a CII invoice
+	testFile := filepath.Join(getParsePath(), "CII_example1.xml")
+
+	data, err := os.ReadFile(testFile)
+	require.NoError(t, err)
+
+	// Use the generic Unmarshal function which should detect it's an invoice
+	result, err := cii.Unmarshal(data)
+	require.NoError(t, err)
+
+	// Verify it's an Invoice document
+	inv, ok := result.(*cii.Invoice)
+	require.True(t, ok, "Expected Invoice document, got %T", result)
+	require.NotNil(t, inv, "Invoice should not be nil")
+
+	// Basic validation
+	assert.NotNil(t, inv.ExchangedDocument, "ExchangedDocument should not be nil")
+	assert.NotNil(t, inv.Transaction, "Transaction should not be nil")
+}
+
 func TestCDARRoundtrip(t *testing.T) {
 	// Get all CDAR XML files for roundtrip testing
 	cdarFiles, err := filepath.Glob(filepath.Join(getParsePath(), "UC*.xml"))

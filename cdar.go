@@ -1,4 +1,3 @@
-// Package cii helps convert GOBL into Cross Industry Invoice documents and vice versa.
 package cii
 
 import (
@@ -94,4 +93,3 @@ func (c *CDAR) String() (string, error) {
 	}
 	return string(data), nil
 }
-
