@@ -15,6 +15,7 @@ import (
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/xmlctx"
 )
 
 var (
@@ -127,7 +128,7 @@ var ContextChorusProV1 = Context{
 	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
-// Parse parses a raw XML CII document and converts it into
+// Parse parses a raw XML CII invoice document and converts it into
 // a GOBL envelope. If the type is unsupported, an
 // ErrUnknownDocumentType is provided.
 func Parse(data []byte) (*gobl.Envelope, error) {
@@ -136,22 +137,58 @@ func Parse(data []byte) (*gobl.Envelope, error) {
 		return nil, err
 	}
 
-	env := gobl.NewEnvelope()
-	var res any
-	switch ns {
-	case NamespaceRSM:
-		res, err = parseInvoice(data)
-		if err != nil {
-			return nil, err
-		}
-	default:
+	if ns != NamespaceRSM {
 		return nil, ErrUnknownDocumentType
+	}
+
+	env := gobl.NewEnvelope()
+	res, err := parseInvoice(data)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := env.Insert(res); err != nil {
 		return nil, err
 	}
 	return env, nil
+}
+
+// Unmarshal detects the document type and unmarshals XML into the appropriate
+// Go struct. Returns either *Invoice (for CII) or *CDAR (for acknowledgements).
+// This is pure unmarshaling without GOBL conversion.
+func Unmarshal(data []byte) (any, error) {
+	ns, err := extractRootNamespace(data)
+	if err != nil {
+		return nil, err
+	}
+
+	switch ns {
+	case NamespaceRSM:
+		// CII Invoice - unmarshal to Invoice struct
+		return UnmarshalInvoice(data)
+	case NamespaceCDARRSM:
+		// CDAR acknowledgement - unmarshal to CDAR struct
+		return UnmarshalCDAR(data)
+	default:
+		return nil, ErrUnknownDocumentType
+	}
+}
+
+// UnmarshalInvoice unmarshals CII invoice XML into an Invoice struct
+// without converting to GOBL.
+func UnmarshalInvoice(data []byte) (*Invoice, error) {
+	inv := new(Invoice)
+	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
+		map[string]string{
+			"rsm": NamespaceRSM,
+			"ram": NamespaceRAM,
+			"qdt": NamespaceQDT,
+			"udt": NamespaceUDT,
+		},
+	)); err != nil {
+		return nil, fmt.Errorf("error unmarshaling CII invoice: %w", err)
+	}
+	return inv, nil
 }
 
 // Convert takes a gobl envelope and converts it into a CII document
