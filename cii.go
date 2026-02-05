@@ -15,6 +15,7 @@ import (
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/xmlctx"
 )
 
 var (
@@ -167,11 +168,7 @@ func Unmarshal(data []byte) (any, error) {
 		return UnmarshalInvoice(data)
 	case NamespaceCDARRSM:
 		// CDAR acknowledgement - unmarshal to CDAR struct
-		cdar := new(CDAR)
-		if err := xml.Unmarshal(data, cdar); err != nil {
-			return nil, fmt.Errorf("error unmarshaling CDAR: %w", err)
-		}
-		return cdar, nil
+		return UnmarshalCDAR(data)
 	default:
 		return nil, ErrUnknownDocumentType
 	}
@@ -181,7 +178,14 @@ func Unmarshal(data []byte) (any, error) {
 // without converting to GOBL.
 func UnmarshalInvoice(data []byte) (*Invoice, error) {
 	inv := new(Invoice)
-	if err := xml.Unmarshal(data, inv); err != nil {
+	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
+		map[string]string{
+			"rsm": NamespaceRSM,
+			"ram": NamespaceRAM,
+			"qdt": NamespaceQDT,
+			"udt": NamespaceUDT,
+		},
+	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CII invoice: %w", err)
 	}
 	return inv, nil

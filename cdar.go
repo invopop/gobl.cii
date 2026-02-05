@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+
+	"github.com/invopop/xmlctx"
 )
 
 // CDAR namespaces
@@ -55,7 +57,14 @@ func UnmarshalCDAR(data []byte) (*CDAR, error) {
 	}
 
 	cdar := new(CDAR)
-	if err := xml.Unmarshal(data, cdar); err != nil {
+	if err := xmlctx.Unmarshal(data, cdar, xmlctx.WithNamespaces(
+		map[string]string{
+			"rsm": NamespaceCDARRSM,
+			"ram": NamespaceCDARRAM,
+			"qdt": NamespaceCDARQDT,
+			"udt": NamespaceCDARUDT,
+		},
+	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CDAR: %w", err)
 	}
 
