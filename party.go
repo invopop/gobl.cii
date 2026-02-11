@@ -51,8 +51,8 @@ type SpecifiedTaxRegistration struct {
 
 // LegalOrganization defines the structure of the SpecifiedLegalOrganization of the CII standard
 type LegalOrganization struct {
-	ID   *PartyID `xml:"ram:ID"`
-	Name string   `xml:"ram:TradingBusinessName"`
+	ID   *PartyID `xml:"ram:ID,omitempty"`
+	Name string   `xml:"ram:TradingBusinessName,omitempty"`
 }
 
 // Contact defines the structure of the DefinedTradeContact of the CII standard

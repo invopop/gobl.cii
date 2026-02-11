@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6c2b275544067b2dd08419ee853178417538be5ebf0345af8c95ae4141880788"
+			"val": "5e4fb8fdca77f64d8c976bd5757edb317480ad1096586908fdbb965769565b90"
 		}
 	},
 	"doc": {
@@ -82,6 +82,7 @@
 			{
 				"i": 1,
 				"quantity": "1",
+				"cost": "BookingCode001",
 				"item": {
 					"ref": "JB007",
 					"name": "Laptop computer",
@@ -131,6 +132,7 @@
 			{
 				"i": 2,
 				"quantity": "-1",
+				"cost": "BookingCode002",
 				"item": {
 					"ref": "JB008",
 					"name": "Returned \"Advanced computing\" book",
@@ -163,6 +165,7 @@
 			{
 				"i": 3,
 				"quantity": "2",
+				"cost": "BookingCode003",
 				"item": {
 					"ref": "JB009",
 					"name": "\"Computing for dummies\" book",
@@ -190,6 +193,7 @@
 			{
 				"i": 4,
 				"quantity": "-1",
+				"cost": "BookingCode004",
 				"item": {
 					"ref": "JB010",
 					"name": "Returned IBM 5150 desktop",
@@ -217,6 +221,7 @@
 			{
 				"i": 5,
 				"quantity": "250",
+				"cost": "BookingCode005",
 				"item": {
 					"ref": "JB011",
 					"name": "Network cable",
