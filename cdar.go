@@ -24,14 +24,14 @@ var (
 
 // CDAR represents the root structure for Cross Domain Acknowledgement and Response
 type CDAR struct {
-	XMLName                  xml.Name                  `xml:"rsm:CrossDomainAcknowledgementAndResponse"`
-	RSMNamespace             string                    `xml:"xmlns:rsm,attr"`
-	RAMNamespace             string                    `xml:"xmlns:ram,attr"`
-	QDTNamespace             string                    `xml:"xmlns:qdt,attr"`
-	UDTNamespace             string                    `xml:"xmlns:udt,attr"`
-	ExchangedDocumentContext *CDARExchangedContext     `xml:"rsm:ExchangedDocumentContext,omitempty"`
-	ExchangedDocument        *CDARExchangedDocument    `xml:"rsm:ExchangedDocument"`
-	AcknowledgementDocuments []*CDARAcknowledgement    `xml:"rsm:AcknowledgementDocument"`
+	XMLName                  xml.Name               `xml:"rsm:CrossDomainAcknowledgementAndResponse"`
+	RSMNamespace             string                 `xml:"xmlns:rsm,attr"`
+	RAMNamespace             string                 `xml:"xmlns:ram,attr"`
+	QDTNamespace             string                 `xml:"xmlns:qdt,attr"`
+	UDTNamespace             string                 `xml:"xmlns:udt,attr"`
+	ExchangedDocumentContext *CDARExchangedContext  `xml:"rsm:ExchangedDocumentContext,omitempty"`
+	ExchangedDocument        *CDARExchangedDocument `xml:"rsm:ExchangedDocument"`
+	AcknowledgementDocuments []*CDARAcknowledgement `xml:"rsm:AcknowledgementDocument"`
 }
 
 // NewCDAR creates a new CDAR document with the necessary namespaces

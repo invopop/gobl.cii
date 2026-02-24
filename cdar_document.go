@@ -13,20 +13,20 @@ type CDARDocumentContextParameter struct {
 
 // CDARExchangedDocument defines the structure of the ExchangedDocument of the CDAR standard
 type CDARExchangedDocument struct {
-	ID                      string                  `xml:"ram:ID,omitempty"`
-	Name                    string                  `xml:"ram:Name,omitempty"`
-	TypeCode                string                  `xml:"ram:TypeCode,omitempty"`
-	StatusCode              string                  `xml:"ram:StatusCode,omitempty"`
-	IssueDateTime           *CDARIssueDateTime      `xml:"ram:IssueDateTime,omitempty"`
-	LanguageID              string                  `xml:"ram:LanguageID,omitempty"`
-	ElectronicPresentation  *CDARIndicator          `xml:"ram:ElectronicPresentationIndicator,omitempty"`
-	VersionID               string                  `xml:"ram:VersionID,omitempty"`
-	GlobalID                string                  `xml:"ram:GlobalID,omitempty"`
-	IncludedNotes           []*CDARNote             `xml:"ram:IncludedNote,omitempty"`
-	EffectivePeriod         *CDARSpecifiedPeriod    `xml:"ram:EffectiveSpecifiedPeriod,omitempty"`
-	SenderTradeParty        *CDARTradeParty         `xml:"ram:SenderTradeParty,omitempty"`
-	IssuerTradeParty        *CDARTradeParty         `xml:"ram:IssuerTradeParty,omitempty"`
-	RecipientTradeParties   []*CDARTradeParty       `xml:"ram:RecipientTradeParty,omitempty"`
+	ID                     string               `xml:"ram:ID,omitempty"`
+	Name                   string               `xml:"ram:Name,omitempty"`
+	TypeCode               string               `xml:"ram:TypeCode,omitempty"`
+	StatusCode             string               `xml:"ram:StatusCode,omitempty"`
+	IssueDateTime          *CDARIssueDateTime   `xml:"ram:IssueDateTime,omitempty"`
+	LanguageID             string               `xml:"ram:LanguageID,omitempty"`
+	ElectronicPresentation *CDARIndicator       `xml:"ram:ElectronicPresentationIndicator,omitempty"`
+	VersionID              string               `xml:"ram:VersionID,omitempty"`
+	GlobalID               string               `xml:"ram:GlobalID,omitempty"`
+	IncludedNotes          []*CDARNote          `xml:"ram:IncludedNote,omitempty"`
+	EffectivePeriod        *CDARSpecifiedPeriod `xml:"ram:EffectiveSpecifiedPeriod,omitempty"`
+	SenderTradeParty       *CDARTradeParty      `xml:"ram:SenderTradeParty,omitempty"`
+	IssuerTradeParty       *CDARTradeParty      `xml:"ram:IssuerTradeParty,omitempty"`
+	RecipientTradeParties  []*CDARTradeParty    `xml:"ram:RecipientTradeParty,omitempty"`
 }
 
 // CDARIssueDateTime defines the structure of IssueDateTime of the CDAR standard
