@@ -12,10 +12,10 @@ import (
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/xmlctx"
 )
 
 var (
@@ -90,7 +90,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{en16931.V2017},
+	Addons:      []cbc.Key{ctc.Flow2V1},
 	VESID:       "fr.factur-x:en16931:1.0.7-2",
 }
 
@@ -99,7 +99,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{en16931.V2017},
+	Addons:      []cbc.Key{ctc.Flow2V1},
 	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
@@ -175,23 +175,6 @@ func Unmarshal(data []byte) (any, error) {
 	}
 }
 
-// UnmarshalInvoice unmarshals CII invoice XML into an Invoice struct
-// without converting to GOBL.
-func UnmarshalInvoice(data []byte) (*Invoice, error) {
-	inv := new(Invoice)
-	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
-		map[string]string{
-			"rsm": NamespaceRSM,
-			"ram": NamespaceRAM,
-			"qdt": NamespaceQDT,
-			"udt": NamespaceUDT,
-		},
-	)); err != nil {
-		return nil, fmt.Errorf("error unmarshaling CII invoice: %w", err)
-	}
-	return inv, nil
-}
-
 // Convert takes a gobl envelope and converts it into a CII document
 // ready to be serialized into an XML data object.
 func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
@@ -220,20 +203,6 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
-}
-
-// ConvertInvoice is a convenience function that converts a GOBL envelope
-// containing an invoice into a CII Invoice.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
-	if err != nil {
-		return nil, err
-	}
-	inv, ok := doc.(*Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected invoice, got %T", doc)
-	}
-	return inv, nil
 }
 
 type options struct {
