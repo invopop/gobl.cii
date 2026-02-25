@@ -2,13 +2,13 @@ package cii
 
 // CDARTradeParty represents party information (sender, issuer, recipient)
 type CDARTradeParty struct {
-	IDs                       []*CDARID                       `xml:"ram:ID,omitempty"`
-	GlobalIDs                 []*CDARGlobalID                 `xml:"ram:GlobalID,omitempty"`
-	Name                      string                          `xml:"ram:Name,omitempty"`
-	RoleCode                  string                          `xml:"ram:RoleCode,omitempty"`
-	DefinedTradeContacts      []*CDARTradeContact             `xml:"ram:DefinedTradeContact,omitempty"`
-	PostalTradeAddress        *CDARTradeAddress               `xml:"ram:PostalTradeAddress,omitempty"`
-	URIUniversalCommunication *CDARUniversalCommunication     `xml:"ram:URIUniversalCommunication,omitempty"`
+	IDs                       []*CDARID                   `xml:"ram:ID,omitempty"`
+	GlobalIDs                 []*CDARGlobalID             `xml:"ram:GlobalID,omitempty"`
+	Name                      string                      `xml:"ram:Name,omitempty"`
+	RoleCode                  string                      `xml:"ram:RoleCode,omitempty"`
+	DefinedTradeContacts      []*CDARTradeContact         `xml:"ram:DefinedTradeContact,omitempty"`
+	PostalTradeAddress        *CDARTradeAddress           `xml:"ram:PostalTradeAddress,omitempty"`
+	URIUniversalCommunication *CDARUniversalCommunication `xml:"ram:URIUniversalCommunication,omitempty"`
 }
 
 // CDARID represents an identifier
@@ -25,13 +25,13 @@ type CDARGlobalID struct {
 
 // CDARTradeContact represents contact details
 type CDARTradeContact struct {
-	ID                              string                          `xml:"ram:ID,omitempty"`
-	PersonName                      string                          `xml:"ram:PersonName,omitempty"`
-	DepartmentName                  string                          `xml:"ram:DepartmentName,omitempty"`
-	TypeCode                        string                          `xml:"ram:TypeCode,omitempty"`
-	TelephoneUniversalCommunication []*CDARUniversalCommunication   `xml:"ram:TelephoneUniversalCommunication,omitempty"`
-	FaxUniversalCommunication       []*CDARUniversalCommunication   `xml:"ram:FaxUniversalCommunication,omitempty"`
-	EmailURIUniversalCommunication  *CDARUniversalCommunication     `xml:"ram:EmailURIUniversalCommunication,omitempty"`
+	ID                              string                        `xml:"ram:ID,omitempty"`
+	PersonName                      string                        `xml:"ram:PersonName,omitempty"`
+	DepartmentName                  string                        `xml:"ram:DepartmentName,omitempty"`
+	TypeCode                        string                        `xml:"ram:TypeCode,omitempty"`
+	TelephoneUniversalCommunication []*CDARUniversalCommunication `xml:"ram:TelephoneUniversalCommunication,omitempty"`
+	FaxUniversalCommunication       []*CDARUniversalCommunication `xml:"ram:FaxUniversalCommunication,omitempty"`
+	EmailURIUniversalCommunication  *CDARUniversalCommunication   `xml:"ram:EmailURIUniversalCommunication,omitempty"`
 }
 
 // CDARTradeAddress represents address information

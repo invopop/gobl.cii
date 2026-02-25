@@ -12,8 +12,6 @@ type CDARAcknowledgement struct {
 	ItemIdentificationID        string                    `xml:"ram:ItemIdentificationID,omitempty"`
 	ReasonInformation           []string                  `xml:"ram:ReasonInformation,omitempty"`
 	ChannelCode                 string                    `xml:"ram:ChannelCode,omitempty"`
-	ProcessConditionCode        string                    `xml:"ram:ProcessConditionCode,omitempty"`
-	ProcessCondition            []string                  `xml:"ram:ProcessCondition,omitempty"`
 	Status                      []string                  `xml:"ram:Status,omitempty"`
 	ReferenceReferencedDocument []*CDARReferencedDocument `xml:"ram:ReferenceReferencedDocument"`
 }
@@ -32,6 +30,8 @@ type CDARReferencedDocument struct {
 	AttachmentBinaryObjects   []*CDARBinaryObject         `xml:"ram:AttachmentBinaryObject,omitempty"`
 	ReferenceTypeCode         string                      `xml:"ram:ReferenceTypeCode,omitempty"`
 	FormattedIssueDateTime    *CDARFormattedIssueDateTime `xml:"ram:FormattedIssueDateTime,omitempty"`
+	ProcessConditionCode      string                      `xml:"ram:ProcessConditionCode,omitempty"`
+	ProcessCondition          string                      `xml:"ram:ProcessCondition,omitempty"`
 	IssuerTradeParty          *CDARTradeParty             `xml:"ram:IssuerTradeParty,omitempty"`
 	RecipientTradeParties     []*CDARTradeParty           `xml:"ram:RecipientTradeParty,omitempty"`
 	SpecifiedDocumentStatuses []*CDARDocumentStatus       `xml:"ram:SpecifiedDocumentStatus,omitempty"`
@@ -47,9 +47,29 @@ type CDARBinaryObject struct {
 
 // CDARDocumentStatus represents a document status with conditions and reasons
 type CDARDocumentStatus struct {
-	ReferenceDateTime *CDARIssueDateTime `xml:"ram:ReferenceDateTime,omitempty"`
-	ConditionCode     string             `xml:"ram:ConditionCode,omitempty"`
-	ReasonCode        string             `xml:"ram:ReasonCode,omitempty"`
-	Reason            []string           `xml:"ram:Reason,omitempty"`
-	SequenceNumeric   int                `xml:"ram:SequenceNumeric,omitempty"`
+	ReferenceDateTime                *CDARIssueDateTime            `xml:"ram:ReferenceDateTime,omitempty"`
+	ConditionCode                    string                        `xml:"ram:ConditionCode,omitempty"`
+	ReasonCode                       string                        `xml:"ram:ReasonCode,omitempty"`
+	Reason                           []string                      `xml:"ram:Reason,omitempty"`
+	RequestedActionCode              string                        `xml:"ram:RequestedActionCode,omitempty"`
+	RequestedAction                  string                        `xml:"ram:RequestedAction,omitempty"`
+	SequenceNumeric                  int                           `xml:"ram:SequenceNumeric,omitempty"`
+	SpecifiedDocumentCharacteristics []*CDARDocumentCharacteristic `xml:"ram:SpecifiedDocumentCharacteristic,omitempty"`
+}
+
+// CDARDocumentCharacteristic represents a characteristic attached to a document status
+type CDARDocumentCharacteristic struct {
+	ID                    string               `xml:"ram:ID,omitempty"`
+	TypeCode              string               `xml:"ram:TypeCode,omitempty"`
+	ValueChangedIndicator *CDARIndicatorString `xml:"ram:ValueChangedIndicator,omitempty"`
+	Name                  string               `xml:"ram:Name,omitempty"`
+	Location              string               `xml:"ram:Location,omitempty"`
+	ValuePercent          string               `xml:"ram:ValuePercent,omitempty"`
+	ValueAmount           string               `xml:"ram:ValueAmount,omitempty"`
+	ValueDateTime         *CDARIssueDateTime   `xml:"ram:ValueDateTime,omitempty"`
+}
+
+// CDARIndicatorString represents a boolean indicator using udt:IndicatorString
+type CDARIndicatorString struct {
+	Value string `xml:"udt:IndicatorString"`
 }

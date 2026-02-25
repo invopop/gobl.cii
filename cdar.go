@@ -11,9 +11,6 @@ import (
 // CDAR namespaces
 const (
 	NamespaceCDARRSM = "urn:un:unece:uncefact:data:standard:CrossDomainAcknowledgementAndResponse:100"
-	NamespaceCDARRAM = "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
-	NamespaceCDARQDT = "urn:un:unece:uncefact:data:standard:QualifiedDataType:100"
-	NamespaceCDARUDT = "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
 )
 
 var (
@@ -38,9 +35,9 @@ type CDAR struct {
 func NewCDAR() *CDAR {
 	return &CDAR{
 		RSMNamespace: NamespaceCDARRSM,
-		RAMNamespace: NamespaceCDARRAM,
-		QDTNamespace: NamespaceCDARQDT,
-		UDTNamespace: NamespaceCDARUDT,
+		RAMNamespace: NamespaceRAM,
+		QDTNamespace: NamespaceQDT,
+		UDTNamespace: NamespaceUDT,
 	}
 }
 
@@ -59,9 +56,9 @@ func UnmarshalCDAR(data []byte) (*CDAR, error) {
 	if err := xmlctx.Unmarshal(data, cdar, xmlctx.WithNamespaces(
 		map[string]string{
 			"rsm": NamespaceCDARRSM,
-			"ram": NamespaceCDARRAM,
-			"qdt": NamespaceCDARQDT,
-			"udt": NamespaceCDARUDT,
+			"ram": NamespaceRAM,
+			"qdt": NamespaceQDT,
+			"udt": NamespaceUDT,
 		},
 	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CDAR: %w", err)

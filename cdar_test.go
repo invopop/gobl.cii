@@ -38,9 +38,9 @@ func TestUnmarshalCDAR(t *testing.T) {
 
 			// Set namespaces for marshaling back (they're not captured during unmarshaling)
 			cdar.RSMNamespace = cii.NamespaceCDARRSM
-			cdar.RAMNamespace = cii.NamespaceCDARRAM
-			cdar.QDTNamespace = cii.NamespaceCDARQDT
-			cdar.UDTNamespace = cii.NamespaceCDARUDT
+			cdar.RAMNamespace = cii.NamespaceRAM
+			cdar.QDTNamespace = cii.NamespaceQDT
+			cdar.UDTNamespace = cii.NamespaceUDT
 
 			// Verify we can marshal it back to XML
 			xmlData, err := cdar.Bytes()
@@ -118,9 +118,9 @@ func TestCDARRoundtrip(t *testing.T) {
 
 			// Set namespaces for marshaling (they're used for output)
 			cdar.RSMNamespace = cii.NamespaceCDARRSM
-			cdar.RAMNamespace = cii.NamespaceCDARRAM
-			cdar.QDTNamespace = cii.NamespaceCDARQDT
-			cdar.UDTNamespace = cii.NamespaceCDARUDT
+			cdar.RAMNamespace = cii.NamespaceRAM
+			cdar.QDTNamespace = cii.NamespaceQDT
+			cdar.UDTNamespace = cii.NamespaceUDT
 
 			// Marshal back to XML
 			marshaledData, err := cdar.Bytes()
@@ -142,4 +142,65 @@ func TestCDARRoundtrip(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUnmarshalCDARProcessCondition(t *testing.T) {
+	// UC1_F202500003_05 has ProcessConditionCode/ProcessCondition inside ReferenceReferencedDocument
+	testFile := filepath.Join(getParsePath(), "UC1_F202500003_05-CDV-205_Approuvee.xml")
+	data, err := os.ReadFile(testFile)
+	require.NoError(t, err)
+
+	cdar, err := cii.UnmarshalCDAR(data)
+	require.NoError(t, err)
+	require.Len(t, cdar.AcknowledgementDocuments, 1)
+
+	ack := cdar.AcknowledgementDocuments[0]
+	require.Len(t, ack.ReferenceReferencedDocument, 1)
+
+	ref := ack.ReferenceReferencedDocument[0]
+	assert.Equal(t, "F202500003", ref.IssuerAssignedID)
+	assert.Equal(t, "205", ref.ProcessConditionCode)
+	assert.Equal(t, "Approuvée", ref.ProcessCondition)
+}
+
+func TestUnmarshalCDARDispute(t *testing.T) {
+	// UC4 has SpecifiedDocumentStatus with RequestedAction and SpecifiedDocumentCharacteristic
+	testFile := filepath.Join(getParsePath(), "UC4_F202500006_04-CDV-207_En_litige.xml")
+	data, err := os.ReadFile(testFile)
+	require.NoError(t, err)
+
+	cdar, err := cii.UnmarshalCDAR(data)
+	require.NoError(t, err)
+	require.Len(t, cdar.AcknowledgementDocuments, 1)
+
+	ack := cdar.AcknowledgementDocuments[0]
+	require.Len(t, ack.ReferenceReferencedDocument, 1)
+
+	ref := ack.ReferenceReferencedDocument[0]
+	assert.Equal(t, "207", ref.ProcessConditionCode)
+	assert.Equal(t, "En_litige", ref.ProcessCondition)
+
+	// Verify SpecifiedDocumentStatus
+	require.Len(t, ref.SpecifiedDocumentStatuses, 1)
+	status := ref.SpecifiedDocumentStatuses[0]
+	assert.Equal(t, "TX_TVA_ERR", status.ReasonCode)
+	assert.Equal(t, "NIN", status.RequestedActionCode)
+	assert.Equal(t, "Créer une Facture Rectificative", status.RequestedAction)
+	assert.Equal(t, 1, status.SequenceNumeric)
+
+	// Verify SpecifiedDocumentCharacteristics
+	require.Len(t, status.SpecifiedDocumentCharacteristics, 2)
+
+	char1 := status.SpecifiedDocumentCharacteristics[0]
+	assert.Equal(t, "BT-152", char1.ID)
+	assert.Equal(t, "DIV", char1.TypeCode)
+	assert.Equal(t, "Taux TVA", char1.Name)
+	assert.Equal(t, "10.00", char1.ValuePercent)
+	require.NotNil(t, char1.ValueChangedIndicator)
+	assert.Equal(t, "true", char1.ValueChangedIndicator.Value)
+
+	char2 := status.SpecifiedDocumentCharacteristics[1]
+	assert.Equal(t, "BT-152", char2.ID)
+	assert.Equal(t, "DVA", char2.TypeCode)
+	assert.Equal(t, "20.00", char2.ValuePercent)
 }

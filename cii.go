@@ -130,7 +130,8 @@ var ContextChorusProV1 = Context{
 
 // Parse parses a raw XML CII invoice document and converts it into
 // a GOBL envelope. If the type is unsupported, an
-// ErrUnknownDocumentType is provided.
+// ErrUnknownDocumentType is provided. CDAR and other non-invoice CII
+// documents are not supported by Parse and should be handled using Unmarshal.
 func Parse(data []byte) (*gobl.Envelope, error) {
 	ns, err := extractRootNamespace(data)
 	if err != nil {
