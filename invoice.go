@@ -2,10 +2,13 @@ package cii
 
 import (
 	"encoding/xml"
+	"fmt"
 	"slices"
 
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/xmlctx"
 )
 
 // Invoice is a pseudo-model for containing the XML document being created
@@ -48,6 +51,37 @@ type Date struct {
 type Note struct {
 	Content     string `xml:"ram:Content,omitempty"`
 	SubjectCode string `xml:"ram:SubjectCode,omitempty"`
+}
+
+// ConvertInvoice is a convenience function that converts a GOBL envelope
+// containing an invoice into a CII Invoice.
+func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Convert(env, opts...)
+	if err != nil {
+		return nil, err
+	}
+	inv, ok := doc.(*Invoice)
+	if !ok {
+		return nil, fmt.Errorf("expected invoice, got %T", doc)
+	}
+	return inv, nil
+}
+
+// UnmarshalInvoice unmarshals CII invoice XML into an Invoice struct
+// without converting to GOBL.
+func UnmarshalInvoice(data []byte) (*Invoice, error) {
+	inv := new(Invoice)
+	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
+		map[string]string{
+			"rsm": NamespaceRSM,
+			"ram": NamespaceRAM,
+			"qdt": NamespaceQDT,
+			"udt": NamespaceUDT,
+		},
+	)); err != nil {
+		return nil, fmt.Errorf("error unmarshaling CII invoice: %w", err)
+	}
+	return inv, nil
 }
 
 func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {

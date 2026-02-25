@@ -12,6 +12,7 @@ import (
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -89,7 +90,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{en16931.V2017},
+	Addons:      []cbc.Key{ctc.Flow2V1},
 	VESID:       "fr.factur-x:en16931:1.0.7-2",
 }
 
@@ -98,7 +99,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{en16931.V2017},
+	Addons:      []cbc.Key{ctc.Flow2V1},
 	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
@@ -127,31 +128,51 @@ var ContextChorusProV1 = Context{
 	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
-// Parse parses a raw XML CII document and converts it into
+// Parse parses a raw XML CII invoice document and converts it into
 // a GOBL envelope. If the type is unsupported, an
-// ErrUnknownDocumentType is provided.
+// ErrUnknownDocumentType is provided. CDAR and other non-invoice CII
+// documents are not supported by Parse and should be handled using Unmarshal.
 func Parse(data []byte) (*gobl.Envelope, error) {
 	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err
 	}
 
-	env := gobl.NewEnvelope()
-	var res any
-	switch ns {
-	case NamespaceRSM:
-		res, err = parseInvoice(data)
-		if err != nil {
-			return nil, err
-		}
-	default:
+	if ns != NamespaceRSM {
 		return nil, ErrUnknownDocumentType
+	}
+
+	env := gobl.NewEnvelope()
+	res, err := parseInvoice(data)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := env.Insert(res); err != nil {
 		return nil, err
 	}
 	return env, nil
+}
+
+// Unmarshal detects the document type and unmarshals XML into the appropriate
+// Go struct. Returns either *Invoice (for CII) or *CDAR (for acknowledgements).
+// This is pure unmarshaling without GOBL conversion.
+func Unmarshal(data []byte) (any, error) {
+	ns, err := extractRootNamespace(data)
+	if err != nil {
+		return nil, err
+	}
+
+	switch ns {
+	case NamespaceRSM:
+		// CII Invoice - unmarshal to Invoice struct
+		return UnmarshalInvoice(data)
+	case NamespaceCDARRSM:
+		// CDAR acknowledgement - unmarshal to CDAR struct
+		return UnmarshalCDAR(data)
+	default:
+		return nil, ErrUnknownDocumentType
+	}
 }
 
 // Convert takes a gobl envelope and converts it into a CII document
@@ -182,20 +203,6 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
-}
-
-// ConvertInvoice is a convenience function that converts a GOBL envelope
-// containing an invoice into a CII Invoice.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
-	if err != nil {
-		return nil, err
-	}
-	inv, ok := doc.(*Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected invoice, got %T", doc)
-	}
-	return inv, nil
 }
 
 type options struct {
