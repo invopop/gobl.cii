@@ -79,7 +79,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		return nil, err
 	}
 
-	// Payment comprised of terms, means and payee. Check tehre is relevant info in at least one of them to create a payment
+	// Payment comprised of terms, means and payee. Check there is relevant info in at least one of them to create a payment
 	if out.Payment, err = goblNewPaymentDetails(ahts); err != nil {
 		return nil, err
 	}
