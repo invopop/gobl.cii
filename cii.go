@@ -139,12 +139,13 @@ var contexts = []Context{
 // FindContext looks up a context by GuidelineID and optionally BusinessID.
 // Returns nil if no matching context is found.
 func FindContext(guidelineID string, businessID string) *Context {
-	for _, ctx := range contexts {
+	for i := range contexts {
+		ctx := &contexts[i]
 		if ctx.GuidelineID == guidelineID {
 			if ctx.BusinessID != "" && businessID != "" && ctx.BusinessID != businessID {
 				continue
 			}
-			return &ctx
+			return ctx
 		}
 	}
 	return nil

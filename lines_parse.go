@@ -181,6 +181,12 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 // goblLineTaxes populates line tax information from the CII trade tax entries.
 func goblLineTaxes(taxes []*Tax, l *bill.Line, taxMap map[string]*taxCategoryInfo) error {
 	for i, tt := range taxes {
+		// Ensure the Taxes slice has enough capacity
+		for len(l.Taxes) <= i {
+			l.Taxes = append(l.Taxes, &tax.Combo{
+				Category: cbc.Code(tt.TypeCode),
+			})
+		}
 		if tt.CategoryCode != "" {
 			l.Taxes[i].Ext = tax.Extensions{
 				untdid.ExtKeyTaxCategory: cbc.Code(tt.CategoryCode),

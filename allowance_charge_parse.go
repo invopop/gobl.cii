@@ -76,13 +76,11 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 		}
 		c.Percent = &p
 	}
-	if ac.Tax != nil {
-		if ac.Tax.TypeCode != "" {
-			c.Taxes = tax.Set{
-				{
-					Category: cbc.Code(ac.Tax.TypeCode),
-				},
-			}
+	if ac.Tax != nil && ac.Tax.TypeCode != "" {
+		c.Taxes = tax.Set{
+			{
+				Category: cbc.Code(ac.Tax.TypeCode),
+			},
 		}
 		if ac.Tax.CategoryCode != "" {
 			c.Taxes[0].Ext = tax.Extensions{
@@ -140,13 +138,11 @@ func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*
 		}
 		d.Percent = &p
 	}
-	if ac.Tax != nil {
-		if ac.Tax.TypeCode != "" {
-			d.Taxes = tax.Set{
-				{
-					Category: cbc.Code(ac.Tax.TypeCode),
-				},
-			}
+	if ac.Tax != nil && ac.Tax.TypeCode != "" {
+		d.Taxes = tax.Set{
+			{
+				Category: cbc.Code(ac.Tax.TypeCode),
+			},
 		}
 		if ac.Tax.CategoryCode != "" {
 			d.Taxes[0].Ext = tax.Extensions{
