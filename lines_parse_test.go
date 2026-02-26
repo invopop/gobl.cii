@@ -116,7 +116,6 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, cbc.Code("BookingCode001"), lines[0].Cost)
 	})
 
-
 	// Invoice with BasisQuantity
 	t.Run("CII_example8.xml", func(t *testing.T) {
 		e, err := parseInvoiceFrom(t, "CII_example8.xml")
