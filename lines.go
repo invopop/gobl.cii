@@ -24,12 +24,19 @@ type LineDoc struct {
 
 // LineAgreement defines the structure of the SpecifiedLineTradeAgreement in the CII standard
 type LineAgreement struct {
-	NetPrice *NetPrice `xml:"ram:NetPriceProductTradePrice"`
+	OrderReference *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
+	NetPrice       *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
+}
+
+// LineOrderReference defines the structure of BuyerOrderReferencedDocument at line level
+type LineOrderReference struct {
+	LineID string `xml:"ram:LineID,omitempty"`
 }
 
 // NetPrice defines the structure of the NetPriceProductTradePrice in the CII standard
 type NetPrice struct {
-	Amount string `xml:"ram:ChargeAmount"`
+	Amount       string    `xml:"ram:ChargeAmount"`
+	BaseQuantity *Quantity `xml:"ram:BasisQuantity,omitempty"`
 }
 
 // LineDelivery defines the structure of the SpecifiedLineTradeDelivery in the CII standard
@@ -62,8 +69,8 @@ type GlobalID struct {
 
 // ListID defines the structure of the ListID of the CII standard
 type ListID struct {
-	ID     string `xml:"ram:ID,omitempty"`
-	ListID string `xml:"ListID,attr,omitempty"`
+	Value  string `xml:",chardata"`
+	ListID string `xml:"listID,attr,omitempty"`
 }
 
 // Characteristic defines the structure of the ApplicableProductCharacteristic of the CII standard
@@ -84,6 +91,12 @@ type TradeSettlement struct {
 	Period             *Period            `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	AllowanceCharge    []*AllowanceCharge `xml:"ram:SpecifiedTradeAllowanceCharge,omitempty"`
 	Sum                *Summation         `xml:"ram:SpecifiedTradeSettlementLineMonetarySummation"`
+	AccountingAccount  *AccountingAccount `xml:"ram:ReceivableSpecifiedTradeAccountingAccount,omitempty"`
+}
+
+// AccountingAccount defines the structure of ReceivableSpecifiedTradeAccountingAccount
+type AccountingAccount struct {
+	ID string `xml:"ram:ID,omitempty"`
 }
 
 // Summation defines the structure of the SpecifiedTradeSettlementLineMonetarySummation of the CII standard

@@ -16,6 +16,7 @@ import (
 // Settlement defines the structure of ApplicableHeaderTradeSettlement of the CII standard
 type Settlement struct {
 	CreditorRefID      string                `xml:"ram:CreditorReferenceID,omitempty"`
+	PaymentReference   string                `xml:"ram:PaymentReference,omitempty"`
 	Currency           string                `xml:"ram:InvoiceCurrencyCode"`
 	Payee              *Party                `xml:"ram:PayeeTradeParty,omitempty"`
 	PaymentMeans       []*PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
@@ -192,6 +193,9 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
 		instr := inv.Payment.Instructions
+		if instr.Ref != "" {
+			stlm.PaymentReference = instr.Ref.String()
+		}
 		pmc, err := getPaymentMeansCode(instr)
 		if err != nil {
 			return nil, err

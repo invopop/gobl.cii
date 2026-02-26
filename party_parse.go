@@ -13,6 +13,40 @@ func goblNewParty(party *Party) *org.Party {
 		Name: party.Name,
 	}
 
+	// BT-28/BT-45: Trading name (alias)
+	if party.LegalOrganization != nil && party.LegalOrganization.Name != "" {
+		if party.LegalOrganization.Name != p.Name {
+			p.Alias = party.LegalOrganization.Name
+		}
+	}
+
+	// BT-30/BT-47: Legal registration identifier
+	if party.LegalOrganization != nil && party.LegalOrganization.ID != nil && party.LegalOrganization.ID.Value != "" {
+		identity := &org.Identity{
+			Code:  cbc.Code(party.LegalOrganization.ID.Value),
+			Scope: org.IdentityScopeLegal,
+		}
+		if party.LegalOrganization.ID.SchemeID != "" {
+			identity.Ext = tax.Extensions{
+				iso.ExtKeySchemeID: cbc.Code(party.LegalOrganization.ID.SchemeID),
+			}
+		}
+		p.Identities = append(p.Identities, identity)
+	}
+
+	// BT-29/BT-46: Seller/Buyer identifier
+	if party.ID != nil && party.ID.Value != "" {
+		identity := &org.Identity{
+			Code: cbc.Code(party.ID.Value),
+		}
+		if party.ID.SchemeID != "" {
+			identity.Ext = tax.Extensions{
+				iso.ExtKeySchemeID: cbc.Code(party.ID.SchemeID),
+			}
+		}
+		p.Identities = append(p.Identities, identity)
+	}
+
 	if party.Contact != nil && party.Contact.PersonName != "" {
 		p.People = []*org.Person{
 			{

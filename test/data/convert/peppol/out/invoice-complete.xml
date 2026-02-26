@@ -125,6 +125,7 @@
     </ram:ApplicableHeaderTradeDelivery>
     <ram:ApplicableHeaderTradeSettlement>
       <ram:CreditorReferenceID>987654321</ram:CreditorReferenceID>
+      <ram:PaymentReference>0003434323213231</ram:PaymentReference>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
       <ram:PayeeTradeParty>
         <ram:Name>Ebeneser Scrooge AS</ram:Name>
