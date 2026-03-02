@@ -1,0 +1,1008 @@
+---
+key: "cii"
+name: "EN16931-1 to UN/CEFACT CII D16B Mapping"
+description: |-
+  Mappings of EN16931 Business terms and rules to UN/CEFACT Cross Industry Invoice
+  D16B XPaths as defined by CEN/TS 16931-3-3:2017.
+
+terms:
+  - id: BT-1
+    name: "Invoice number"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:ID
+
+  - id: BT-2
+    name: "Invoice issue date"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:IssueDateTime/udt:DateTimeString
+
+  - id: BT-3
+    name: "Invoice type code"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:TypeCode
+
+  - id: BT-5
+    name: "Invoice currency code"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceCurrencyCode
+
+  - id: BT-6
+    name: "Tax accounting currency code"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:TaxCurrencyCode
+
+  - id: BT-7
+    name: "Tax point date"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:TaxPointDate/udt:DateTimeString
+
+  - id: BT-8
+    name: "Payment due date type code"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:DueDateTypeCode
+
+  - id: BT-9
+    name: "Payment due date"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradePaymentTerms/ram:DueDateDateTime/udt:DateTimeString
+
+  - id: BT-10
+    name: "Buyer reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerReference
+
+  - id: BT-11
+    name: "Project reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SpecifiedProcuringProject/ram:ID
+
+  - id: BT-12
+    name: "Contract reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:ContractReferencedDocument/ram:IssuerAssignedID
+
+  - id: BT-13
+    name: "Purchase order reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerOrderReferencedDocument/ram:IssuerAssignedID
+
+  - id: BT-14
+    name: "Sales order reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerOrderReferencedDocument/ram:IssuerAssignedID
+
+  - id: BT-15
+    name: "Receiving advice reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ReceivingAdviceReferencedDocument/ram:IssuerAssignedID
+
+  - id: BT-16
+    name: "Despatch advice reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:DespatchAdviceReferencedDocument/ram:IssuerAssignedID
+
+  - id: BT-17
+    name: "Tender or lot reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:IssuerAssignedID
+
+  - id: BT-18
+    name: "Invoice line document reference"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:IssuerAssignedID
+
+  - id: BT-18-1
+    name: "Invoice line document reference type code"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:ReferenceTypeCode
+
+  - id: BT-19
+    name: "Accounting account identifier"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ReceivableSpecifiedTradeAccountingAccount/ram:ID
+
+  - id: BT-20
+    name: "Payment terms"
+    paths:
+      - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradePaymentTerms/ram:Description
+
+  - id: BG-1
+    name: "Invoice note"
+    terms:
+      - id: BT-21
+        name: "Invoice note subject code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:IncludedNote/ram:SubjectCode
+
+      - id: BT-22
+        name: "Invoice note"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:ExchangedDocument/ram:IncludedNote/ram:Content
+
+  - id: BG-2
+    name: "Process control"
+    terms:
+      - id: BT-23
+        name: "Business process type"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext/ram:BusinessProcessSpecifiedDocumentContextParameter/ram:ID
+
+      - id: BT-24
+        name: "Specification identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:ExchangedDocumentContext/ram:GuidelineSpecifiedDocumentContextParameter/ram:ID
+
+  - id: BG-3
+    name: "Preceding invoice reference"
+    terms:
+      - id: BT-25
+        name: "Preceding invoice number"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceReferencedDocument/ram:IssuerAssignedID
+
+      - id: BT-26
+        name: "Preceding invoice issue date"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:InvoiceReferencedDocument/ram:FormattedIssueDateTime/qdt:DateTimeString
+
+  - id: BG-4
+    name: "Seller"
+    terms:
+      - id: BT-27
+        name: "Seller name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:Name
+
+      - id: BT-28
+        name: "Seller trading name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedLegalOrganization/ram:TradingBusinessName
+
+      - id: BT-29
+        name: "Seller global identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:GlobalID
+
+      - id: BT-29-1
+        name: "Seller global identifier scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:GlobalID/@schemeID
+
+      - id: BT-30
+        name: "Seller legal registration identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedLegalOrganization/ram:ID
+
+      - id: BT-30-1
+        name: "Seller legal registration identifier scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedLegalOrganization/ram:ID/@schemeID
+
+      - id: BT-31
+        name: "Seller VAT identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID
+
+      - id: BT-32
+        name: "Seller tax registration identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:SpecifiedTaxRegistration/ram:ID
+
+      - id: BT-33
+        name: "Seller additional legal information"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:Description
+
+      - id: BT-34
+        name: "Seller electronic address"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:URIUniversalCommunication/ram:URIID
+
+      - id: BT-34-1
+        name: "Seller electronic address scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:URIUniversalCommunication/ram:URIID/@schemeID
+
+  - id: BG-5
+    name: "Seller postal address"
+    terms:
+      - id: BT-35
+        name: "Seller address line 1"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:LineOne
+
+      - id: BT-36
+        name: "Seller address line 2"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:LineTwo
+
+      - id: BT-162
+        name: "Seller address line 3"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:LineThree
+
+      - id: BT-37
+        name: "Seller city"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CityName
+
+      - id: BT-38
+        name: "Seller post code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:PostcodeCode
+
+      - id: BT-39
+        name: "Seller country subdivision"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName
+
+      - id: BT-40
+        name: "Seller country code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:PostalTradeAddress/ram:CountryID
+
+  - id: BG-6
+    name: "Seller contact"
+    terms:
+      - id: BT-41
+        name: "Seller contact point name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:PersonName
+
+      - id: BT-42
+        name: "Seller contact telephone number"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:TelephoneUniversalCommunication/ram:CompleteNumber
+
+      - id: BT-43
+        name: "Seller contact email address"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTradeParty/ram:DefinedTradeContact/ram:EmailURIUniversalCommunication/ram:URIID
+
+  - id: BG-7
+    name: "Buyer"
+    terms:
+      - id: BT-44
+        name: "Buyer name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:Name
+
+      - id: BT-45
+        name: "Buyer trading name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:TradingBusinessName
+
+      - id: BT-46
+        name: "Buyer global identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:GlobalID
+
+      - id: BT-46-1
+        name: "Buyer global identifier scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:GlobalID/@schemeID
+
+      - id: BT-47
+        name: "Buyer legal registration identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:ID
+
+      - id: BT-47-1
+        name: "Buyer legal registration identifier scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:SpecifiedLegalOrganization/ram:ID/@schemeID
+
+      - id: BT-48
+        name: "Buyer VAT identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:SpecifiedTaxRegistration/ram:ID
+
+      - id: BT-49
+        name: "Buyer electronic address"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:URIUniversalCommunication/ram:URIID
+
+      - id: BT-49-1
+        name: "Buyer electronic address scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:URIUniversalCommunication/ram:URIID/@schemeID
+
+  - id: BG-8
+    name: "Buyer postal address"
+    terms:
+      - id: BT-50
+        name: "Buyer address line 1"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:LineOne
+
+      - id: BT-51
+        name: "Buyer address line 2"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:LineTwo
+
+      - id: BT-163
+        name: "Buyer address line 3"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:LineThree
+
+      - id: BT-52
+        name: "Buyer city"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CityName
+
+      - id: BT-53
+        name: "Buyer post code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:PostcodeCode
+
+      - id: BT-54
+        name: "Buyer country subdivision"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName
+
+      - id: BT-55
+        name: "Buyer country code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:PostalTradeAddress/ram:CountryID
+
+  - id: BG-9
+    name: "Buyer contact"
+    terms:
+      - id: BT-56
+        name: "Buyer contact point name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact/ram:PersonName
+
+      - id: BT-57
+        name: "Buyer contact telephone number"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact/ram:TelephoneUniversalCommunication/ram:CompleteNumber
+
+      - id: BT-58
+        name: "Buyer contact email address"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:BuyerTradeParty/ram:DefinedTradeContact/ram:EmailURIUniversalCommunication/ram:URIID
+
+  - id: BG-10
+    name: "Payee"
+    terms:
+      - id: BT-59
+        name: "Payee name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:Name
+
+      - id: BT-60
+        name: "Payee global identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:GlobalID
+
+      - id: BT-60-1
+        name: "Payee global identifier scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:GlobalID/@schemeID
+
+      - id: BT-61
+        name: "Payee legal registration identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:SpecifiedLegalOrganization/ram:ID
+
+      - id: BT-61-1
+        name: "Payee legal registration identifier scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PayeeTradeParty/ram:SpecifiedLegalOrganization/ram:ID/@schemeID
+
+  - id: BG-11
+    name: "Seller tax representative party"
+    terms:
+      - id: BT-62
+        name: "Seller tax representative name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:Name
+
+      - id: BT-63
+        name: "Seller tax representative VAT identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:SpecifiedTaxRegistration/ram:ID
+
+  - id: BG-12
+    name: "Seller tax representative postal address"
+    terms:
+      - id: BT-64
+        name: "Seller tax representative address line 1"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:LineOne
+
+      - id: BT-65
+        name: "Seller tax representative address line 2"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:LineTwo
+
+      - id: BT-164
+        name: "Seller tax representative address line 3"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:LineThree
+
+      - id: BT-66
+        name: "Seller tax representative city"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:CityName
+
+      - id: BT-67
+        name: "Seller tax representative post code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:PostcodeCode
+
+      - id: BT-68
+        name: "Seller tax representative country subdivision"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName
+
+      - id: BT-69
+        name: "Seller tax representative country code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:SellerTaxRepresentativeTradeParty/ram:PostalTradeAddress/ram:CountryID
+
+  - id: BG-13
+    name: "Delivery information"
+    terms:
+      - id: BT-70
+        name: "Deliver to party name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:Name
+
+      - id: BT-71
+        name: "Deliver to party global identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:GlobalID
+
+      - id: BT-71-1
+        name: "Deliver to party global identifier scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:GlobalID/@schemeID
+
+      - id: BT-72
+        name: "Actual delivery date"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ActualDeliverySupplyChainEvent/ram:OccurrenceDateTime/udt:DateTimeString
+
+  - id: BG-14
+    name: "Invoicing period"
+    terms:
+      - id: BT-73
+        name: "Invoicing period start date"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:BillingSpecifiedPeriod/ram:StartDateTime/udt:DateTimeString
+
+      - id: BT-74
+        name: "Invoicing period end date"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:BillingSpecifiedPeriod/ram:EndDateTime/udt:DateTimeString
+
+  - id: BG-15
+    name: "Deliver to address"
+    terms:
+      - id: BT-75
+        name: "Deliver to address line 1"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:LineOne
+
+      - id: BT-76
+        name: "Deliver to address line 2"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:LineTwo
+
+      - id: BT-165
+        name: "Deliver to address line 3"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:LineThree
+
+      - id: BT-77
+        name: "Deliver to city"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CityName
+
+      - id: BT-78
+        name: "Deliver to post code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:PostcodeCode
+
+      - id: BT-79
+        name: "Deliver to country subdivision"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CountrySubDivisionName
+
+      - id: BT-80
+        name: "Deliver to country code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeDelivery/ram:ShipToTradeParty/ram:PostalTradeAddress/ram:CountryID
+
+  - id: BG-16
+    name: "Payment instructions"
+    terms:
+      - id: BT-81
+        name: "Payment means type code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:TypeCode
+
+      - id: BT-82
+        name: "Payment means text"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:Information
+
+      - id: BT-83
+        name: "Remittance information"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:PaymentReference
+
+  - id: BG-17
+    name: "Credit transfer"
+    terms:
+      - id: BT-84
+        name: "Payment account identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount/ram:IBANID
+
+      - id: BT-84-alt
+        name: "Payment account identifier (proprietary)"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount/ram:ProprietaryID
+
+      - id: BT-85
+        name: "Payment account name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeePartyCreditorFinancialAccount/ram:AccountName
+
+      - id: BT-86
+        name: "Payment service provider identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayeeSpecifiedCreditorFinancialInstitution/ram:BICID
+
+  - id: BG-18
+    name: "Payment card information"
+    terms:
+      - id: BT-87
+        name: "Payment card primary account number"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:ApplicableTradeSettlementFinancialCard/ram:ID
+
+      - id: BT-88
+        name: "Payment card holder name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:ApplicableTradeSettlementFinancialCard/ram:CardholderName
+
+  - id: BG-19
+    name: "Direct debit"
+    terms:
+      - id: BT-89
+        name: "Direct debit mandate identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradePaymentTerms/ram:DirectDebitMandateID
+
+      - id: BT-90
+        name: "Creditor reference"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:CreditorReferenceID
+
+      - id: BT-91
+        name: "Debtor account identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementPaymentMeans/ram:PayerPartyDebtorFinancialAccount/ram:IBANID
+
+  - id: BG-20
+    name: "Document level allowances"
+    terms:
+      - id: BT-92
+        name: "Document level allowance amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ActualAmount
+
+      - id: BT-93
+        name: "Document level allowance base amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:BasisAmount
+
+      - id: BT-94
+        name: "Document level allowance percentage"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CalculationPercent
+
+      - id: BT-95
+        name: "Document level allowance VAT category code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CategoryTradeTax/ram:CategoryCode
+
+      - id: BT-96
+        name: "Document level allowance VAT rate"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CategoryTradeTax/ram:RateApplicablePercent
+
+      - id: BT-97
+        name: "Document level allowance reason"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:Reason
+
+      - id: BT-98
+        name: "Document level allowance reason code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ReasonCode
+
+  - id: BG-21
+    name: "Document level charges"
+    terms:
+      - id: BT-99
+        name: "Document level charge amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ActualAmount
+
+      - id: BT-100
+        name: "Document level charge base amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:BasisAmount
+
+      - id: BT-101
+        name: "Document level charge percentage"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CalculationPercent
+
+      - id: BT-102
+        name: "Document level charge VAT category code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CategoryTradeTax/ram:CategoryCode
+
+      - id: BT-103
+        name: "Document level charge VAT rate"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CategoryTradeTax/ram:RateApplicablePercent
+
+      - id: BT-104
+        name: "Document level charge reason"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:Reason
+
+      - id: BT-105
+        name: "Document level charge reason code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ReasonCode
+
+  - id: BG-22
+    name: "Document totals"
+    terms:
+      - id: BT-106
+        name: "Sum of invoice line net amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:LineTotalAmount
+
+      - id: BT-107
+        name: "Sum of allowances on document level"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:AllowanceTotalAmount
+
+      - id: BT-108
+        name: "Sum of charges on document level"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:ChargeTotalAmount
+
+      - id: BT-109
+        name: "Invoice total amount without VAT"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxBasisTotalAmount
+
+      - id: BT-110
+        name: "Invoice total VAT amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxTotalAmount
+
+      - id: BT-111
+        name: "Invoice total VAT amount in accounting currency"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TaxTotalAmount
+
+      - id: BT-112
+        name: "Invoice total amount with VAT"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:GrandTotalAmount
+
+      - id: BT-113
+        name: "Prepaid amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:TotalPrepaidAmount
+
+      - id: BT-114
+        name: "Rounding amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:RoundingAmount
+
+      - id: BT-115
+        name: "Amount due for payment"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:SpecifiedTradeSettlementHeaderMonetarySummation/ram:DuePayableAmount
+
+  - id: BG-23
+    name: "VAT breakdown"
+    terms:
+      - id: BT-116
+        name: "VAT category taxable amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:BasisAmount
+
+      - id: BT-117
+        name: "VAT category tax amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:CalculatedAmount
+
+      - id: BT-118
+        name: "VAT category code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:CategoryCode
+
+      - id: BT-119
+        name: "VAT category rate"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent
+
+      - id: BT-120
+        name: "VAT exemption reason text"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:ExemptionReason
+
+      - id: BT-121
+        name: "VAT exemption reason code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeSettlement/ram:ApplicableTradeTax/ram:ExemptionReasonCode
+
+  - id: BG-24
+    name: "Additional supporting documents"
+    terms:
+      - id: BT-122
+        name: "Supporting document reference"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:IssuerAssignedID
+
+      - id: BT-123
+        name: "Supporting document description"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:Name
+
+      - id: BT-124
+        name: "Supporting document URL"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:URIID
+
+      - id: BT-125
+        name: "Supporting document embedded document"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:AttachmentBinaryObject
+
+      - id: BT-125-1
+        name: "Attached document MIME code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:AttachmentBinaryObject/@mimeCode
+
+      - id: BT-125-2
+        name: "Attached document filename"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:ApplicableHeaderTradeAgreement/ram:AdditionalReferencedDocument/ram:AttachmentBinaryObject/@filename
+
+  - id: BG-25
+    name: "Invoice line"
+    terms:
+      - id: BT-126
+        name: "Invoice line identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:AssociatedDocumentLineDocument/ram:LineID
+
+      - id: BT-127
+        name: "Line item note"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:AssociatedDocumentLineDocument/ram:IncludedNote/ram:Content
+
+      - id: BT-128
+        name: "Invoice line object identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:AdditionalReferencedDocument/ram:IssuerAssignedID
+
+      - id: BT-128-1
+        name: "Invoice line object identifier type code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:AdditionalReferencedDocument/ram:ReferenceTypeCode
+
+      - id: BT-129
+        name: "Invoiced quantity"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity
+
+      - id: BT-130
+        name: "Invoiced quantity unit code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeDelivery/ram:BilledQuantity/@unitCode
+
+      - id: BT-131
+        name: "Invoice line net amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeSettlementLineMonetarySummation/ram:LineTotalAmount
+
+      - id: BT-132
+        name: "Referenced purchase order line reference"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:BuyerOrderReferencedDocument/ram:LineID
+
+      - id: BT-133
+        name: "Invoice line accounting account identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ReceivableSpecifiedTradeAccountingAccount/ram:ID
+
+  - id: BG-26
+    name: "Invoice line period"
+    terms:
+      - id: BT-134
+        name: "Invoice line period start date"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:BillingSpecifiedPeriod/ram:StartDateTime/udt:DateTimeString
+
+      - id: BT-135
+        name: "Invoice line period end date"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:BillingSpecifiedPeriod/ram:EndDateTime/udt:DateTimeString
+
+  - id: BG-27
+    name: "Invoice line allowances"
+    terms:
+      - id: BT-136
+        name: "Invoice line allowance amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ActualAmount
+
+      - id: BT-137
+        name: "Invoice line allowance base amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:BasisAmount
+
+      - id: BT-138
+        name: "Invoice line allowance percentage"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CalculationPercent
+
+      - id: BT-139
+        name: "Invoice line allowance reason"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:Reason
+
+      - id: BT-140
+        name: "Invoice line allowance reason code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ReasonCode
+
+  - id: BG-28
+    name: "Invoice line charges"
+    terms:
+      - id: BT-141
+        name: "Invoice line charge amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ActualAmount
+
+      - id: BT-142
+        name: "Invoice line charge base amount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:BasisAmount
+
+      - id: BT-143
+        name: "Invoice line charge percentage"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:CalculationPercent
+
+      - id: BT-144
+        name: "Invoice line charge reason"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:Reason
+
+      - id: BT-145
+        name: "Invoice line charge reason code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:SpecifiedTradeAllowanceCharge/ram:ReasonCode
+
+  - id: BG-29
+    name: "Price details"
+    terms:
+      - id: BT-146
+        name: "Item net price"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:ChargeAmount
+
+      - id: BT-147
+        name: "Item price discount"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:AppliedTradeAllowanceCharge/ram:ActualAmount
+
+      - id: BT-148
+        name: "Item gross price"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:GrossPriceProductTradePrice/ram:ChargeAmount
+
+      - id: BT-149
+        name: "Item price basis quantity"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:BasisQuantity
+
+      - id: BT-150
+        name: "Item price basis quantity unit code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeAgreement/ram:NetPriceProductTradePrice/ram:BasisQuantity/@unitCode
+
+  - id: BG-30
+    name: "Line VAT information"
+    terms:
+      - id: BT-151
+        name: "Invoice line VAT category code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:CategoryCode
+
+      - id: BT-152
+        name: "Invoice line VAT rate"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent
+
+  - id: BG-31
+    name: "Item information"
+    terms:
+      - id: BT-153
+        name: "Item name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:Name
+
+      - id: BT-154
+        name: "Item description"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:Description
+
+      - id: BT-155
+        name: "Item seller's identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:SellerAssignedID
+
+      - id: BT-156
+        name: "Item buyer's identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:BuyerAssignedID
+
+      - id: BT-157
+        name: "Item standard identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:GlobalID
+
+      - id: BT-157-1
+        name: "Item standard identifier type code"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:GlobalID/@schemeID
+
+      - id: BT-158
+        name: "Item classification identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:DesignatedProductClassification/ram:ClassCode
+
+      - id: BT-158-1
+        name: "Item classification identifier identification scheme identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:DesignatedProductClassification/ram:ClassCode/@listID
+
+      - id: BT-158-2
+        name: "Item classification identifier version identifier"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:DesignatedProductClassification/ram:ClassCode/@listVersionID
+
+      - id: BT-159
+        name: "Item country of origin"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:OriginTradeCountry/ram:ID
+
+  - id: BG-32
+    name: "Item attributes"
+    terms:
+      - id: BT-160
+        name: "Item attribute name"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:ApplicableProductCharacteristic/ram:Description
+
+      - id: BT-161
+        name: "Item attribute value"
+        paths:
+          - /rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedTradeProduct/ram:ApplicableProductCharacteristic/ram:Value
