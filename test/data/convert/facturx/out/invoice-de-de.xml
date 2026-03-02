@@ -43,6 +43,7 @@
     <ram:ApplicableHeaderTradeAgreement>
       <ram:BuyerReference>XR-2024-2</ram:BuyerReference>
       <ram:SellerTradeParty>
+        <ram:ID>123456789</ram:ID>
         <ram:Name>Salescompany ltd.</ram:Name>
         <ram:DefinedTradeContact>
           <ram:PersonName>Antonio Salesmacher</ram:PersonName>

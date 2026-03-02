@@ -96,6 +96,7 @@
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery>
       <ram:ShipToTradeParty>
+        <ram:GlobalID schemeID="0088">6754238987643</ram:GlobalID>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>523427</ram:PostcodeCode>
           <ram:LineOne>Deliverystreet 2</ram:LineOne>
@@ -122,6 +123,7 @@
       <ram:PaymentReference>0003434323213231</ram:PaymentReference>
       <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
       <ram:PayeeTradeParty>
+        <ram:ID>989823401</ram:ID>
         <ram:Name>Ebeneser Scrooge AS</ram:Name>
       </ram:PayeeTradeParty>
       <ram:SpecifiedTradeSettlementPaymentMeans>
@@ -152,6 +154,7 @@
           <udt:Indicator>true</udt:Indicator>
         </ram:ChargeIndicator>
         <ram:ActualAmount>11.00</ram:ActualAmount>
+        <ram:ReasonCode>ABK</ram:ReasonCode>
         <ram:Reason>Freight</ram:Reason>
         <ram:CategoryTradeTax>
           <ram:TypeCode>VAT</ram:TypeCode>
