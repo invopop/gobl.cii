@@ -66,10 +66,7 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 		ac.Reason = c.Reason
 	}
 
-	// ReasonCode is not supported at the moment due to a bug in the CII Schema that does not
-	// have the correct UNTDID 7161 code list and subsequently rejects the invoice
-	// if the reason code is mapped.
-	// ac.ReasonCode = c.Ext.Get(untdid.ExtKeyCharge).String()
+	ac.ReasonCode = c.Ext.Get(untdid.ExtKeyCharge).String()
 
 	if c.Percent != nil {
 		p := c.Percent.StringWithoutSymbol()
