@@ -87,12 +87,20 @@ func newParty(party *org.Party) *Party {
 		PostalTradeAddress: newPostalTradeAddress(party.Addresses),
 	}
 
+	// BT-28/BT-45: Trading name (alias)
+	if party.Alias != "" {
+		p.LegalOrganization = &LegalOrganization{
+			Name: party.Alias,
+		}
+	}
+
 	// For Chorus Pro, we need to extract the scheme ID from the tax extension
 	if party.Ext.Has(choruspro.ExtKeyScheme) {
-		p.LegalOrganization = &LegalOrganization{
-			ID: &PartyID{
-				SchemeID: party.Ext.Get(choruspro.ExtKeyScheme).String(),
-			},
+		if p.LegalOrganization == nil {
+			p.LegalOrganization = &LegalOrganization{}
+		}
+		p.LegalOrganization.ID = &PartyID{
+			SchemeID: party.Ext.Get(choruspro.ExtKeyScheme).String(),
 		}
 	}
 
@@ -106,21 +114,49 @@ func newParty(party *org.Party) *Party {
 				},
 			},
 		}
+		// Override address country from tax ID (authoritative source)
+		if party.TaxID.Country != "" {
+			if p.PostalTradeAddress == nil {
+				p.PostalTradeAddress = new(PostalTradeAddress)
+			}
+			p.PostalTradeAddress.CountryID = party.TaxID.Country.String()
+		}
 		// Add ID for Chorus Pro
-		if p.LegalOrganization != nil {
+		if p.LegalOrganization != nil && p.LegalOrganization.ID != nil {
 			p.LegalOrganization.ID.Value = party.TaxID.String()
 		}
 	}
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
+			// BT-30/BT-47: Legal registration identifier
+			if id.Scope == org.IdentityScopeLegal {
+				if p.LegalOrganization == nil {
+					p.LegalOrganization = &LegalOrganization{}
+				}
+				p.LegalOrganization.ID = &PartyID{
+					Value: id.Code.String(),
+				}
+				if id.Ext.Has(iso.ExtKeySchemeID) {
+					p.LegalOrganization.ID.SchemeID = id.Ext[iso.ExtKeySchemeID].String()
+				}
+				continue
+			}
+			// GlobalID: identity with scheme ID and no scope
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				p.GlobalID = &PartyID{
 					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
 					Value:    id.Code.String(),
 				}
+				continue
+			}
+			// BT-29/BT-46: Seller/Buyer identifier (no scheme, no scope)
+			if p.ID == nil {
+				p.ID = &PartyID{
+					Value: id.Code.String(),
+				}
 			}
 			// Add ID for Chorus Pro
-			if id.Type == fr.IdentityTypeSIRET && p.LegalOrganization != nil {
+			if id.Type == fr.IdentityTypeSIRET && p.LegalOrganization != nil && p.LegalOrganization.ID != nil {
 				p.LegalOrganization.ID.Value = id.Code.String()
 			}
 		}

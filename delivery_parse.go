@@ -10,17 +10,24 @@ func goblNewDeliveryDetails(del *Delivery) (*bill.DeliveryDetails, error) {
 	d := new(bill.DeliveryDetails)
 
 	if del.Receiver != nil {
-		d.Receiver = goblNewParty(del.Receiver)
+		d.Receiver = goblNewDeliveryParty(del.Receiver)
 
-		// BT-71: Delivery location identifier
-		if del.Receiver.ID != nil && del.Receiver.ID.Value != "" {
-			id := &org.Identity{
-				Code: cbc.Code(del.Receiver.ID.Value),
+		// BT-71: Delivery location identifier stored on delivery identities
+		// (not party identities) to match UBL mapping pattern.
+		// GlobalID carries the scheme ID, plain ID does not.
+		if del.Receiver.GlobalID != nil && del.Receiver.GlobalID.Value != "" {
+			d.Identities = []*org.Identity{
+				{
+					Code:  cbc.Code(del.Receiver.GlobalID.Value),
+					Label: del.Receiver.GlobalID.SchemeID,
+				},
 			}
-			if del.Receiver.ID.SchemeID != "" {
-				id.Label = del.Receiver.ID.SchemeID
+		} else if del.Receiver.ID != nil && del.Receiver.ID.Value != "" {
+			d.Identities = []*org.Identity{
+				{
+					Code: cbc.Code(del.Receiver.ID.Value),
+				},
 			}
-			d.Identities = []*org.Identity{id}
 		}
 	}
 
@@ -36,4 +43,21 @@ func goblNewDeliveryDetails(del *Delivery) (*bill.DeliveryDetails, error) {
 		return d, nil
 	}
 	return nil, nil
+}
+
+// goblNewDeliveryParty creates a GOBL party with only the BTs available
+// for the delivery party (BT-70 name, BG-15 address).
+func goblNewDeliveryParty(party *Party) *org.Party {
+	p := &org.Party{
+		Name: party.Name,
+	}
+	if party.PostalTradeAddress != nil {
+		p.Addresses = []*org.Address{
+			goblNewAddress(party.PostalTradeAddress),
+		}
+	}
+	if p.Name == "" && len(p.Addresses) == 0 {
+		return nil
+	}
+	return p
 }
