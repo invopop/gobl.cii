@@ -77,7 +77,7 @@ func goblAttachments(docs []*AdditionalDocument) []*org.Attachment {
 
 // AddBinaryAttachment adds an embedded binary attachment to the CII Invoice.
 // The binary data will be automatically base64-encoded.
-func (inv *Invoice) AddBinaryAttachment(att BinaryAttachment) {
+func (out *Invoice) AddBinaryAttachment(att BinaryAttachment) {
 	encodedData := base64.StdEncoding.EncodeToString(att.Data)
 
 	doc := &AdditionalDocument{
@@ -91,18 +91,18 @@ func (inv *Invoice) AddBinaryAttachment(att BinaryAttachment) {
 		},
 	}
 
-	inv.Transaction.Agreement.AdditionalDocument = append(
-		inv.Transaction.Agreement.AdditionalDocument,
+	out.Transaction.Agreement.AdditionalDocument = append(
+		out.Transaction.Agreement.AdditionalDocument,
 		doc,
 	)
 }
 
 // ExtractBinaryAttachments extracts all binary attachments from the CII Invoice.
 // It returns a slice of BinaryAttachment containing the ID, description, and decoded binary data.
-func (inv *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
+func (out *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 	var result []BinaryAttachment
 
-	for _, doc := range inv.Transaction.Agreement.AdditionalDocument {
+	for _, doc := range out.Transaction.Agreement.AdditionalDocument {
 		if doc.AttachmentBinaryObject == nil || doc.AttachmentBinaryObject.Value == "" {
 			continue
 		}

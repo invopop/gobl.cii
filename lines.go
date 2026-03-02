@@ -25,9 +25,9 @@ type LineDoc struct {
 
 // LineAgreement defines the structure of the SpecifiedLineTradeAgreement in the CII standard
 type LineAgreement struct {
-	OrderReference      *LineOrderReference  `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
-	AdditionalReference *LineDocReference     `xml:"ram:AdditionalReferencedDocument,omitempty"`
-	NetPrice            *NetPrice             `xml:"ram:NetPriceProductTradePrice"`
+	OrderReference      *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
+	AdditionalReference *LineDocReference   `xml:"ram:AdditionalReferencedDocument,omitempty"`
+	NetPrice            *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
 }
 
 // LineDocReference defines the structure of AdditionalReferencedDocument at line level
