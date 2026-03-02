@@ -33,12 +33,13 @@ type Transaction struct {
 
 // Tax defines the structure of ApplicableTradeTax of the CII standard
 type Tax struct {
-	CalculatedAmount      string `xml:"ram:CalculatedAmount,omitempty"`
-	TypeCode              string `xml:"ram:TypeCode,omitempty"`
-	BasisAmount           string `xml:"ram:BasisAmount,omitempty"`
-	CategoryCode          string `xml:"ram:CategoryCode,omitempty"`
-	ExemptionReasonCode   string `xml:"ram:ExemptionReasonCode,omitempty"`
-	RateApplicablePercent string `xml:"ram:RateApplicablePercent,omitempty"`
+	CalculatedAmount      string     `xml:"ram:CalculatedAmount,omitempty"`
+	TypeCode              string     `xml:"ram:TypeCode,omitempty"`
+	BasisAmount           string     `xml:"ram:BasisAmount,omitempty"`
+	CategoryCode          string     `xml:"ram:CategoryCode,omitempty"`
+	ExemptionReasonCode   string     `xml:"ram:ExemptionReasonCode,omitempty"`
+	TaxPointDate          *IssueDate `xml:"ram:TaxPointDate,omitempty"`
+	RateApplicablePercent string     `xml:"ram:RateApplicablePercent,omitempty"`
 }
 
 // Date defines date in the UDT structure
@@ -118,6 +119,9 @@ func (out *Invoice) addTransaction(inv *bill.Invoice) error {
 	}
 	if err := out.addAgreement(inv); err != nil {
 		return err
+	}
+	if len(inv.Attachments) > 0 {
+		out.addAttachments(inv)
 	}
 	var err error
 	if out.Transaction.Settlement, err = newSettlement(inv); err != nil {

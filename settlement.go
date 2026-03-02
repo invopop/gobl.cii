@@ -162,6 +162,14 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 
 	if inv.Totals != nil {
 		stlm.Tax = newTaxes(inv.Totals.Taxes)
+		// BT-7: VAT point date
+		if inv.ValueDate != nil {
+			for _, t := range stlm.Tax {
+				t.TaxPointDate = &IssueDate{
+					DateFormat: documentDate(inv.ValueDate),
+				}
+			}
+		}
 		stlm.Summary = newSummary(inv.Totals, string(inv.Currency))
 	}
 

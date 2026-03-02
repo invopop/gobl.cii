@@ -75,6 +75,15 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	ahts := in.Transaction.Settlement
 	taxMap := buildTaxCategoryMap(ahts.Tax)
 
+	// BT-7: VAT point date (from first header-level ApplicableTradeTax)
+	if len(ahts.Tax) > 0 && ahts.Tax[0].TaxPointDate != nil && ahts.Tax[0].TaxPointDate.DateFormat != nil {
+		vd, err := parseDate(ahts.Tax[0].TaxPointDate.DateFormat.Value)
+		if err != nil {
+			return nil, err
+		}
+		out.ValueDate = &vd
+	}
+
 	if err = goblAddLines(in.Transaction, out, taxMap); err != nil {
 		return nil, err
 	}
@@ -136,6 +145,11 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		if err = goblAddChargesAndDiscounts(ahts, out, taxMap); err != nil {
 			return nil, err
 		}
+	}
+
+	// BT-125: Attachments
+	if atts := goblAttachments(in.Transaction.Agreement.AdditionalDocument); len(atts) > 0 {
+		out.Attachments = atts
 	}
 
 	return out, nil
