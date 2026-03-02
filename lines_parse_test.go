@@ -107,7 +107,7 @@ func TestParseCtoGLines(t *testing.T) {
 		// BT-158: Item classification
 		classID := lines[0].Item.Identities[1]
 		assert.Equal(t, cbc.Code("65434568"), classID.Code)
-		assert.Equal(t, "STI", classID.Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "STI", classID.Label)
 
 		// BT-132: Purchase order line reference
 		assert.Equal(t, cbc.Code("1"), lines[0].Order)

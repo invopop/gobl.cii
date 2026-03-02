@@ -57,7 +57,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		}
 	}
 
-	if it.Quantity.Quantity.UnitCode != "" {
+	if it.Quantity != nil && it.Quantity.Quantity != nil && it.Quantity.Quantity.UnitCode != "" {
 		u := cbc.Code(it.Quantity.Quantity.UnitCode)
 		l.Item.Unit = goblUnitFromUNECE(u)
 	}
@@ -81,6 +81,18 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		for _, char := range it.Product.Characteristics {
 			key := formatKey(char.Description)
 			l.Item.Meta[key] = char.Value
+		}
+	}
+
+	// BT-128: Invoice line object identifier
+	if it.Agreement.AdditionalReference != nil && it.Agreement.AdditionalReference.ID != "" {
+		l.Identifier = &org.Identity{
+			Code: cbc.Code(it.Agreement.AdditionalReference.ID),
+		}
+		if it.Agreement.AdditionalReference.RefCode != nil {
+			l.Identifier.Ext = tax.Extensions{
+				untdid.ExtKeyReference: cbc.Code(*it.Agreement.AdditionalReference.RefCode),
+			}
 		}
 	}
 
@@ -147,14 +159,14 @@ func goblLineProduct(prod *Product, item *org.Item) {
 	}
 
 	// BT-158: Item classification
+	// Use Label for the scheme ID to avoid conflicting with GlobalID detection,
+	// which relies on Ext[iso.ExtKeySchemeID].
 	if prod.Classification != nil && prod.Classification.Code != nil {
 		id := &org.Identity{
 			Code: cbc.Code(prod.Classification.Code.Value),
 		}
 		if prod.Classification.Code.ListID != "" {
-			id.Ext = tax.Extensions{
-				iso.ExtKeySchemeID: cbc.Code(prod.Classification.Code.ListID),
-			}
+			id.Label = prod.Classification.Code.ListID
 		}
 		item.Identities = append(item.Identities, id)
 	}
