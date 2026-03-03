@@ -9,6 +9,8 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
+var whitespaceRegex = regexp.MustCompile(`\s+`)
+
 // AdditionalDocumentTypeAttachment is the TypeCode for additional supporting documents
 const AdditionalDocumentTypeAttachment = "916"
 
@@ -108,7 +110,6 @@ func (out *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 		}
 
 		// Remove whitespace that may have been added by XML formatting
-		whitespaceRegex := regexp.MustCompile(`\s+`)
 		v := whitespaceRegex.ReplaceAllString(doc.AttachmentBinaryObject.Value, "")
 
 		decoded, err := base64.StdEncoding.DecodeString(v)

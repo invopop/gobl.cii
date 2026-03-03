@@ -218,11 +218,25 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 	}
 
 	if len(instr.CreditTransfer) > 0 {
-		pm.Creditor = &Creditor{
-			IBAN:   instr.CreditTransfer[0].IBAN,
-			Number: instr.CreditTransfer[0].Number,
+		ct := instr.CreditTransfer[0]
+		var c *Creditor
+		if ct.IBAN != "" {
+			c = &Creditor{}
+			c.IBAN = ct.IBAN
 		}
-		if instr.CreditTransfer[0].BIC != "" {
+
+		if ct.Number != "" {
+			if c == nil {
+				c = &Creditor{}
+			}
+			c.Number = ct.Number
+		}
+
+		if c != nil {
+			pm.Creditor = c
+		}
+
+		if ct.BIC != "" {
 			pm.CreditorInstitution = &CreditorInstitution{
 				BIC: instr.CreditTransfer[0].BIC,
 			}

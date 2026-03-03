@@ -84,8 +84,8 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		}
 	}
 
-	// BT-128: Invoice line object identifier
-	if it.Agreement.AdditionalReference != nil && it.Agreement.AdditionalReference.ID != "" {
+	// BT-128: Invoice line object identifier (TypeCode 130 indicates object identifier)
+	if it.Agreement.AdditionalReference != nil && it.Agreement.AdditionalReference.TypeCode == "130" && it.Agreement.AdditionalReference.ID != "" {
 		l.Identifier = &org.Identity{
 			Code: cbc.Code(it.Agreement.AdditionalReference.ID),
 		}
