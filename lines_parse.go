@@ -43,11 +43,14 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 			Name:  strings.TrimSpace(it.Product.Name),
 			Price: &price,
 		},
-		Taxes: tax.Set{
+	}
+
+	if len(it.TradeSettlement.ApplicableTradeTax) > 0 {
+		l.Taxes = tax.Set{
 			{
 				Category: cbc.Code(it.TradeSettlement.ApplicableTradeTax[0].TypeCode),
 			},
-		},
+		}
 	}
 
 	if it.Quantity != nil && it.Quantity.Quantity != nil {
