@@ -247,17 +247,19 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 		if instr.DirectDebit.Account != "" {
 			pm.Debtor = &DebtorAccount{IBAN: instr.DirectDebit.Account}
 		}
-		if stlm.PaymentTerms == nil {
-			stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref}}
-		} else {
-			for _, term := range stlm.PaymentTerms {
-				term.Mandate = instr.DirectDebit.Ref
+		if instr.DirectDebit.Ref != "" {
+			if stlm.PaymentTerms == nil {
+				stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref}}
+			} else {
+				for _, term := range stlm.PaymentTerms {
+					term.Mandate = instr.DirectDebit.Ref
+				}
 			}
 		}
 		stlm.CreditorRefID = instr.DirectDebit.Creditor
 	}
 
-	if instr.Card != nil {
+	if instr.Card != nil && (instr.Card.Last4 != "" || instr.Card.Holder != "") {
 		pm.Card = &Card{
 			ID:   instr.Card.Last4,
 			Name: instr.Card.Holder,
