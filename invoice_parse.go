@@ -96,11 +96,9 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	if len(in.ExchangedDocument.IncludedNote) > 0 {
 		out.Notes = make([]*org.Note, 0, len(in.ExchangedDocument.IncludedNote))
 		for _, note := range in.ExchangedDocument.IncludedNote {
-			n := &org.Note{
-				Text: note.Content,
-			}
+			n := &org.Note{Text: note.Content}
 			if note.SubjectCode != "" {
-				n.Code = cbc.Code(note.SubjectCode)
+				n.Ext = tax.Extensions{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)}
 			}
 			out.Notes = append(out.Notes, n)
 		}

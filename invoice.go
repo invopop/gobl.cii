@@ -35,6 +35,7 @@ type Transaction struct {
 type Tax struct {
 	CalculatedAmount      string     `xml:"ram:CalculatedAmount,omitempty"`
 	TypeCode              string     `xml:"ram:TypeCode,omitempty"`
+	ExemptionReason       string     `xml:"ram:ExemptionReason,omitempty"`
 	BasisAmount           string     `xml:"ram:BasisAmount,omitempty"`
 	CategoryCode          string     `xml:"ram:CategoryCode,omitempty"`
 	ExemptionReasonCode   string     `xml:"ram:ExemptionReasonCode,omitempty"`
