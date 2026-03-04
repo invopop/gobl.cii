@@ -95,6 +95,7 @@ func newParty(party *org.Party) *Party {
 	}
 
 	// For Chorus Pro, we need to extract the scheme ID from the tax extension
+	// TODO: at some point we should migrate this to use scope legal. This would require a migration in GOBL that creates and Identity.
 	if party.Ext.Has(choruspro.ExtKeyScheme) {
 		if p.LegalOrganization == nil {
 			p.LegalOrganization = &LegalOrganization{}
