@@ -1,6 +1,9 @@
 package cii
 
-import "github.com/invopop/gobl/bill"
+import (
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/org"
+)
 
 // Delivery defines the structure of ApplicableHeaderTradeDelivery of the CII standard
 type Delivery struct {
@@ -30,7 +33,25 @@ func newDelivery(inv *bill.Invoice) *Delivery {
 			}
 		}
 		if inv.Delivery.Receiver != nil {
-			d.Receiver = newParty(inv.Delivery.Receiver)
+			d.Receiver = newDeliveryParty(inv.Delivery.Receiver)
+		}
+		// BT-71: Delivery location identifier
+		if len(inv.Delivery.Identities) > 0 {
+			id := inv.Delivery.Identities[0]
+			if d.Receiver == nil {
+				d.Receiver = new(Party)
+			}
+			if id.Label != "" {
+				// When scheme ID is present, use GlobalID
+				d.Receiver.GlobalID = &PartyID{
+					Value:    id.Code.String(),
+					SchemeID: id.Label,
+				}
+			} else {
+				d.Receiver.ID = &PartyID{
+					Value: id.Code.String(),
+				}
+			}
 		}
 	}
 	if inv.Ordering != nil && inv.Ordering.Despatch != nil {
@@ -46,4 +67,16 @@ func newDelivery(inv *bill.Invoice) *Delivery {
 		}
 	}
 	return d
+}
+
+// newDeliveryParty creates a Party with only the BTs available for
+// the delivery party (BT-70 name, BG-15 address).
+func newDeliveryParty(party *org.Party) *Party {
+	if party == nil {
+		return nil
+	}
+	return &Party{
+		Name:               party.Name,
+		PostalTradeAddress: newPostalTradeAddress(party.Addresses),
+	}
 }

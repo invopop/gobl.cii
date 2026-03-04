@@ -26,10 +26,19 @@ type Project struct {
 
 // AdditionalDocument defines the structure of AdditionalReferencedDocument of the CII standard
 type AdditionalDocument struct {
-	ID        string              `xml:"ram:IssuerAssignedID,omitempty"`
-	TypeCode  string              `xml:"ram:TypeCode,omitempty"`
-	Name      string              `xml:"ram:Name,omitempty"`
-	IssueDate *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
+	ID                     string              `xml:"ram:IssuerAssignedID,omitempty"`
+	URIID                  string              `xml:"ram:URIID,omitempty"`
+	TypeCode               string              `xml:"ram:TypeCode,omitempty"`
+	Name                   string              `xml:"ram:Name,omitempty"`
+	AttachmentBinaryObject *BinaryObject       `xml:"ram:AttachmentBinaryObject,omitempty"`
+	IssueDate              *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
+}
+
+// BinaryObject represents binary data with associated metadata in CII
+type BinaryObject struct {
+	Value    string `xml:",chardata"`
+	MimeCode string `xml:"mimeCode,attr,omitempty"`
+	Filename string `xml:"filename,attr,omitempty"`
 }
 
 // IssuerID defines the structure of IssuerAssignedID of the CII standard
@@ -88,6 +97,21 @@ func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 			if inv.Ordering.Projects[0].Description != "" {
 				agmt.Project.Name = inv.Ordering.Projects[0].Description
 			}
+		}
+		// BT-17: Tender/lot reference
+		for _, tender := range inv.Ordering.Tender {
+			agmt.AdditionalDocument = append(agmt.AdditionalDocument, &AdditionalDocument{
+				ID:       tender.Code.String(),
+				TypeCode: AdditionalDocumentTypeTender,
+			})
+		}
+		// BT-18: Invoiced object identifier
+		if len(inv.Ordering.Identities) > 0 {
+			id := inv.Ordering.Identities[0]
+			agmt.AdditionalDocument = append(agmt.AdditionalDocument, &AdditionalDocument{
+				ID:       id.Code.String(),
+				TypeCode: AdditionalDocumentTypeProductInvoice,
+			})
 		}
 	}
 	return nil

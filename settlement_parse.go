@@ -146,20 +146,25 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		},
 	}
 
+	// BT-83: Payment reference
+	if stlm.PaymentReference != "" {
+		inst.Ref = cbc.Code(stlm.PaymentReference)
+	}
+
 	if pm.Information != "" {
 		inst.Detail = pm.Information
 	}
 
 	if pm.Card != nil {
-		if pm.Card != nil {
-			card := pm.Card
-			inst.Card = &pay.Card{
-				// GOBL only stores last 4 digits of card number
-				Last4: card.ID[len(card.ID)-4:],
-			}
-			if card.Name != "" {
-				inst.Card.Holder = card.Name
-			}
+		card := pm.Card
+		inst.Card = &pay.Card{}
+		if len(card.ID) >= 4 {
+			inst.Card.Last4 = card.ID[len(card.ID)-4:]
+		} else {
+			inst.Card.Last4 = card.ID
+		}
+		if card.Name != "" {
+			inst.Card.Holder = card.Name
 		}
 	}
 
@@ -180,7 +185,45 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		}
 		inst.CreditTransfer = append(inst.CreditTransfer, ct)
 	}
+
+	// BT-89, BT-90, BT-91: Direct debit details
+	dd := goblNewDirectDebit(stlm)
+	if dd != nil {
+		inst.DirectDebit = dd
+	}
+
 	return inst
+}
+
+func goblNewDirectDebit(stlm *Settlement) *pay.DirectDebit {
+	dd := &pay.DirectDebit{}
+	hasData := false
+
+	// BT-89: Direct debit mandate ID (from payment terms)
+	for _, term := range stlm.PaymentTerms {
+		if term.Mandate != "" {
+			dd.Ref = term.Mandate
+			hasData = true
+			break
+		}
+	}
+
+	// BT-90: Creditor reference ID
+	if stlm.CreditorRefID != "" {
+		dd.Creditor = stlm.CreditorRefID
+		hasData = true
+	}
+
+	// BT-91: Debtor account IBAN
+	if len(stlm.PaymentMeans) > 0 && stlm.PaymentMeans[0].Debtor != nil && stlm.PaymentMeans[0].Debtor.IBAN != "" {
+		dd.Account = stlm.PaymentMeans[0].Debtor.IBAN
+		hasData = true
+	}
+
+	if !hasData {
+		return nil
+	}
+	return dd
 }
 
 // paymentMeansCode maps a CII payment means to a GOBL equivalent

@@ -82,7 +82,7 @@ var ContextFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{facturx.V1},
-	VESID:       "fr.factur-x:extended:1.0.7-2",
+	VESID:       "fr.factur-x:extended:1.0.8",
 }
 
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
@@ -91,7 +91,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{ctc.Flow2V1},
-	VESID:       "fr.factur-x:en16931:1.0.7-2",
+	VESID:       "fr.factur-x:en16931:1.0.8",
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
@@ -126,6 +126,29 @@ var ContextChorusProV1 = Context{
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{choruspro.V1},
 	VESID:       "", // ChorusPro does not have a specific VESID
+}
+
+// contexts is used internally for reverse lookups during parsing.
+// When adding new contexts, remember to add them here AND as exported variables above.
+var contexts = []Context{
+	ContextEN16931V2017, ContextPeppolV3, ContextFacturXV1,
+	ContextPeppolFranceFacturXV1, ContextPeppolFranceCIUSV1,
+	ContextZUGFeRDV2, ContextXRechnungV3, ContextChorusProV1,
+}
+
+// FindContext looks up a context by GuidelineID and optionally BusinessID.
+// Returns nil if no matching context is found.
+func FindContext(guidelineID string, businessID string) *Context {
+	for i := range contexts {
+		ctx := &contexts[i]
+		if ctx.GuidelineID == guidelineID {
+			if ctx.BusinessID != "" && businessID != "" && ctx.BusinessID != businessID {
+				continue
+			}
+			return ctx
+		}
+	}
+	return nil
 }
 
 // Parse parses a raw XML CII invoice document and converts it into

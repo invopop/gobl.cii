@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
+	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -88,9 +89,13 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "The Buyercompany", customer.Name)
 		assert.Equal(t, cbc.Code("987654321MVA"), customer.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
-		require.Len(t, customer.Identities, 1)
-		assert.Equal(t, "3456789012098", customer.Identities[0].Code.String())
-		assert.Equal(t, "0088", customer.Identities[0].Ext[iso.ExtKeySchemeID].String())
+		require.Len(t, customer.Identities, 2)
+		// BT-47: Legal registration identifier
+		assert.Equal(t, cbc.Code("987654321"), customer.Identities[0].Code)
+		assert.Equal(t, org.IdentityScopeLegal, customer.Identities[0].Scope)
+		// GlobalID
+		assert.Equal(t, "3456789012098", customer.Identities[1].Code.String())
+		assert.Equal(t, "0088", customer.Identities[1].Ext[iso.ExtKeySchemeID].String())
 	})
 
 	t.Run("CII-IN_SE-R-003.xml", func(t *testing.T) {

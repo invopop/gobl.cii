@@ -1,10 +1,14 @@
 package cii
 
 import (
+	"strings"
+
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/invopop/xmlctx"
@@ -27,6 +31,17 @@ func parseInvoice(data []byte) (*bill.Invoice, error) {
 }
 
 func goblInvoice(in *Invoice) (*bill.Invoice, error) {
+	// Detect context from guideline/business IDs
+	var ctx *Context
+	if in.ExchangedContext != nil && in.ExchangedContext.GuidelineContext != nil {
+		guidelineID := in.ExchangedContext.GuidelineContext.ID
+		var businessID string
+		if in.ExchangedContext.BusinessContext != nil {
+			businessID = in.ExchangedContext.BusinessContext.ID
+		}
+		ctx = FindContext(guidelineID, businessID)
+	}
+
 	out := &bill.Invoice{
 		Code:     cbc.Code(in.ExchangedDocument.ID),
 		Type:     typeCodeParse(in.ExchangedDocument.TypeCode),
@@ -34,10 +49,20 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		Supplier: goblNewParty(in.Transaction.Agreement.Seller),
 		Customer: goblNewParty(in.Transaction.Agreement.Buyer),
 		Tax: &bill.Tax{
+			Rounding: tax.RoundingRuleCurrency,
 			Ext: tax.Extensions{
 				untdid.ExtKeyDocumentType: cbc.Code(in.ExchangedDocument.TypeCode),
 			},
 		},
+	}
+
+	if ctx != nil {
+		out.Addons = tax.Addons{List: ctx.Addons}
+		if ctx.GuidelineID == ContextPeppolFranceFacturXV1.GuidelineID || ctx.GuidelineID == ContextPeppolFranceCIUSV1.GuidelineID {
+			if in.ExchangedContext.BusinessContext != nil {
+				out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
+			}
+		}
 	}
 
 	issueDate, err := parseDate(in.ExchangedDocument.IssueDate.DateFormat.Value)
@@ -46,12 +71,24 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	}
 	out.IssueDate = issueDate
 
-	if err = goblAddLines(in.Transaction, out); err != nil {
+	// Build tax category map from header-level tax summary for exemption code lookups
+	ahts := in.Transaction.Settlement
+	taxMap := buildTaxCategoryMap(ahts.Tax)
+
+	// BT-7: VAT point date (from first header-level ApplicableTradeTax)
+	if len(ahts.Tax) > 0 && ahts.Tax[0].TaxPointDate != nil && ahts.Tax[0].TaxPointDate.DateFormat != nil {
+		vd, err := parseDate(ahts.Tax[0].TaxPointDate.DateFormat.Value)
+		if err != nil {
+			return nil, err
+		}
+		out.ValueDate = &vd
+	}
+
+	if err = goblAddLines(in.Transaction, out, taxMap); err != nil {
 		return nil, err
 	}
 
-	// Payment comprised of terms, means and payee. Check tehre is relevant info in at least one of them to create a payment
-	ahts := in.Transaction.Settlement
+	// Payment comprised of terms, means and payee. Check there is relevant info in at least one of them to create a payment
 	if out.Payment, err = goblNewPaymentDetails(ahts); err != nil {
 		return nil, err
 	}
@@ -105,10 +142,63 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	}
 
 	if len(ahts.AllowanceCharges) > 0 {
-		if err = goblAddChargesAndDiscounts(ahts, out); err != nil {
+		if err = goblAddChargesAndDiscounts(ahts, out, taxMap); err != nil {
 			return nil, err
 		}
 	}
 
+	// BT-125: Attachments
+	if atts := goblAttachments(in.Transaction.Agreement.AdditionalDocument); len(atts) > 0 {
+		out.Attachments = atts
+	}
+
 	return out, nil
+}
+
+// taxCategoryInfo holds tax category information from header-level tax summary.
+type taxCategoryInfo struct {
+	exemptionReasonCode string
+}
+
+// buildTaxCategoryMap builds a map from the header-level ApplicableTradeTax entries,
+// keyed by TypeCode:CategoryCode[:percent] for looking up exemption reason codes.
+func buildTaxCategoryMap(taxes []*Tax) map[string]*taxCategoryInfo {
+	categoryMap := make(map[string]*taxCategoryInfo)
+	for _, t := range taxes {
+		if t.CategoryCode == "" {
+			continue
+		}
+		key := buildTaxCategoryKey(t.TypeCode, t.CategoryCode, t.RateApplicablePercent)
+		info := &taxCategoryInfo{}
+		if t.ExemptionReasonCode != "" {
+			info.exemptionReasonCode = t.ExemptionReasonCode
+		}
+		categoryMap[key] = info
+	}
+	return categoryMap
+}
+
+// buildTaxCategoryKey constructs a unique key for a tax category.
+// For standard-rate "S" entries, the normalized percent is included since
+// an invoice can have multiple S entries at different rates.
+// For other categories (E, AE, Z, O, etc.) percent is omitted.
+func buildTaxCategoryKey(typeCode, categoryCode, percent string) string {
+	if categoryCode == "S" {
+		return typeCode + ":" + categoryCode + ":" + normalizeTaxPercent(percent)
+	}
+	return typeCode + ":" + categoryCode
+}
+
+// normalizeTaxPercent converts a percent string to a canonical form
+// by parsing and re-rendering, so "20", "20.0", "20.00" all produce "20".
+func normalizeTaxPercent(percent string) string {
+	s := strings.TrimSuffix(strings.TrimSpace(percent), "%")
+	if s == "" {
+		return "0"
+	}
+	a, err := num.AmountFromString(s)
+	if err != nil {
+		return s
+	}
+	return a.String()
 }

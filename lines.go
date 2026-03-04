@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/catalogues/untdid"
 )
 
 // Line defines the structure of the IncludedSupplyChainTradeLineItem in the CII standard
@@ -24,12 +25,27 @@ type LineDoc struct {
 
 // LineAgreement defines the structure of the SpecifiedLineTradeAgreement in the CII standard
 type LineAgreement struct {
-	NetPrice *NetPrice `xml:"ram:NetPriceProductTradePrice"`
+	OrderReference      *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
+	AdditionalReference *LineDocReference   `xml:"ram:AdditionalReferencedDocument,omitempty"`
+	NetPrice            *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
+}
+
+// LineDocReference defines the structure of AdditionalReferencedDocument at line level
+type LineDocReference struct {
+	ID       string  `xml:"ram:IssuerAssignedID"`
+	TypeCode string  `xml:"ram:TypeCode"`
+	RefCode  *string `xml:"ram:ReferenceTypeCode,omitempty"`
+}
+
+// LineOrderReference defines the structure of BuyerOrderReferencedDocument at line level
+type LineOrderReference struct {
+	LineID string `xml:"ram:LineID,omitempty"`
 }
 
 // NetPrice defines the structure of the NetPriceProductTradePrice in the CII standard
 type NetPrice struct {
-	Amount string `xml:"ram:ChargeAmount"`
+	Amount       string    `xml:"ram:ChargeAmount"`
+	BaseQuantity *Quantity `xml:"ram:BasisQuantity,omitempty"`
 }
 
 // LineDelivery defines the structure of the SpecifiedLineTradeDelivery in the CII standard
@@ -62,8 +78,8 @@ type GlobalID struct {
 
 // ListID defines the structure of the ListID of the CII standard
 type ListID struct {
-	ID     string `xml:"ram:ID,omitempty"`
-	ListID string `xml:"ListID,attr,omitempty"`
+	Value  string `xml:",chardata"`
+	ListID string `xml:"listID,attr,omitempty"`
 }
 
 // Characteristic defines the structure of the ApplicableProductCharacteristic of the CII standard
@@ -84,6 +100,12 @@ type TradeSettlement struct {
 	Period             *Period            `xml:"ram:BillingSpecifiedPeriod,omitempty"`
 	AllowanceCharge    []*AllowanceCharge `xml:"ram:SpecifiedTradeAllowanceCharge,omitempty"`
 	Sum                *Summation         `xml:"ram:SpecifiedTradeSettlementLineMonetarySummation"`
+	AccountingAccount  *AccountingAccount `xml:"ram:ReceivableSpecifiedTradeAccountingAccount,omitempty"`
+}
+
+// AccountingAccount defines the structure of ReceivableSpecifiedTradeAccountingAccount
+type AccountingAccount struct {
+	ID string `xml:"ram:ID,omitempty"`
 }
 
 // Summation defines the structure of the SpecifiedTradeSettlementLineMonetarySummation of the CII standard
@@ -147,12 +169,45 @@ func newLine(l *bill.Line) *Line {
 
 	if len(it.Identities) > 0 {
 		for _, id := range it.Identities {
+			// BT-157: Standard identifier (has scheme ID extension)
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				lineItem.Product.GlobalID = &GlobalID{
 					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
 					Value:    id.Code.String(),
 				}
+			} else if id.Label != "" {
+				// BT-158: Item classification (Label holds the list ID)
+				lineItem.Product.Classification = &Classification{
+					Code: &ListID{
+						Value:  id.Code.String(),
+						ListID: id.Label,
+					},
+				}
+			} else if lineItem.Product.BuyerAssignedID == nil {
+				// BT-156: Buyer's item identifier (plain identity)
+				code := id.Code.String()
+				lineItem.Product.BuyerAssignedID = &code
 			}
+		}
+	}
+
+	// BT-128: Invoice line object identifier
+	if l.Identifier != nil {
+		ref := &LineDocReference{
+			ID:       l.Identifier.Code.String(),
+			TypeCode: "130",
+		}
+		if l.Identifier.Ext.Has(untdid.ExtKeyReference) {
+			rc := l.Identifier.Ext[untdid.ExtKeyReference].String()
+			ref.RefCode = &rc
+		}
+		lineItem.Agreement.AdditionalReference = ref
+	}
+
+	// BT-132: Purchase order line reference
+	if l.Order != "" {
+		lineItem.Agreement.OrderReference = &LineOrderReference{
+			LineID: l.Order.String(),
 		}
 	}
 
@@ -192,6 +247,13 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 
 	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
 		stlm.AllowanceCharge = newLineAllowanceCharges(l)
+	}
+
+	// BT-133: Line buyer accounting reference
+	if l.Cost != "" {
+		stlm.AccountingAccount = &AccountingAccount{
+			ID: l.Cost.String(),
+		}
 	}
 
 	return stlm

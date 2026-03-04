@@ -16,6 +16,7 @@ import (
 // Settlement defines the structure of ApplicableHeaderTradeSettlement of the CII standard
 type Settlement struct {
 	CreditorRefID      string                `xml:"ram:CreditorReferenceID,omitempty"`
+	PaymentReference   string                `xml:"ram:PaymentReference,omitempty"`
 	Currency           string                `xml:"ram:InvoiceCurrencyCode"`
 	Payee              *Party                `xml:"ram:PayeeTradeParty,omitempty"`
 	PaymentMeans       []*PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
@@ -113,54 +114,21 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	stlm := &Settlement{
 		Currency: string(inv.Currency),
 	}
+
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		description := inv.Payment.Terms.Notes
-		if len(inv.Payment.Terms.DueDates) == 0 {
-			if description != "" {
-				stlm.PaymentTerms = []*Terms{
-					{
-						Description: description,
-					},
-				}
-			}
-		} else {
-			stlm.PaymentTerms = []*Terms{}
-			for _, dueDate := range inv.Payment.Terms.DueDates {
-				term := &Terms{}
-
-				// Append description
-				if description != "" {
-					term.Description = description
-				}
-
-				// Append notes to description
-				if dueDate.Notes != "" {
-					if term.Description != "" {
-						term.Description = strings.Join([]string{term.Description, dueDate.Notes}, ". ")
-					} else {
-						term.Description = dueDate.Notes
-					}
-				}
-
-				// no need to set percent because if percent is set then ammount is calculated
-				if !dueDate.Amount.Equals(inv.Totals.Payable) {
-					term.Amount = dueDate.Amount.Rescale(2).String()
-				}
-
-				if dueDate.Date != nil {
-					term.DueDate = &IssueDate{
-						DateFormat: documentDate(dueDate.Date),
-					}
-				}
-
-				stlm.PaymentTerms = append(stlm.PaymentTerms, term)
-			}
-		}
-
+		stlm.PaymentTerms = newPaymentTerms(inv.Payment.Terms, inv.Totals)
 	}
 
 	if inv.Totals != nil {
 		stlm.Tax = newTaxes(inv.Totals.Taxes)
+		// BT-7: VAT point date
+		if inv.ValueDate != nil {
+			for _, t := range stlm.Tax {
+				t.TaxPointDate = &IssueDate{
+					DateFormat: documentDate(inv.ValueDate),
+				}
+			}
+		}
 		stlm.Summary = newSummary(inv.Totals, string(inv.Currency))
 	}
 
@@ -191,64 +159,9 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	}
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
-		instr := inv.Payment.Instructions
-		pmc, err := getPaymentMeansCode(instr)
-		if err != nil {
+		if err := addPaymentInstructions(stlm, inv.Payment.Instructions); err != nil {
 			return nil, err
 		}
-
-		// Always create a PaymentMeans with at least the payment code
-		pm := &PaymentMeans{
-			TypeCode:    pmc,
-			Information: instr.Detail,
-		}
-
-		// Fill in credit transfer details if available
-		if len(instr.CreditTransfer) > 0 {
-			pm.Creditor = &Creditor{
-				IBAN:   instr.CreditTransfer[0].IBAN,
-				Number: instr.CreditTransfer[0].Number,
-			}
-			if instr.CreditTransfer[0].BIC != "" {
-				pm.CreditorInstitution = &CreditorInstitution{
-					BIC: instr.CreditTransfer[0].BIC,
-				}
-			}
-		}
-
-		// Fill in direct debit details if available
-		if instr.DirectDebit != nil {
-			if instr.DirectDebit.Account != "" {
-				pm.Debtor = &DebtorAccount{
-					IBAN: instr.DirectDebit.Account,
-				}
-			}
-
-			if stlm.PaymentTerms == nil {
-				stlm.PaymentTerms = []*Terms{
-					{
-						Mandate: instr.DirectDebit.Ref,
-					},
-				}
-			} else {
-				for _, term := range stlm.PaymentTerms {
-					term.Mandate = instr.DirectDebit.Ref
-				}
-			}
-
-			stlm.CreditorRefID = instr.DirectDebit.Creditor
-		}
-
-		// Fill in card details if available
-		if instr.Card != nil {
-			pm.Card = &Card{
-				ID:   instr.Card.Last4,
-				Name: instr.Card.Holder,
-			}
-		}
-
-		// Always append the payment means since we have at least the payment code
-		stlm.PaymentMeans = []*PaymentMeans{pm}
 	}
 
 	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
@@ -256,6 +169,103 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	}
 
 	return stlm, nil
+}
+
+func newPaymentTerms(terms *pay.Terms, totals *bill.Totals) []*Terms {
+	description := terms.Notes
+	if len(terms.DueDates) == 0 {
+		if description == "" {
+			return nil
+		}
+		return []*Terms{{Description: description}}
+	}
+	result := make([]*Terms, 0, len(terms.DueDates))
+	for _, dueDate := range terms.DueDates {
+		term := &Terms{}
+		if description != "" {
+			term.Description = description
+		}
+		if dueDate.Notes != "" {
+			if term.Description != "" {
+				term.Description = strings.Join([]string{term.Description, dueDate.Notes}, ". ")
+			} else {
+				term.Description = dueDate.Notes
+			}
+		}
+		if totals != nil && !dueDate.Amount.Equals(totals.Payable) {
+			term.Amount = dueDate.Amount.Rescale(2).String()
+		}
+		if dueDate.Date != nil {
+			term.DueDate = &IssueDate{DateFormat: documentDate(dueDate.Date)}
+		}
+		result = append(result, term)
+	}
+	return result
+}
+
+func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
+	if instr.Ref != "" {
+		stlm.PaymentReference = instr.Ref.String()
+	}
+	pmc, err := getPaymentMeansCode(instr)
+	if err != nil {
+		return err
+	}
+
+	pm := &PaymentMeans{
+		TypeCode:    pmc,
+		Information: instr.Detail,
+	}
+
+	if len(instr.CreditTransfer) > 0 {
+		ct := instr.CreditTransfer[0]
+		var c *Creditor
+		if ct.IBAN != "" {
+			c = &Creditor{}
+			c.IBAN = ct.IBAN
+		}
+
+		if ct.Number != "" {
+			if c == nil {
+				c = &Creditor{}
+			}
+			c.Number = ct.Number
+		}
+
+		if c != nil {
+			pm.Creditor = c
+		}
+
+		if ct.BIC != "" {
+			pm.CreditorInstitution = &CreditorInstitution{
+				BIC: instr.CreditTransfer[0].BIC,
+			}
+		}
+	}
+
+	if instr.DirectDebit != nil {
+		if instr.DirectDebit.Account != "" {
+			pm.Debtor = &DebtorAccount{IBAN: instr.DirectDebit.Account}
+		}
+		if stlm.PaymentTerms == nil {
+			stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref}}
+		} else {
+			for _, term := range stlm.PaymentTerms {
+				term.Mandate = instr.DirectDebit.Ref
+			}
+		}
+		stlm.CreditorRefID = instr.DirectDebit.Creditor
+	}
+
+	if instr.Card != nil {
+		pm.Card = &Card{
+			ID:   instr.Card.Last4,
+			Name: instr.Card.Holder,
+		}
+	}
+
+	stlm.PaymentMeans = []*PaymentMeans{pm}
+	return nil
 }
 
 func newSummary(totals *bill.Totals, currency string) *Summary {

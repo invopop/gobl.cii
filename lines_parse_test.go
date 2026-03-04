@@ -103,6 +103,31 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, cbc.Code("JB007"), lines[0].Item.Ref)
 		assert.Equal(t, "1234567890128", lines[0].Item.Identities[0].Code.String())
 		assert.Equal(t, "0088", lines[0].Item.Identities[0].Ext[iso.ExtKeySchemeID].String())
+
+		// BT-158: Item classification
+		classID := lines[0].Item.Identities[1]
+		assert.Equal(t, cbc.Code("65434568"), classID.Code)
+		assert.Equal(t, "STI", classID.Label)
+
+		// BT-132: Purchase order line reference
+		assert.Equal(t, cbc.Code("1"), lines[0].Order)
+
+		// BT-133: Line buyer accounting reference
+		assert.Equal(t, cbc.Code("BookingCode001"), lines[0].Cost)
 	})
 
+	// Invoice with BasisQuantity
+	t.Run("CII_example8.xml", func(t *testing.T) {
+		e, err := parseInvoiceFrom(t, "CII_example8.xml")
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		lines := inv.Lines
+		require.NotEmpty(t, lines)
+
+		// BT-148: Price 0.00880 / BasisQuantity 0.00880 = 1.00000
+		assert.Equal(t, "1.00000", lines[0].Item.Price.String())
+	})
 }

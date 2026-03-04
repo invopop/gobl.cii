@@ -4,19 +4,20 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
 )
 
-func goblAddChargesAndDiscounts(stlm *Settlement, out *bill.Invoice) error {
+func goblAddChargesAndDiscounts(stlm *Settlement, out *bill.Invoice, taxMap map[string]*taxCategoryInfo) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
 	for _, ac := range stlm.AllowanceCharges {
 		if ac.ChargeIndicator.Value {
-			c, err := goblNewCharge(ac)
+			c, err := goblNewCharge(ac, taxMap)
 			if err != nil {
 				return err
 			}
@@ -25,7 +26,7 @@ func goblAddChargesAndDiscounts(stlm *Settlement, out *bill.Invoice) error {
 			}
 			charges = append(charges, c)
 		} else {
-			d, err := goblNewDiscount(ac)
+			d, err := goblNewDiscount(ac, taxMap)
 			if err != nil {
 				return err
 			}
@@ -44,7 +45,7 @@ func goblAddChargesAndDiscounts(stlm *Settlement, out *bill.Invoice) error {
 	return nil
 }
 
-func goblNewCharge(ac *AllowanceCharge) (*bill.Charge, error) {
+func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bill.Charge, error) {
 	// This is a charge
 	c := &bill.Charge{}
 	if ac.Reason != "" {
@@ -75,15 +76,21 @@ func goblNewCharge(ac *AllowanceCharge) (*bill.Charge, error) {
 		}
 		c.Percent = &p
 	}
-	if ac.Tax != nil {
-		if ac.Tax.TypeCode != "" {
-			c.Taxes = tax.Set{
-				{
-					Category: cbc.Code(ac.Tax.TypeCode),
-				},
+	if ac.Tax != nil && ac.Tax.TypeCode != "" {
+		c.Taxes = tax.Set{
+			{
+				Category: cbc.Code(ac.Tax.TypeCode),
+			},
+		}
+		if ac.Tax.CategoryCode != "" {
+			c.Taxes[0].Ext = tax.Extensions{
+				untdid.ExtKeyTaxCategory: cbc.Code(ac.Tax.CategoryCode),
+			}
+			key := buildTaxCategoryKey(ac.Tax.TypeCode, ac.Tax.CategoryCode, ac.Tax.RateApplicablePercent)
+			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
+				c.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}
 		}
-		// Format percentages
 		if ac.Tax.RateApplicablePercent != "" {
 			if !strings.HasSuffix(ac.Tax.RateApplicablePercent, "%") {
 				ac.Tax.RateApplicablePercent += "%"
@@ -92,13 +99,16 @@ func goblNewCharge(ac *AllowanceCharge) (*bill.Charge, error) {
 			if err != nil {
 				return nil, err
 			}
-			c.Taxes[0].Percent = &p
+			// Skip setting percent if it's 0% and tax category is not "Z"
+			if !p.IsZero() || ac.Tax.CategoryCode == "Z" {
+				c.Taxes[0].Percent = &p
+			}
 		}
 	}
 	return c, nil
 }
 
-func goblNewDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
+func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.Reason != "" {
 		d.Reason = ac.Reason
@@ -128,12 +138,19 @@ func goblNewDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
 		}
 		d.Percent = &p
 	}
-	if ac.Tax != nil {
-		if ac.Tax.TypeCode != "" {
-			d.Taxes = tax.Set{
-				{
-					Category: cbc.Code(ac.Tax.TypeCode),
-				},
+	if ac.Tax != nil && ac.Tax.TypeCode != "" {
+		d.Taxes = tax.Set{
+			{
+				Category: cbc.Code(ac.Tax.TypeCode),
+			},
+		}
+		if ac.Tax.CategoryCode != "" {
+			d.Taxes[0].Ext = tax.Extensions{
+				untdid.ExtKeyTaxCategory: cbc.Code(ac.Tax.CategoryCode),
+			}
+			key := buildTaxCategoryKey(ac.Tax.TypeCode, ac.Tax.CategoryCode, ac.Tax.RateApplicablePercent)
+			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
+				d.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}
 		}
 		if ac.Tax.RateApplicablePercent != "" {
@@ -144,7 +161,10 @@ func goblNewDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
 			if err != nil {
 				return nil, err
 			}
-			d.Taxes[0].Percent = &p
+			// Skip setting percent if it's 0% and tax category is not "Z"
+			if !p.IsZero() || ac.Tax.CategoryCode == "Z" {
+				d.Taxes[0].Percent = &p
+			}
 		}
 	}
 
