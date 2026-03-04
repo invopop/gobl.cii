@@ -52,7 +52,7 @@ type SpecifiedTaxRegistration struct {
 // LegalOrganization defines the structure of the SpecifiedLegalOrganization of the CII standard
 type LegalOrganization struct {
 	ID   *PartyID `xml:"ram:ID"`
-	Name string   `xml:"ram:TradingBusinessName"`
+	Name string   `xml:"ram:TradingBusinessName,omitempty"`
 }
 
 // Contact defines the structure of the DefinedTradeContact of the CII standard
@@ -164,6 +164,11 @@ func newParty(party *org.Party) *Party {
 	}
 
 	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
+
+	if p.LegalOrganization != nil && p.LegalOrganization.ID != nil && p.LegalOrganization.ID.Value == "" {
+		p.LegalOrganization.ID = nil
+	}
+
 	return p
 }
 

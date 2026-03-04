@@ -112,6 +112,7 @@
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>0.00</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
+        <ram:ExemptionReason>Reverse Charge / Umkehr der Steuerschuld.</ram:ExemptionReason>
         <ram:BasisAmount>1620.00</ram:BasisAmount>
         <ram:CategoryCode>AE</ram:CategoryCode>
         <ram:ExemptionReasonCode>VATEX-EU-AE</ram:ExemptionReasonCode>

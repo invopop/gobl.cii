@@ -120,7 +120,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	}
 
 	if inv.Totals != nil {
-		stlm.Tax = newTaxes(inv.Totals.Taxes)
+		stlm.Tax = newTaxes(inv, inv.Totals.Taxes)
 		// BT-7: VAT point date
 		if inv.ValueDate != nil {
 			for _, t := range stlm.Tax {
@@ -299,21 +299,21 @@ func newSummary(totals *bill.Totals, currency string) *Summary {
 	return s
 }
 
-func newTaxes(total *tax.Total) []*Tax {
+func newTaxes(inv *bill.Invoice, total *tax.Total) []*Tax {
 	if total == nil {
 		return nil
 	}
 	var taxes []*Tax
 	for _, category := range total.Categories {
 		for _, rate := range category.Rates {
-			tax := newTax(rate, category)
+			tax := newTax(inv, rate, category)
 			taxes = append(taxes, tax)
 		}
 	}
 	return taxes
 }
 
-func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
+func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	cat := rate.Ext.Get(untdid.ExtKeyTaxCategory)
 	t := &Tax{
 		CalculatedAmount: rate.Amount.Rescale(2).String(),
@@ -331,6 +331,15 @@ func newTax(rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	// Set exemption reason code from extensions if provided
 	if rate.Ext.Has(cef.ExtKeyVATEX) {
 		t.ExemptionReasonCode = rate.Ext.Get(cef.ExtKeyVATEX).String()
+	}
+	// BT-120: Set exemption reason from legal note for exempt tax categories
+	if inv.Notes != nil && cat.In("E", "AE", "K", "G", "O") {
+		for _, n := range inv.Notes {
+			if n.Key == org.NoteKeyLegal {
+				t.ExemptionReason = n.Text
+				break
+			}
+		}
 	}
 	return t
 }
