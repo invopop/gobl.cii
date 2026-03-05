@@ -61,4 +61,13 @@ func TestNewSettlement(t *testing.T) {
 		_, err := cii.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
+
+	t.Run("exemption reason from legal note", func(t *testing.T) {
+		doc, err := newInvoiceFrom(t, "xrechnung/invoice-de-es-b2b.json")
+		require.NoError(t, err)
+
+		tax := doc.Transaction.Settlement.Tax[0]
+		assert.Equal(t, "Reverse Charge / Umkehr der Steuerschuld.", tax.ExemptionReason)
+		assert.Equal(t, "VATEX-EU-AE", tax.ExemptionReasonCode)
+	})
 }
