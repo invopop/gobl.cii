@@ -62,7 +62,6 @@ func TestNewHeader(t *testing.T) {
 		assert.Equal(t, "389", doc.ExchangedDocument.TypeCode)
 	})
 
-
 	t.Run("notes with UNTDID text subject code", func(t *testing.T) {
 		env := loadEnvelope(t, "en16931/invoice-de-de.json")
 		inv := env.Extract().(*bill.Invoice)
