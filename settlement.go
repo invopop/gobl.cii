@@ -259,7 +259,7 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 		stlm.CreditorRefID = instr.DirectDebit.Creditor
 	}
 
-	if instr.Card != nil && (instr.Card.Last4 != "" || instr.Card.Holder != "") {
+	if instr.Card != nil && instr.Card.Last4 != "" {
 		pm.Card = &Card{
 			ID:   instr.Card.Last4,
 			Name: instr.Card.Holder,
