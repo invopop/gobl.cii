@@ -260,10 +260,11 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 	}
 
 	if instr.Card != nil && instr.Card.Last4 != "" {
-		pm.Card = &Card{
-			ID:   instr.Card.Last4,
-			Name: instr.Card.Holder,
+		card := &Card{ID: instr.Card.Last4}
+		if instr.Card.Holder != "" {
+			card.Name = instr.Card.Holder
 		}
+		pm.Card = card
 	}
 
 	stlm.PaymentMeans = []*PaymentMeans{pm}
