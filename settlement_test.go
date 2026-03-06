@@ -51,6 +51,23 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "John Doe", doc.Transaction.Settlement.PaymentMeans[0].Card.Name)
 	})
 
+	t.Run("empty direct debit ref and card fields omitted", func(t *testing.T) {
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Payment.Instructions.DirectDebit.Ref = ""
+		inv.Payment.Instructions.Card = nil
+
+		doc, err := cii.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		for _, term := range doc.Transaction.Settlement.PaymentTerms {
+			assert.Empty(t, term.Mandate)
+		}
+		assert.Nil(t, doc.Transaction.Settlement.PaymentMeans[0].Card)
+	})
+
 	t.Run("extension errors", func(t *testing.T) {
 		env := loadEnvelope(t, "en16931/invoice-complete.json")
 		inv, ok := env.Extract().(*bill.Invoice)
