@@ -79,10 +79,10 @@ var ContextPeppolV3 = Context{
 
 // ContextFacturXV1 is used for Factur-X V1 documents.
 var ContextFacturXV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
-	Version:     VersionD16B,
+	GuidelineID: "urn:cen.eu:en16931:2017",
+	Version:     VersionD22B,
 	Addons:      []cbc.Key{facturx.V1},
-	VESID:       "fr.factur-x:extended:1.0.8",
+	VESID:       "fr.factur-x:en16931:1.0.8",
 }
 
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
@@ -105,10 +105,10 @@ var ContextPeppolFranceCIUSV1 = Context{
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
 var ContextZUGFeRDV2 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended",
+	GuidelineID: "urn:cen.eu:en16931:2017",
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
-	VESID:       "de.zugferd:extended:2.3.2",
+	VESID:       "de.zugferd:en16931:2.4",
 }
 
 // ContextXRechnungV3 is used for XRechnung documents

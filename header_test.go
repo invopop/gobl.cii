@@ -5,6 +5,9 @@ import (
 
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 
 	"github.com/stretchr/testify/assert"
@@ -59,4 +62,25 @@ func TestNewHeader(t *testing.T) {
 		assert.Equal(t, "389", doc.ExchangedDocument.TypeCode)
 	})
 
+	t.Run("notes with UNTDID text subject code", func(t *testing.T) {
+		env := loadEnvelope(t, "en16931/invoice-de-de.json")
+		inv := env.Extract().(*bill.Invoice)
+
+		inv.Notes = append(inv.Notes, &org.Note{
+			Text: "Please pay on time",
+			Ext:  tax.Extensions{untdid.ExtKeyTextSubject: cbc.Code("AAI")},
+		})
+
+		doc, err := cii.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		var found bool
+		for _, n := range doc.ExchangedDocument.IncludedNote {
+			if n.SubjectCode == "AAI" {
+				assert.Equal(t, "Please pay on time", n.Content)
+				found = true
+			}
+		}
+		assert.True(t, found, "expected note with subject code AAI")
+	})
 }

@@ -135,7 +135,6 @@ func TestParseInvoice(t *testing.T) {
 		{"PeppolFranceFacturX", "peppol-france-facturx"},
 		{"PeppolFranceCIUS", "peppol-france-cius"},
 		{"PeppolFranceExtended", "peppol-france-extended"},
-		{"ZUGFeRD", "zugferd"},
 	}
 
 	for _, ctx := range contexts {

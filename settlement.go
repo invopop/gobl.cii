@@ -34,8 +34,10 @@ type Terms struct {
 	Description string     `xml:"ram:Description,omitempty"`
 	DueDate     *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
 	Mandate     string     `xml:"ram:DirectDebitMandateID,omitempty"`
-	Amount      string     `xml:"ram:PartialPaymentAmount,omitempty"`
-	Percent     string     `xml:"ram:PartialPaymentPercent,omitempty"`
+	// Amount and Percent are parse-only: present in some CII documents but not emitted
+	// as PartialPaymentAmount is not in the EN16931/Factur-X/ZUGFeRD schema.
+	Amount  string `xml:"ram:PartialPaymentAmount,omitempty"`
+	Percent string `xml:"ram:PartialPaymentPercent,omitempty"`
 }
 
 // PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard
@@ -116,7 +118,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	}
 
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		stlm.PaymentTerms = newPaymentTerms(inv.Payment.Terms, inv.Totals)
+		stlm.PaymentTerms = newPaymentTerms(inv.Payment.Terms)
 	}
 
 	if inv.Totals != nil {
@@ -171,7 +173,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	return stlm, nil
 }
 
-func newPaymentTerms(terms *pay.Terms, totals *bill.Totals) []*Terms {
+func newPaymentTerms(terms *pay.Terms) []*Terms {
 	description := terms.Notes
 	if len(terms.DueDates) == 0 {
 		if description == "" {
@@ -191,9 +193,6 @@ func newPaymentTerms(terms *pay.Terms, totals *bill.Totals) []*Terms {
 			} else {
 				term.Description = dueDate.Notes
 			}
-		}
-		if totals != nil && !dueDate.Amount.Equals(totals.Payable) {
-			term.Amount = dueDate.Amount.Rescale(2).String()
 		}
 		if dueDate.Date != nil {
 			term.DueDate = &IssueDate{DateFormat: documentDate(dueDate.Date)}
@@ -247,21 +246,24 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 		if instr.DirectDebit.Account != "" {
 			pm.Debtor = &DebtorAccount{IBAN: instr.DirectDebit.Account}
 		}
-		if stlm.PaymentTerms == nil {
-			stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref}}
-		} else {
-			for _, term := range stlm.PaymentTerms {
-				term.Mandate = instr.DirectDebit.Ref
+		if instr.DirectDebit.Ref != "" {
+			if stlm.PaymentTerms == nil {
+				stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref}}
+			} else {
+				for _, term := range stlm.PaymentTerms {
+					term.Mandate = instr.DirectDebit.Ref
+				}
 			}
 		}
 		stlm.CreditorRefID = instr.DirectDebit.Creditor
 	}
 
-	if instr.Card != nil {
-		pm.Card = &Card{
-			ID:   instr.Card.Last4,
-			Name: instr.Card.Holder,
+	if instr.Card != nil && instr.Card.Last4 != "" {
+		card := &Card{ID: instr.Card.Last4}
+		if instr.Card.Holder != "" {
+			card.Name = instr.Card.Holder
 		}
+		pm.Card = card
 	}
 
 	stlm.PaymentMeans = []*PaymentMeans{pm}
@@ -323,10 +325,12 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	}
 
 	// BR-E-05, BR-AG-05, BR-AF-05, BR-AE-05, BR-Z-05
-	t.RateApplicablePercent = "0"
-
-	if rate.Percent != nil {
-		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
+	// BR-O-05: category O (not subject to VAT) must not have a rate
+	if !cat.In("O") {
+		t.RateApplicablePercent = "0"
+		if rate.Percent != nil {
+			t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
+		}
 	}
 	// Set exemption reason code from extensions if provided
 	if rate.Ext.Has(cef.ExtKeyVATEX) {

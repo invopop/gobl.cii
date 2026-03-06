@@ -105,7 +105,7 @@ func newParty(party *org.Party) *Party {
 		}
 	}
 
-	if party.TaxID != nil {
+	if party.TaxID != nil && party.TaxID.Code != "" {
 		// Assumes VAT ID being used instead of possible tax number
 		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
 			{

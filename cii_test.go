@@ -33,7 +33,7 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXV1))
 		require.NoError(t, err)
 
-		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended", out.ExchangedContext.GuidelineContext.ID)
+		assert.Equal(t, "urn:cen.eu:en16931:2017", out.ExchangedContext.GuidelineContext.ID)
 		assert.Nil(t, out.ExchangedContext.BusinessContext)
 	})
 
