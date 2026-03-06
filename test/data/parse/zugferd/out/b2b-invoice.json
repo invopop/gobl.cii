@@ -1,0 +1,133 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "0a2657177d1c3d30967ced48cc07843b7e593c65196c8ae1f9c8e2091357057c"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "UC2026-0313149",
+		"issue_date": "2026-03-01",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Usercentrics GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "318857096"
+			},
+			"addresses": [
+				{
+					"street": "Sendlinger Straße 7",
+					"locality": "München",
+					"region": "Bayern",
+					"code": "80331",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "invoices@usercentrics.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "GEZE GmbH",
+			"tax_id": {
+				"country": "DE"
+			},
+			"addresses": [
+				{
+					"street": "Reinhold-Vöster-Straße 21-29",
+					"locality": "Leonberg",
+					"code": "71229",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Advanced-Web (1000000 units)",
+					"description": "Subscription 198QNJU4RdtfQubj",
+					"price": "8700.00",
+					"unit": "one"
+				},
+				"sum": "8700.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "8700.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-03-31",
+						"amount": "0.00"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "8700.00",
+			"total": "8700.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "8700.00",
+								"percent": "19%",
+								"amount": "1653.00"
+							}
+						],
+						"amount": "1653.00"
+					}
+				],
+				"sum": "1653.00"
+			},
+			"tax": "1653.00",
+			"total_with_tax": "10353.00",
+			"payable": "10353.00"
+		},
+		"notes": [
+			{
+				"text": "\u003cdiv\u003e\n  \u003ctable style=\"\n  width: 100%;\n  margin-top: 50px;\n\"\u003e\u003ctr\u003e\u003ctd style=\"\n  border-color: #000000;\n  vertical-align: top;\n  padding-bottom: 10px;\n\"\u003e\n        \u003cp style=\"\n  height: 28px;\n  line-height: 22px;\n  margin: 0;\n  padding: 0;\n\"\u003e\u003cstrong\u003eUsercentrics GmbH\u003c/strong\u003e\u003c/p\u003e\n        Sendlinger Str. 7 \n        \u003cbr /\u003e\n        80331 München \n        \u003cbr /\u003e\n        Deutschland\n      \u003c/td\u003e\u003ctd style=\"\n  border-color: #000000;\n  border-left: solid 2px;\n  padding-left: 40px;\n  vertical-align: top;\n\"\u003e\n        \u003cp style=\"\n  height: 28px;\n  line-height: 22px;\n  margin: 0;\n  padding: 0;\n\"\u003e\u003cstrong\u003eKontakt\u003c/strong\u003e\u003c/p\u003e\n        Tel.: +49 89 21 54 01 20\n        \u003cbr /\u003e\n         E-Mail: invoices@usercentrics.com \n        \u003cbr /\u003e\n        Web: https://usercentrics.com \n      \u003c/td\u003e\u003ctd style=\"\n  border-color: #000000;\n  border-left: solid 2px;\n  padding-left: 40px;\n  vertical-align: top;\n\"\u003e\n \u003cp style=\"\n  height: 28px;\n  line-height: 22px;\n  margin: 0;\n  padding: 0;\n\"\u003e\u003cstrong\u003eFirmeninformation\u003c/strong\u003e\u003c/p\u003e\n        München\n        \u003cbr /\u003e\n        HR-Nr.: HRB241272 \n        \u003cbr /\u003e\n        UST-ID: DE318857096 \n\t\u003cbr /\u003e\n        Geschäftsführung: Donna Dror, Ibrahim Husseini, Ea Luise Winther Andersen \n      \u003c/td\u003e\u003ctd style=\"\n  border-color: #000000;\n  border-left: solid 2px;\n  padding-left: 40px;\n  vertical-align: top;\n\"\u003e\n      \u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\n\u003c/div\u003e"
+			}
+		]
+	}
+}

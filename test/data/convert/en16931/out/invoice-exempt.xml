@@ -32,7 +32,6 @@
         <ram:ApplicableTradeTax>
           <ram:TypeCode>VAT</ram:TypeCode>
           <ram:CategoryCode>E</ram:CategoryCode>
-          <ram:ExemptionReasonCode>VATEX-EU-132</ram:ExemptionReasonCode>
           <ram:RateApplicablePercent>0</ram:RateApplicablePercent>
         </ram:ApplicableTradeTax>
         <ram:SpecifiedTradeSettlementLineMonetarySummation>

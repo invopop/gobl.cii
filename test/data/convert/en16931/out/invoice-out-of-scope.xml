@@ -40,6 +40,7 @@
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
       <ram:SellerTradeParty>
+        <ram:ID>111/222/33340</ram:ID>
         <ram:Name>CYBERDYNE IT GmbH</ram:Name>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>50829</ram:PostcodeCode>
@@ -47,9 +48,6 @@
           <ram:CityName>Köln</ram:CityName>
           <ram:CountryID>DE</ram:CountryID>
         </ram:PostalTradeAddress>
-        <ram:SpecifiedTaxRegistration>
-          <ram:ID schemeID="VA">DE111111125</ram:ID>
-        </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
         <ram:Name>Openlane Ltd</ram:Name>
@@ -69,6 +67,7 @@
         <ram:TypeCode>VAT</ram:TypeCode>
         <ram:BasisAmount>500.00</ram:BasisAmount>
         <ram:CategoryCode>O</ram:CategoryCode>
+        <ram:ExemptionReasonCode>VATEX-EU-O</ram:ExemptionReasonCode>
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradePaymentTerms>
         <ram:Description>Payment due on receipt</ram:Description>

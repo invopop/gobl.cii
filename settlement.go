@@ -34,8 +34,10 @@ type Terms struct {
 	Description string     `xml:"ram:Description,omitempty"`
 	DueDate     *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
 	Mandate     string     `xml:"ram:DirectDebitMandateID,omitempty"`
-	Amount      string     `xml:"ram:PartialPaymentAmount,omitempty"`
-	Percent     string     `xml:"ram:PartialPaymentPercent,omitempty"`
+	// Amount and Percent are parse-only: present in some CII documents but not emitted
+	// as PartialPaymentAmount is not in the EN16931/Factur-X/ZUGFeRD schema.
+	Amount  string `xml:"ram:PartialPaymentAmount,omitempty"`
+	Percent string `xml:"ram:PartialPaymentPercent,omitempty"`
 }
 
 // PaymentMeans defines the structure of SpecifiedTradeSettlementPaymentMeans of the CII standard
@@ -116,7 +118,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	}
 
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		stlm.PaymentTerms = newPaymentTerms(inv.Payment.Terms, inv.Totals)
+		stlm.PaymentTerms = newPaymentTerms(inv.Payment.Terms)
 	}
 
 	if inv.Totals != nil {
@@ -171,7 +173,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	return stlm, nil
 }
 
-func newPaymentTerms(terms *pay.Terms, totals *bill.Totals) []*Terms {
+func newPaymentTerms(terms *pay.Terms) []*Terms {
 	description := terms.Notes
 	if len(terms.DueDates) == 0 {
 		if description == "" {
@@ -191,9 +193,6 @@ func newPaymentTerms(terms *pay.Terms, totals *bill.Totals) []*Terms {
 			} else {
 				term.Description = dueDate.Notes
 			}
-		}
-		if totals != nil && !dueDate.Amount.Equals(totals.Payable) {
-			term.Amount = dueDate.Amount.Rescale(2).String()
 		}
 		if dueDate.Date != nil {
 			term.DueDate = &IssueDate{DateFormat: documentDate(dueDate.Date)}

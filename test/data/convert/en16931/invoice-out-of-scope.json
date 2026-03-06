@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "029639adb4f0ad5156d4e2ac9925b490961577de94f0894e19bf16973e5f3cc4"
+			"val": "140396e7847249c7120fe1e0fcaee064a6a22a06c3f1d439a93fca37e2375052"
 		}
 	},
 	"doc": {
@@ -26,9 +26,14 @@
 		"supplier": {
 			"name": "CYBERDYNE IT GmbH",
 			"tax_id": {
-				"country": "DE",
-				"code": "111111125"
+				"country": "DE"
 			},
+			"identities": [
+				{
+					"key": "de-tax-number",
+					"code": "111/222/33340"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Am Wassermann 29",
@@ -64,6 +69,7 @@
 						"cat": "VAT",
 						"key": "outside-scope",
 						"ext": {
+							"cef-vatex": "VATEX-EU-O",
 							"untdid-tax-category": "O"
 						}
 					}
@@ -87,6 +93,7 @@
 							{
 								"key": "outside-scope",
 								"ext": {
+									"cef-vatex": "VATEX-EU-O",
 									"untdid-tax-category": "O"
 								},
 								"base": "500.00",

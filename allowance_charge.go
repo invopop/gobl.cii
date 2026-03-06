@@ -3,7 +3,6 @@ package cii
 import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/tax"
 )
@@ -150,9 +149,6 @@ func makeTaxCategory(t *tax.Combo) *Tax {
 		if t.Percent != nil {
 			c.RateApplicablePercent = t.Percent.StringWithoutSymbol()
 		}
-	}
-	if cat == en16931.TaxCategoryExempt {
-		c.ExemptionReasonCode = t.Ext.Get(cef.ExtKeyVATEX).String()
 	}
 	return c
 }

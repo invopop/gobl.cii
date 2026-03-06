@@ -4,18 +4,22 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "38c509e042894d01c2779fecef117d3a5b17a2696503df3e6d6c6476d99fd789"
+			"val": "7d50448cef70cfa84df0936059692ebbf270a199e0fdf322071de9d32ab9c931"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "471102",
 		"issue_date": "2018-06-05",
 		"currency": "EUR",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -49,6 +53,11 @@
 		},
 		"customer": {
 			"name": "Kunden AG Mitte",
+			"identities": [
+				{
+					"code": "GE2020211"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Kundenstraße 15",
@@ -80,15 +89,18 @@
 					"price": "3.3333",
 					"unit": "m2"
 				},
-				"sum": "9.9999",
+				"sum": "10.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "9.9999",
+				"total": "10.00",
 				"notes": [
 					{
 						"text": "Wir erlauben uns Ihnen folgende Positionen aus der Lieferung Nr. 2018-51112 in Rechnung zu stellen:"
@@ -116,15 +128,18 @@
 					"price": "5.5000",
 					"unit": "kg"
 				},
-				"sum": "27.5000",
+				"sum": "27.50",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "7.00%"
+						"percent": "7.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "27.5000"
+				"total": "27.50"
 			},
 			{
 				"i": 3,
@@ -146,15 +161,18 @@
 					"price": "5.4900",
 					"unit": "piece"
 				},
-				"sum": "109.8000",
+				"sum": "109.80",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "7.00%"
+						"percent": "7.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "109.8000"
+				"total": "109.80"
 			},
 			{
 				"i": 4,
@@ -176,15 +194,18 @@
 					"price": "2.7700",
 					"unit": "one"
 				},
-				"sum": "55.4000",
+				"sum": "55.40",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "55.4000"
+				"total": "55.40"
 			}
 		],
 		"discounts": [
@@ -197,7 +218,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			},
@@ -210,7 +234,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "7.00%"
+						"percent": "7.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -225,7 +252,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "7.00%"
+						"percent": "7.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -263,39 +293,49 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "64.40",
 								"percent": "19.00%",
 								"amount": "12.24"
 							},
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "129.37",
 								"percent": "7.00%",
 								"amount": "9.06"
 							}
 						],
-						"amount": "21.29"
+						"amount": "21.30"
 					}
 				],
-				"sum": "21.29"
+				"sum": "21.30"
 			},
-			"tax": "21.29",
-			"total_with_tax": "215.06",
-			"payable": "215.06",
+			"tax": "21.30",
+			"total_with_tax": "215.07",
+			"payable": "215.07",
 			"advance": "50.00",
-			"due": "165.06"
+			"due": "165.07"
 		},
 		"notes": [
 			{
 				"text": "Rechnung gemäß Bestellung Nr. 2018-471331 vom 01.03.2018."
 			},
 			{
-				"code": "AAK",
-				"text": "Es bestehen Rabatt- und Bonusvereinbarungen."
+				"text": "Es bestehen Rabatt- und Bonusvereinbarungen.",
+				"ext": {
+					"untdid-text-subject": "AAK"
+				}
 			},
 			{
-				"code": "REG",
-				"text": "Lieferant GmbH\nLieferantenstraße 20\n80333 München\nDeutschland\nGeschäftsführer: Hans Muster\nHandelsregisternummer: H A 123"
+				"text": "Lieferant GmbH\nLieferantenstraße 20\n80333 München\nDeutschland\nGeschäftsführer: Hans Muster\nHandelsregisternummer: H A 123",
+				"ext": {
+					"untdid-text-subject": "REG"
+				}
 			}
 		]
 	}
