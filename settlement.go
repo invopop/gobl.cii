@@ -326,10 +326,12 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	}
 
 	// BR-E-05, BR-AG-05, BR-AF-05, BR-AE-05, BR-Z-05
-	t.RateApplicablePercent = "0"
-
-	if rate.Percent != nil {
-		t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
+	// BR-O-05: category O (not subject to VAT) must not have a rate
+	if !cat.In("O") {
+		t.RateApplicablePercent = "0"
+		if rate.Percent != nil {
+			t.RateApplicablePercent = rate.Percent.StringWithoutSymbol()
+		}
 	}
 	// Set exemption reason code from extensions if provided
 	if rate.Ext.Has(cef.ExtKeyVATEX) {

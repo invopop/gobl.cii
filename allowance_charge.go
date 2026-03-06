@@ -144,9 +144,12 @@ func makeTaxCategory(t *tax.Combo) *Tax {
 	}
 	cat := t.Ext.Get(untdid.ExtKeyTaxCategory)
 	c.CategoryCode = cat.String()
-	c.RateApplicablePercent = "0"
-	if t.Percent != nil {
-		c.RateApplicablePercent = t.Percent.StringWithoutSymbol()
+	// BR-O-05: category O (not subject to VAT) must not have a rate
+	if !cat.In(en16931.TaxCategoryOutsideScope) {
+		c.RateApplicablePercent = "0"
+		if t.Percent != nil {
+			c.RateApplicablePercent = t.Percent.StringWithoutSymbol()
+		}
 	}
 	if cat == en16931.TaxCategoryExempt {
 		c.ExemptionReasonCode = t.Ext.Get(cef.ExtKeyVATEX).String()

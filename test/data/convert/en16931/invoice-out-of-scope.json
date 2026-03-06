@@ -1,0 +1,106 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "029639adb4f0ad5156d4e2ac9925b490961577de94f0894e19bf16973e5f3cc4"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "INV-OUT-001",
+		"issue_date": "2025-04-10",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "CYBERDYNE IT GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"addresses": [
+				{
+					"street": "Am Wassermann 29",
+					"locality": "Köln",
+					"code": "50829",
+					"country": "DE"
+				}
+			]
+		},
+		"customer": {
+			"name": "Openlane Ltd",
+			"addresses": [
+				{
+					"street": "Am Wassermann 29",
+					"locality": "Köln",
+					"code": "50829",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Consulting services outside scope of VAT",
+					"price": "500.00",
+					"unit": "one"
+				},
+				"sum": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "outside-scope",
+						"ext": {
+							"untdid-tax-category": "O"
+						}
+					}
+				],
+				"total": "500.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "Payment due on receipt"
+			}
+		},
+		"totals": {
+			"sum": "500.00",
+			"total": "500.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "outside-scope",
+								"ext": {
+									"untdid-tax-category": "O"
+								},
+								"base": "500.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "500.00",
+			"payable": "500.00"
+		}
+	}
+}
