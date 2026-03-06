@@ -104,7 +104,9 @@ func goblNewParty(party *Party) *org.Party {
 				case "VA":
 					// Parse the country code from the vat
 					if identity, err := tax.ParseIdentity(taxReg.ID.Value); err == nil {
-						p.TaxID = identity
+						if identity.Code != "" {
+							p.TaxID = identity
+						}
 					} else {
 						// Fallback to preserve the tax id
 						p.TaxID = &tax.Identity{

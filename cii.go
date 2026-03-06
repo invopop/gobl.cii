@@ -79,10 +79,10 @@ var ContextPeppolV3 = Context{
 
 // ContextFacturXV1 is used for Factur-X V1 documents.
 var ContextFacturXV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
-	Version:     VersionD16B,
+	GuidelineID: "urn:cen.eu:en16931:2017",
+	Version:     VersionD22B,
 	Addons:      []cbc.Key{facturx.V1},
-	VESID:       "fr.factur-x:extended:1.0.8",
+	VESID:       "fr.factur-x:en16931:1.0.8",
 }
 
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
