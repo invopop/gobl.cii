@@ -104,7 +104,7 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 		return nil, err
 	}
 
-	if err := out.addTransaction(inv); err != nil {
+	if err := out.addTransaction(inv, context); err != nil {
 		return nil, err
 	}
 
@@ -112,20 +112,20 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 }
 
 // addTransaction adds the transaction part of a EN 16931 compliant invoice
-func (out *Invoice) addTransaction(inv *bill.Invoice) error {
+func (out *Invoice) addTransaction(inv *bill.Invoice, ctx Context) error {
 	out.Transaction = new(Transaction)
 
 	if err := out.addLines(inv.Lines); err != nil {
 		return err
 	}
-	if err := out.addAgreement(inv); err != nil {
+	if err := out.addAgreement(inv, ctx); err != nil {
 		return err
 	}
 	if len(inv.Attachments) > 0 {
 		out.addAttachments(inv)
 	}
 	var err error
-	if out.Transaction.Settlement, err = newSettlement(inv); err != nil {
+	if out.Transaction.Settlement, err = newSettlement(inv, ctx); err != nil {
 		return err
 	}
 	out.Transaction.Delivery = newDelivery(inv)

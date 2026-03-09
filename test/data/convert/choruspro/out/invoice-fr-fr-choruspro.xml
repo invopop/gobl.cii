@@ -48,10 +48,9 @@
     </ram:IncludedSupplyChainTradeLineItem>
     <ram:ApplicableHeaderTradeAgreement>
       <ram:SellerTradeParty>
-        <ram:GlobalID schemeID="0009">73282932012345</ram:GlobalID>
         <ram:Name>Provide One Inc.</ram:Name>
         <ram:SpecifiedLegalOrganization>
-          <ram:ID schemeID="1">FR44732829320</ram:ID>
+          <ram:ID schemeID="1">73282932012345</ram:ID>
         </ram:SpecifiedLegalOrganization>
         <ram:DefinedTradeContact>
           <ram:EmailURIUniversalCommunication>
@@ -70,10 +69,9 @@
         </ram:SpecifiedTaxRegistration>
       </ram:SellerTradeParty>
       <ram:BuyerTradeParty>
-        <ram:GlobalID schemeID="0009">35600000012345</ram:GlobalID>
         <ram:Name>Sample Consumer</ram:Name>
         <ram:SpecifiedLegalOrganization>
-          <ram:ID schemeID="1">FR39356000000</ram:ID>
+          <ram:ID schemeID="1">35600000012345</ram:ID>
         </ram:SpecifiedLegalOrganization>
         <ram:DefinedTradeContact>
           <ram:EmailURIUniversalCommunication>

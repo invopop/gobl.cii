@@ -112,7 +112,7 @@ type TaxTotalAmount struct {
 }
 
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
-func newSettlement(inv *bill.Invoice) (*Settlement, error) {
+func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	stlm := &Settlement{
 		Currency: string(inv.Currency),
 	}
@@ -146,7 +146,7 @@ func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 		}
 	}
 	if inv.Payment != nil && inv.Payment.Payee != nil {
-		stlm.Payee = newPayee(inv.Payment.Payee)
+		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
 	}
 
 	if inv.Delivery != nil && inv.Delivery.Period != nil {
@@ -348,10 +348,10 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	return t
 }
 
-func newPayee(party *org.Party) *Party {
+func newPayee(party *org.Party, ctx Context) *Party {
 	// Reflects rules from CII-SR-352 to 364 and CII-SR-364
 	// These rules are warnings but have been added as they produce cleaner invoices
-	p := newParty(party)
+	p := newParty(party, ctx)
 	payee := &Party{
 		Name: p.Name,
 		ID:   p.ID,
