@@ -47,17 +47,17 @@ type IssuerID struct {
 }
 
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
-func (out *Invoice) addAgreement(inv *bill.Invoice) error {
+func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 	out.Transaction.Agreement = new(Agreement)
 	agmt := out.Transaction.Agreement
 	if inv.Ordering != nil && inv.Ordering.Code != "" {
 		agmt.BuyerReference = inv.Ordering.Code.String()
 	}
 	if supplier := inv.Supplier; supplier != nil {
-		agmt.Seller = newParty(supplier)
+		agmt.Seller = newParty(supplier, ctx)
 	}
 	if customer := inv.Customer; customer != nil {
-		agmt.Buyer = newParty(customer)
+		agmt.Buyer = newParty(customer, ctx)
 	}
 	if inv.Ordering != nil {
 		if inv.Ordering.Seller != nil {
@@ -70,7 +70,7 @@ func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 				SpecifiedTaxRegistration: agmt.Seller.SpecifiedTaxRegistration,
 			}
 
-			agmt.Seller = newParty(inv.Ordering.Seller)
+			agmt.Seller = newParty(inv.Ordering.Seller, ctx)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
 			c := inv.Ordering.Contracts[0].Code.String()
