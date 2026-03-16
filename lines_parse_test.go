@@ -114,6 +114,11 @@ func TestParseCtoGLines(t *testing.T) {
 
 		// BT-133: Line buyer accounting reference
 		assert.Equal(t, cbc.Code("BookingCode001"), lines[0].Cost)
+
+		// BT-134/BT-135: Invoice line period
+		require.NotNil(t, lines[0].Period, "Line period should not be nil")
+		assert.Equal(t, "2013-06-01", lines[0].Period.Start.String())
+		assert.Equal(t, "2013-06-01", lines[0].Period.End.String())
 	})
 
 	// Invoice with BasisQuantity
