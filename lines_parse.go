@@ -127,7 +127,9 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 			}
 			per.End = end
 		}
-		l.Period = per
+		if !per.Start.IsZero() || !per.End.IsZero() {
+			l.Period = per
+		}
 	}
 
 	return l, nil
