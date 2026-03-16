@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -107,6 +108,26 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	// BT-133: Line buyer accounting reference
 	if it.TradeSettlement.AccountingAccount != nil && it.TradeSettlement.AccountingAccount.ID != "" {
 		l.Cost = cbc.Code(it.TradeSettlement.AccountingAccount.ID)
+	}
+
+	// BT-134/BT-135: Invoice line period
+	if it.TradeSettlement.Period != nil {
+		per := &cal.Period{}
+		if it.TradeSettlement.Period.Start != nil && it.TradeSettlement.Period.Start.DateFormat != nil {
+			start, err := parseDate(it.TradeSettlement.Period.Start.DateFormat.Value)
+			if err != nil {
+				return nil, err
+			}
+			per.Start = start
+		}
+		if it.TradeSettlement.Period.End != nil && it.TradeSettlement.Period.End.DateFormat != nil {
+			end, err := parseDate(it.TradeSettlement.Period.End.DateFormat.Value)
+			if err != nil {
+				return nil, err
+			}
+			per.End = end
+		}
+		l.Period = per
 	}
 
 	return l, nil
