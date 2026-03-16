@@ -88,49 +88,14 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		}
 	}
 
-	// BT-128: Invoice line object identifier (TypeCode 130 indicates object identifier)
-	if it.Agreement.AdditionalReference != nil && it.Agreement.AdditionalReference.TypeCode == "130" && it.Agreement.AdditionalReference.ID != "" {
-		l.Identifier = &org.Identity{
-			Code: cbc.Code(it.Agreement.AdditionalReference.ID),
-		}
-		if it.Agreement.AdditionalReference.RefCode != nil {
-			l.Identifier.Ext = tax.Extensions{
-				untdid.ExtKeyReference: cbc.Code(*it.Agreement.AdditionalReference.RefCode),
-			}
-		}
-	}
+	goblLineAgreement(it.Agreement, l)
+	goblLineSettlement(it.TradeSettlement, l)
 
-	// BT-132: Purchase order line reference
-	if it.Agreement.OrderReference != nil && it.Agreement.OrderReference.LineID != "" {
-		l.Order = cbc.Code(it.Agreement.OrderReference.LineID)
+	per, err := goblLinePeriod(it.TradeSettlement.Period)
+	if err != nil {
+		return nil, err
 	}
-
-	// BT-133: Line buyer accounting reference
-	if it.TradeSettlement.AccountingAccount != nil && it.TradeSettlement.AccountingAccount.ID != "" {
-		l.Cost = cbc.Code(it.TradeSettlement.AccountingAccount.ID)
-	}
-
-	// BT-134/BT-135: Invoice line period
-	if it.TradeSettlement.Period != nil {
-		per := &cal.Period{}
-		if it.TradeSettlement.Period.Start != nil && it.TradeSettlement.Period.Start.DateFormat != nil {
-			start, err := parseDate(it.TradeSettlement.Period.Start.DateFormat.Value)
-			if err != nil {
-				return nil, err
-			}
-			per.Start = start
-		}
-		if it.TradeSettlement.Period.End != nil && it.TradeSettlement.Period.End.DateFormat != nil {
-			end, err := parseDate(it.TradeSettlement.Period.End.DateFormat.Value)
-			if err != nil {
-				return nil, err
-			}
-			per.End = end
-		}
-		if !per.Start.IsZero() || !per.End.IsZero() {
-			l.Period = per
-		}
-	}
+	l.Period = per
 
 	return l, nil
 }
@@ -214,6 +179,60 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 		}
 		l.Notes = append(l.Notes, n)
 	}
+}
+
+// goblLineAgreement populates line-level references from the CII agreement.
+func goblLineAgreement(ag *LineAgreement, l *bill.Line) {
+	// BT-128: Invoice line object identifier (TypeCode 130 indicates object identifier)
+	if ag.AdditionalReference != nil && ag.AdditionalReference.TypeCode == "130" && ag.AdditionalReference.ID != "" {
+		l.Identifier = &org.Identity{
+			Code: cbc.Code(ag.AdditionalReference.ID),
+		}
+		if ag.AdditionalReference.RefCode != nil {
+			l.Identifier.Ext = tax.Extensions{
+				untdid.ExtKeyReference: cbc.Code(*ag.AdditionalReference.RefCode),
+			}
+		}
+	}
+
+	// BT-132: Purchase order line reference
+	if ag.OrderReference != nil && ag.OrderReference.LineID != "" {
+		l.Order = cbc.Code(ag.OrderReference.LineID)
+	}
+}
+
+// goblLineSettlement populates line-level settlement fields from the CII trade settlement.
+func goblLineSettlement(ts *TradeSettlement, l *bill.Line) {
+	// BT-133: Line buyer accounting reference
+	if ts.AccountingAccount != nil && ts.AccountingAccount.ID != "" {
+		l.Cost = cbc.Code(ts.AccountingAccount.ID)
+	}
+}
+
+// goblLinePeriod parses BT-134/BT-135 invoice line period dates.
+func goblLinePeriod(p *Period) (*cal.Period, error) {
+	if p == nil {
+		return nil, nil
+	}
+	per := &cal.Period{}
+	if p.Start != nil && p.Start.DateFormat != nil {
+		start, err := parseDate(p.Start.DateFormat.Value)
+		if err != nil {
+			return nil, err
+		}
+		per.Start = start
+	}
+	if p.End != nil && p.End.DateFormat != nil {
+		end, err := parseDate(p.End.DateFormat.Value)
+		if err != nil {
+			return nil, err
+		}
+		per.End = end
+	}
+	if per.Start.IsZero() && per.End.IsZero() {
+		return nil, nil
+	}
+	return per, nil
 }
 
 // goblLineTaxes populates line tax information from the CII trade tax entries.
