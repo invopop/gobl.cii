@@ -58,9 +58,9 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 
 	if ctx != nil {
 		out.Addons = tax.Addons{List: ctx.Addons}
-		if ctx.GuidelineID == ContextPeppolFranceFacturXV1.GuidelineID || ctx.GuidelineID == ContextPeppolFranceCIUSV1.GuidelineID {
+		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) {
 			if in.ExchangedContext.BusinessContext != nil {
-				out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
+				out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
 			}
 		}
 	}
