@@ -152,11 +152,11 @@ var contexts = []Context{
 // Returns nil if no matching context is found.
 //
 // The lookup logic works as follows:
-// 1. If the BusinessID is a French billing mode code, checks for a context whose
-//    OutputGuidelineID matches (France CIUS documents use EN16931's
-//    GuidelineID in the XML but can be identified by their billing mode BusinessID)
-// 2. Tries to match on the full GuidelineID (for external identification)
-// 3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
+//  1. If the BusinessID is a French billing mode code, checks for a context whose
+//     OutputGuidelineID matches (France CIUS documents use EN16931's
+//     GuidelineID in the XML but can be identified by their billing mode BusinessID)
+//  2. Tries to match on the full GuidelineID (for external identification)
+//  3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
 func FindContext(guidelineID string, businessID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// GuidelineID as EN16931 but can be identified by their BusinessID
