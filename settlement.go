@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
@@ -336,13 +337,10 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	if rate.Ext.Has(cef.ExtKeyVATEX) {
 		t.ExemptionReasonCode = rate.Ext.Get(cef.ExtKeyVATEX).String()
 	}
-	// BT-120: Set exemption reason from legal note for exempt tax categories
-	if inv.Notes != nil && cat.In("E", "AE", "K", "G", "O") {
-		for _, n := range inv.Notes {
-			if n.Key == org.NoteKeyLegal {
-				t.ExemptionReason = n.Text
-				break
-			}
+	// BT-120: Set exemption reason from tax notes
+	if inv.Tax != nil {
+		if note := findTaxNote(inv.Tax.Notes, category.Code, rate); note != nil {
+			t.ExemptionReason = note.Text
 		}
 	}
 	return t
@@ -375,4 +373,34 @@ func getPaymentMeansCode(instr *pay.Instructions) (string, error) {
 		}
 	}
 	return instr.Ext.Get(untdid.ExtKeyPaymentMeans).String(), nil
+}
+
+// goblAddTaxNotes extracts tax notes from header-level ApplicableTradeTax entries
+// and adds them to the invoice's Tax.Notes.
+func goblAddTaxNotes(taxes []*Tax, inv *bill.Invoice) {
+	for _, t := range taxes {
+		if t.ExemptionReason == "" || t.CategoryCode == "" || t.TypeCode == "" {
+			continue
+		}
+		note := &tax.Note{
+			Category: cbc.Code(t.TypeCode),
+			Text:     t.ExemptionReason,
+			Ext:      tax.Extensions{untdid.ExtKeyTaxCategory: cbc.Code(t.CategoryCode)},
+		}
+		inv.Tax = inv.Tax.MergeNotes(note)
+	}
+}
+
+// findTaxNote finds a tax note that matches the given category code and rate total
+// by comparing category and the UNTDID tax category extension.
+func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
+	for _, n := range notes {
+		if n.Category != catCode {
+			continue
+		}
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+			return n
+		}
+	}
+	return nil
 }
