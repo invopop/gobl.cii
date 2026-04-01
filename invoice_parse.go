@@ -150,6 +150,8 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		out.Attachments = atts
 	}
 
+	goblAddTaxNotes(ahts.Tax, out)
+
 	return out, nil
 }
 
