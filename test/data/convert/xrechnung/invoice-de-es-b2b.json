@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4ff8b8f9595460a14957c3d5c172021b0eca0991bce2c0740bf83cf48c798d07"
+			"val": "f5f7ec2094af65ca9147e0152c36fdc1cf2f848cf46953fef37fceb9e8b668cd"
 		}
 	},
 	"doc": {
@@ -26,7 +26,17 @@
 		"tax": {
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "reverse-charge",
+					"text": "Reverse Charge / Umkehr der Steuerschuld.",
+					"ext": {
+						"untdid-tax-category": "AE"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "Provide One GmbH",
@@ -183,7 +193,10 @@
 			{
 				"key": "legal",
 				"src": "reverse-charge",
-				"text": "Reverse Charge / Umkehr der Steuerschuld."
+				"text": "Reverse Charge / Umkehr der Steuerschuld.",
+				"ext": {
+					"untdid-text-subject": "ABL"
+				}
 			}
 		]
 	}

@@ -7,7 +7,9 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/fr/choruspro"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/xmlctx"
 )
 
@@ -87,17 +89,31 @@ func UnmarshalInvoice(data []byte) (*Invoice, error) {
 }
 
 func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
+	// Determine GuidelineID to use in output
+	guidelineID := extractGuidelineID(inv, context)
+	if context.OutputGuidelineID != "" {
+		guidelineID = context.OutputGuidelineID
+	}
+
+	// Determine BusinessID to use in output
+	businessID := context.BusinessID
+	if context.Is(ContextPeppolFranceCIUSV1) || context.Is(ContextPeppolFranceFacturXV1) {
+		if profile := inv.Tax.GetExt(ctc.ExtKeyBillingMode); profile != cbc.CodeEmpty {
+			businessID = profile.String()
+		}
+	}
+
 	out := &Invoice{
 		RSMNamespace: NamespaceRSM,
 		RAMNamespace: NamespaceRAM,
 		QDTNamespace: NamespaceQDT,
 		UDTNamespace: NamespaceUDT,
 		ExchangedContext: &ExchangedContext{
-			GuidelineContext: &ExchangedContextParameter{ID: extractGuidelineID(inv, context)},
+			GuidelineContext: &ExchangedContextParameter{ID: guidelineID},
 		},
 	}
-	if context.BusinessID != "" {
-		out.ExchangedContext.BusinessContext = &ExchangedContextParameter{ID: context.BusinessID}
+	if businessID != "" {
+		out.ExchangedContext.BusinessContext = &ExchangedContextParameter{ID: businessID}
 	}
 
 	if err := out.addHeader(inv); err != nil {

@@ -54,10 +54,20 @@ const (
 type Context struct {
 	GuidelineID string
 	BusinessID  string
-	Version     string
-	Addons      []cbc.Key
+	// OutputGuidelineID optionally specifies a different GuidelineID
+	// to use in the actual generated CII XML document. If empty, GuidelineID
+	// is used. This allows the context to be identified by one ID externally while
+	// generating different values in the XML output.
+	OutputGuidelineID string
+	Version           string
+	Addons            []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
+}
+
+// Is checks if two contexts are the same.
+func (c *Context) Is(c2 Context) bool {
+	return c.GuidelineID == c2.GuidelineID && c.BusinessID == c2.BusinessID
 }
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
@@ -87,20 +97,22 @@ var ContextFacturXV1 = Context{
 
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
 var ContextPeppolFranceFacturXV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
-	Version:     VersionD16B,
-	Addons:      []cbc.Key{ctc.Flow2V1},
-	VESID:       "fr.factur-x:en16931:1.0.8",
+	GuidelineID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
+	BusinessID:        ProfileIDPeppolFranceBilling,
+	OutputGuidelineID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
+	Version:           VersionD16B,
+	Addons:            []cbc.Key{ctc.Flow2V1},
+	VESID:             "fr.factur-x:en16931:1.0.8",
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
 var ContextPeppolFranceCIUSV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
-	Version:     VersionD22B,
-	Addons:      []cbc.Key{ctc.Flow2V1},
-	VESID:       "eu.cen.en16931:cii:1.3.13",
+	GuidelineID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
+	BusinessID:        ProfileIDPeppolFranceBilling,
+	OutputGuidelineID: "urn:cen.eu:en16931:2017",
+	Version:           VersionD22B,
+	Addons:            []cbc.Key{ctc.Flow2V1},
+	VESID:             "eu.cen.en16931:cii:1.3.13",
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
@@ -138,7 +150,27 @@ var contexts = []Context{
 
 // FindContext looks up a context by GuidelineID and optionally BusinessID.
 // Returns nil if no matching context is found.
+//
+// The lookup logic works as follows:
+//  1. If the BusinessID is a French billing mode code, checks for a context whose
+//     OutputGuidelineID matches (France CIUS documents use EN16931's
+//     GuidelineID in the XML but can be identified by their billing mode BusinessID)
+//  2. Tries to match on the full GuidelineID (for external identification)
+//  3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
 func FindContext(guidelineID string, businessID string) *Context {
+	// French billing mode check: France CIUS documents use the same
+	// GuidelineID as EN16931 but can be identified by their BusinessID
+	// containing a billing mode code (e.g., "B1", "S1", "M4").
+	if isFrenchBillingMode(businessID) {
+		for i := range contexts {
+			ctx := &contexts[i]
+			if ctx.OutputGuidelineID == guidelineID {
+				return ctx
+			}
+		}
+	}
+
+	// First pass: try to match on full GuidelineID
 	for i := range contexts {
 		ctx := &contexts[i]
 		if ctx.GuidelineID == guidelineID {
@@ -148,7 +180,30 @@ func FindContext(guidelineID string, businessID string) *Context {
 			return ctx
 		}
 	}
+
+	// Second pass: try to match on OutputGuidelineID (for parsing incoming documents)
+	for i := range contexts {
+		ctx := &contexts[i]
+		if ctx.OutputGuidelineID != "" && ctx.OutputGuidelineID == guidelineID {
+			return ctx
+		}
+	}
+
 	return nil
+}
+
+// isFrenchBillingMode checks if the given businessID matches a known French
+// billing mode code pattern (e.g., "S1", "B1", "M4"). These codes consist of
+// a letter (B for goods, S for services, M for mixed) followed by a digit.
+func isFrenchBillingMode(businessID string) bool {
+	if len(businessID) != 2 {
+		return false
+	}
+	switch businessID[0] {
+	case 'B', 'S', 'M':
+		return businessID[1] >= '0' && businessID[1] <= '9'
+	}
+	return false
 }
 
 // Parse parses a raw XML CII invoice document and converts it into

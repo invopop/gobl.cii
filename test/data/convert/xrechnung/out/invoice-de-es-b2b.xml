@@ -16,6 +16,7 @@
     </ram:IssueDateTime>
     <ram:IncludedNote>
       <ram:Content>Reverse Charge / Umkehr der Steuerschuld.</ram:Content>
+      <ram:SubjectCode>ABL</ram:SubjectCode>
     </ram:IncludedNote>
   </rsm:ExchangedDocument>
   <rsm:SupplyChainTradeTransaction>
