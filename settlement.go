@@ -112,6 +112,20 @@ type TaxTotalAmount struct {
 	Currency string `xml:"currencyID,attr"`
 }
 
+// taxPointCIICodeMap maps GOBL tax point keys to UNTDID 2475 codes for CII.
+var taxPointCIICodeMap = map[cbc.Key]string{
+	tax.PointIssue:    "5",
+	tax.PointDelivery: "29",
+	tax.PointPayment:  "72",
+}
+
+// taxPointCIIKeyMap is the reverse mapping from UNTDID 2475 codes to GOBL tax point keys.
+var taxPointCIIKeyMap = map[string]cbc.Key{
+	"5":  tax.PointIssue,
+	"29": tax.PointDelivery,
+	"72": tax.PointPayment,
+}
+
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
 func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	stlm := &Settlement{
@@ -129,6 +143,14 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 			for _, t := range stlm.Tax {
 				t.TaxPointDate = &IssueDate{
 					DateFormat: documentDate(inv.ValueDate),
+				}
+			}
+		}
+		// BT-8: VAT point date code (UNTDID 2475)
+		if inv.Tax != nil && inv.Tax.Point != cbc.KeyEmpty {
+			if code, ok := taxPointCIICodeMap[inv.Tax.Point]; ok {
+				for _, t := range stlm.Tax {
+					t.DueDateTypeCode = code
 				}
 			}
 		}

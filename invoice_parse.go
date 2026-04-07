@@ -84,6 +84,13 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		out.ValueDate = &vd
 	}
 
+	// BT-8: VAT point date code (UNTDID 2475, from first header-level ApplicableTradeTax)
+	if len(ahts.Tax) > 0 && ahts.Tax[0].DueDateTypeCode != "" {
+		if key, ok := taxPointCIIKeyMap[ahts.Tax[0].DueDateTypeCode]; ok {
+			out.Tax.Point = key
+		}
+	}
+
 	if err = goblAddLines(in.Transaction, out, taxMap); err != nil {
 		return nil, err
 	}
