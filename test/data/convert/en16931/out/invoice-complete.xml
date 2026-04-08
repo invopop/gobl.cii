@@ -147,6 +147,7 @@
         <ram:TypeCode>VAT</ram:TypeCode>
         <ram:BasisAmount>1621.00</ram:BasisAmount>
         <ram:CategoryCode>S</ram:CategoryCode>
+        <ram:DueDateTypeCode>72</ram:DueDateTypeCode>
         <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
       <ram:SpecifiedTradeAllowanceCharge>

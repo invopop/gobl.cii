@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -99,6 +100,97 @@ func TestNewSettlement(t *testing.T) {
 			assert.Empty(t, tax.ExemptionReasonCode)
 		}
 	})
+}
+
+func TestTaxPointConversion(t *testing.T) {
+	tests := []struct {
+		name string
+		key  cbc.Key
+		code string
+	}{
+		{"issue", tax.PointIssue, "5"},
+		{"delivery", tax.PointDelivery, "29"},
+		{"payment", tax.PointPayment, "72"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			env := loadEnvelope(t, "en16931/invoice-complete.json")
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			inv.Tax.Point = tt.key
+			doc, err := cii.ConvertInvoice(env)
+			require.NoError(t, err)
+
+			// All header-level tax entries should have the code
+			for _, tax := range doc.Transaction.Settlement.Tax {
+				assert.Equal(t, tt.code, tax.DueDateTypeCode)
+			}
+		})
+	}
+
+	t.Run("unknown key ignored", func(t *testing.T) {
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Tax.Point = "unknown"
+		doc, err := cii.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		for _, tax := range doc.Transaction.Settlement.Tax {
+			assert.Empty(t, tax.DueDateTypeCode)
+		}
+	})
+
+	t.Run("empty point ignored", func(t *testing.T) {
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Tax.Point = ""
+		doc, err := cii.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		for _, tax := range doc.Transaction.Settlement.Tax {
+			assert.Empty(t, tax.DueDateTypeCode)
+		}
+	})
+}
+
+func TestTaxPointRoundTrip(t *testing.T) {
+	tests := []struct {
+		name string
+		key  cbc.Key
+		code string
+	}{
+		{"issue", tax.PointIssue, "5"},
+		{"delivery", tax.PointDelivery, "29"},
+		{"payment", tax.PointPayment, "72"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			env := loadEnvelope(t, "en16931/invoice-complete.json")
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			inv.Tax.Point = tt.key
+			doc, err := cii.ConvertInvoice(env)
+			require.NoError(t, err)
+
+			// Marshal to XML and parse back
+			data, err := doc.Bytes()
+			require.NoError(t, err)
+
+			parsed, err := cii.Parse(data)
+			require.NoError(t, err)
+			parsedInv, ok := parsed.Extract().(*bill.Invoice)
+			require.True(t, ok)
+			assert.Equal(t, tt.key, parsedInv.Tax.Point)
+		})
+	}
 }
 
 func TestParseTaxNotes(t *testing.T) {
