@@ -12,6 +12,7 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/schema"
@@ -72,6 +73,30 @@ func TestFlow6CodeTablesRoundTrip(t *testing.T) {
 	})
 }
 
+// defaultReasonForCode picks a CDAR ReasonCode known to be allowed by
+// the BR-FR-CDV-CL-09 schematron rule for the given status code, or
+// returns ok=false if the code does not require a reason.
+func defaultReasonForCode(code string) (string, bool) {
+	switch code {
+	case "206", "208":
+		return "AUTRE", true
+	case "207", "210":
+		return "TX_TVA_ERR", true
+	case "213":
+		return "REJ_SEMAN", true
+	}
+	return "", false
+}
+
+// issuerRoleForType returns the role code the issuing platform should
+// claim on the ExchangedDocument depending on the bill.Status.Type.
+func issuerRoleForType(typ cbc.Key) cbc.Code {
+	if typ == bill.StatusTypeUpdate {
+		return flow6.RoleWK
+	}
+	return flow6.RoleSE
+}
+
 // buildSyntheticStatus builds a minimal but valid bill.Status for the
 // given Flow 6 process code.
 func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
@@ -92,6 +117,9 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
 				},
 			},
+			Inboxes: []*org.Inbox{
+				{Scheme: "0225", Code: "100000009_PEP"},
+			},
 			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleSE),
 		},
 		Customer: &org.Party{
@@ -102,7 +130,24 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
 				},
 			},
+			Inboxes: []*org.Inbox{
+				{Scheme: "0225", Code: "200000008_PEP"},
+			},
 			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleBY),
+		},
+		// Issuer is the platform (PA) producing the CDAR. For "update"
+		// status types (305 ack) it claims the WK role; for "response"
+		// types (23 ack) the schematron expects the issuer to mirror the
+		// seller — RoleSE.
+		Issuer: &org.Party{
+			Name: "PA-FR",
+			Identities: []*org.Identity{
+				{
+					Code: "9998",
+					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0238"),
+				},
+			},
+			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, issuerRoleForType(typ)),
 		},
 	}
 	st.SetAddons(flow6.V1)
@@ -117,12 +162,14 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 		},
 	}
 
-	// Codes that require at least one Reason per BR-FR-CDV-15.
-	switch code {
-	case "206", "207", "208", "210", "213":
-		line.Reasons = []*bill.Reason{{Key: bill.ReasonKeyLegal,
-			Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReasonCode, "TX_TVA_ERR"),
-			Description: "Taux TVA erroné",
+	// Codes that require at least one Reason. The schematron restricts
+	// the allowed reason codes per status (BR-FR-CDV-CL-09), so we pick a
+	// code that's valid for each.
+	if reasonCode, ok := defaultReasonForCode(code); ok {
+		line.Reasons = []*bill.Reason{{
+			Key:         bill.ReasonKeyLegal,
+			Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReasonCode, cbc.Code(reasonCode)),
+			Description: "Motif " + reasonCode,
 		}}
 		line.Actions = []*bill.Action{{Key: bill.ActionKeyReissue, Description: "Créer une facture rectificative"}}
 	}
@@ -130,10 +177,13 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 	// Code 212 (paid) — attach an MEN amount as a complement so we exercise
 	// the characteristic round-trip from the StatusLine level.
 	if code == "212" {
-		amt := num.MakeAmount(50000, 2)
+		amt := currency.Amount{
+			Currency: currency.EUR,
+			Value:    num.MakeAmount(50000, 2),
+		}
 		obj, err := schema.NewObject(&flow6.Characteristic{
 			TypeCode: flow6.TypeCodeAmountReceived,
-			Numeric:  &amt,
+			Amount:   &amt,
 		})
 		require.NoError(t, err)
 		line.Complements = append(line.Complements, obj)

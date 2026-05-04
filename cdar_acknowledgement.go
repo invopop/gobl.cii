@@ -65,11 +65,18 @@ type CDARDocumentCharacteristic struct {
 	Name                  string               `xml:"ram:Name,omitempty"`
 	Location              string               `xml:"ram:Location,omitempty"`
 	ValuePercent          string               `xml:"ram:ValuePercent,omitempty"`
-	ValueAmount           string               `xml:"ram:ValueAmount,omitempty"`
+	ValueAmount           *CDARValueAmount     `xml:"ram:ValueAmount,omitempty"`
 	ValueDateTime         *CDARIssueDateTime   `xml:"ram:ValueDateTime,omitempty"`
 }
 
 // CDARIndicatorString represents a boolean indicator using udt:IndicatorString
 type CDARIndicatorString struct {
 	Value string `xml:"udt:IndicatorString"`
+}
+
+// CDARValueAmount represents a monetary value with the currencyID
+// attribute required by the CDAR XSD for ValueAmount elements.
+type CDARValueAmount struct {
+	Value      string `xml:",chardata"`
+	CurrencyID string `xml:"currencyID,attr,omitempty"`
 }

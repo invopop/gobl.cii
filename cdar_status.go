@@ -71,12 +71,27 @@ func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
 	if st.Series != "" && cdar.ExchangedDocument.ID == "" {
 		cdar.ExchangedDocument.ID = string(st.Series)
 	}
-	if st.Issuer != nil {
-		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(st.Issuer)
-	} else if st.Supplier != nil && st.Type == bill.StatusTypeUpdate {
-		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(st.Supplier)
-	} else if st.Customer != nil && st.Type == bill.StatusTypeResponse {
-		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(st.Customer)
+	// In a Flow 6 B2B status, both SenderTradeParty (MDT-21) and
+	// IssuerTradeParty (MDT-40) of the ExchangedDocument represent the
+	// platform (PA) producing the CDAR. The caller surfaces that party as
+	// bill.Status.Issuer, with Ext[fr-ctc-role] = "WK". For "response"
+	// status types where no explicit Issuer is set, we fall back to the
+	// Customer (the buyer-side platform / recipient), and for "update"
+	// types we fall back to the Supplier — those fallbacks lose the WK
+	// role, which is why the platform should always populate Issuer.
+	sender := st.Issuer
+	if sender == nil {
+		switch st.Type {
+		case bill.StatusTypeUpdate:
+			sender = st.Supplier
+		case bill.StatusTypeResponse:
+			sender = st.Customer
+		}
+	}
+	if sender != nil {
+		tp := newCDARTradeParty(sender)
+		cdar.ExchangedDocument.SenderTradeParty = tp
+		cdar.ExchangedDocument.IssuerTradeParty = tp
 	}
 
 	var recipients []*CDARTradeParty
@@ -265,7 +280,10 @@ func characteristicsFromComplements(comps []*schema.Object, reasonCode cbc.Code)
 			dc.ValuePercent = c.Percent.StringWithoutSymbol()
 		}
 		if c.Amount != nil {
-			dc.ValueAmount = c.Amount.Value.String()
+			dc.ValueAmount = &CDARValueAmount{
+				Value:      c.Amount.Value.String(),
+				CurrencyID: c.Amount.Currency.String(),
+			}
 		}
 		out = append(out, dc)
 	}

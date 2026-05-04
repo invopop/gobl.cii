@@ -72,45 +72,37 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 	// recipients (including the counterparty and any platforms) in
 	// RecipientTradeParty. We map the SE-roled party to Supplier and BY-roled
 	// party to Customer; any leftover party becomes Recipient.
-	allParties := make([]*org.Party, 0)
+	// Map by CDAR slot rather than role-bucketing. The slots are stable
+	// across status types; the role codes overlap (e.g. an "SE" Sender on
+	// a 23-typed response is the platform claiming the seller's role, not
+	// the supplier itself).
+	//   ExchangedDocument.IssuerTradeParty           → bill.Status.Issuer
+	//   ReferenceReferencedDocument.IssuerTradeParty → bill.Status.Supplier
+	//   ExchangedDocument.RecipientTradeParty (BY)   → bill.Status.Customer
+	//   any remaining recipient                      → bill.Status.Recipient
 	if p := goblPartyFromCDAR(cdar.ExchangedDocument.IssuerTradeParty); p != nil {
-		allParties = append(allParties, p)
+		st.Issuer = p
 	}
 	for _, rp := range cdar.ExchangedDocument.RecipientTradeParties {
-		if p := goblPartyFromCDAR(rp); p != nil {
-			allParties = append(allParties, p)
+		p := goblPartyFromCDAR(rp)
+		if p == nil {
+			continue
 		}
-	}
-	for _, p := range allParties {
 		role := p.Ext.Get(flow6.ExtKeyRole)
-		switch role {
-		case flow6.RoleSE:
-			if st.Supplier == nil {
-				st.Supplier = p
-				continue
-			}
-		case flow6.RoleBY:
-			if st.Customer == nil {
-				st.Customer = p
-				continue
-			}
-		}
-		// fallback: place into first empty slot
 		switch {
-		case st.Supplier == nil && role == "":
-			st.Supplier = p
-		case st.Customer == nil && role == "":
+		case role == flow6.RoleBY && st.Customer == nil:
 			st.Customer = p
+		case role == flow6.RoleSE && st.Supplier == nil:
+			st.Supplier = p
 		case st.Recipient == nil:
 			st.Recipient = p
-		case st.Issuer == nil:
-			st.Issuer = p
 		}
 	}
 
-	// Fallback: if no Supplier yet but we have any party with SIREN, treat
-	// the first reference's IssuerTradeParty as Supplier.
-	if st.Supplier == nil && len(cdar.AcknowledgementDocuments) > 0 {
+	// Pull the supplier from the referenced-document's issuer slot —
+	// regardless of any earlier assignment, that slot is the canonical
+	// place for the seller's identity in CDAR.
+	if len(cdar.AcknowledgementDocuments) > 0 {
 		ack := cdar.AcknowledgementDocuments[0]
 		for _, ref := range ack.ReferenceReferencedDocument {
 			if ref != nil && ref.IssuerTradeParty != nil {
