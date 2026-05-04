@@ -115,7 +115,7 @@ func newParty(party *org.Party) *Party {
 		for _, id := range party.Identities {
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				p.GlobalID = &PartyID{
-					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
 					Value:    id.Code.String(),
 				}
 			}

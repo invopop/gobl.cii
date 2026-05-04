@@ -67,9 +67,7 @@ func goblAddLines(in *Transaction, out *bill.Invoice) error {
 			}
 			l.Item.Identities = append(l.Item.Identities, &org.Identity{
 				// This label corresponds to a code from the ISO 6523 ICD List. Mapping is not yet supported
-				Ext: tax.Extensions{
-					iso.ExtKeySchemeID: cbc.Code(it.Product.GlobalID.SchemeID),
-				},
+				Ext: tax.MakeExtensions().Set(iso.ExtKeySchemeID, cbc.Code(it.Product.GlobalID.SchemeID)),
 				Code: cbc.Code(it.Product.GlobalID.Value),
 			})
 		}

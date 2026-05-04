@@ -98,9 +98,7 @@ func goblNewParty(party *Party) *org.Party {
 			p.Identities = make([]*org.Identity, 0)
 		}
 		p.Identities = append(p.Identities, &org.Identity{
-			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: cbc.Code(party.GlobalID.SchemeID),
-			},
+			Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, cbc.Code(party.GlobalID.SchemeID)),
 			Code: cbc.Code(party.GlobalID.Value),
 		})
 	}

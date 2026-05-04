@@ -34,9 +34,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		Supplier: goblNewParty(in.Transaction.Agreement.Seller),
 		Customer: goblNewParty(in.Transaction.Agreement.Buyer),
 		Tax: &bill.Tax{
-			Ext: tax.Extensions{
-				untdid.ExtKeyDocumentType: cbc.Code(in.ExchangedDocument.TypeCode),
-			},
+			Ext: tax.MakeExtensions().Set(untdid.ExtKeyDocumentType, cbc.Code(in.ExchangedDocument.TypeCode)),
 		},
 	}
 

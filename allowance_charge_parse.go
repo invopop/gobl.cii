@@ -54,9 +54,7 @@ func goblNewCharge(ac *AllowanceCharge) (*bill.Charge, error) {
 		c.Amount, _ = num.AmountFromString(ac.Amount)
 	}
 	if ac.ReasonCode != "" {
-		c.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
-		}
+		c.Ext = tax.MakeExtensions().Set(untdid.ExtKeyCharge, cbc.Code(ac.ReasonCode))
 	}
 	if ac.Base != "" {
 		b, err := num.AmountFromString(ac.Base)
@@ -107,9 +105,7 @@ func goblNewDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
 		d.Amount, _ = num.AmountFromString(ac.Amount)
 	}
 	if ac.ReasonCode != "" {
-		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
-		}
+		d.Ext = tax.MakeExtensions().Set(untdid.ExtKeyAllowance, cbc.Code(ac.ReasonCode))
 	}
 	if ac.Base != "" {
 		b, err := num.AmountFromString(ac.Base)
@@ -160,9 +156,7 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		Amount: a,
 	}
 	if ac.ReasonCode != "" {
-		c.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
-		}
+		c.Ext = tax.MakeExtensions().Set(untdid.ExtKeyCharge, cbc.Code(ac.ReasonCode))
 	}
 	if ac.Reason != "" {
 		c.Reason = ac.Reason
@@ -189,9 +183,7 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		Amount: a,
 	}
 	if ac.ReasonCode != "" {
-		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
-		}
+		d.Ext = tax.MakeExtensions().Set(untdid.ExtKeyAllowance, cbc.Code(ac.ReasonCode))
 	}
 	if ac.Reason != "" {
 		d.Reason = ac.Reason

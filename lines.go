@@ -149,7 +149,7 @@ func newLine(l *bill.Line) *Line {
 		for _, id := range it.Identities {
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				lineItem.Product.GlobalID = &GlobalID{
-					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
 					Value:    id.Code.String(),
 				}
 			}

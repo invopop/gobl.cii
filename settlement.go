@@ -342,7 +342,7 @@ func newPayee(party *org.Party) *Party {
 }
 
 func getPaymentMeansCode(instr *pay.Instructions) (string, error) {
-	if instr == nil || instr.Ext == nil || instr.Ext[untdid.ExtKeyPaymentMeans].String() == "" {
+	if instr == nil || instr.Ext.IsZero() || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return "", validation.Errors{
 			"instructions": validation.Errors{
 				"ext": validation.Errors{

@@ -29,7 +29,7 @@ func TestParseCtoGCharges(t *testing.T) {
 
 		assert.Equal(t, num.MakeAmount(10000, 2), charge.Amount)
 		assert.Equal(t, "Freight charge", charge.Reason)
-		assert.Equal(t, "FC", charge.Ext[untdid.ExtKeyCharge].String())
+		assert.Equal(t, "FC", charge.Ext.Get(untdid.ExtKeyCharge).String())
 	})
 	// Invoice with Discount and Charge
 	t.Run("CII_business_example_02.xml", func(t *testing.T) {
@@ -72,7 +72,7 @@ func TestParseCtoGCharges(t *testing.T) {
 
 		discount := discounts[0]
 		assert.Equal(t, num.MakeAmount(10000, 2), discount.Amount)
-		assert.Equal(t, "95", discount.Ext[untdid.ExtKeyAllowance].String())
+		assert.Equal(t, "95", discount.Ext.Get(untdid.ExtKeyAllowance).String())
 		assert.Equal(t, "Promotion discount", discount.Reason)
 		assert.Equal(t, "VAT", discount.Taxes[0].Category.String())
 		percent, err := num.PercentageFromString("25%")

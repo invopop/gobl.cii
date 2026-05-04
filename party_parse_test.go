@@ -90,7 +90,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
 		require.Len(t, customer.Identities, 1)
 		assert.Equal(t, "3456789012098", customer.Identities[0].Code.String())
-		assert.Equal(t, "0088", customer.Identities[0].Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "0088", customer.Identities[0].Ext.Get(iso.ExtKeySchemeID).String())
 	})
 
 	t.Run("CII-IN_SE-R-003.xml", func(t *testing.T) {
