@@ -140,7 +140,6 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 
 func TestCDARStatusRoundTripPerCode(t *testing.T) {
 	for _, code := range allProcessCodes {
-		code := code
 		t.Run("CDV-"+code, func(t *testing.T) {
 			st := buildSyntheticStatus(t, code)
 
