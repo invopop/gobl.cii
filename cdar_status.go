@@ -20,13 +20,38 @@ const (
 	schemeIDSIREN      = "0002"
 )
 
-// Acknowledgement TypeCode mapping. CDAR uses 305 for "update" (issuer-side
-// status messages such as "deposed" or "payment-forwarded") and 23 for
-// "response" messages issued by the recipient or platform.
+// CDARPhase identifies which CDAR ack a Context produces. The choice
+// is up to the caller — gobl.cii does not derive it from any field on
+// the GOBL document.
+type CDARPhase cbc.Key
+
+// CDARPhase values.
 const (
-	cdarTypeCodeUpdate   = "305"
-	cdarTypeCodeResponse = "23"
+	// CDARPhaseResponse is the treatment-phase CDAR (a recipient
+	// platform's response to an invoice). Wire ack TypeCode: 23.
+	CDARPhaseResponse CDARPhase = "response"
+	// CDARPhaseUpdate is the transmission-phase CDAR (a sending
+	// platform's status update on the network forwarding of an
+	// invoice). Wire ack TypeCode: 305.
+	CDARPhaseUpdate CDARPhase = "update"
 )
+
+// CDARAckType wire TypeCode values emitted on the
+// AcknowledgementDocument. Defined as constants so the literal codes
+// live in exactly one place.
+const (
+	CDARAckTypeResponse = "23"
+	CDARAckTypeUpdate   = "305"
+)
+
+// cdarAckTypeByPhase maps a CDARPhase to the wire TypeCode emitted on
+// the AcknowledgementDocument. Lookups against an unset / unknown
+// phase return "", which the generator treats as "fall back to the
+// Status.Type derivation" for older callers.
+var cdarAckTypeByPhase = map[CDARPhase]string{
+	CDARPhaseResponse: CDARAckTypeResponse,
+	CDARPhaseUpdate:   CDARAckTypeUpdate,
+}
 
 // NewCDARFromStatus is the exported entry point for converting a
 // *bill.Status into a CDAR XML document using the provided context.
@@ -107,14 +132,14 @@ func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
 
 	// Acknowledgement TypeCode comes from the Context — the caller picks
 	// ContextCDARFlow6Response (23) or ContextCDARFlow6Update (305). When
-	// the context did not specify, fall back to deriving it from the
-	// status Type so older callers keep working.
-	ackType := ctx.CDARAckTypeCode
+	// the context did not specify a phase, fall back to deriving it
+	// from Status.Type so older callers keep working.
+	ackType := cdarAckTypeByPhase[ctx.CDARPhase]
 	if ackType == "" {
 		if st.Type == bill.StatusTypeUpdate {
-			ackType = cdarTypeCodeUpdate
+			ackType = CDARAckTypeUpdate
 		} else {
-			ackType = cdarTypeCodeResponse
+			ackType = CDARAckTypeResponse
 		}
 	}
 

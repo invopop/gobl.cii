@@ -59,11 +59,12 @@ type Context struct {
 	Addons      []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
-	// CDARAckTypeCode pins the AcknowledgementDocument TypeCode emitted
-	// for CDAR (status) documents — "23" for response-phase acks
-	// (treatment) or "305" for update-phase acks (transmission). Only
-	// meaningful for CDAR contexts; ignored for invoice contexts.
-	CDARAckTypeCode string
+	// CDARPhase identifies which CDAR ack flavor the context emits —
+	// CDARPhaseResponse for treatment-phase (TypeCode 23) or
+	// CDARPhaseUpdate for transmission-phase (TypeCode 305). Only set
+	// on CDAR contexts; the wire code is resolved through the
+	// cdarAckTypeByPhase map, not the Context.
+	CDARPhase CDARPhase
 }
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
@@ -143,7 +144,7 @@ var ContextCDARFlow6Response = Context{
 	BusinessID:      "REGULATED",
 	Addons:          []cbc.Key{flow6.V1},
 	VESID:           "fr.ctc:cdar:1.3",
-	CDARAckTypeCode: "23",
+	CDARPhase: CDARPhaseResponse,
 }
 
 // ContextCDARFlow6Update is used for French CTC Flow 6 CDAR update-phase
@@ -155,7 +156,7 @@ var ContextCDARFlow6Update = Context{
 	BusinessID:      "REGULATED",
 	Addons:          []cbc.Key{flow6.V1},
 	VESID:           "fr.ctc:cdar:1.3",
-	CDARAckTypeCode: "305",
+	CDARPhase: CDARPhaseUpdate,
 }
 
 // ContextCDARFlow6 is the default Flow 6 CDAR context — response-phase
