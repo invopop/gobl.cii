@@ -12,7 +12,8 @@ import (
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
-	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl/addons/fr/ctc/flow2"
+	"github.com/invopop/gobl/addons/fr/ctc/flow6"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -90,7 +91,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{ctc.Flow2V1},
+	Addons:      []cbc.Key{flow2.V1},
 	VESID:       "fr.factur-x:en16931:1.0.7-2",
 }
 
@@ -99,7 +100,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{ctc.Flow2V1},
+	Addons:      []cbc.Key{flow2.V1},
 	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
@@ -128,6 +129,13 @@ var ContextChorusProV1 = Context{
 	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
+// ContextCDARFlow6 is used for French CTC Flow 6 CDAR (lifecycle status) documents.
+var ContextCDARFlow6 = Context{
+	GuidelineID: "urn.cpro.gouv.fr:1p0:CDV:invoice",
+	BusinessID:  "REGULATED",
+	Addons:      []cbc.Key{flow6.V1},
+}
+
 // Parse parses a raw XML CII invoice document and converts it into
 // a GOBL envelope. If the type is unsupported, an
 // ErrUnknownDocumentType is provided. CDAR and other non-invoice CII
@@ -138,20 +146,29 @@ func Parse(data []byte) (*gobl.Envelope, error) {
 		return nil, err
 	}
 
-	if ns != NamespaceRSM {
+	env := gobl.NewEnvelope()
+	switch ns {
+	case NamespaceRSM:
+		res, err := parseInvoice(data)
+		if err != nil {
+			return nil, err
+		}
+		if err := env.Insert(res); err != nil {
+			return nil, err
+		}
+		return env, nil
+	case NamespaceCDARRSM:
+		res, err := parseStatus(data)
+		if err != nil {
+			return nil, err
+		}
+		if err := env.Insert(res); err != nil {
+			return nil, err
+		}
+		return env, nil
+	default:
 		return nil, ErrUnknownDocumentType
 	}
-
-	env := gobl.NewEnvelope()
-	res, err := parseInvoice(data)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := env.Insert(res); err != nil {
-		return nil, err
-	}
-	return env, nil
 }
 
 // Unmarshal detects the document type and unmarshals XML into the appropriate
@@ -200,6 +217,14 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		}
 
 		return newInvoice(doc, o.context)
+	case *bill.Status:
+		ctx := o.context
+		// If the caller didn't override the default invoice context, fall back
+		// to the CDAR Flow 6 context for status documents.
+		if ctx.GuidelineID == ContextEN16931V2017.GuidelineID {
+			ctx = ContextCDARFlow6
+		}
+		return newCDAR(doc, ctx)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
