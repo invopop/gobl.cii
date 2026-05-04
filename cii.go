@@ -59,12 +59,6 @@ type Context struct {
 	Addons      []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
-	// CDARPhase identifies which CDAR ack flavor the context emits —
-	// CDARPhaseResponse for treatment-phase (TypeCode 23) or
-	// CDARPhaseUpdate for transmission-phase (TypeCode 305). Only set
-	// on CDAR contexts; the wire code is resolved through the
-	// cdarAckTypeByPhase map, not the Context.
-	CDARPhase CDARPhase
 }
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
@@ -137,31 +131,28 @@ var ContextChorusProV1 = Context{
 
 // ContextCDARFlow6Response is used for French CTC Flow 6 CDAR
 // response-phase acks (TypeCode 23) — the treatment-phase status a
-// recipient platform issues after processing an invoice. This is the
-// default for B2B end-user statuses produced by gobl.cii.
+// recipient platform issues after processing an invoice. The
+// GuidelineID is the end-party "invoice" URN (BR-FR-CDV-02), and the
+// REGULATED BusinessProcessParameter is required.
 var ContextCDARFlow6Response = Context{
-	GuidelineID:     "urn.cpro.gouv.fr:1p0:CDV:invoice",
-	BusinessID:      "REGULATED",
-	Addons:          []cbc.Key{flow6.V1},
-	VESID:           "fr.ctc:cdar:1.3",
-	CDARPhase: CDARPhaseResponse,
+	GuidelineID: CDARGuidelineInvoice,
+	BusinessID:  "REGULATED",
+	Addons:      []cbc.Key{flow6.V1},
+	VESID:       "fr.ctc:cdar:1.3",
 }
 
-// ContextCDARFlow6Update is used for French CTC Flow 6 CDAR update-phase
-// acks (TypeCode 305) — the transmission-phase status a sending
-// platform issues when forwarding an invoice through the network.
-// Typically used by the platform/PA itself rather than end-user code.
+// ContextCDARFlow6Update is used for French CTC Flow 6 CDAR
+// update-phase acks (TypeCode 305) — the transmission-phase status
+// sent to the PPF. The GuidelineID is the einvoicingF2 URN per
+// BR-FR-CDV-02 and no BusinessProcessParameter is emitted.
 var ContextCDARFlow6Update = Context{
-	GuidelineID:     "urn.cpro.gouv.fr:1p0:CDV:invoice",
-	BusinessID:      "REGULATED",
-	Addons:          []cbc.Key{flow6.V1},
-	VESID:           "fr.ctc:cdar:1.3",
-	CDARPhase: CDARPhaseUpdate,
+	GuidelineID: CDARGuidelinePPF,
+	Addons:      []cbc.Key{flow6.V1},
+	VESID:       "fr.ctc:cdar:1.3",
 }
 
-// ContextCDARFlow6 is the default Flow 6 CDAR context — response-phase
-// (TypeCode 23). Kept as an alias of ContextCDARFlow6Response for
-// callers that don't care about the distinction.
+// ContextCDARFlow6 is an alias for the response-phase Flow 6 context,
+// the default for B2B end-user statuses produced by gobl.cii.
 var ContextCDARFlow6 = ContextCDARFlow6Response
 
 // Parse parses a raw XML CII invoice document and converts it into

@@ -20,37 +20,25 @@ const (
 	schemeIDSIREN      = "0002"
 )
 
-// CDARPhase identifies which CDAR ack a Context produces. The choice
-// is up to the caller — gobl.cii does not derive it from any field on
-// the GOBL document.
-type CDARPhase cbc.Key
-
-// CDARPhase values.
+// CDAR GuidelineID URNs per BR-FR-CDV-02 (MDT-3). Used as the stable
+// identifier that distinguishes one CDAR Context from another — the
+// rest of the converter looks up the ack TypeCode from this URN.
 const (
-	// CDARPhaseResponse is the treatment-phase CDAR (a recipient
-	// platform's response to an invoice). Wire ack TypeCode: 23.
-	CDARPhaseResponse CDARPhase = "response"
-	// CDARPhaseUpdate is the transmission-phase CDAR (a sending
-	// platform's status update on the network forwarding of an
-	// invoice). Wire ack TypeCode: 305.
-	CDARPhaseUpdate CDARPhase = "update"
+	// CDARGuidelineInvoice is the GuidelineID for end-party CDARs
+	// (treatment phase). Pairs with ack TypeCode 23.
+	CDARGuidelineInvoice = "urn.cpro.gouv.fr:1p0:CDV:invoice"
+	// CDARGuidelinePPF is the GuidelineID for CDARs transmitted to the
+	// PPF (transmission phase). Pairs with ack TypeCode 305.
+	CDARGuidelinePPF = "urn.cpro.gouv.fr:1p0:CDV:einvoicingF2"
 )
 
-// CDARAckType wire TypeCode values emitted on the
-// AcknowledgementDocument. Defined as constants so the literal codes
-// live in exactly one place.
-const (
-	CDARAckTypeResponse = "23"
-	CDARAckTypeUpdate   = "305"
-)
-
-// cdarAckTypeByPhase maps a CDARPhase to the wire TypeCode emitted on
-// the AcknowledgementDocument. Lookups against an unset / unknown
-// phase return "", which the generator treats as "fall back to the
+// cdarAckTypeByGuideline maps a CDAR GuidelineID to the wire TypeCode
+// emitted on the AcknowledgementDocument. Lookups against an unknown
+// guideline return "", which the generator treats as "fall back to the
 // Status.Type derivation" for older callers.
-var cdarAckTypeByPhase = map[CDARPhase]string{
-	CDARPhaseResponse: CDARAckTypeResponse,
-	CDARPhaseUpdate:   CDARAckTypeUpdate,
+var cdarAckTypeByGuideline = map[string]string{
+	CDARGuidelineInvoice: "23",
+	CDARGuidelinePPF:     "305",
 }
 
 // NewCDARFromStatus is the exported entry point for converting a
@@ -78,15 +66,15 @@ func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
 	if guideline == "" {
 		guideline = ContextCDARFlow6.GuidelineID
 	}
-	business := ctx.BusinessID
-	if business == "" {
-		business = "REGULATED"
-	}
 
 	cdar := NewCDAR()
 	cdar.ExchangedDocumentContext = &CDARExchangedContext{
-		BusinessProcessParameter: &CDARDocumentContextParameter{ID: business},
-		GuidelineParameter:       &CDARDocumentContextParameter{ID: guideline},
+		GuidelineParameter: &CDARDocumentContextParameter{ID: guideline},
+	}
+	// BusinessProcessParameter is only present on the end-party
+	// "invoice" guideline (REGULATED); PPF transmissions omit it.
+	if ctx.BusinessID != "" {
+		cdar.ExchangedDocumentContext.BusinessProcessParameter = &CDARDocumentContextParameter{ID: ctx.BusinessID}
 	}
 
 	cdar.ExchangedDocument = &CDARExchangedDocument{
@@ -130,16 +118,17 @@ func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
 	}
 	cdar.ExchangedDocument.RecipientTradeParties = recipients
 
-	// Acknowledgement TypeCode comes from the Context — the caller picks
-	// ContextCDARFlow6Response (23) or ContextCDARFlow6Update (305). When
-	// the context did not specify a phase, fall back to deriving it
-	// from Status.Type so older callers keep working.
-	ackType := cdarAckTypeByPhase[ctx.CDARPhase]
+	// Acknowledgement TypeCode is resolved from the Context's
+	// GuidelineID — the caller picks ContextCDARFlow6Response (invoice
+	// guideline → 23) or ContextCDARFlow6Update (einvoicingF2 → 305).
+	// Older callers that set neither fall back to the Status.Type
+	// derivation.
+	ackType := cdarAckTypeByGuideline[ctx.GuidelineID]
 	if ackType == "" {
 		if st.Type == bill.StatusTypeUpdate {
-			ackType = CDARAckTypeUpdate
+			ackType = "305"
 		} else {
-			ackType = CDARAckTypeResponse
+			ackType = "23"
 		}
 	}
 
