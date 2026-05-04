@@ -59,6 +59,11 @@ type Context struct {
 	Addons      []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
+	// CDARAckTypeCode pins the AcknowledgementDocument TypeCode emitted
+	// for CDAR (status) documents — "23" for response-phase acks
+	// (treatment) or "305" for update-phase acks (transmission). Only
+	// meaningful for CDAR contexts; ignored for invoice contexts.
+	CDARAckTypeCode string
 }
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
@@ -129,13 +134,34 @@ var ContextChorusProV1 = Context{
 	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
-// ContextCDARFlow6 is used for French CTC Flow 6 CDAR (lifecycle status) documents.
-var ContextCDARFlow6 = Context{
-	GuidelineID: "urn.cpro.gouv.fr:1p0:CDV:invoice",
-	BusinessID:  "REGULATED",
-	Addons:      []cbc.Key{flow6.V1},
-	VESID:       "fr.ctc:cdar:1.3",
+// ContextCDARFlow6Response is used for French CTC Flow 6 CDAR
+// response-phase acks (TypeCode 23) — the treatment-phase status a
+// recipient platform issues after processing an invoice. This is the
+// default for B2B end-user statuses produced by gobl.cii.
+var ContextCDARFlow6Response = Context{
+	GuidelineID:     "urn.cpro.gouv.fr:1p0:CDV:invoice",
+	BusinessID:      "REGULATED",
+	Addons:          []cbc.Key{flow6.V1},
+	VESID:           "fr.ctc:cdar:1.3",
+	CDARAckTypeCode: "23",
 }
+
+// ContextCDARFlow6Update is used for French CTC Flow 6 CDAR update-phase
+// acks (TypeCode 305) — the transmission-phase status a sending
+// platform issues when forwarding an invoice through the network.
+// Typically used by the platform/PA itself rather than end-user code.
+var ContextCDARFlow6Update = Context{
+	GuidelineID:     "urn.cpro.gouv.fr:1p0:CDV:invoice",
+	BusinessID:      "REGULATED",
+	Addons:          []cbc.Key{flow6.V1},
+	VESID:           "fr.ctc:cdar:1.3",
+	CDARAckTypeCode: "305",
+}
+
+// ContextCDARFlow6 is the default Flow 6 CDAR context — response-phase
+// (TypeCode 23). Kept as an alias of ContextCDARFlow6Response for
+// callers that don't care about the distinction.
+var ContextCDARFlow6 = ContextCDARFlow6Response
 
 // Parse parses a raw XML CII invoice document and converts it into
 // a GOBL envelope. If the type is unsupported, an

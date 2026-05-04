@@ -105,9 +105,17 @@ func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
 	}
 	cdar.ExchangedDocument.RecipientTradeParties = recipients
 
-	ackType := cdarTypeCodeResponse
-	if st.Type == bill.StatusTypeUpdate {
-		ackType = cdarTypeCodeUpdate
+	// Acknowledgement TypeCode comes from the Context — the caller picks
+	// ContextCDARFlow6Response (23) or ContextCDARFlow6Update (305). When
+	// the context did not specify, fall back to deriving it from the
+	// status Type so older callers keep working.
+	ackType := ctx.CDARAckTypeCode
+	if ackType == "" {
+		if st.Type == bill.StatusTypeUpdate {
+			ackType = cdarTypeCodeUpdate
+		} else {
+			ackType = cdarTypeCodeResponse
+		}
 	}
 
 	for _, line := range st.Lines {

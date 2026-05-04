@@ -73,6 +73,17 @@ func TestFlow6CodeTablesRoundTrip(t *testing.T) {
 	})
 }
 
+// contextForStatus picks the CDAR context whose ack TypeCode matches
+// the given bill.Status — Response (23) for treatment-phase statuses,
+// Update (305) for transmission-phase statuses. This is the choice a
+// real caller makes at the call site.
+func contextForStatus(st *bill.Status) cii.Context {
+	if st.Type == bill.StatusTypeUpdate {
+		return cii.ContextCDARFlow6Update
+	}
+	return cii.ContextCDARFlow6Response
+}
+
 // defaultReasonForCode picks a CDAR ReasonCode known to be allowed by
 // the BR-FR-CDV-CL-09 schematron rule for the given status code, or
 // returns ok=false if the code does not require a reason.
@@ -199,7 +210,7 @@ func TestCDARStatusRoundTripPerCode(t *testing.T) {
 			st := buildSyntheticStatus(t, code)
 
 			// Generate CDAR
-			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
+			cdar, err := cii.NewCDARFromStatus(st, contextForStatus(st))
 			require.NoError(t, err)
 			require.NotNil(t, cdar)
 
@@ -259,7 +270,7 @@ func TestCDARStatusRejectionWithCharacteristic(t *testing.T) {
 	require.NoError(t, err)
 	line.Complements = append(line.Complements, obj)
 
-	cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
+	cdar, err := cii.NewCDARFromStatus(st, contextForStatus(st))
 	require.NoError(t, err)
 
 	data, err := cdar.Bytes()
@@ -310,7 +321,7 @@ func TestCDARSchematron(t *testing.T) {
 	for _, code := range allProcessCodes {
 		t.Run("CDV-"+code, func(t *testing.T) {
 			st := buildSyntheticStatus(t, code)
-			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
+			cdar, err := cii.NewCDARFromStatus(st, contextForStatus(st))
 			require.NoError(t, err)
 			data, err := cdar.Bytes()
 			require.NoError(t, err)
