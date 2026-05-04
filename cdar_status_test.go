@@ -1,6 +1,8 @@
 package cii_test
 
 import (
+	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -14,8 +16,11 @@ import (
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
+	"github.com/invopop/phive"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // allProcessCodes is the canonical list of CDAR ProcessConditionCodes
@@ -236,4 +241,38 @@ func TestCDARStatusRejectionWithCharacteristic(t *testing.T) {
 	require.NotNil(t, found.Changed)
 	assert.True(t, *found.Changed)
 	assert.Equal(t, cbc.Code("TX_TVA_ERR"), found.ReasonCode)
+}
+
+// TestCDARSchematron generates a CDAR for each process code and validates it
+// against the live Phive instance using the fr.ctc:cdar VESID. Requires
+// `-validate` and a Phive gRPC service reachable on localhost:9091.
+func TestCDARSchematron(t *testing.T) {
+	if !*validate {
+		t.Skip("requires -validate flag and a running Phive gRPC service")
+	}
+
+	conn, err := grpc.NewClient("localhost:9091",
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close() //nolint:errcheck
+	pc := phive.NewValidationServiceClient(conn)
+
+	for _, code := range allProcessCodes {
+		t.Run("CDV-"+code, func(t *testing.T) {
+			st := buildSyntheticStatus(t, code)
+			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
+			require.NoError(t, err)
+			data, err := cdar.Bytes()
+			require.NoError(t, err)
+
+			resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+				Vesid:      cii.ContextCDARFlow6.VESID,
+				XmlContent: data,
+			})
+			require.NoError(t, err)
+			out, _ := json.MarshalIndent(resp.Results, "", "  ")
+			require.True(t, resp.Success,
+				"CDAR for code %s failed Phive validation: %s", code, string(out))
+		})
+	}
 }

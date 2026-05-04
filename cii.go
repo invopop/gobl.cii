@@ -134,6 +134,7 @@ var ContextCDARFlow6 = Context{
 	GuidelineID: "urn.cpro.gouv.fr:1p0:CDV:invoice",
 	BusinessID:  "REGULATED",
 	Addons:      []cbc.Key{flow6.V1},
+	VESID:       "fr.ctc:cdar:1.3",
 }
 
 // Parse parses a raw XML CII invoice document and converts it into
