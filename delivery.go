@@ -1,7 +1,11 @@
 package cii
 
 import (
+	"slices"
+
+	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
 )
 
@@ -19,7 +23,7 @@ type ChainEvent struct {
 }
 
 // prepareDelivery creates the ApplicableHeaderTradeDelivery part of a EN 16931 compliant invoice
-func newDelivery(inv *bill.Invoice) *Delivery {
+func newDelivery(inv *bill.Invoice, ctx Context) *Delivery {
 	d := new(Delivery)
 	if inv.Delivery != nil {
 		if inv.Delivery.Date != nil {
@@ -52,6 +56,13 @@ func newDelivery(inv *bill.Invoice) *Delivery {
 					Value: id.Code.String(),
 				}
 			}
+		}
+	} else if documentType := inv.Tax.Ext.Get(untdid.ExtKeyDocumentType); slices.Contains(ctx.Addons, zugferd.V2) && documentType.String() != "386" {
+		// Helper for Zugferd BR-FX-EN-04 rule in case delivery
+		// is not specified in the invoice (imported invoice)
+		customerParty := inv.Customer
+		if customerParty != nil && len(customerParty.Addresses) > 0 {
+			d.Receiver = newDeliveryParty(customerParty)
 		}
 	}
 	if inv.Ordering != nil && inv.Ordering.Despatch != nil {
