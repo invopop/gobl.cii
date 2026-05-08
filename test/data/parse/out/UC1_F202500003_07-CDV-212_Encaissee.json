@@ -1,0 +1,88 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "3bcde2e43c0427cb574d0531a5f7085bbcc02d5e8a601b3f6e41054c0685d8b6"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2025-08-02",
+		"issue_time": "10:05:00",
+		"code": "F202500003_212_20250701151000380_20250701",
+		"supplier": {
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			]
+		},
+		"issuer": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"recipient": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "200000008"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "BY"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "paid",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003"
+				},
+				"complements": [
+					{
+						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic",
+						"type_code": "MEN",
+						"changed": false,
+						"percent": "20.00%",
+						"amount": {
+							"currency": "EUR",
+							"value": "12000"
+						}
+					}
+				]
+			}
+		]
+	}
+}

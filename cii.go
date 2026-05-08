@@ -17,6 +17,7 @@ import (
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 )
 
 var (
@@ -129,31 +130,27 @@ var ContextChorusProV1 = Context{
 	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
-// ContextCDARFlow6Response is used for French CTC Flow 6 CDAR
-// response-phase acks (TypeCode 23) — the treatment-phase status a
-// recipient platform issues after processing an invoice. The
-// GuidelineID is the end-party "invoice" URN (BR-FR-CDV-02), and the
-// REGULATED BusinessProcessParameter is required.
-var ContextCDARFlow6Response = Context{
+// ContextCDARFlow6 is used for French CTC Flow 6 CDAR treatment-phase
+// acks (TypeCode 23) — the status a recipient platform issues after
+// processing an invoice on behalf of an end-party. The GuidelineID is
+// the end-party "invoice" URN (BR-FR-CDV-02), and the REGULATED
+// BusinessProcessParameter is required.
+var ContextCDARFlow6 = Context{
 	GuidelineID: CDARGuidelineInvoice,
 	BusinessID:  "REGULATED",
 	Addons:      []cbc.Key{flow6.V1},
 	VESID:       "fr.ctc:cdar:1.3",
 }
 
-// ContextCDARFlow6Update is used for French CTC Flow 6 CDAR
-// update-phase acks (TypeCode 305) — the transmission-phase status
-// sent to the PPF. The GuidelineID is the einvoicingF2 URN per
-// BR-FR-CDV-02 and no BusinessProcessParameter is emitted.
-var ContextCDARFlow6Update = Context{
+// ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR transmission-
+// phase acks (TypeCode 305) sent to the PPF. The GuidelineID is the
+// einvoicingF2 URN per BR-FR-CDV-02 and no BusinessProcessParameter is
+// emitted.
+var ContextCDARFlow6PPF = Context{
 	GuidelineID: CDARGuidelinePPF,
 	Addons:      []cbc.Key{flow6.V1},
 	VESID:       "fr.ctc:cdar:1.3",
 }
-
-// ContextCDARFlow6 is an alias for the response-phase Flow 6 context,
-// the default for B2B end-user statuses produced by gobl.cii.
-var ContextCDARFlow6 = ContextCDARFlow6Response
 
 // Parse parses a raw XML CII invoice document and converts it into
 // a GOBL envelope. If the type is unsupported, an
@@ -243,7 +240,7 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		if ctx.GuidelineID == ContextEN16931V2017.GuidelineID {
 			ctx = ContextCDARFlow6
 		}
-		return newCDAR(doc, ctx)
+		return newCDAR(doc, ctx, o.sender)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
@@ -251,6 +248,7 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 
 type options struct {
 	context Context
+	sender  *org.Party
 }
 
 // Option is used to define configuration options to use during the
@@ -261,6 +259,20 @@ type Option func(*options)
 func WithContext(context Context) Option {
 	return func(o *options) {
 		o.context = context
+	}
+}
+
+// WithSenderTradeParty pins the *org.Party emitted as the CDAR
+// ExchangedDocument/SenderTradeParty (MDT-21). Use this to carry the
+// dematerialisation platform's identity (Name + GlobalID + Inbox +
+// RoleCode) on the wire when it isn't anonymous. When unset, the writer
+// emits a bare <ram:RoleCode>WK</ram:RoleCode> — matching the anonymous-
+// platform pattern used throughout the official UC1 corpus.
+//
+// The option is a no-op for non-CDAR conversions.
+func WithSenderTradeParty(p *org.Party) Option {
+	return func(o *options) {
+		o.sender = p
 	}
 }
 

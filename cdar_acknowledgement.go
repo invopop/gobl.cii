@@ -64,8 +64,8 @@ type CDARDocumentCharacteristic struct {
 	ValueChangedIndicator *CDARIndicatorString `xml:"ram:ValueChangedIndicator,omitempty"`
 	Name                  string               `xml:"ram:Name,omitempty"`
 	Location              string               `xml:"ram:Location,omitempty"`
-	ValuePercent          string               `xml:"ram:ValuePercent,omitempty"`
 	ValueAmount           *CDARValueAmount     `xml:"ram:ValueAmount,omitempty"`
+	ValuePercent          string               `xml:"ram:ValuePercent,omitempty"`
 	ValueDateTime         *CDARIssueDateTime   `xml:"ram:ValueDateTime,omitempty"`
 }
 

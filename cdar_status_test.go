@@ -73,39 +73,44 @@ func TestFlow6CodeTablesRoundTrip(t *testing.T) {
 	})
 }
 
-// contextForStatus picks the CDAR context whose ack TypeCode matches
-// the given bill.Status — Response (23) for treatment-phase statuses,
-// Update (305) for transmission-phase statuses. This is the choice a
-// real caller makes at the call site.
-func contextForStatus(st *bill.Status) cii.Context {
-	if st.Type == bill.StatusTypeUpdate {
-		return cii.ContextCDARFlow6Update
+
+// findSEPartyAcross returns whichever of Supplier/Issuer/Recipient on st
+// carries fr-ctc-role=SE — used in tests that don't run the flow6
+// normaliser (which would otherwise auto-fill st.Supplier from the SE
+// party in the other slots). Falls back to a SIREN-only party with no
+// role (e.g. from ref.IssuerTradeParty).
+func findSEPartyAcross(st *bill.Status) *org.Party {
+	for _, p := range []*org.Party{st.Supplier, st.Issuer, st.Recipient} {
+		if p == nil {
+			continue
+		}
+		if p.Ext.Get(flow6.ExtKeyRole) == flow6.RoleSE {
+			return p
+		}
+		if p.Ext.IsZero() {
+			return p
+		}
 	}
-	return cii.ContextCDARFlow6Response
+	return nil
 }
 
 // defaultReasonForCode picks a CDAR ReasonCode known to be allowed by
 // the BR-FR-CDV-CL-09 schematron rule for the given status code, or
 // returns ok=false if the code does not require a reason.
 func defaultReasonForCode(code string) (string, bool) {
+	// Each picked code is in the BR-FR-CDV-CL-09 allowed list for the
+	// status it pairs with (per Annexe A "Tableau des motifs de STATUTS").
 	switch code {
-	case "206", "208":
+	case "206":
 		return "AUTRE", true
 	case "207", "210":
 		return "TX_TVA_ERR", true
+	case "208":
+		return "JUSTIF_ABS", true
 	case "213":
 		return "REJ_SEMAN", true
 	}
 	return "", false
-}
-
-// issuerRoleForType returns the role code the issuing platform should
-// claim on the ExchangedDocument depending on the bill.Status.Type.
-func issuerRoleForType(typ cbc.Key) cbc.Code {
-	if typ == bill.StatusTypeUpdate {
-		return flow6.RoleWK
-	}
-	return flow6.RoleSE
 }
 
 // buildSyntheticStatus builds a minimal but valid bill.Status for the
@@ -146,19 +151,36 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 			},
 			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleBY),
 		},
-		// Issuer is the platform (PA) producing the CDAR. For "update"
-		// status types (305 ack) it claims the WK role; for "response"
-		// types (23 ack) the schematron expects the issuer to mirror the
-		// seller — RoleSE.
+		// Issuer = the buyer-end-party reporting the status (UC1 default
+		// pattern: buyer-platform sends 23 acks). For PPF / 305 callers
+		// would set this to a WK platform party instead.
 		Issuer: &org.Party{
-			Name: "PA-FR",
+			Name: "ACHETEUR",
 			Identities: []*org.Identity{
 				{
-					Code: "9998",
-					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0238"),
+					Code: "200000008",
+					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
 				},
 			},
-			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, issuerRoleForType(typ)),
+			Inboxes: []*org.Inbox{
+				{Scheme: "0225", Code: "200000008_PEP"},
+			},
+			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleBY),
+		},
+		// Recipient = the seller-end-party (counterparty of the buyer
+		// issuer). Must carry an inbox per BR-FR-CDV-08.
+		Recipient: &org.Party{
+			Name: "VENDEUR",
+			Identities: []*org.Identity{
+				{
+					Code: "100000009",
+					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
+				},
+			},
+			Inboxes: []*org.Inbox{
+				{Scheme: "0225", Code: "100000009_PEP"},
+			},
+			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleSE),
 		},
 	}
 	st.SetAddons(flow6.V1)
@@ -177,8 +199,10 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 	// the allowed reason codes per status (BR-FR-CDV-CL-09), so we pick a
 	// code that's valid for each.
 	if reasonCode, ok := defaultReasonForCode(code); ok {
+		// Leave Key empty — flow6's reason normaliser fills it from the
+		// ReasonCode extension, matching whichever bucket the code rolls
+		// up to (AUTRE → other, TX_TVA_ERR → legal, etc.).
 		line.Reasons = []*bill.Reason{{
-			Key:         bill.ReasonKeyLegal,
 			Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReasonCode, cbc.Code(reasonCode)),
 			Description: "Motif " + reasonCode,
 		}}
@@ -210,7 +234,7 @@ func TestCDARStatusRoundTripPerCode(t *testing.T) {
 			st := buildSyntheticStatus(t, code)
 
 			// Generate CDAR
-			cdar, err := cii.NewCDARFromStatus(st, contextForStatus(st))
+			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
 			require.NoError(t, err)
 			require.NotNil(t, cdar)
 
@@ -235,10 +259,14 @@ func TestCDARStatusRoundTripPerCode(t *testing.T) {
 			require.Len(t, out.Lines, 1, "should have one line for %s", code)
 			require.Equal(t, expectedKey, out.Lines[0].Key)
 
-			// Supplier SIREN preserved.
-			require.NotNil(t, out.Supplier)
+			// Seller's SIREN is preserved somewhere in the parsed status —
+			// either on Supplier (filled by the flow6 normaliser when the
+			// envelope is calculated) or on whichever of Issuer/Recipient
+			// carries the SE role.
+			seller := findSEPartyAcross(out)
+			require.NotNil(t, seller, "no SE-roled party in parsed status %s", code)
 			found := ""
-			for _, id := range out.Supplier.Identities {
+			for _, id := range seller.Identities {
 				if id.Ext.Get(iso.ExtKeySchemeID).String() == "0002" {
 					found = id.Code.String()
 				}
@@ -270,7 +298,7 @@ func TestCDARStatusRejectionWithCharacteristic(t *testing.T) {
 	require.NoError(t, err)
 	line.Complements = append(line.Complements, obj)
 
-	cdar, err := cii.NewCDARFromStatus(st, contextForStatus(st))
+	cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
 	require.NoError(t, err)
 
 	data, err := cdar.Bytes()
@@ -304,6 +332,48 @@ func TestCDARStatusRejectionWithCharacteristic(t *testing.T) {
 	assert.Equal(t, cbc.Code("TX_TVA_ERR"), found.ReasonCode)
 }
 
+// TestCDARSenderTradeParty checks that NewCDARFromStatusWithSender (and
+// the equivalent Convert option) carries the supplied platform identity
+// into the CDAR ExchangedDocument/SenderTradeParty slot, while leaving
+// IssuerTradeParty and the recipients untouched.
+func TestCDARSenderTradeParty(t *testing.T) {
+	st := buildSyntheticStatus(t, "205")
+
+	platform := &org.Party{
+		Name: "PA-FR",
+		Identities: []*org.Identity{
+			{
+				Code: "9998",
+				Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0238"),
+			},
+		},
+		Inboxes: []*org.Inbox{
+			{Scheme: "0225", Code: "9998_PEP"},
+		},
+		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleWK),
+	}
+
+	cdar, err := cii.NewCDARFromStatusWithSender(st, cii.ContextCDARFlow6, platform)
+	require.NoError(t, err)
+	require.NotNil(t, cdar.ExchangedDocument.SenderTradeParty)
+	assert.Equal(t, "PA-FR", cdar.ExchangedDocument.SenderTradeParty.Name)
+	require.Len(t, cdar.ExchangedDocument.SenderTradeParty.GlobalIDs, 1)
+	assert.Equal(t, "9998", cdar.ExchangedDocument.SenderTradeParty.GlobalIDs[0].Value)
+	assert.Equal(t, "WK", cdar.ExchangedDocument.SenderTradeParty.RoleCode)
+
+	// IssuerTradeParty stays as the end-party (Customer, default for ack 23).
+	require.NotNil(t, cdar.ExchangedDocument.IssuerTradeParty)
+	assert.Equal(t, "ACHETEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
+
+	// And without the option, sender goes back to bare WK.
+	bare, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
+	require.NoError(t, err)
+	require.NotNil(t, bare.ExchangedDocument.SenderTradeParty)
+	assert.Empty(t, bare.ExchangedDocument.SenderTradeParty.Name)
+	assert.Empty(t, bare.ExchangedDocument.SenderTradeParty.GlobalIDs)
+	assert.Equal(t, "WK", bare.ExchangedDocument.SenderTradeParty.RoleCode)
+}
+
 // TestCDARSchematron generates a CDAR for each process code and validates it
 // against the live Phive instance using the fr.ctc:cdar VESID. Requires
 // `-validate` and a Phive gRPC service reachable on localhost:9091.
@@ -321,7 +391,7 @@ func TestCDARSchematron(t *testing.T) {
 	for _, code := range allProcessCodes {
 		t.Run("CDV-"+code, func(t *testing.T) {
 			st := buildSyntheticStatus(t, code)
-			cdar, err := cii.NewCDARFromStatus(st, contextForStatus(st))
+			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
 			require.NoError(t, err)
 			data, err := cdar.Bytes()
 			require.NoError(t, err)

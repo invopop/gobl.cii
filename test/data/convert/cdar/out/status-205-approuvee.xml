@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rsm:CrossDomainAcknowledgementAndResponse xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossDomainAcknowledgementAndResponse:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+  <rsm:ExchangedDocumentContext>
+    <ram:BusinessProcessSpecifiedDocumentContextParameter>
+      <ram:ID>REGULATED</ram:ID>
+    </ram:BusinessProcessSpecifiedDocumentContextParameter>
+    <ram:GuidelineSpecifiedDocumentContextParameter>
+      <ram:ID>urn.cpro.gouv.fr:1p0:CDV:invoice</ram:ID>
+    </ram:GuidelineSpecifiedDocumentContextParameter>
+  </rsm:ExchangedDocumentContext>
+  <rsm:ExchangedDocument>
+    <ram:ID>STATUS-205</ram:ID>
+    <ram:IssueDateTime>
+      <udt:DateTimeString format="204">20250701151000</udt:DateTimeString>
+    </ram:IssueDateTime>
+    <ram:SenderTradeParty>
+      <ram:RoleCode>WK</ram:RoleCode>
+    </ram:SenderTradeParty>
+    <ram:IssuerTradeParty>
+      <ram:GlobalID schemeID="0002">200000008</ram:GlobalID>
+      <ram:Name>ACHETEUR</ram:Name>
+      <ram:RoleCode>BY</ram:RoleCode>
+      <ram:URIUniversalCommunication>
+        <ram:URIID schemeID="0225">200000008_PEP</ram:URIID>
+      </ram:URIUniversalCommunication>
+    </ram:IssuerTradeParty>
+    <ram:RecipientTradeParty>
+      <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
+      <ram:Name>VENDEUR</ram:Name>
+      <ram:RoleCode>SE</ram:RoleCode>
+      <ram:URIUniversalCommunication>
+        <ram:URIID schemeID="0225">100000009_PEP</ram:URIID>
+      </ram:URIUniversalCommunication>
+    </ram:RecipientTradeParty>
+  </rsm:ExchangedDocument>
+  <rsm:AcknowledgementDocument>
+    <ram:MultipleReferencesIndicator>
+      <udt:Indicator>false</udt:Indicator>
+    </ram:MultipleReferencesIndicator>
+    <ram:TypeCode>23</ram:TypeCode>
+    <ram:IssueDateTime>
+      <udt:DateTimeString format="204">20250701151000</udt:DateTimeString>
+    </ram:IssueDateTime>
+    <ram:ReferenceReferencedDocument>
+      <ram:IssuerAssignedID>F202500003</ram:IssuerAssignedID>
+      <ram:TypeCode>380</ram:TypeCode>
+      <ram:FormattedIssueDateTime>
+        <qdt:DateTimeString format="102">20250701</qdt:DateTimeString>
+      </ram:FormattedIssueDateTime>
+      <ram:ProcessConditionCode>205</ram:ProcessConditionCode>
+      <ram:IssuerTradeParty>
+        <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
+      </ram:IssuerTradeParty>
+    </ram:ReferenceReferencedDocument>
+  </rsm:AcknowledgementDocument>
+</rsm:CrossDomainAcknowledgementAndResponse>

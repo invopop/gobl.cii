@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/schema"
+	"github.com/invopop/gobl/tax"
 )
 
 // Date format codes for CDAR (UN/EDIFACT date format qualifier 2379).
@@ -46,8 +47,20 @@ var cdarAckTypeByGuideline = map[string]string{
 // Most callers should use Convert with a *gobl.Envelope wrapping the
 // status; this helper is useful when the caller wants to bypass
 // envelope-level validation (for example, in tests).
+//
+// SenderTradeParty is emitted as a bare <ram:RoleCode>WK</ram:RoleCode>.
+// To carry an identified platform party in that slot, use
+// NewCDARFromStatusWithSender or pass WithSenderTradeParty to Convert.
 func NewCDARFromStatus(st *bill.Status, ctx Context) (*CDAR, error) {
-	return newCDAR(st, ctx)
+	return newCDAR(st, ctx, nil)
+}
+
+// NewCDARFromStatusWithSender is the same as NewCDARFromStatus but
+// carries the supplied *org.Party as the CDAR
+// ExchangedDocument/SenderTradeParty (MDT-21) — typically the
+// dematerialisation platform's identity (Name + GlobalID + Inbox).
+func NewCDARFromStatusWithSender(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
+	return newCDAR(st, ctx, sender)
 }
 
 // ParseCDARStatus parses a raw CDAR XML byte slice into a *bill.Status
@@ -57,7 +70,16 @@ func ParseCDARStatus(data []byte) (*bill.Status, error) {
 }
 
 // newCDAR converts a *bill.Status into a CDAR XML document.
-func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
+//
+// The CDAR wire layout (ack TypeCode 23 vs 305 and the corresponding
+// trade-party shape) is driven entirely by the caller-supplied Context —
+// not by bill.Status.Type. The GOBL Type field is a lifecycle category
+// (response / update / system) and is used only by flow6 to disambiguate
+// the ProcessConditionCode for a given StatusLine.Key. The CDAR phase
+// (treatment vs transmission) is a separate axis chosen at conversion
+// time via ContextCDARFlow6 (treatment, 23) or ContextCDARFlow6PPF
+// (transmission, 305).
+func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
 	if st == nil {
 		return nil, fmt.Errorf("nil bill.Status")
 	}
@@ -65,6 +87,12 @@ func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
 	guideline := ctx.GuidelineID
 	if guideline == "" {
 		guideline = ContextCDARFlow6.GuidelineID
+	}
+	// Resolve the ack TypeCode from the Context's GuidelineID. This is the
+	// single discriminator for "what shape of CDAR are we producing".
+	ackType := cdarAckTypeByGuideline[guideline]
+	if ackType == "" {
+		ackType = "23"
 	}
 
 	cdar := NewCDAR()
@@ -84,51 +112,23 @@ func newCDAR(st *bill.Status, ctx Context) (*CDAR, error) {
 	if st.Series != "" && cdar.ExchangedDocument.ID == "" {
 		cdar.ExchangedDocument.ID = string(st.Series)
 	}
-	// In a Flow 6 B2B status, both SenderTradeParty (MDT-21) and
-	// IssuerTradeParty (MDT-40) of the ExchangedDocument represent the
-	// platform (PA) producing the CDAR. The caller surfaces that party as
-	// bill.Status.Issuer, with Ext[fr-ctc-role] = "WK". For "response"
-	// status types where no explicit Issuer is set, we fall back to the
-	// Customer (the buyer-side platform / recipient), and for "update"
-	// types we fall back to the Supplier — those fallbacks lose the WK
-	// role, which is why the platform should always populate Issuer.
-	sender := st.Issuer
+	// Direct mapping — flow6 validations guarantee st.Issuer and
+	// st.Recipient are present (MDG-16, MDG-23).
+	//
+	//   SenderTradeParty (MDT-21):  bare <RoleCode>WK</RoleCode> by
+	//     default; overridden by the WithSenderTradeParty option.
+	//   IssuerTradeParty (MDG-16):  st.Issuer.
+	//   RecipientTradeParty (MDG-23): st.Recipient.
 	if sender == nil {
-		switch st.Type {
-		case bill.StatusTypeUpdate:
-			sender = st.Supplier
-		case bill.StatusTypeResponse:
-			sender = st.Customer
-		}
+		sender = bareWKParty()
 	}
-	if sender != nil {
-		tp := newCDARTradeParty(sender)
-		cdar.ExchangedDocument.SenderTradeParty = tp
-		cdar.ExchangedDocument.IssuerTradeParty = tp
+	cdar.ExchangedDocument.SenderTradeParty = newCDARTradeParty(sender)
+	if st.Issuer != nil {
+		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(st.Issuer)
 	}
-
-	var recipients []*CDARTradeParty
 	if st.Recipient != nil {
-		recipients = append(recipients, newCDARTradeParty(st.Recipient))
-	}
-	if st.Type == bill.StatusTypeUpdate && st.Customer != nil {
-		recipients = append(recipients, newCDARTradeParty(st.Customer))
-	} else if st.Type == bill.StatusTypeResponse && st.Supplier != nil {
-		recipients = append(recipients, newCDARTradeParty(st.Supplier))
-	}
-	cdar.ExchangedDocument.RecipientTradeParties = recipients
-
-	// Acknowledgement TypeCode is resolved from the Context's
-	// GuidelineID — the caller picks ContextCDARFlow6Response (invoice
-	// guideline → 23) or ContextCDARFlow6Update (einvoicingF2 → 305).
-	// Older callers that set neither fall back to the Status.Type
-	// derivation.
-	ackType := cdarAckTypeByGuideline[ctx.GuidelineID]
-	if ackType == "" {
-		if st.Type == bill.StatusTypeUpdate {
-			ackType = "305"
-		} else {
-			ackType = "23"
+		cdar.ExchangedDocument.RecipientTradeParties = []*CDARTradeParty{
+			newCDARTradeParty(st.Recipient),
 		}
 	}
 
@@ -310,6 +310,16 @@ func characteristicsFromComplements(comps []*schema.Object, reasonCode cbc.Code)
 		out = append(out, dc)
 	}
 	return out
+}
+
+// bareWKParty returns a minimal *org.Party tagged with the WK platform role
+// — used as the SenderTradeParty (always) and as the IssuerTradeParty
+// fallback for ack 305 when no platform identity is supplied. Matches the
+// UC1 corpus shape of <ram:RoleCode>WK</ram:RoleCode> with no body.
+func bareWKParty() *org.Party {
+	return &org.Party{
+		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleWK),
+	}
 }
 
 func newCDARTradeParty(p *org.Party) *CDARTradeParty {

@@ -1,0 +1,127 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "660e44d159d3f46086158abb41e331afdf829a3d4ad2e47a848d6c771b3045c5"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2025-07-01",
+		"issue_time": "15:10:00",
+		"code": "STATUS-206",
+		"supplier": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "100000009_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"customer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "200000008_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "BY"
+			}
+		},
+		"issuer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "200000008_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "BY"
+			}
+		},
+		"recipient": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "100000009_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "partially-accepted",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003"
+				},
+				"reasons": [
+					{
+						"key": "other",
+						"description": "Motif AUTRE",
+						"ext": {
+							"fr-ctc-reason-code": "AUTRE"
+						}
+					}
+				],
+				"actions": [
+					{
+						"key": "reissue",
+						"description": "Créer une facture rectificative"
+					}
+				]
+			}
+		]
+	}
+}

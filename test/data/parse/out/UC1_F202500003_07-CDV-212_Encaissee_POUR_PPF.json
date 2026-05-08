@@ -1,0 +1,82 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "98ee314a5d3b1dc12349ed09973b70409636ee9a1a2dab5b46287ac14936e653"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2025-08-02",
+		"issue_time": "10:05:00",
+		"code": "FFE0614A_CC0238_5118445863362991847",
+		"supplier": {
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			]
+		},
+		"issuer": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"recipient": {
+			"name": "PPF",
+			"identities": [
+				{
+					"code": "9998",
+					"ext": {
+						"iso-scheme-id": "0238"
+					}
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "DFH"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "paid",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003"
+				},
+				"complements": [
+					{
+						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic",
+						"type_code": "MEN",
+						"changed": false,
+						"percent": "20.00%",
+						"amount": {
+							"currency": "EUR",
+							"value": "12000"
+						}
+					}
+				]
+			}
+		]
+	}
+}

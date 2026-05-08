@@ -1,0 +1,67 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "959983783f488b23a8dd1da5f8900442d7a9861f12f5083c3ad707821edbc8aa"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2025-07-01",
+		"issue_time": "16:30:00",
+		"code": "F202500003_203_20250701161000380_20250701",
+		"supplier": {
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			]
+		},
+		"issuer": {
+			"ext": {
+				"fr-ctc-role": "WK"
+			}
+		},
+		"recipient": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "100000009_STATUTS"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "made-available",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003"
+				}
+			}
+		]
+	}
+}

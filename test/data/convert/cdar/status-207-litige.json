@@ -1,0 +1,127 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "b22468984ee66fc10f1ca807ec41a46bd5e2841c2980a49978e274e9d37af422"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2025-07-01",
+		"issue_time": "15:10:00",
+		"code": "STATUS-207",
+		"supplier": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "100000009_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"customer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "200000008_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "BY"
+			}
+		},
+		"issuer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "200000008_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "BY"
+			}
+		},
+		"recipient": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "100000009_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "disputed",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003"
+				},
+				"reasons": [
+					{
+						"key": "legal",
+						"description": "Motif TX_TVA_ERR",
+						"ext": {
+							"fr-ctc-reason-code": "TX_TVA_ERR"
+						}
+					}
+				],
+				"actions": [
+					{
+						"key": "reissue",
+						"description": "Créer une facture rectificative"
+					}
+				]
+			}
+		]
+	}
+}

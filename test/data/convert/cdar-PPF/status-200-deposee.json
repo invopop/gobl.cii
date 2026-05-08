@@ -1,0 +1,106 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "2fb821e3dca5dd1ecdec71538d0e008bdba2713cd215eb72d218fcbf26a2ddba"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "update",
+		"issue_date": "2025-07-01",
+		"issue_time": "15:10:00",
+		"code": "STATUS-200",
+		"supplier": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "100000009_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"customer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "200000008_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "BY"
+			}
+		},
+		"issuer": {
+			"name": "PA-FR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "9998_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "WK"
+			}
+		},
+		"recipient": {
+			"name": "PPF",
+			"identities": [
+				{
+					"code": "9998",
+					"ext": {
+						"iso-scheme-id": "0238"
+					}
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "DFH"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "issued",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003"
+				}
+			}
+		]
+	}
+}

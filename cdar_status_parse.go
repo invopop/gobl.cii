@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/schema"
@@ -68,41 +69,30 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 		}
 	}
 
-	// Map parties. The CDAR places the issuer in IssuerTradeParty and the
-	// recipients (including the counterparty and any platforms) in
-	// RecipientTradeParty. We map the SE-roled party to Supplier and BY-roled
-	// party to Customer; any leftover party becomes Recipient.
-	// Map by CDAR slot rather than role-bucketing. The slots are stable
-	// across status types; the role codes overlap (e.g. an "SE" Sender on
-	// a 23-typed response is the platform claiming the seller's role, not
-	// the supplier itself).
-	//   ExchangedDocument.IssuerTradeParty           → bill.Status.Issuer
-	//   ReferenceReferencedDocument.IssuerTradeParty → bill.Status.Supplier
-	//   ExchangedDocument.RecipientTradeParty (BY)   → bill.Status.Customer
-	//   any remaining recipient                      → bill.Status.Recipient
+	// Direct, by-name mapping that mirrors the writer:
+	//   ExchangedDocument.IssuerTradeParty (MDG-16) → st.Issuer
+	//   ExchangedDocument.RecipientTradeParty (MDG-23) → st.Recipient
+	//
+	// flow6's normaliser auto-fills Supplier/Customer from whichever of
+	// these two parties carries the SE/BY role, so a parsed status that
+	// only has Issuer + Recipient still ends up with the seller and
+	// buyer mapped onto Supplier/Customer for downstream consumers.
 	if p := goblPartyFromCDAR(cdar.ExchangedDocument.IssuerTradeParty); p != nil {
 		st.Issuer = p
 	}
 	for _, rp := range cdar.ExchangedDocument.RecipientTradeParties {
-		p := goblPartyFromCDAR(rp)
-		if p == nil {
-			continue
-		}
-		role := p.Ext.Get(flow6.ExtKeyRole)
-		switch {
-		case role == flow6.RoleBY && st.Customer == nil:
-			st.Customer = p
-		case role == flow6.RoleSE && st.Supplier == nil:
-			st.Supplier = p
-		case st.Recipient == nil:
+		if p := goblPartyFromCDAR(rp); p != nil {
 			st.Recipient = p
+			break // CDAR carries a single business-counterparty Recipient
 		}
 	}
 
-	// Pull the supplier from the referenced-document's issuer slot —
-	// regardless of any earlier assignment, that slot is the canonical
-	// place for the seller's identity in CDAR.
-	if len(cdar.AcknowledgementDocuments) > 0 {
+	// Populate Supplier from the canonical MDT-129 ref.IssuerTradeParty
+	// slot — that's where the wire spec puts the seller's SIREN, and
+	// it's always present (BR-FR-CDV-13). The parsed Supplier carries
+	// just the SIREN; richer seller data (name, inbox, role) shows up
+	// under whichever of Issuer / Recipient holds the SE party.
+	if st.Supplier == nil && len(cdar.AcknowledgementDocuments) > 0 {
 		ack := cdar.AcknowledgementDocuments[0]
 		for _, ref := range ack.ReferenceReferencedDocument {
 			if ref != nil && ref.IssuerTradeParty != nil {
@@ -203,6 +193,14 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) (*bill.StatusLine, erro
 			if dc.ValuePercent != "" {
 				if p, err := num.PercentageFromString(dc.ValuePercent + "%"); err == nil {
 					c.Percent = &p
+				}
+			}
+			if dc.ValueAmount != nil && dc.ValueAmount.Value != "" {
+				if v, err := num.AmountFromString(dc.ValueAmount.Value); err == nil {
+					c.Amount = &currency.Amount{
+						Currency: currency.Code(dc.ValueAmount.CurrencyID),
+						Value:    v,
+					}
 				}
 			}
 			obj, err := schema.NewObject(c)

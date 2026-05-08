@@ -1,0 +1,113 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "7f66bd2a211d761f2ef5599115cf75b474fe681d9de2dce2144c315a1c7e6e92"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2025-07-01",
+		"issue_time": "18:15:00",
+		"code": "F202500006_207_20250701161000380_20250701",
+		"supplier": {
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			]
+		},
+		"issuer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "BY"
+			}
+		},
+		"recipient": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "100000009_STATUTS"
+				}
+			],
+			"ext": {
+				"fr-ctc-role": "SE"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "disputed",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500006"
+				},
+				"reasons": [
+					{
+						"key": "legal",
+						"description": "Taux de TVA erroné",
+						"ext": {
+							"fr-ctc-reason-code": "TX_TVA_ERR"
+						}
+					}
+				],
+				"actions": [
+					{
+						"key": "reissue",
+						"description": "Créer une Facture Rectificative"
+					}
+				],
+				"complements": [
+					{
+						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic",
+						"id": "BT-152",
+						"type_code": "DIV",
+						"reason_code": "TX_TVA_ERR",
+						"changed": true,
+						"name": "Taux TVA",
+						"location": "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent",
+						"percent": "10.00%"
+					},
+					{
+						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic",
+						"id": "BT-152",
+						"type_code": "DVA",
+						"reason_code": "TX_TVA_ERR",
+						"changed": true,
+						"name": "Taux TVA",
+						"location": "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent",
+						"percent": "20.00%"
+					}
+				]
+			}
+		]
+	}
+}

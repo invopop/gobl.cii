@@ -12,7 +12,10 @@ import (
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
+	"github.com/invopop/gobl/addons/fr/ctc/flow6"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/invopop/gobl/uuid"
 	"github.com/invopop/phive"
 	"github.com/stretchr/testify/assert"
@@ -205,6 +208,212 @@ func TestParseInvoice(t *testing.T) {
 					assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
 				})
 			}
+		})
+	}
+}
+
+// cdarConvertContexts pins each fixture directory to the CDAR Context it
+// represents. The test loop and the fixture regenerator both read context
+// from this map — never from bill.Status.Type.
+var cdarConvertContexts = []struct {
+	name    string
+	dir     string
+	context cii.Context
+}{
+	{"CDARFlow6", "cdar", cii.ContextCDARFlow6},
+	{"CDARFlow6PPF", "cdar-PPF", cii.ContextCDARFlow6PPF},
+}
+
+// cdarConvertFixtures lists the synthetic CDAR status fixtures used to
+// drive TestConvertCDAR. Each entry names the destination directory; that
+// directory's Context (in cdarConvertContexts) is the only signal for how
+// the fixture is shaped — process code and bill.Status.Type are irrelevant.
+var cdarConvertFixtures = []struct {
+	processCode string
+	fixtureName string
+	dir         string
+}{
+	// Buyer-issued ack 23 — Issuer = Customer, Recipient = Supplier
+	{"204", "status-204-prise-en-charge.json", "cdar"},
+	{"205", "status-205-approuvee.json", "cdar"},
+	{"206", "status-206-approuvee-partiellement.json", "cdar"},
+	{"207", "status-207-litige.json", "cdar"},
+	{"208", "status-208-suspendue.json", "cdar"},
+	{"210", "status-210-refusee.json", "cdar"},
+	// Seller-issued ack 23 — Issuer = Supplier, Recipient = Customer
+	{"209", "status-209-completee.json", "cdar"},
+	{"212", "status-212-encaissee.json", "cdar"},
+	// Platform-issued ack 23 — caller-supplied Issuer/Recipient
+	{"213", "status-213-rejetee-semantique.json", "cdar"},
+	// PPF transmissions (305)
+	{"200", "status-200-deposee.json", "cdar-PPF"},
+	{"211", "status-211-paiement.json", "cdar-PPF"},
+}
+
+// contextForDir returns the CDAR Context bound to a fixture directory.
+func contextForDir(dir string) (cii.Context, bool) {
+	for _, c := range cdarConvertContexts {
+		if c.dir == dir {
+			return c.context, true
+		}
+	}
+	return cii.Context{}, false
+}
+
+// regenerateCDARFixtures rebuilds the JSON fixtures for TestConvertCDAR from
+// the synthetic-status factory. Only runs under -update.
+//
+// For PPF-context fixtures the Issuer is rewritten as the WK platform
+// and the Recipient is replaced with the canonical PPF party — those
+// are the only spec-conformant shapes for ack TypeCode 305.
+func regenerateCDARFixtures(t *testing.T) {
+	t.Helper()
+	for _, f := range cdarConvertFixtures {
+		ctx, ok := contextForDir(f.dir)
+		require.True(t, ok, "no context bound to dir %q", f.dir)
+
+		st := buildSyntheticStatus(t, f.processCode)
+		if ctx.GuidelineID == cii.CDARGuidelinePPF {
+			// 305 / PPF: Issuer is the WK platform; Recipient is the PPF.
+			st.Issuer = &org.Party{
+				Name:       "PA-FR",
+				Identities: st.Issuer.Identities, // keep some SIREN for traceability
+				Inboxes:    []*org.Inbox{{Scheme: "0225", Code: "9998_PEP"}},
+				Ext:        tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleWK),
+			}
+			st.Recipient = ppfRecipient()
+		}
+
+		env, err := gobl.Envelop(st)
+		require.NoError(t, err, "envelope for %s", f.processCode)
+		env.Head.UUID = staticUUID
+		st.UUID = staticUUID
+		require.NoError(t, env.Calculate())
+		require.NoError(t, env.Validate())
+
+		dir := filepath.Join(getConvertPath(), f.dir)
+		require.NoError(t, os.MkdirAll(dir, 0755))
+		data, err := json.MarshalIndent(env, "", "\t")
+		require.NoError(t, err)
+		require.NoError(t, os.WriteFile(filepath.Join(dir, f.fixtureName), data, 0644))
+	}
+}
+
+func TestConvertCDAR(t *testing.T) {
+	if *updateOut {
+		regenerateCDARFixtures(t)
+	}
+
+	var pc phive.ValidationServiceClient
+	if *validate {
+		conn, err := grpc.NewClient(
+			"localhost:9091",
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+		require.NoError(t, err)
+		defer conn.Close() //nolint:errcheck
+		pc = phive.NewValidationServiceClient(conn)
+	}
+
+	for _, ctx := range cdarConvertContexts {
+		t.Run(ctx.name, func(t *testing.T) {
+			examples, err := filepath.Glob(filepath.Join(getConvertPath(), ctx.dir, pathPatternJSON))
+			require.NoError(t, err)
+			if len(examples) == 0 {
+				t.Skip("No examples found for context")
+			}
+
+			for _, example := range examples {
+				inName := filepath.Base(example)
+				outName := strings.Replace(inName, ".json", ".xml", 1)
+
+				t.Run(inName, func(t *testing.T) {
+					env := loadEnvelope(t, filepath.Join(ctx.dir, inName))
+					out, err := cii.Convert(env, cii.WithContext(ctx.context))
+					require.NoError(t, err)
+
+					cdar, ok := out.(*cii.CDAR)
+					require.True(t, ok, "expected *cii.CDAR, got %T", out)
+
+					data, err := cdar.Bytes()
+					require.NoError(t, err)
+
+					outPath := filepath.Join(getConvertPath(), ctx.dir, pathOut, outName)
+					if *updateOut {
+						outDir := filepath.Join(getConvertPath(), ctx.dir, pathOut)
+						require.NoError(t, os.MkdirAll(outDir, 0755))
+						require.NoError(t, os.WriteFile(outPath, data, 0644))
+					}
+
+					if *validate && ctx.context.VESID != "" {
+						resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+							Vesid:      ctx.context.VESID,
+							XmlContent: data,
+						})
+						require.NoError(t, err)
+						results, err := json.MarshalIndent(resp.Results, "", "  ")
+						require.NoError(t, err)
+						require.True(t, resp.Success, "Generated CDAR XML should be valid for %s: %s", ctx.context.VESID, string(results))
+					}
+
+					expected, err := os.ReadFile(outPath)
+					assert.NoError(t, err)
+					assert.Equal(t, string(expected), string(data), "Output should match the expected XML. Update with --update flag.")
+				})
+			}
+		})
+	}
+}
+
+func TestParseCDAR(t *testing.T) {
+	examples, err := filepath.Glob(filepath.Join(getParsePath(), "UC*.xml"))
+	require.NoError(t, err)
+	require.NotEmpty(t, examples, "expected UC*.xml CDAR fixtures")
+
+	for _, example := range examples {
+		inName := filepath.Base(example)
+		outName := strings.Replace(inName, ".xml", ".json", 1)
+
+		t.Run(inName, func(t *testing.T) {
+			xmlData, err := os.ReadFile(example)
+			require.NoError(t, err)
+
+			env, err := cii.Parse(xmlData)
+			require.NoError(t, err)
+
+			env.Head.UUID = staticUUID
+			if st, ok := env.Extract().(*bill.Status); ok {
+				st.UUID = staticUUID
+			}
+			require.NoError(t, env.Calculate())
+
+			outPath := filepath.Join(getParsePath(), pathOut, outName)
+			if *updateOut {
+				outDir := filepath.Join(getParsePath(), pathOut)
+				require.NoError(t, os.MkdirAll(outDir, 0755))
+				data, err := json.MarshalIndent(env, "", "\t")
+				require.NoError(t, err)
+				require.NoError(t, os.WriteFile(outPath, data, 0644))
+			}
+
+			st, ok := env.Extract().(*bill.Status)
+			require.True(t, ok, "Document should be a bill.Status")
+
+			data, err := json.MarshalIndent(st, "", "\t")
+			require.NoError(t, err)
+
+			expectedRaw, err := os.ReadFile(outPath)
+			assert.NoError(t, err)
+
+			var expectedEnv gobl.Envelope
+			require.NoError(t, json.Unmarshal(expectedRaw, &expectedEnv))
+			expectedStatus, ok := expectedEnv.Extract().(*bill.Status)
+			require.True(t, ok, "Expected document should be a bill.Status")
+
+			expectedData, err := json.MarshalIndent(expectedStatus, "", "\t")
+			require.NoError(t, err)
+
+			assert.JSONEq(t, string(expectedData), string(data), "Status should match the expected JSON. Update with --update flag.")
 		})
 	}
 }
