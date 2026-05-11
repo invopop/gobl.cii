@@ -4,13 +4,13 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0f307109e7a04933c64798a3341203351283efcbf631fa867edf4a4f010c0bac"
+			"val": "617bc1814fe9210eb34ddbe465f0f0a51839f4f3a472a0b64d93e72ef4010d38"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-flow6-v1"
+			"fr-ctc-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "response",
@@ -47,6 +47,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "100000009_STATUTS"
 				}

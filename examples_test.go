@@ -12,7 +12,7 @@ import (
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl/addons/fr/ctc/flow6"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
@@ -279,7 +279,7 @@ func regenerateCDARFixtures(t *testing.T) {
 				Name:       "PA-FR",
 				Identities: st.Issuer.Identities, // keep some SIREN for traceability
 				Inboxes:    []*org.Inbox{{Scheme: "0225", Code: "9998_PEP"}},
-				Ext:        tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleWK),
+				Ext:        tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleWK),
 			}
 			st.Recipient = ppfRecipient()
 		}

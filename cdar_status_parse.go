@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/invopop/gobl/addons/fr/ctc/flow6"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -39,7 +39,7 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 		return nil, fmt.Errorf("invalid CDAR document")
 	}
 	st := &bill.Status{}
-	st.SetAddons(flow6.V1)
+	st.SetAddons(ctc.V1)
 
 	if cdar.ExchangedDocument.ID != "" {
 		st.Code = cbc.Code(cdar.ExchangedDocument.ID)
@@ -62,7 +62,7 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 			if ref == nil {
 				continue
 			}
-			if _, typ, ok := flow6.StatusKeyFor(ref.ProcessConditionCode); ok {
+			if _, typ, ok := ctc.StatusKeyFor(ref.ProcessConditionCode); ok {
 				st.Type = typ
 				break
 			}
@@ -127,7 +127,7 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 func goblStatusLineFromCDAR(ref *CDARReferencedDocument) (*bill.StatusLine, error) {
 	line := &bill.StatusLine{}
 	if ref.ProcessConditionCode != "" {
-		if key, _, ok := flow6.StatusKeyFor(ref.ProcessConditionCode); ok {
+		if key, _, ok := ctc.StatusKeyFor(ref.ProcessConditionCode); ok {
 			line.Key = key
 		}
 	}
@@ -152,10 +152,10 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) (*bill.StatusLine, erro
 		}
 		if ds.ReasonCode != "" {
 			r := &bill.Reason{}
-			if key, ok := flow6.ReasonKeyFor(ds.ReasonCode); ok {
+			if key, ok := ctc.ReasonKeyFor(ds.ReasonCode); ok {
 				r.Key = key
 			}
-			r.Ext = tax.MakeExtensions().Set(flow6.ExtKeyReasonCode, cbc.Code(ds.ReasonCode))
+			r.Ext = tax.MakeExtensions().Set(ctc.ExtKeyReasonCode, cbc.Code(ds.ReasonCode))
 			if len(ds.Reason) > 0 {
 				r.Description = ds.Reason[0]
 			}
@@ -163,7 +163,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) (*bill.StatusLine, erro
 		}
 		if ds.RequestedActionCode != "" {
 			a := &bill.Action{}
-			if key, ok := flow6.ActionKeyFor(ds.RequestedActionCode); ok {
+			if key, ok := ctc.ActionKeyFor(ds.RequestedActionCode); ok {
 				a.Key = key
 			}
 			if ds.RequestedAction != "" {
@@ -176,7 +176,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) (*bill.StatusLine, erro
 			if dc == nil {
 				continue
 			}
-			c := &flow6.Characteristic{
+			c := &ctc.Characteristic{
 				ID:       dc.ID,
 				TypeCode: cbc.Code(dc.TypeCode),
 				Name:     dc.Name,
@@ -219,7 +219,7 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 	}
 	p := &org.Party{Name: tp.Name}
 	if tp.RoleCode != "" {
-		p.Ext = tax.MakeExtensions().Set(flow6.ExtKeyRole, cbc.Code(tp.RoleCode))
+		p.Ext = tax.MakeExtensions().Set(ctc.ExtKeyRole, cbc.Code(tp.RoleCode))
 	}
 	for _, gid := range tp.GlobalIDs {
 		if gid == nil || gid.Value == "" {

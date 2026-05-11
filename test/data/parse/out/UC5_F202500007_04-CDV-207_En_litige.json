@@ -4,13 +4,13 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d4adf553e592ee8420864ef54d057ba86613043cb33abd385e8142846411f4a0"
+			"val": "1dbbed2385d50bf8a01b2294080e535a4beffe3fd8562c41437e4c0ab765428d"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-flow6-v1"
+			"fr-ctc-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "response",
@@ -42,6 +42,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "200000008_STATUTS"
 				}
@@ -62,6 +63,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "100000009_STATUTS"
 				}
@@ -96,7 +98,7 @@
 				],
 				"complements": [
 					{
-						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic",
+						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/characteristic",
 						"id": "BT-152",
 						"type_code": "DIV",
 						"reason_code": "TX_TVA_ERR",
@@ -106,7 +108,7 @@
 						"percent": "10.00%"
 					},
 					{
-						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic",
+						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/characteristic",
 						"id": "BT-152",
 						"type_code": "DVA",
 						"reason_code": "TX_TVA_ERR",

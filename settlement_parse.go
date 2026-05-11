@@ -53,7 +53,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 			if err != nil {
 				return nil, err
 			}
-			a := &pay.Advance{
+			a := &pay.Record{
 				Amount: amt,
 			}
 			if ap.Date != nil && ap.Date.DateFormat != nil {
@@ -71,7 +71,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 		if err != nil {
 			return nil, err
 		}
-		a := &pay.Advance{
+		a := &pay.Record{
 			Amount: amt,
 		}
 		pymt.Advances = append(pymt.Advances, a)

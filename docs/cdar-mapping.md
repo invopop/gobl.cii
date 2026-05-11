@@ -1,7 +1,7 @@
 # GOBL ↔ CDAR (Flow 6) mapping reference
 
 This document describes how `bill.Status` documents in GOBL with the
-`fr-ctc-flow6-v1` addon round-trip to and from the French CDAR
+`fr-ctc-v1` addon round-trip to and from the French CDAR
 (*Compte Rendu d'Avis et de Réception* — XP Z12-012 Annex A v1.3) XML
 exchanged between *Plateformes Agréées* (PAs).
 
@@ -16,7 +16,7 @@ Two independent axes:
 
 | Axis | Lives in | Values | Drives |
 |---|---|---|---|
-| **GOBL lifecycle category** | `bill.Status.Type` | `response` / `update` / `system` | The flow6 process-code lookup (`flow6.CDARProcessCodeFor(key, type)`) |
+| **GOBL lifecycle category** | `bill.Status.Type` | `response` / `update` / `system` | The flow6 process-code lookup (`ctc.CDARProcessCodeFor(key, type)`) |
 | **CDAR phase / wire ack** | `cii.Context.GuidelineID` | `urn.cpro.gouv.fr:1p0:CDV:invoice` (treatment, ack 23) or `…einvoicingF2` (transmission, ack 305) | `<ram:TypeCode>` and the trade-party shape |
 
 `bill.Status.Type` and the ack TypeCode are **not the same thing** —
@@ -112,13 +112,13 @@ ones not in stock GOBL are exported by `flow6` itself.
 | `issued` | `update` | **200** | Déposée | `bill.StatusEventIssued` |
 | `issued` | `response` | **201** | Émise par la plateforme | `bill.StatusEventIssued` |
 | `acknowledged` | `response` | **202** | Reçue | `bill.StatusEventAcknowledged` |
-| `made-available` | `response` | **203** | Mise à disposition | `flow6.StatusEventMadeAvailable` |
+| `made-available` | `response` | **203** | Mise à disposition | `ctc.StatusEventMadeAvailable` |
 | `processing` | `response` | **204** | Prise en charge | `bill.StatusEventProcessing` |
 | `accepted` | `response` | **205** | Approuvée | `bill.StatusEventAccepted` |
-| `partially-accepted` | `response` | **206** | Approuvée Partiellement | `flow6.StatusEventPartiallyAccepted` |
-| `disputed` | `response` | **207** | En litige | `flow6.StatusEventDisputed` |
+| `partially-accepted` | `response` | **206** | Approuvée Partiellement | `ctc.StatusEventPartiallyAccepted` |
+| `disputed` | `response` | **207** | En litige | `ctc.StatusEventDisputed` |
 | `querying` | `response` | **208** | Suspendue | `bill.StatusEventQuerying` |
-| `completed` | `response` | **209** | Complétée | `flow6.StatusEventCompleted` |
+| `completed` | `response` | **209** | Complétée | `ctc.StatusEventCompleted` |
 | `rejected` | `response` | **210** | Refusée | `bill.StatusEventRejected` |
 | `paid` | `update` | **211** | Paiement transmis | `bill.StatusEventPaid` (shared) |
 | `paid` | `response` | **212** | Encaissée | `bill.StatusEventPaid` (shared) |
@@ -186,7 +186,7 @@ silent for them in Annexe A).
 
 ### Characteristics — `<ram:SpecifiedDocumentCharacteristic>`
 
-A `flow6.Characteristic` complement on a status line maps to one
+A `ctc.Characteristic` complement on a status line maps to one
 `SpecifiedDocumentCharacteristic`:
 
 | CDAR field | Characteristic field |
@@ -212,7 +212,7 @@ the writer keeps them in the same `SpecifiedDocumentStatus` entry; the
 
 ## 5. Validations enforced by `flow6` (mirror of the schematron)
 
-The `fr-ctc-flow6-v1` addon validates everything that the deployed
+The `fr-ctc-v1` addon validates everything that the deployed
 schematron currently *warns* about (warnings are treated as errors —
 they will become hard errors in future spec releases):
 
@@ -251,7 +251,7 @@ they will become hard errors in future spec releases):
 
 ```yaml
 $schema: "https://gobl.org/draft-0/bill/status"
-$addons: ["fr-ctc-flow6-v1"]
+$addons: ["fr-ctc-v1"]
 issue_date: "2026-04-16"
 code: "STA-2026-0001"
 
@@ -302,7 +302,7 @@ lines:
   - key: "paid"
     doc: {code: "2026-00042", issue_date: "2026-04-15"}
     complements:
-      - $schema: "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic"
+      - $schema: "https://gobl.org/draft-0/addons/fr/ctc/characteristic"
         type_code: "MEN"
         amount: {currency: "EUR", value: "1200.00"}
 ```

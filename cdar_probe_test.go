@@ -9,7 +9,7 @@ import (
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl/addons/fr/ctc/flow6"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -69,7 +69,7 @@ func minIssuerBY() *org.Party {
 			Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
 		}},
 		Inboxes: []*org.Inbox{{Scheme: "0225", Code: "200000008_PEP"}},
-		Ext:     tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleBY),
+		Ext:     tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleBY),
 	}
 }
 
@@ -83,7 +83,7 @@ func minRecipientSE() *org.Party {
 			Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
 		}},
 		Inboxes: []*org.Inbox{{Scheme: "0225", Code: "100000009_PEP"}},
-		Ext:     tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleSE),
+		Ext:     tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleSE),
 	}
 }
 
@@ -97,7 +97,7 @@ func ppfRecipient() *org.Party {
 			Code: "9998",
 			Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0238"),
 		}},
-		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleDFH),
+		Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleDFH),
 	}
 }
 
@@ -110,7 +110,7 @@ func minIssuerWK() *org.Party {
 			Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0238"),
 		}},
 		Inboxes: []*org.Inbox{{Scheme: "0225", Code: "9998_PEP"}},
-		Ext:     tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleWK),
+		Ext:     tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleWK),
 	}
 }
 
@@ -125,12 +125,12 @@ func minPaidStatus() *bill.Status {
 		Issuer:    minIssuerBY(),
 		Recipient: minRecipientSE(),
 	}
-	st.SetAddons(flow6.V1)
+	st.SetAddons(ctc.V1)
 
 	docDate := cal.MakeDate(2026, time.April, 15)
 	amt := currency.Amount{Currency: currency.EUR, Value: num.MakeAmount(120000, 2)}
-	cobj, err := schema.NewObject(&flow6.Characteristic{
-		TypeCode: flow6.TypeCodeAmountReceived,
+	cobj, err := schema.NewObject(&ctc.Characteristic{
+		TypeCode: ctc.TypeCodeAmountReceived,
 		Amount:   &amt,
 	})
 	if err != nil {
@@ -159,7 +159,7 @@ func minDepositedStatus() *bill.Status {
 		Issuer:    minIssuerWK(),
 		Recipient: ppfRecipient(),
 	}
-	st.SetAddons(flow6.V1)
+	st.SetAddons(ctc.V1)
 	docDate := cal.MakeDate(2026, time.April, 15)
 	st.Lines = []*bill.StatusLine{{
 		Key: bill.StatusEventIssued,
@@ -175,11 +175,11 @@ func minDepositedStatus() *bill.Status {
 func minDisputedStatus() *bill.Status {
 	st := minPaidStatus()
 	st.Code = "STATUS-207"
-	st.Lines[0].Key = flow6.StatusEventDisputed
+	st.Lines[0].Key = ctc.StatusEventDisputed
 	st.Lines[0].Complements = nil
 	st.Lines[0].Reasons = []*bill.Reason{{
 		Key:         bill.ReasonKeyLegal,
-		Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReasonCode, cbc.Code("TX_TVA_ERR")),
+		Ext:         tax.MakeExtensions().Set(ctc.ExtKeyReasonCode, cbc.Code("TX_TVA_ERR")),
 		Description: "Taux de TVA erroné",
 	}}
 	st.Lines[0].Actions = []*bill.Action{{
@@ -378,10 +378,10 @@ func TestProbeInvalidStatusesRejectedByGOBL(t *testing.T) {
 			"reason-not-allowed-for-status",
 			func(st *bill.Status) {
 				// 207 disputed accepts AUTRE/TX_TVA_ERR; REJ_SEMAN is 213-only.
-				st.Lines[0].Key = flow6.StatusEventDisputed
+				st.Lines[0].Key = ctc.StatusEventDisputed
 				st.Type = bill.StatusTypeResponse
 				st.Lines[0].Reasons = []*bill.Reason{{
-					Ext: tax.MakeExtensions().Set(flow6.ExtKeyReasonCode, "REJ_SEMAN"),
+					Ext: tax.MakeExtensions().Set(ctc.ExtKeyReasonCode, "REJ_SEMAN"),
 				}}
 				st.Lines[0].Complements = nil
 			},

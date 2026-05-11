@@ -7,7 +7,7 @@ import (
 	"time"
 
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl/addons/fr/ctc/flow6"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -34,9 +34,9 @@ var allProcessCodes = []string{
 func TestFlow6CodeTablesRoundTrip(t *testing.T) {
 	t.Run("process codes", func(t *testing.T) {
 		for _, code := range allProcessCodes {
-			key, typ, ok := flow6.StatusKeyFor(code)
+			key, typ, ok := ctc.StatusKeyFor(code)
 			require.True(t, ok, "process code %s should resolve to a key", code)
-			out, ok := flow6.CDARProcessCodeFor(key, typ)
+			out, ok := ctc.CDARProcessCodeFor(key, typ)
 			require.True(t, ok)
 			require.Equal(t, code, out, "round-trip mismatch for %s", code)
 		}
@@ -45,9 +45,9 @@ func TestFlow6CodeTablesRoundTrip(t *testing.T) {
 	t.Run("action codes", func(t *testing.T) {
 		actions := []string{"NOA", "PIN", "NIN", "CNF", "CNP", "CNA", "OTH"}
 		for _, code := range actions {
-			key, ok := flow6.ActionKeyFor(code)
+			key, ok := ctc.ActionKeyFor(code)
 			require.True(t, ok)
-			out, ok := flow6.CDARActionCodeFor(key)
+			out, ok := ctc.CDARActionCodeFor(key)
 			require.True(t, ok)
 			require.Equal(t, code, out)
 		}
@@ -64,9 +64,9 @@ func TestFlow6CodeTablesRoundTrip(t *testing.T) {
 			bill.ReasonKeyQuality, bill.ReasonKeyDelivery,
 		}
 		for _, key := range buckets {
-			code, ok := flow6.CDARReasonCodeFor(key)
+			code, ok := ctc.CDARReasonCodeFor(key)
 			require.True(t, ok, "no default code for bucket %s", key)
-			outKey, ok := flow6.ReasonKeyFor(code)
+			outKey, ok := ctc.ReasonKeyFor(code)
 			require.True(t, ok)
 			require.Equal(t, key, outKey, "round-trip for bucket %s broke", key)
 		}
@@ -84,7 +84,7 @@ func findSEPartyAcross(st *bill.Status) *org.Party {
 		if p == nil {
 			continue
 		}
-		if p.Ext.Get(flow6.ExtKeyRole) == flow6.RoleSE {
+		if p.Ext.Get(ctc.ExtKeyRole) == ctc.RoleSE {
 			return p
 		}
 		if p.Ext.IsZero() {
@@ -117,7 +117,7 @@ func defaultReasonForCode(code string) (string, bool) {
 // given Flow 6 process code.
 func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 	t.Helper()
-	key, typ, ok := flow6.StatusKeyFor(code)
+	key, typ, ok := ctc.StatusKeyFor(code)
 	require.True(t, ok, "unknown process code %s", code)
 
 	st := &bill.Status{
@@ -136,7 +136,7 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 			Inboxes: []*org.Inbox{
 				{Scheme: "0225", Code: "100000009_PEP"},
 			},
-			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleSE),
+			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleSE),
 		},
 		Customer: &org.Party{
 			Name: "ACHETEUR",
@@ -149,7 +149,7 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 			Inboxes: []*org.Inbox{
 				{Scheme: "0225", Code: "200000008_PEP"},
 			},
-			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleBY),
+			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleBY),
 		},
 		// Issuer = the buyer-end-party reporting the status (UC1 default
 		// pattern: buyer-platform sends 23 acks). For PPF / 305 callers
@@ -165,7 +165,7 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 			Inboxes: []*org.Inbox{
 				{Scheme: "0225", Code: "200000008_PEP"},
 			},
-			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleBY),
+			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleBY),
 		},
 		// Recipient = the seller-end-party (counterparty of the buyer
 		// issuer). Must carry an inbox per BR-FR-CDV-08.
@@ -180,10 +180,10 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 			Inboxes: []*org.Inbox{
 				{Scheme: "0225", Code: "100000009_PEP"},
 			},
-			Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleSE),
+			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleSE),
 		},
 	}
-	st.SetAddons(flow6.V1)
+	st.SetAddons(ctc.V1)
 
 	docDate := cal.MakeDate(2025, time.July, 1)
 	line := &bill.StatusLine{
@@ -203,7 +203,7 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 		// ReasonCode extension, matching whichever bucket the code rolls
 		// up to (AUTRE → other, TX_TVA_ERR → legal, etc.).
 		line.Reasons = []*bill.Reason{{
-			Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReasonCode, cbc.Code(reasonCode)),
+			Ext:         tax.MakeExtensions().Set(ctc.ExtKeyReasonCode, cbc.Code(reasonCode)),
 			Description: "Motif " + reasonCode,
 		}}
 		line.Actions = []*bill.Action{{Key: bill.ActionKeyReissue, Description: "Créer une facture rectificative"}}
@@ -216,8 +216,8 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 			Currency: currency.EUR,
 			Value:    num.MakeAmount(50000, 2),
 		}
-		obj, err := schema.NewObject(&flow6.Characteristic{
-			TypeCode: flow6.TypeCodeAmountReceived,
+		obj, err := schema.NewObject(&ctc.Characteristic{
+			TypeCode: ctc.TypeCodeAmountReceived,
 			Amount:   &amt,
 		})
 		require.NoError(t, err)
@@ -254,7 +254,7 @@ func TestCDARStatusRoundTripPerCode(t *testing.T) {
 			require.NotNil(t, out)
 
 			// Type must round-trip.
-			expectedKey, expectedType, _ := flow6.StatusKeyFor(code)
+			expectedKey, expectedType, _ := ctc.StatusKeyFor(code)
 			require.Equal(t, expectedType, out.Type, "type mismatch for %s", code)
 			require.Len(t, out.Lines, 1, "should have one line for %s", code)
 			require.Equal(t, expectedKey, out.Lines[0].Key)
@@ -287,9 +287,9 @@ func TestCDARStatusRejectionWithCharacteristic(t *testing.T) {
 	pct, err := num.PercentageFromString("10.00%")
 	require.NoError(t, err)
 
-	obj, err := schema.NewObject(&flow6.Characteristic{
+	obj, err := schema.NewObject(&ctc.Characteristic{
 		ID:         "BT-152",
-		TypeCode:   flow6.TypeCodeInvalidData,
+		TypeCode:   ctc.TypeCodeInvalidData,
 		Name:       "Taux TVA",
 		Changed:    &changed,
 		Percent:    &pct,
@@ -313,10 +313,10 @@ func TestCDARStatusRejectionWithCharacteristic(t *testing.T) {
 	require.NotEmpty(t, parsed.Lines[0].Complements,
 		"characteristic complement should be preserved on round-trip")
 
-	var found *flow6.Characteristic
+	var found *ctc.Characteristic
 	for _, c := range parsed.Lines[0].Complements {
-		if inst, ok := c.Instance().(*flow6.Characteristic); ok {
-			if inst.TypeCode == flow6.TypeCodeInvalidData {
+		if inst, ok := c.Instance().(*ctc.Characteristic); ok {
+			if inst.TypeCode == ctc.TypeCodeInvalidData {
 				found = inst
 				break
 			}
@@ -350,7 +350,7 @@ func TestCDARSenderTradeParty(t *testing.T) {
 		Inboxes: []*org.Inbox{
 			{Scheme: "0225", Code: "9998_PEP"},
 		},
-		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleWK),
+		Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleWK),
 	}
 
 	cdar, err := cii.NewCDARFromStatusWithSender(st, cii.ContextCDARFlow6, platform)

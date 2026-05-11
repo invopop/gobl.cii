@@ -12,8 +12,7 @@ import (
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
-	"github.com/invopop/gobl/addons/fr/ctc/flow2"
-	"github.com/invopop/gobl/addons/fr/ctc/flow6"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -92,7 +91,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{flow2.V1},
+	Addons:      []cbc.Key{ctc.V1},
 	VESID:       "fr.factur-x:en16931:1.0.7-2",
 }
 
@@ -101,7 +100,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{flow2.V1},
+	Addons:      []cbc.Key{ctc.V1},
 	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
@@ -138,7 +137,7 @@ var ContextChorusProV1 = Context{
 var ContextCDARFlow6 = Context{
 	GuidelineID: CDARGuidelineInvoice,
 	BusinessID:  "REGULATED",
-	Addons:      []cbc.Key{flow6.V1},
+	Addons:      []cbc.Key{ctc.V1},
 	VESID:       "fr.ctc:cdar:1.3",
 }
 
@@ -148,7 +147,7 @@ var ContextCDARFlow6 = Context{
 // emitted.
 var ContextCDARFlow6PPF = Context{
 	GuidelineID: CDARGuidelinePPF,
-	Addons:      []cbc.Key{flow6.V1},
+	Addons:      []cbc.Key{ctc.V1},
 	VESID:       "fr.ctc:cdar:1.3",
 }
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/invopop/gobl/addons/fr/ctc/flow6"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -147,7 +147,7 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
 }
 
 func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType string) (*CDARAcknowledgement, error) {
-	processCode, ok := flow6.CDARProcessCodeFor(line.Key, st.Type)
+	processCode, ok := ctc.CDARProcessCodeFor(line.Key, st.Type)
 	if !ok {
 		return nil, fmt.Errorf("no CDAR process code for status line key %q with type %q", line.Key, st.Type)
 	}
@@ -244,9 +244,9 @@ func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) (*
 	ds := &CDARDocumentStatus{SequenceNumeric: seq}
 	if reason != nil {
 		// ReasonCode: ext value if set, else default-for-key.
-		code := reason.Ext.Get(flow6.ExtKeyReasonCode).String()
+		code := reason.Ext.Get(ctc.ExtKeyReasonCode).String()
 		if code == "" {
-			if def, ok := flow6.CDARReasonCodeFor(reason.Key); ok {
+			if def, ok := ctc.CDARReasonCodeFor(reason.Key); ok {
 				code = def
 			}
 		}
@@ -260,7 +260,7 @@ func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) (*
 		// the reason's ext code.)
 	}
 	if action != nil {
-		if code, ok := flow6.CDARActionCodeFor(action.Key); ok {
+		if code, ok := ctc.CDARActionCodeFor(action.Key); ok {
 			ds.RequestedActionCode = code
 		}
 		if action.Description != "" {
@@ -270,7 +270,7 @@ func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) (*
 	return ds, nil
 }
 
-// characteristicsFromComplements pulls flow6.Characteristic instances out of
+// characteristicsFromComplements pulls ctc.Characteristic instances out of
 // a Complements slice and builds CDAR characteristics. If reasonCode is
 // non-empty, only characteristics matching that ReasonCode (or with an
 // empty ReasonCode) are returned; if empty, all are returned.
@@ -280,7 +280,7 @@ func characteristicsFromComplements(comps []*schema.Object, reasonCode cbc.Code)
 		if obj == nil {
 			continue
 		}
-		c, ok := obj.Instance().(*flow6.Characteristic)
+		c, ok := obj.Instance().(*ctc.Characteristic)
 		if !ok || c == nil {
 			continue
 		}
@@ -318,7 +318,7 @@ func characteristicsFromComplements(comps []*schema.Object, reasonCode cbc.Code)
 // UC1 corpus shape of <ram:RoleCode>WK</ram:RoleCode> with no body.
 func bareWKParty() *org.Party {
 	return &org.Party{
-		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RoleWK),
+		Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleWK),
 	}
 }
 
@@ -330,7 +330,7 @@ func newCDARTradeParty(p *org.Party) *CDARTradeParty {
 		Name: p.Name,
 	}
 	if !p.Ext.IsZero() {
-		tp.RoleCode = p.Ext.Get(flow6.ExtKeyRole).String()
+		tp.RoleCode = p.Ext.Get(ctc.ExtKeyRole).String()
 	}
 	for _, id := range p.Identities {
 		if id == nil || id.Ext.IsZero() {

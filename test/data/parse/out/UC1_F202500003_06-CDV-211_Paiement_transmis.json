@@ -4,13 +4,13 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0fb103331d5f1022f4ab2b2080d9c4df9b174826d732892457d549251c2a1bd2"
+			"val": "291594cfdd894a77f94da25e01a67101f8e62d72cb5f9e51c77eede0a05f5a4f"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-flow6-v1"
+			"fr-ctc-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "update",
@@ -42,6 +42,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "200000008_STATUTS"
 				}
@@ -62,6 +63,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "100000009_STATUTS"
 				}
@@ -81,7 +83,7 @@
 				},
 				"complements": [
 					{
-						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/flow6/characteristic",
+						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/characteristic",
 						"type_code": "MPA",
 						"changed": false,
 						"amount": {

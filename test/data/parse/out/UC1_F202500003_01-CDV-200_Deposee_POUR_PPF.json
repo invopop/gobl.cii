@@ -4,13 +4,13 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2c190c3aaf8051d3b6e4ab21b3aca266bdb3d2b685b5ec92f1033f9f746d6875"
+			"val": "b4f4832d87b761ce6004f7bcd8e3a1264167b84be82ac31d5c9ffd0d55133ea7"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-flow6-v1"
+			"fr-ctc-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "update",
