@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "49cb86163ddd0a436deb947b800ad66c9a8c221dfe780f93773c4df92c6bc8f6"
+			"val": "a125f5be8ed68c1b3b4bfb8f00782d0ff35c350d2ab20af57ef5c941cd3bc3f3"
 		}
 	},
 	"doc": {
@@ -17,6 +17,9 @@
 		"issue_date": "2025-07-01",
 		"issue_time": "15:10:00",
 		"code": "STATUS-213",
+		"ext": {
+			"fr-ctc-status-code": "213"
+		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "eb2f52cf8347ab9fec91cf08258a0bfb4da4385693ff10d62dde37c7cfd15a60"
+			"val": "5b05b9f0d8113078f1c3898a2196b95ca7315f94a375515431824a8c33a51507"
 		}
 	},
 	"doc": {
@@ -17,6 +17,9 @@
 		"issue_date": "2025-07-01",
 		"issue_time": "15:10:00",
 		"code": "STATUS-209",
+		"ext": {
+			"fr-ctc-status-code": "209"
+		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [

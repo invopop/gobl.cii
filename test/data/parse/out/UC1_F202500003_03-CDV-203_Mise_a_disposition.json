@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "959983783f488b23a8dd1da5f8900442d7a9861f12f5083c3ad707821edbc8aa"
+			"val": "ec1c8ae14bc8ebc214a80abbdf6c3cdea75a19ef23cdaae1adf63be815899264"
 		}
 	},
 	"doc": {
@@ -17,6 +17,9 @@
 		"issue_date": "2025-07-01",
 		"issue_time": "16:30:00",
 		"code": "F202500003_203_20250701161000380_20250701",
+		"ext": {
+			"fr-ctc-status-code": "203"
+		},
 		"supplier": {
 			"identities": [
 				{

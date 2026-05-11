@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "59686b52d4e8ee0d709da52a3b63da2da39d53c6831f92b4d34efcf9afc0832a"
+			"val": "ba6e9b0e2ef9c1b17bf72e934b7376ed0ab9d031f339db5c190da7faf1a0fe43"
 		}
 	},
 	"doc": {
@@ -17,6 +17,9 @@
 		"issue_date": "2025-07-01",
 		"issue_time": "15:10:00",
 		"code": "STATUS-212",
+		"ext": {
+			"fr-ctc-status-code": "212"
+		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [

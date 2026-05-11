@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fa560e4d7f8def49ecbaab69c8554cda3769db8e06399f0d99e61b003ae2784d"
+			"val": "9297e45a7e59f059ac44ddb3c1d1267bbb780980e4768fa33cad273406dcf325"
 		}
 	},
 	"doc": {
@@ -17,6 +17,9 @@
 		"issue_date": "2025-07-01",
 		"issue_time": "15:10:00",
 		"code": "STATUS-205",
+		"ext": {
+			"fr-ctc-status-code": "205"
+		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [
