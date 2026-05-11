@@ -110,7 +110,7 @@ ones not in stock GOBL are exported by `flow6` itself.
 | `bill.StatusLine.Key` | `bill.Status.Type` | Process code | Libellé | Source const |
 |---|---|---|---|---|
 | `issued` | `update` | **200** | Déposée | `bill.StatusEventIssued` |
-| `issued-by-platform` | `update` | **201** | Émise | `flow6.StatusEventIssuedByPlatform` |
+| `issued` | `response` | **201** | Émise par la plateforme | `bill.StatusEventIssued` |
 | `acknowledged` | `response` | **202** | Reçue | `bill.StatusEventAcknowledged` |
 | `made-available` | `response` | **203** | Mise à disposition | `flow6.StatusEventMadeAvailable` |
 | `processing` | `response` | **204** | Prise en charge | `bill.StatusEventProcessing` |

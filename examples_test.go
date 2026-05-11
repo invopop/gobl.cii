@@ -386,6 +386,7 @@ func TestParseCDAR(t *testing.T) {
 				st.UUID = staticUUID
 			}
 			require.NoError(t, env.Calculate())
+			require.NoError(t, env.Validate(), "parsed envelope must satisfy GOBL validation")
 
 			outPath := filepath.Join(getParsePath(), pathOut, outName)
 			if *updateOut {

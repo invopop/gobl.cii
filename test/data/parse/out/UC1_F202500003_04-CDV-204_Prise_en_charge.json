@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "646c23019a9936672278083084f56f86d06d2b85697d35e24823fa4d96b87c60"
+			"val": "c750669a8d1b8d9b6a1728e8da40955834b801bc1a34b932fc4200e75237496c"
 		}
 	},
 	"doc": {
@@ -35,6 +35,12 @@
 					"ext": {
 						"iso-scheme-id": "0002"
 					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "200000008_STATUTS"
 				}
 			],
 			"ext": {

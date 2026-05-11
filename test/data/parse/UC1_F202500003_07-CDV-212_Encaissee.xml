@@ -26,6 +26,9 @@ xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100"
                <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>  <!-- MDT-38 (ID émetteur document (global)) : 100000009 -->
                <ram:Name>VENDEUR</ram:Name>  <!-- MDT-39 (Raison sociale) : VENDEUR -->
                <ram:RoleCode>SE</ram:RoleCode>  <!-- MDT-40 (Code rôle) : SE -->
+                         <ram:URIUniversalCommunication>
+                    <ram:URIID schemeID="0225">100000009_STATUTS</ram:URIID>  <!-- MDT-49 (Adresse électronique émetteur) : 100000009_STATUTS -->
+               </ram:URIUniversalCommunication>
           </ram:IssuerTradeParty>
           <ram:RecipientTradeParty>
                <ram:GlobalID schemeID="0002">200000008</ram:GlobalID>  <!-- MDT-57 (ID destinataire (global)) : 200000008 -->
