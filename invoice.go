@@ -78,10 +78,10 @@ func UnmarshalInvoice(data []byte) (*Invoice, error) {
 	inv := new(Invoice)
 	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
 		map[string]string{
-			"rsm": NamespaceRSM,
-			"ram": NamespaceRAM,
-			"qdt": NamespaceQDT,
-			"udt": NamespaceUDT,
+			nsPrefixRSM: NamespaceRSM,
+			nsPrefixRAM: NamespaceRAM,
+			nsPrefixQDT: NamespaceQDT,
+			nsPrefixUDT: NamespaceUDT,
 		},
 	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CII invoice: %w", err)
