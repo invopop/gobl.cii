@@ -36,6 +36,20 @@ const (
 	NamespaceUDT = "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
 )
 
+// Namespace prefixes used when unmarshalling CII XML documents.
+const (
+	nsPrefixRSM = "rsm"
+	nsPrefixRAM = "ram"
+	nsPrefixQDT = "qdt"
+	nsPrefixUDT = "udt"
+)
+
+// Common Guideline and VESID values reused across multiple contexts.
+const (
+	guidelineIDEN16931V2017 = "urn:cen.eu:en16931:2017"
+	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.13"
+)
+
 // Profile ID codes
 const (
 	ProfileIDPeppolBilling       = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
@@ -72,24 +86,24 @@ func (c *Context) Is(c2 Context) bool {
 
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
 var ContextEN16931V2017 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017",
+	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
-	VESID:       "eu.cen.en16931:cii:1.3.13",
+	VESID:       vesIDEN16931CII,
 }
 
 // ContextPeppolV3 for Peppol Billing V3.0 context.
 var ContextPeppolV3 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
+	GuidelineID: guidelineIDEN16931V2017 + "#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
-	VESID:       "eu.cen.en16931:cii:1.3.13",
+	VESID:       vesIDEN16931CII,
 }
 
 // ContextFacturXV1 is used for Factur-X V1 documents.
 var ContextFacturXV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017",
+	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD22B,
 	Addons:      []cbc.Key{facturx.V1},
 	VESID:       "fr.factur-x:en16931:1.0.8",
@@ -97,9 +111,9 @@ var ContextFacturXV1 = Context{
 
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
 var ContextPeppolFranceFacturXV1 = Context{
-	GuidelineID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
+	GuidelineID:       guidelineIDEN16931V2017 + "#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:        ProfileIDPeppolFranceBilling,
-	OutputGuidelineID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
+	OutputGuidelineID: guidelineIDEN16931V2017 + "#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Version:           VersionD16B,
 	Addons:            []cbc.Key{ctc.Flow2V1},
 	VESID:             "fr.factur-x:en16931:1.0.8",
@@ -107,17 +121,17 @@ var ContextPeppolFranceFacturXV1 = Context{
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
 var ContextPeppolFranceCIUSV1 = Context{
-	GuidelineID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
+	GuidelineID:       guidelineIDEN16931V2017 + "#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:        ProfileIDPeppolFranceBilling,
-	OutputGuidelineID: "urn:cen.eu:en16931:2017",
+	OutputGuidelineID: guidelineIDEN16931V2017,
 	Version:           VersionD22B,
 	Addons:            []cbc.Key{ctc.Flow2V1},
-	VESID:             "eu.cen.en16931:cii:1.3.13",
+	VESID:             vesIDEN16931CII,
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
 var ContextZUGFeRDV2 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017",
+	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
 	VESID:       "de.zugferd:en16931:2.4",
@@ -125,7 +139,7 @@ var ContextZUGFeRDV2 = Context{
 
 // ContextXRechnungV3 is used for XRechnung documents
 var ContextXRechnungV3 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+	GuidelineID: guidelineIDEN16931V2017 + "#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{xrechnung.V3},

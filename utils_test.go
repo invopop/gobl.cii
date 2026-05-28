@@ -60,15 +60,16 @@ func TestTypeCodeParse(t *testing.T) {
 
 // Define tests for the UnitFromUNECE function
 func TestUnitFromUNECE(t *testing.T) {
+	const knownUNECECode = "Known UNECE code"
 	tests := []struct {
 		name     string
 		input    string
 		expected org.Unit
 	}{
-		{"Known UNECE code", "HUR", org.Unit("h")},
-		{"Known UNECE code", "SEC", org.Unit("s")},
-		{"Known UNECE code", "MTR", org.Unit("m")},
-		{"Known UNECE code", "GRM", org.Unit("g")},
+		{knownUNECECode, "HUR", org.Unit("h")},
+		{knownUNECECode, "SEC", org.Unit("s")},
+		{knownUNECECode, "MTR", org.Unit("m")},
+		{knownUNECECode, "GRM", org.Unit("g")},
 		{"Unknown UNECE code", "XYZ", org.Unit("XYZ")},
 	}
 
