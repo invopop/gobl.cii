@@ -145,7 +145,7 @@ func (out *Invoice) addTransaction(inv *bill.Invoice, ctx Context) error {
 	if out.Transaction.Settlement, err = newSettlement(inv, ctx); err != nil {
 		return err
 	}
-	out.Transaction.Delivery = newDelivery(inv, ctx)
+	out.Transaction.Delivery = newDelivery(inv)
 	return nil
 }
 
