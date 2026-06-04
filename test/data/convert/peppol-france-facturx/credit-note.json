@@ -1,0 +1,198 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "73fee2ca229a207b715312aff748bb9eafa29abb8bf5a0354024430a58be14b9"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017",
+			"fr-ctc-flow2-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "credit-note",
+		"code": "AVR-2024-001",
+		"issue_date": "2024-06-13",
+		"currency": "EUR",
+		"preceding": [
+			{
+				"issue_date": "2024-06-13",
+				"code": "FAC-2024-001"
+			}
+		],
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"fr-ctc-billing-mode": "S1",
+				"untdid-document-type": "381"
+			}
+		},
+		"supplier": {
+			"name": "Supplier SARL",
+			"tax_id": {
+				"country": "FR",
+				"code": "39356000000"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"type": "SIREN",
+					"code": "356000000",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0225",
+					"code": "356000000"
+				}
+			],
+			"addresses": [
+				{
+					"street": "1 Rue",
+					"locality": "Paris",
+					"code": "75001",
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "Customer SAS",
+			"tax_id": {
+				"country": "FR",
+				"code": "44732829320"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"type": "SIREN",
+					"code": "732829320",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0225",
+					"code": "732829320"
+				}
+			],
+			"addresses": [
+				{
+					"street": "1 Rue",
+					"locality": "Paris",
+					"code": "75001",
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Service",
+					"price": "100.00",
+					"unit": "one"
+				},
+				"sum": "1000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "20%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1000.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"key": "due-date",
+				"due_dates": [
+					{
+						"date": "2024-07-13",
+						"amount": "120.00",
+						"percent": "10.0%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "FR7630006000011234567890189",
+						"name": "Supplier SARL"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "1000.00",
+			"total": "1000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1000.00",
+								"percent": "20%",
+								"amount": "200.00"
+							}
+						],
+						"amount": "200.00"
+					}
+				],
+				"sum": "200.00"
+			},
+			"tax": "200.00",
+			"total_with_tax": "1200.00",
+			"payable": "1200.00"
+		},
+		"notes": [
+			{
+				"key": "payment",
+				"text": "Conditions.",
+				"ext": {
+					"untdid-text-subject": "PMT"
+				}
+			},
+			{
+				"key": "payment-method",
+				"text": "Penalties.",
+				"ext": {
+					"untdid-text-subject": "PMD"
+				}
+			},
+			{
+				"key": "payment-term",
+				"text": "No early discount.",
+				"ext": {
+					"untdid-text-subject": "AAB"
+				}
+			}
+		]
+	}
+}

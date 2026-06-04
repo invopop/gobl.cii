@@ -118,7 +118,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	OutputGuidelineID: guidelineIDEN16931V2017 + "#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Version:           VersionD16B,
 	Addons:            []cbc.Key{flow2.V1},
-	VESID:             "fr.factur-x:en16931:1.0.8",
+	VESID:             "fr.ctc:extended-cii:1.3.1",
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
@@ -128,7 +128,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	OutputGuidelineID: guidelineIDEN16931V2017,
 	Version:           VersionD22B,
 	Addons:            []cbc.Key{flow2.V1},
-	VESID:             vesIDEN16931CII,
+	VESID:             "fr.ctc:cii:1.3.1",
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
