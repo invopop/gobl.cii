@@ -6,8 +6,10 @@ import (
 	"slices"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/xmlctx"
 )
 
@@ -33,12 +35,15 @@ type Transaction struct {
 
 // Tax defines the structure of ApplicableTradeTax of the CII standard
 type Tax struct {
-	CalculatedAmount      string `xml:"ram:CalculatedAmount,omitempty"`
-	TypeCode              string `xml:"ram:TypeCode,omitempty"`
-	BasisAmount           string `xml:"ram:BasisAmount,omitempty"`
-	CategoryCode          string `xml:"ram:CategoryCode,omitempty"`
-	ExemptionReasonCode   string `xml:"ram:ExemptionReasonCode,omitempty"`
-	RateApplicablePercent string `xml:"ram:RateApplicablePercent,omitempty"`
+	CalculatedAmount      string     `xml:"ram:CalculatedAmount,omitempty"`
+	TypeCode              string     `xml:"ram:TypeCode,omitempty"`
+	ExemptionReason       string     `xml:"ram:ExemptionReason,omitempty"`
+	BasisAmount           string     `xml:"ram:BasisAmount,omitempty"`
+	CategoryCode          string     `xml:"ram:CategoryCode,omitempty"`
+	ExemptionReasonCode   string     `xml:"ram:ExemptionReasonCode,omitempty"`
+	DueDateTypeCode       string     `xml:"ram:DueDateTypeCode,omitempty"`
+	TaxPointDate          *IssueDate `xml:"ram:TaxPointDate,omitempty"`
+	RateApplicablePercent string     `xml:"ram:RateApplicablePercent,omitempty"`
 }
 
 // Date defines date in the UDT structure
@@ -73,10 +78,10 @@ func UnmarshalInvoice(data []byte) (*Invoice, error) {
 	inv := new(Invoice)
 	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
 		map[string]string{
-			"rsm": NamespaceRSM,
-			"ram": NamespaceRAM,
-			"qdt": NamespaceQDT,
-			"udt": NamespaceUDT,
+			nsPrefixRSM: NamespaceRSM,
+			nsPrefixRAM: NamespaceRAM,
+			nsPrefixQDT: NamespaceQDT,
+			nsPrefixUDT: NamespaceUDT,
 		},
 	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CII invoice: %w", err)
@@ -85,24 +90,38 @@ func UnmarshalInvoice(data []byte) (*Invoice, error) {
 }
 
 func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
+	// Determine GuidelineID to use in output
+	guidelineID := extractGuidelineID(inv, context)
+	if context.OutputGuidelineID != "" {
+		guidelineID = context.OutputGuidelineID
+	}
+
+	// Determine BusinessID to use in output
+	businessID := context.BusinessID
+	if context.Is(ContextPeppolFranceCIUSV1) || context.Is(ContextPeppolFranceFacturXV1) {
+		if profile := inv.Tax.GetExt(dgfip.ExtKeyBillingMode); profile != cbc.CodeEmpty {
+			businessID = profile.String()
+		}
+	}
+
 	out := &Invoice{
 		RSMNamespace: NamespaceRSM,
 		RAMNamespace: NamespaceRAM,
 		QDTNamespace: NamespaceQDT,
 		UDTNamespace: NamespaceUDT,
 		ExchangedContext: &ExchangedContext{
-			GuidelineContext: &ExchangedContextParameter{ID: extractGuidelineID(inv, context)},
+			GuidelineContext: &ExchangedContextParameter{ID: guidelineID},
 		},
 	}
-	if context.BusinessID != "" {
-		out.ExchangedContext.BusinessContext = &ExchangedContextParameter{ID: context.BusinessID}
+	if businessID != "" {
+		out.ExchangedContext.BusinessContext = &ExchangedContextParameter{ID: businessID}
 	}
 
 	if err := out.addHeader(inv); err != nil {
 		return nil, err
 	}
 
-	if err := out.addTransaction(inv); err != nil {
+	if err := out.addTransaction(inv, context); err != nil {
 		return nil, err
 	}
 
@@ -110,17 +129,20 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 }
 
 // addTransaction adds the transaction part of a EN 16931 compliant invoice
-func (out *Invoice) addTransaction(inv *bill.Invoice) error {
+func (out *Invoice) addTransaction(inv *bill.Invoice, ctx Context) error {
 	out.Transaction = new(Transaction)
 
 	if err := out.addLines(inv.Lines); err != nil {
 		return err
 	}
-	if err := out.addAgreement(inv); err != nil {
+	if err := out.addAgreement(inv, ctx); err != nil {
 		return err
 	}
+	if len(inv.Attachments) > 0 {
+		out.addAttachments(inv)
+	}
 	var err error
-	if out.Transaction.Settlement, err = newSettlement(inv); err != nil {
+	if out.Transaction.Settlement, err = newSettlement(inv, ctx); err != nil {
 		return err
 	}
 	out.Transaction.Delivery = newDelivery(inv)

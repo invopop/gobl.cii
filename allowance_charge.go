@@ -3,7 +3,6 @@ package cii
 import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/tax"
 )
@@ -66,10 +65,7 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 		ac.Reason = c.Reason
 	}
 
-	// ReasonCode is not supported at the moment due to a bug in the CII Schema that does not
-	// have the correct UNTDID 7161 code list and subsequently rejects the invoice
-	// if the reason code is mapped.
-	// ac.ReasonCode = c.Ext.Get(untdid.ExtKeyCharge).String()
+	ac.ReasonCode = c.Ext.Get(untdid.ExtKeyCharge).String()
 
 	if c.Percent != nil {
 		p := c.Percent.StringWithoutSymbol()
@@ -147,12 +143,12 @@ func makeTaxCategory(t *tax.Combo) *Tax {
 	}
 	cat := t.Ext.Get(untdid.ExtKeyTaxCategory)
 	c.CategoryCode = cat.String()
-	c.RateApplicablePercent = "0"
-	if t.Percent != nil {
-		c.RateApplicablePercent = t.Percent.StringWithoutSymbol()
-	}
-	if cat == en16931.TaxCategoryExempt {
-		c.ExemptionReasonCode = t.Ext.Get(cef.ExtKeyVATEX).String()
+	// BR-O-05: category O (not subject to VAT) must not have a rate
+	if !cat.In(en16931.TaxCategoryOutsideScope) {
+		c.RateApplicablePercent = "0"
+		if t.Percent != nil {
+			c.RateApplicablePercent = t.Percent.StringWithoutSymbol()
+		}
 	}
 	return c
 }

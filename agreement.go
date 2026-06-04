@@ -26,10 +26,19 @@ type Project struct {
 
 // AdditionalDocument defines the structure of AdditionalReferencedDocument of the CII standard
 type AdditionalDocument struct {
-	ID        string              `xml:"ram:IssuerAssignedID,omitempty"`
-	TypeCode  string              `xml:"ram:TypeCode,omitempty"`
-	Name      string              `xml:"ram:Name,omitempty"`
-	IssueDate *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
+	ID                     string              `xml:"ram:IssuerAssignedID,omitempty"`
+	URIID                  string              `xml:"ram:URIID,omitempty"`
+	TypeCode               string              `xml:"ram:TypeCode,omitempty"`
+	Name                   string              `xml:"ram:Name,omitempty"`
+	AttachmentBinaryObject *BinaryObject       `xml:"ram:AttachmentBinaryObject,omitempty"`
+	IssueDate              *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
+}
+
+// BinaryObject represents binary data with associated metadata in CII
+type BinaryObject struct {
+	Value    string `xml:",chardata"`
+	MimeCode string `xml:"mimeCode,attr,omitempty"`
+	Filename string `xml:"filename,attr,omitempty"`
 }
 
 // IssuerID defines the structure of IssuerAssignedID of the CII standard
@@ -38,17 +47,17 @@ type IssuerID struct {
 }
 
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
-func (out *Invoice) addAgreement(inv *bill.Invoice) error {
+func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 	out.Transaction.Agreement = new(Agreement)
 	agmt := out.Transaction.Agreement
 	if inv.Ordering != nil && inv.Ordering.Code != "" {
 		agmt.BuyerReference = inv.Ordering.Code.String()
 	}
 	if supplier := inv.Supplier; supplier != nil {
-		agmt.Seller = newParty(supplier)
+		agmt.Seller = newParty(supplier, ctx)
 	}
 	if customer := inv.Customer; customer != nil {
-		agmt.Buyer = newParty(customer)
+		agmt.Buyer = newParty(customer, ctx)
 	}
 	if inv.Ordering != nil {
 		if inv.Ordering.Seller != nil {
@@ -61,7 +70,7 @@ func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 				SpecifiedTaxRegistration: agmt.Seller.SpecifiedTaxRegistration,
 			}
 
-			agmt.Seller = newParty(inv.Ordering.Seller)
+			agmt.Seller = newParty(inv.Ordering.Seller, ctx)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
 			c := inv.Ordering.Contracts[0].Code.String()
@@ -88,6 +97,21 @@ func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 			if inv.Ordering.Projects[0].Description != "" {
 				agmt.Project.Name = inv.Ordering.Projects[0].Description
 			}
+		}
+		// BT-17: Tender/lot reference
+		for _, tender := range inv.Ordering.Tender {
+			agmt.AdditionalDocument = append(agmt.AdditionalDocument, &AdditionalDocument{
+				ID:       tender.Code.String(),
+				TypeCode: AdditionalDocumentTypeTender,
+			})
+		}
+		// BT-18: Invoiced object identifier
+		if len(inv.Ordering.Identities) > 0 {
+			id := inv.Ordering.Identities[0]
+			agmt.AdditionalDocument = append(agmt.AdditionalDocument, &AdditionalDocument{
+				ID:       id.Code.String(),
+				TypeCode: AdditionalDocumentTypeProductInvoice,
+			})
 		}
 	}
 	return nil

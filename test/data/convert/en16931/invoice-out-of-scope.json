@@ -1,0 +1,113 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "140396e7847249c7120fe1e0fcaee064a6a22a06c3f1d439a93fca37e2375052"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "INV-OUT-001",
+		"issue_date": "2025-04-10",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "CYBERDYNE IT GmbH",
+			"tax_id": {
+				"country": "DE"
+			},
+			"identities": [
+				{
+					"key": "de-tax-number",
+					"code": "111/222/33340"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Am Wassermann 29",
+					"locality": "Köln",
+					"code": "50829",
+					"country": "DE"
+				}
+			]
+		},
+		"customer": {
+			"name": "Openlane Ltd",
+			"addresses": [
+				{
+					"street": "Am Wassermann 29",
+					"locality": "Köln",
+					"code": "50829",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Consulting services outside scope of VAT",
+					"price": "500.00",
+					"unit": "one"
+				},
+				"sum": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "outside-scope",
+						"ext": {
+							"cef-vatex": "VATEX-EU-O",
+							"untdid-tax-category": "O"
+						}
+					}
+				],
+				"total": "500.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "Payment due on receipt"
+			}
+		},
+		"totals": {
+			"sum": "500.00",
+			"total": "500.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "outside-scope",
+								"ext": {
+									"cef-vatex": "VATEX-EU-O",
+									"untdid-tax-category": "O"
+								},
+								"base": "500.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "500.00",
+			"payable": "500.00"
+		}
+	}
+}

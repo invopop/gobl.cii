@@ -44,4 +44,23 @@ func TestParseCtoGPayment(t *testing.T) {
 
 	assert.Len(t, payment.Instructions.CreditTransfer, 1)
 	assert.Equal(t, "123456789012345678", payment.Instructions.CreditTransfer[0].IBAN)
+
+	// BT-91: Debtor account IBAN
+	require.NotNil(t, payment.Instructions.DirectDebit)
+	assert.Equal(t, "098765432109876543", payment.Instructions.DirectDebit.Account)
+}
+
+func TestParseCtoGPaymentReference(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "CII_example2.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	payment := inv.Payment
+	require.NotNil(t, payment)
+	require.NotNil(t, payment.Instructions)
+
+	// BT-83: Payment reference
+	assert.Equal(t, cbc.Code("0003434323213231"), payment.Instructions.Ref)
 }

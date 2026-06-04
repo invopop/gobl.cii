@@ -98,12 +98,6 @@
     <ram:ApplicableHeaderTradeDelivery>
       <ram:ShipToTradeParty>
         <ram:Name>Ministerium für Wissenschaft, Forschung und Kunst Baden-Württemberg</ram:Name>
-        <ram:DefinedTradeContact>
-          <ram:PersonName>IT Team</ram:PersonName>
-          <ram:EmailURIUniversalCommunication>
-            <ram:URIID>rechnung@random.com</ram:URIID>
-          </ram:EmailURIUniversalCommunication>
-        </ram:DefinedTradeContact>
         <ram:PostalTradeAddress>
           <ram:PostcodeCode>70173</ram:PostcodeCode>
           <ram:LineOne>Königstr. 46</ram:LineOne>

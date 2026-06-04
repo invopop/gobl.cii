@@ -38,6 +38,20 @@ const (
 	NamespaceUDT = "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
 )
 
+// Namespace prefixes used when unmarshalling CII XML documents.
+const (
+	nsPrefixRSM = "rsm"
+	nsPrefixRAM = "ram"
+	nsPrefixQDT = "qdt"
+	nsPrefixUDT = "udt"
+)
+
+// Common Guideline and VESID values reused across multiple contexts.
+const (
+	guidelineIDEN16931V2017 = "urn:cen.eu:en16931:2017"
+	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.13"
+)
+
 // Profile ID codes
 const (
 	ProfileIDPeppolBilling       = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
@@ -56,66 +70,78 @@ const (
 type Context struct {
 	GuidelineID string
 	BusinessID  string
-	Version     string
-	Addons      []cbc.Key
+	// OutputGuidelineID optionally specifies a different GuidelineID
+	// to use in the actual generated CII XML document. If empty, GuidelineID
+	// is used. This allows the context to be identified by one ID externally while
+	// generating different values in the XML output.
+	OutputGuidelineID string
+	Version           string
+	Addons            []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
 }
 
+// Is checks if two contexts are the same.
+func (c *Context) Is(c2 Context) bool {
+	return c.GuidelineID == c2.GuidelineID && c.BusinessID == c2.BusinessID
+}
+
 // ContextEN16931V2017 is used for EN 16931 documents, and is the default.
 var ContextEN16931V2017 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017",
+	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
-	VESID:       "eu.cen.en16931:cii:1.3.13",
+	VESID:       vesIDEN16931CII,
 }
 
 // ContextPeppolV3 for Peppol Billing V3.0 context.
 var ContextPeppolV3 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
+	GuidelineID: guidelineIDEN16931V2017 + "#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
-	VESID:       "eu.cen.en16931:cii:1.3.13",
+	VESID:       vesIDEN16931CII,
 }
 
 // ContextFacturXV1 is used for Factur-X V1 documents.
 var ContextFacturXV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended",
-	Version:     VersionD16B,
+	GuidelineID: guidelineIDEN16931V2017,
+	Version:     VersionD22B,
 	Addons:      []cbc.Key{facturx.V1},
-	VESID:       "fr.factur-x:extended:1.0.7-2",
+	VESID:       "fr.factur-x:en16931:1.0.8",
 }
 
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
 var ContextPeppolFranceFacturXV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
-	Version:     VersionD16B,
-	Addons:      []cbc.Key{flow2.V1},
-	VESID:       "fr.factur-x:en16931:1.0.7-2",
+	GuidelineID:       guidelineIDEN16931V2017 + "#conformant#urn:peppol:france:billing:Factur-X:1.0",
+	BusinessID:        ProfileIDPeppolFranceBilling,
+	OutputGuidelineID: guidelineIDEN16931V2017 + "#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
+	Version:           VersionD16B,
+	Addons:            []cbc.Key{flow2.V1},
+	VESID:             "fr.factur-x:en16931:1.0.8",
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
 var ContextPeppolFranceCIUSV1 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
-	BusinessID:  ProfileIDPeppolFranceBilling,
-	Version:     VersionD22B,
-	Addons:      []cbc.Key{flow2.V1},
-	VESID:       "eu.cen.en16931:cii:1.3.13",
+	GuidelineID:       guidelineIDEN16931V2017 + "#compliant#urn:peppol:france:billing:cius:1.0",
+	BusinessID:        ProfileIDPeppolFranceBilling,
+	OutputGuidelineID: guidelineIDEN16931V2017,
+	Version:           VersionD22B,
+	Addons:            []cbc.Key{flow2.V1},
+	VESID:             vesIDEN16931CII,
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
 var ContextZUGFeRDV2 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended",
+	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
-	VESID:       "de.zugferd:extended:2.3.2",
+	VESID:       "de.zugferd:en16931:2.4",
 }
 
 // ContextXRechnungV3 is used for XRechnung documents
 var ContextXRechnungV3 = Context{
-	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+	GuidelineID: guidelineIDEN16931V2017 + "#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{xrechnung.V3},
@@ -150,6 +176,73 @@ var ContextCDARFlow6PPF = Context{
 	GuidelineID: CDARGuidelinePPF,
 	Addons:      []cbc.Key{flow6.V1},
 	VESID:       "fr.ctc:cdar:1.3.1",
+}
+
+// contexts is used internally for reverse lookups during parsing.
+// When adding new contexts, remember to add them here AND as exported variables above.
+var contexts = []Context{
+	ContextEN16931V2017, ContextPeppolV3, ContextFacturXV1,
+	ContextPeppolFranceFacturXV1, ContextPeppolFranceCIUSV1,
+	ContextZUGFeRDV2, ContextXRechnungV3, ContextChorusProV1,
+	ContextCDARFlow6, ContextCDARFlow6PPF,
+}
+
+// FindContext looks up a context by GuidelineID and optionally BusinessID.
+// Returns nil if no matching context is found.
+//
+// The lookup logic works as follows:
+//  1. If the BusinessID is a French billing mode code, checks for a context whose
+//     OutputGuidelineID matches (France CIUS documents use EN16931's
+//     GuidelineID in the XML but can be identified by their billing mode BusinessID)
+//  2. Tries to match on the full GuidelineID (for external identification)
+//  3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
+func FindContext(guidelineID string, businessID string) *Context {
+	// French billing mode check: France CIUS documents use the same
+	// GuidelineID as EN16931 but can be identified by their BusinessID
+	// containing a billing mode code (e.g., "B1", "S1", "M4").
+	if isFrenchBillingMode(businessID) {
+		for i := range contexts {
+			ctx := &contexts[i]
+			if ctx.OutputGuidelineID == guidelineID {
+				return ctx
+			}
+		}
+	}
+
+	// First pass: try to match on full GuidelineID
+	for i := range contexts {
+		ctx := &contexts[i]
+		if ctx.GuidelineID == guidelineID {
+			if ctx.BusinessID != "" && businessID != "" && ctx.BusinessID != businessID {
+				continue
+			}
+			return ctx
+		}
+	}
+
+	// Second pass: try to match on OutputGuidelineID (for parsing incoming documents)
+	for i := range contexts {
+		ctx := &contexts[i]
+		if ctx.OutputGuidelineID != "" && ctx.OutputGuidelineID == guidelineID {
+			return ctx
+		}
+	}
+
+	return nil
+}
+
+// isFrenchBillingMode checks if the given businessID matches a known French
+// billing mode code pattern (e.g., "S1", "B1", "M4"). These codes consist of
+// a letter (B for goods, S for services, M for mixed) followed by a digit.
+func isFrenchBillingMode(businessID string) bool {
+	if len(businessID) != 2 {
+		return false
+	}
+	switch businessID[0] {
+	case 'B', 'S', 'M':
+		return businessID[1] >= '0' && businessID[1] <= '9'
+	}
+	return false
 }
 
 // Parse parses a raw XML CII invoice document and converts it into

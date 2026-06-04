@@ -2,6 +2,7 @@ package cii
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -52,7 +53,7 @@ type SpecifiedTaxRegistration struct {
 // LegalOrganization defines the structure of the SpecifiedLegalOrganization of the CII standard
 type LegalOrganization struct {
 	ID   *PartyID `xml:"ram:ID"`
-	Name string   `xml:"ram:TradingBusinessName"`
+	Name string   `xml:"ram:TradingBusinessName,omitempty"`
 }
 
 // Contact defines the structure of the DefinedTradeContact of the CII standard
@@ -77,7 +78,7 @@ type Email struct {
 const SchemeIDEmail = "EM"
 
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
-func newParty(party *org.Party) *Party {
+func newParty(party *org.Party, ctx Context) *Party {
 	if party == nil {
 		return nil
 	}
@@ -87,16 +88,14 @@ func newParty(party *org.Party) *Party {
 		PostalTradeAddress: newPostalTradeAddress(party.Addresses),
 	}
 
-	// For Chorus Pro, we need to extract the scheme ID from the tax extension
-	if party.Ext.Has(choruspro.ExtKeyScheme) {
+	// BT-28/BT-45: Trading name (alias)
+	if party.Alias != "" {
 		p.LegalOrganization = &LegalOrganization{
-			ID: &PartyID{
-				SchemeID: party.Ext.Get(choruspro.ExtKeyScheme).String(),
-			},
+			Name: party.Alias,
 		}
 	}
 
-	if party.TaxID != nil {
+	if party.TaxID != nil && party.TaxID.Code != "" {
 		// Assumes VAT ID being used instead of possible tax number
 		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
 			{
@@ -106,28 +105,111 @@ func newParty(party *org.Party) *Party {
 				},
 			},
 		}
-		// Add ID for Chorus Pro
-		if p.LegalOrganization != nil {
-			p.LegalOrganization.ID.Value = party.TaxID.String()
+		// Override address country from tax ID (authoritative source)
+		if party.TaxID.Country != "" {
+			if p.PostalTradeAddress == nil {
+				p.PostalTradeAddress = new(PostalTradeAddress)
+			}
+			p.PostalTradeAddress.CountryID = party.TaxID.Country.String()
 		}
 	}
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
+			// BT-30/BT-47: Legal registration identifier
+			if id.Scope == org.IdentityScopeLegal {
+				if p.LegalOrganization == nil {
+					p.LegalOrganization = &LegalOrganization{}
+				}
+				p.LegalOrganization.ID = &PartyID{
+					Value: id.Code.String(),
+				}
+				if id.Ext.Has(iso.ExtKeySchemeID) {
+					p.LegalOrganization.ID.SchemeID = id.Ext.Get(iso.ExtKeySchemeID).String()
+				}
+				continue
+			}
+
+			// GlobalID: identity with scheme ID and no scope
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				p.GlobalID = &PartyID{
 					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
 					Value:    id.Code.String(),
 				}
+				continue
 			}
-			// Add ID for Chorus Pro
-			if id.Type == fr.IdentityTypeSIRET && p.LegalOrganization != nil {
-				p.LegalOrganization.ID.Value = id.Code.String()
+			// BT-29/BT-46: Seller/Buyer identifier (no scheme, no scope)
+			if p.ID == nil {
+				p.ID = &PartyID{
+					Value: id.Code.String(),
+				}
 			}
 		}
 	}
 
+	if slices.Contains(ctx.Addons, choruspro.V1) {
+		applyChorusPro(party, p)
+	}
+
 	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
+
+	if p.LegalOrganization != nil && p.LegalOrganization.ID != nil && p.LegalOrganization.ID.Value == "" {
+		p.LegalOrganization.ID = nil
+	}
+
 	return p
+}
+
+// chorusProLegalOrgID returns the LegalOrganization ID for Chorus Pro based on the
+// scheme extension value, which determines the type of identifier to use.
+// applyChorusPro sets Chorus Pro-specific fields on the CII party. It suppresses
+// the GlobalID (which is not used in Chorus Pro) and sets the LegalOrganization ID
+// to the identifier required for the given scheme type.
+func applyChorusPro(party *org.Party, p *Party) {
+	p.GlobalID = nil
+	if p.LegalOrganization == nil {
+		p.LegalOrganization = &LegalOrganization{}
+	}
+	p.LegalOrganization.ID = chorusProLegalOrgID(party)
+}
+
+func chorusProLegalOrgID(party *org.Party) *PartyID {
+	scheme := party.Ext.Get(choruspro.ExtKeyScheme)
+	pid := &PartyID{
+		SchemeID: scheme.String(),
+	}
+	switch scheme {
+	case "1":
+		// SIRET: identity with type SIRET
+		for _, id := range party.Identities {
+			if id.Type == fr.IdentityTypeSIRET {
+				pid.Value = id.Code.String()
+				return pid
+			}
+		}
+	case "2":
+		// Intra-community VAT number
+		if party.TaxID != nil {
+			pid.Value = party.TaxID.String()
+		}
+	case "3", "6":
+		// Country code + first 16 characters of company name
+		if party.TaxID != nil && party.TaxID.Country != "" {
+			name := []rune(party.Name)
+			if len(name) > 16 {
+				name = name[:16]
+			}
+			pid.Value = party.TaxID.Country.String() + string(name)
+		}
+	case "4", "5":
+		// RIDET / Tahiti: identity with scope legal
+		for _, id := range party.Identities {
+			if id.Scope == org.IdentityScopeLegal {
+				pid.Value = id.Code.String()
+				return pid
+			}
+		}
+	}
+	return pid
 }
 
 func mapGOBLTaxIDScheme(id *tax.Identity) string {

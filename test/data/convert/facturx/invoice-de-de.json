@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "cd22a028d8e0419913b63ccc9ec5e41ad8eea068dd73324b5e930ad9aa18ec65"
+			"val": "3d6b2a9aea6f997057773723c94c5b4fcb86497d3e382bc3d0e0cbd7c1638e77"
 		}
 	},
 	"doc": {
@@ -195,6 +195,9 @@
 				],
 				"notes": "lorem ipsum"
 			}
+		},
+		"delivery": {
+			"date": "2024-02-13"
 		},
 		"totals": {
 			"sum": "1800.00",

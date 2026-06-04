@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "50f4099e1333ae77a84fc574374eb0fc975c9c7893abdbe96fadcfcbde468585"
+			"val": "a9bb1274ce9e082598dfeb4e0d03b123cb458b19868a509e36efb0dd85b9bd83"
 		}
 	},
 	"doc": {
@@ -12,13 +12,14 @@
 		"$regime": "DE",
 		"$addons": [
 			"eu-en16931-v2017",
-			"fr-facturx-v1"
+			"de-zugferd-v2"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "SAMPLE",
 		"code": "001",
-		"issue_date": "2024-05-15",
+		"issue_date": "2024-02-13",
+		"op_date": "2024-02-13",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
@@ -49,9 +50,16 @@
 		"customer": {
 			"name": "Sample Consumer",
 			"tax_id": {
-				"country": "DE",
-				"code": "282741168"
+				"country": "DE"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "Hans",
+						"surname": "Müller"
+					}
+				}
+			],
 			"addresses": [
 				{
 					"num": "25",
@@ -70,37 +78,52 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "20",
-				"item": {
-					"name": "Development services",
-					"price": "90.00",
-					"unit": "h"
+				"quantity": "1",
+				"period": {
+					"start": "2024-02-01",
+					"end": "2024-02-29"
 				},
-				"sum": "1800.00",
+				"item": {
+					"name": "Monthly platform  license  fee",
+					"price": "4500.00",
+					"unit": "one"
+				},
+				"sum": "4500.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "4500.00"
 			}
 		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "PO-2024-12345"
+				}
+			]
+		},
 		"payment": {
 			"terms": {
-				"notes": "lorem ipsum"
+				"due_dates": [
+					{
+						"date": "2024-03-15",
+						"amount": "5355.00",
+						"percent": "100%"
+					}
+				]
 			}
 		},
-		"delivery": {
-			"date": "2024-05-15"
-		},
 		"totals": {
-			"sum": "1800.00",
-			"total": "1800.00",
+			"sum": "4500.00",
+			"total": "4500.00",
 			"taxes": {
 				"categories": [
 					{
@@ -111,19 +134,27 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1800.00",
+								"base": "4500.00",
 								"percent": "19%",
-								"amount": "342.00"
+								"amount": "855.00"
 							}
 						],
-						"amount": "342.00"
+						"amount": "855.00"
 					}
 				],
-				"sum": "342.00"
+				"sum": "855.00"
 			},
-			"tax": "342.00",
-			"total_with_tax": "2142.00",
-			"payable": "2142.00"
-		}
+			"tax": "855.00",
+			"total_with_tax": "5355.00",
+			"payable": "5355.00"
+		},
+		"notes": [
+			{
+				"text": "Order PO-2024-12345, Department 906300"
+			},
+			{
+				"text": "For questions please contact billing@example.com.\nInvoice period corresponds to service period."
+			}
+		]
 	}
 }

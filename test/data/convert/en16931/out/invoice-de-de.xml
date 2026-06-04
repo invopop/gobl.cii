@@ -51,6 +51,7 @@
     <ram:ApplicableHeaderTradeAgreement>
       <ram:BuyerReference>XR-2024-2</ram:BuyerReference>
       <ram:SellerTradeParty>
+        <ram:ID>123456789</ram:ID>
         <ram:Name>Salescompany ltd.</ram:Name>
         <ram:DefinedTradeContact>
           <ram:PersonName>Antonio Salesmacher</ram:PersonName>
@@ -125,7 +126,6 @@
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20240227</udt:DateTimeString>
         </ram:DueDateDateTime>
-        <ram:PartialPaymentAmount>2000.00</ram:PartialPaymentAmount>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1800.00</ram:LineTotalAmount>

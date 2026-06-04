@@ -55,10 +55,10 @@ func UnmarshalCDAR(data []byte) (*CDAR, error) {
 	cdar := new(CDAR)
 	if err := xmlctx.Unmarshal(data, cdar, xmlctx.WithNamespaces(
 		map[string]string{
-			"rsm": NamespaceCDARRSM,
-			"ram": NamespaceRAM,
-			"qdt": NamespaceQDT,
-			"udt": NamespaceUDT,
+			nsPrefixRSM: NamespaceCDARRSM,
+			nsPrefixRAM: NamespaceRAM,
+			nsPrefixQDT: NamespaceQDT,
+			nsPrefixUDT: NamespaceUDT,
 		},
 	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CDAR: %w", err)
