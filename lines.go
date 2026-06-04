@@ -172,7 +172,7 @@ func newLine(l *bill.Line) *Line {
 			// BT-157: Standard identifier (has scheme ID extension)
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				lineItem.Product.GlobalID = &GlobalID{
-					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
 					Value:    id.Code.String(),
 				}
 			} else if id.Label != "" {
@@ -198,7 +198,7 @@ func newLine(l *bill.Line) *Line {
 			TypeCode: "130",
 		}
 		if l.Identifier.Ext.Has(untdid.ExtKeyReference) {
-			rc := l.Identifier.Ext[untdid.ExtKeyReference].String()
+			rc := l.Identifier.Ext.Get(untdid.ExtKeyReference).String()
 			ref.RefCode = &rc
 		}
 		lineItem.Agreement.AdditionalReference = ref

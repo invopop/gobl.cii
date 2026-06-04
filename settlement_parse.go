@@ -53,7 +53,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 			if err != nil {
 				return nil, err
 			}
-			a := &pay.Advance{
+			a := &pay.Record{
 				Amount: amt,
 			}
 			if ap.Date != nil && ap.Date.DateFormat != nil {
@@ -71,7 +71,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 		if err != nil {
 			return nil, err
 		}
-		a := &pay.Advance{
+		a := &pay.Record{
 			Amount: amt,
 		}
 		pymt.Advances = append(pymt.Advances, a)
@@ -130,7 +130,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 	if len(terms.DueDates) == 0 &&
 		terms.Notes == "" &&
 		terms.Key == "" &&
-		len(terms.Ext) == 0 {
+		terms.Ext.Len() == 0 {
 		return nil, nil
 	}
 
@@ -141,9 +141,9 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 	pm := stlm.PaymentMeans[0]
 	inst := &pay.Instructions{
 		Key: goblPaymentMeansCode(pm.TypeCode),
-		Ext: tax.Extensions{
+		Ext: tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyPaymentMeans: cbc.Code(pm.TypeCode),
-		},
+		}),
 	}
 
 	// BT-83: Payment reference

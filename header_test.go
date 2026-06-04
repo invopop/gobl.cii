@@ -38,7 +38,7 @@ func TestNewHeader(t *testing.T) {
 		assert.ErrorContains(t, err, "tax: (ext: (untdid-document-type: required.).).")
 
 		inv.Tax = &bill.Tax{
-			Ext: tax.Extensions{},
+			Ext: tax.ExtensionsOf(cbc.CodeMap{}),
 		}
 		_, err = cii.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "ext: (untdid-document-type: required.).")
@@ -68,7 +68,7 @@ func TestNewHeader(t *testing.T) {
 
 		inv.Notes = append(inv.Notes, &org.Note{
 			Text: "Please pay on time",
-			Ext:  tax.Extensions{untdid.ExtKeyTextSubject: cbc.Code("AAI")},
+			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code("AAI")}),
 		})
 
 		doc, err := cii.ConvertInvoice(env)

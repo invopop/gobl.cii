@@ -8,11 +8,11 @@ import (
 	"io"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
-	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -115,7 +115,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	BusinessID:        ProfileIDPeppolFranceBilling,
 	OutputGuidelineID: guidelineIDEN16931V2017 + "#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Version:           VersionD16B,
-	Addons:            []cbc.Key{ctc.Flow2V1},
+	Addons:            []cbc.Key{flow2.V1},
 	VESID:             "fr.factur-x:en16931:1.0.8",
 }
 
@@ -125,7 +125,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	BusinessID:        ProfileIDPeppolFranceBilling,
 	OutputGuidelineID: guidelineIDEN16931V2017,
 	Version:           VersionD22B,
-	Addons:            []cbc.Key{ctc.Flow2V1},
+	Addons:            []cbc.Key{flow2.V1},
 	VESID:             vesIDEN16931CII,
 }
 

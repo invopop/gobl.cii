@@ -95,7 +95,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, org.IdentityScopeLegal, customer.Identities[0].Scope)
 		// GlobalID
 		assert.Equal(t, "3456789012098", customer.Identities[1].Code.String())
-		assert.Equal(t, "0088", customer.Identities[1].Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "0088", customer.Identities[1].Ext.Get(iso.ExtKeySchemeID).String())
 	})
 
 	t.Run("CII-IN_SE-R-003.xml", func(t *testing.T) {

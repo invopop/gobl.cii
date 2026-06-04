@@ -3,7 +3,7 @@ package cii
 import (
 	"strings"
 
-	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -42,9 +42,9 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		Customer: goblNewParty(in.Transaction.Agreement.Buyer),
 		Tax: &bill.Tax{
 			Rounding: tax.RoundingRuleCurrency,
-			Ext: tax.Extensions{
+			Ext: tax.ExtensionsOf(cbc.CodeMap{
 				untdid.ExtKeyDocumentType: cbc.Code(in.ExchangedDocument.TypeCode),
-			},
+			}),
 		},
 	}
 
@@ -52,7 +52,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		out.Addons = tax.Addons{List: ctx.Addons}
 		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) {
 			if in.ExchangedContext.BusinessContext != nil {
-				out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
+				out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
 			}
 		}
 	}
@@ -156,7 +156,7 @@ func goblParseNotes(notes []*Note) []*org.Note {
 	for _, note := range notes {
 		n := &org.Note{Text: note.Content}
 		if note.SubjectCode != "" {
-			n.Ext = tax.Extensions{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)}
+			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
 		}
 		out = append(out, n)
 	}
