@@ -49,7 +49,7 @@ const (
 // Common Guideline and VESID values reused across multiple contexts.
 const (
 	guidelineIDEN16931V2017 = "urn:cen.eu:en16931:2017"
-	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.13"
+	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.16"
 )
 
 // Profile ID codes
