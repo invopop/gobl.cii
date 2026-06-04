@@ -4,22 +4,19 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "24e8053cd99aa8ad109602fde6789fad4d164dbf5a029f4d95db3b4230396e70"
+			"val": "45e527b6a514f1d1e49bd6faa347164e2b2906eb97184f1327276339031be5b4"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "update",
 		"issue_date": "2025-07-01",
 		"issue_time": "15:10:00",
 		"code": "STATUS-200",
-		"ext": {
-			"fr-ctc-status-code": "200"
-		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [
@@ -38,7 +35,7 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "SE"
 			}
 		},
 		"customer": {
@@ -59,42 +56,7 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "BY"
-			}
-		},
-		"issuer": {
-			"name": "PA-FR",
-			"identities": [
-				{
-					"code": "200000008",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "9998_PEP"
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "WK"
-			}
-		},
-		"recipient": {
-			"name": "PPF",
-			"identities": [
-				{
-					"code": "9998",
-					"ext": {
-						"iso-scheme-id": "0238"
-					}
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "DFH"
+				"fr-ctc-flow6-role": "BY"
 			}
 		},
 		"lines": [
@@ -105,6 +67,9 @@
 					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003"
+				},
+				"ext": {
+					"fr-ctc-flow6-status": "200"
 				}
 			}
 		]

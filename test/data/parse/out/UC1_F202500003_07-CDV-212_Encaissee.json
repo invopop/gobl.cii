@@ -4,33 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0105937eea7e89a516a34226dd623f7204309bf93ce16bee138347483d1f523a"
+			"val": "df29b6e9360913873e7c84b6108db2fa3b531f45c32b18553c2b50a0fccd926b"
 		}
 	},
 	"doc": {
-		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$schema": "https://gobl.org/draft-0/bill/payment",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "response",
+		"type": "receipt",
+		"code": "F202500003_212_20250701151000380_20250701",
 		"issue_date": "2025-08-02",
 		"issue_time": "10:05:00",
-		"code": "F202500003_212_20250701151000380_20250701",
+		"currency": "EUR",
 		"ext": {
-			"fr-ctc-status-code": "212"
+			"fr-ctc-flow6-condition": "MEN",
+			"fr-ctc-flow6-status": "212"
 		},
 		"supplier": {
-			"identities": [
-				{
-					"code": "100000009",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			]
-		},
-		"issuer": {
 			"name": "VENDEUR",
 			"identities": [
 				{
@@ -48,10 +40,10 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "SE"
 			}
 		},
-		"recipient": {
+		"customer": {
 			"name": "ACHETEUR",
 			"identities": [
 				{
@@ -69,31 +61,26 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "BY"
+				"fr-ctc-flow6-role": "BY"
 			}
 		},
 		"lines": [
 			{
-				"index": 1,
-				"key": "paid",
-				"doc": {
+				"i": 1,
+				"document": {
 					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003"
 				},
-				"complements": [
-					{
-						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/characteristic",
-						"type_code": "MEN",
-						"changed": false,
-						"percent": "20.00%",
-						"amount": {
-							"currency": "EUR",
-							"value": "12000"
-						}
-					}
-				]
+				"amount": "12000"
 			}
-		]
+		],
+		"methods": [
+			{
+				"key": "other",
+				"amount": "12000"
+			}
+		],
+		"total": "12000"
 	}
 }

@@ -4,22 +4,19 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0b5db28913c9ac4699945f855d4c9dc4f118ca91bb883e356c7668b2de0883d5"
+			"val": "a1a2a46ec1128821d3c8972dd193b4001a72b8cee94e3521282f3cbd65efc47d"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "response",
 		"issue_date": "2025-07-01",
 		"issue_time": "15:10:00",
 		"code": "STATUS-213",
-		"ext": {
-			"fr-ctc-status-code": "213"
-		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [
@@ -38,7 +35,7 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "SE"
 			}
 		},
 		"customer": {
@@ -59,49 +56,7 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "BY"
-			}
-		},
-		"issuer": {
-			"name": "ACHETEUR",
-			"identities": [
-				{
-					"code": "200000008",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "200000008_PEP"
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "BY"
-			}
-		},
-		"recipient": {
-			"name": "VENDEUR",
-			"identities": [
-				{
-					"code": "100000009",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "100000009_PEP"
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "BY"
 			}
 		},
 		"lines": [
@@ -118,16 +73,23 @@
 						"key": "legal",
 						"description": "Motif REJ_SEMAN",
 						"ext": {
-							"fr-ctc-reason-code": "REJ_SEMAN"
+							"fr-ctc-flow6-condition": "DIV",
+							"fr-ctc-flow6-reason": "REJ_SEMAN"
 						}
 					}
 				],
 				"actions": [
 					{
 						"key": "reissue",
-						"description": "Créer une facture rectificative"
+						"description": "Créer une facture rectificative",
+						"ext": {
+							"fr-ctc-flow6-action": "NIN"
+						}
 					}
-				]
+				],
+				"ext": {
+					"fr-ctc-flow6-status": "213"
+				}
 			}
 		]
 	}

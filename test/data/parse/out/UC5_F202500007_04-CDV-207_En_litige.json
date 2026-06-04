@@ -4,54 +4,20 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1dbbed2385d50bf8a01b2294080e535a4beffe3fd8562c41437e4c0ab765428d"
+			"val": "180e33bc660626ffa7c79247eb4e1bf142d1afd68b88474e6bb15aa97bb2828b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "response",
 		"issue_date": "2025-07-02",
 		"issue_time": "18:15:00",
 		"code": "F202500007_207_20250702171000380_20250702",
-		"ext": {
-			"fr-ctc-status-code": "207"
-		},
 		"supplier": {
-			"identities": [
-				{
-					"code": "100000009",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			]
-		},
-		"issuer": {
-			"name": "ACHETEUR",
-			"identities": [
-				{
-					"code": "200000008",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "200000008_STATUTS"
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "BY"
-			}
-		},
-		"recipient": {
 			"name": "VENDEUR",
 			"identities": [
 				{
@@ -69,13 +35,34 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "SE"
+			}
+		},
+		"customer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0225",
+					"code": "200000008_STATUTS"
+				}
+			],
+			"ext": {
+				"fr-ctc-flow6-role": "BY"
 			}
 		},
 		"lines": [
 			{
 				"index": 1,
-				"key": "disputed",
+				"key": "rejected",
 				"doc": {
 					"type": "380",
 					"issue_date": "2025-07-02",
@@ -86,38 +73,23 @@
 						"key": "legal",
 						"description": "Taux de TVA erroné",
 						"ext": {
-							"fr-ctc-reason-code": "TX_TVA_ERR"
+							"fr-ctc-flow6-condition": "DIV",
+							"fr-ctc-flow6-reason": "TX_TVA_ERR"
 						}
 					}
 				],
 				"actions": [
 					{
 						"key": "credit-full",
-						"description": "Créer un Avoir total"
+						"description": "Créer un Avoir total",
+						"ext": {
+							"fr-ctc-flow6-action": "CNF"
+						}
 					}
 				],
-				"complements": [
-					{
-						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/characteristic",
-						"id": "BT-152",
-						"type_code": "DIV",
-						"reason_code": "TX_TVA_ERR",
-						"changed": true,
-						"name": "Taux TVA",
-						"location": "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent",
-						"percent": "10.00%"
-					},
-					{
-						"$schema": "https://gobl.org/draft-0/addons/fr/ctc/characteristic",
-						"id": "BT-152",
-						"type_code": "DVA",
-						"reason_code": "TX_TVA_ERR",
-						"changed": true,
-						"name": "Taux TVA",
-						"location": "/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent",
-						"percent": "20.00%"
-					}
-				]
+				"ext": {
+					"fr-ctc-flow6-status": "207"
+				}
 			}
 		]
 	}

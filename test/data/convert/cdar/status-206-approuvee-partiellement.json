@@ -4,22 +4,19 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0a2d47a016e4a6e530452d0c1383d4e64868ad5e9ffd4c82c9aa456e73b08287"
+			"val": "e670df49c428afc13325b7e757478a6ed2b41f0b6918d13bdf774df7091236ac"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "response",
 		"issue_date": "2025-07-01",
 		"issue_time": "15:10:00",
 		"code": "STATUS-206",
-		"ext": {
-			"fr-ctc-status-code": "206"
-		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [
@@ -38,7 +35,7 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "SE"
 			}
 		},
 		"customer": {
@@ -59,55 +56,13 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "BY"
-			}
-		},
-		"issuer": {
-			"name": "ACHETEUR",
-			"identities": [
-				{
-					"code": "200000008",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "200000008_PEP"
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "BY"
-			}
-		},
-		"recipient": {
-			"name": "VENDEUR",
-			"identities": [
-				{
-					"code": "100000009",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "100000009_PEP"
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "BY"
 			}
 		},
 		"lines": [
 			{
 				"index": 1,
-				"key": "partially-accepted",
+				"key": "rejected",
 				"doc": {
 					"type": "380",
 					"issue_date": "2025-07-01",
@@ -118,16 +73,23 @@
 						"key": "other",
 						"description": "Motif AUTRE",
 						"ext": {
-							"fr-ctc-reason-code": "AUTRE"
+							"fr-ctc-flow6-condition": "DIV",
+							"fr-ctc-flow6-reason": "AUTRE"
 						}
 					}
 				],
 				"actions": [
 					{
 						"key": "reissue",
-						"description": "Créer une facture rectificative"
+						"description": "Créer une facture rectificative",
+						"ext": {
+							"fr-ctc-flow6-action": "NIN"
+						}
 					}
-				]
+				],
+				"ext": {
+					"fr-ctc-flow6-status": "206"
+				}
 			}
 		]
 	}

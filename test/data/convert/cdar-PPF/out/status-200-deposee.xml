@@ -14,16 +14,10 @@
       <ram:RoleCode>WK</ram:RoleCode>
     </ram:SenderTradeParty>
     <ram:IssuerTradeParty>
-      <ram:GlobalID schemeID="0002">200000008</ram:GlobalID>
-      <ram:Name>PA-FR</ram:Name>
       <ram:RoleCode>WK</ram:RoleCode>
-      <ram:URIUniversalCommunication>
-        <ram:URIID schemeID="0225">9998_PEP</ram:URIID>
-      </ram:URIUniversalCommunication>
     </ram:IssuerTradeParty>
     <ram:RecipientTradeParty>
       <ram:GlobalID schemeID="0238">9998</ram:GlobalID>
-      <ram:Name>PPF</ram:Name>
       <ram:RoleCode>DFH</ram:RoleCode>
     </ram:RecipientTradeParty>
   </rsm:ExchangedDocument>

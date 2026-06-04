@@ -4,19 +4,23 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1f1b288072b0244361e1a5f7dd6edb8cb110f8f562bf57a641f416b3d67bb9fb"
+			"val": "d318e6b5564f1c8a500a09624ff84f599c76388b82a98bae49b5b8d4fc44bead"
 		}
 	},
 	"doc": {
-		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$schema": "https://gobl.org/draft-0/bill/payment",
 		"$addons": [
 			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "response",
-		"issue_date": "2025-07-01",
-		"issue_time": "15:10:00",
-		"code": "STATUS-207",
+		"type": "receipt",
+		"code": "PAY-212",
+		"issue_date": "2025-07-02",
+		"currency": "EUR",
+		"ext": {
+			"fr-ctc-flow6-condition": "MEN",
+			"fr-ctc-flow6-status": "212"
+		},
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [
@@ -61,36 +65,22 @@
 		},
 		"lines": [
 			{
-				"index": 1,
-				"key": "rejected",
-				"doc": {
+				"i": 1,
+				"document": {
 					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003"
 				},
-				"reasons": [
-					{
-						"key": "legal",
-						"description": "Motif TX_TVA_ERR",
-						"ext": {
-							"fr-ctc-flow6-condition": "DIV",
-							"fr-ctc-flow6-reason": "TX_TVA_ERR"
-						}
-					}
-				],
-				"actions": [
-					{
-						"key": "reissue",
-						"description": "Créer une facture rectificative",
-						"ext": {
-							"fr-ctc-flow6-action": "NIN"
-						}
-					}
-				],
-				"ext": {
-					"fr-ctc-flow6-status": "207"
-				}
+				"amount": "500.00",
+				"due": "250.00"
 			}
-		]
+		],
+		"methods": [
+			{
+				"key": "credit-transfer",
+				"amount": "500.00"
+			}
+		],
+		"total": "500.00"
 	}
 }

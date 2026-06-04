@@ -4,22 +4,19 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b4f4832d87b761ce6004f7bcd8e3a1264167b84be82ac31d5c9ffd0d55133ea7"
+			"val": "db60d13ecb6f0d81ace84445a0fb5f9886e2bae5f587ebf654a3c161a034d419"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "update",
 		"issue_date": "2025-07-01",
 		"issue_time": "15:15:00",
 		"code": "FFE0614A_CC0238_6099239258834564607",
-		"ext": {
-			"fr-ctc-status-code": "200"
-		},
 		"supplier": {
 			"identities": [
 				{
@@ -28,34 +25,9 @@
 						"iso-scheme-id": "0002"
 					}
 				}
-			]
-		},
-		"issuer": {
-			"name": "PA-E Vendeur",
-			"identities": [
-				{
-					"code": "0003",
-					"ext": {
-						"iso-scheme-id": "0238"
-					}
-				}
 			],
 			"ext": {
-				"fr-ctc-role": "WK"
-			}
-		},
-		"recipient": {
-			"name": "PPF",
-			"identities": [
-				{
-					"code": "9998",
-					"ext": {
-						"iso-scheme-id": "0238"
-					}
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "DFH"
+				"fr-ctc-flow6-role": "SE"
 			}
 		},
 		"lines": [
@@ -66,6 +38,9 @@
 					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003"
+				},
+				"ext": {
+					"fr-ctc-flow6-status": "200"
 				}
 			}
 		]

@@ -8,11 +8,12 @@ import (
 	"io"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.fr.ctc/addon/flow2"
+	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
-	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -91,7 +92,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{ctc.V1},
+	Addons:      []cbc.Key{flow2.V1},
 	VESID:       "fr.factur-x:en16931:1.0.7-2",
 }
 
@@ -100,7 +101,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	GuidelineID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	BusinessID:  ProfileIDPeppolFranceBilling,
 	Version:     VersionD22B,
-	Addons:      []cbc.Key{ctc.V1},
+	Addons:      []cbc.Key{flow2.V1},
 	VESID:       "eu.cen.en16931:cii:1.3.13",
 }
 
@@ -129,26 +130,26 @@ var ContextChorusProV1 = Context{
 	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
-// ContextCDARFlow6 is used for French CTC Flow 6 CDAR treatment-phase
-// acks (TypeCode 23) — the status a recipient platform issues after
-// processing an invoice on behalf of an end-party. The GuidelineID is
-// the end-party "invoice" URN (BR-FR-CDV-02), and the REGULATED
-// BusinessProcessParameter is required.
+// ContextCDARFlow6 is used for French CTC Flow 6 CDARs addressed to an
+// end-party: the GuidelineID is the "invoice" URN (BR-FR-CDV-02) with
+// the REGULATED BusinessProcessParameter. The ack TypeCode (23 vs 305)
+// is independent of the context — it follows the ProcessConditionCode's
+// phase (see cdarAckTypeForCode).
 var ContextCDARFlow6 = Context{
 	GuidelineID: CDARGuidelineInvoice,
 	BusinessID:  "REGULATED",
-	Addons:      []cbc.Key{ctc.V1},
-	VESID:       "fr.ctc:cdar:1.3",
+	Addons:      []cbc.Key{flow6.V1},
+	VESID:       "fr.ctc:cdar:1.3.1",
 }
 
-// ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR transmission-
-// phase acks (TypeCode 305) sent to the PPF. The GuidelineID is the
-// einvoicingF2 URN per BR-FR-CDV-02 and no BusinessProcessParameter is
-// emitted.
+// ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR copies sent to
+// the PPF: the GuidelineID is the einvoicingF2 URN per BR-FR-CDV-02, no
+// BusinessProcessParameter is emitted, and the single recipient is the
+// PPF party (9998 / 0238 / DFH).
 var ContextCDARFlow6PPF = Context{
 	GuidelineID: CDARGuidelinePPF,
-	Addons:      []cbc.Key{ctc.V1},
-	VESID:       "fr.ctc:cdar:1.3",
+	Addons:      []cbc.Key{flow6.V1},
+	VESID:       "fr.ctc:cdar:1.3.1",
 }
 
 // Parse parses a raw XML CII invoice document and converts it into
@@ -173,7 +174,7 @@ func Parse(data []byte) (*gobl.Envelope, error) {
 		}
 		return env, nil
 	case NamespaceCDARRSM:
-		res, err := parseStatus(data)
+		res, err := parseCDAR(data)
 		if err != nil {
 			return nil, err
 		}
@@ -240,6 +241,14 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 			ctx = ContextCDARFlow6
 		}
 		return newCDAR(doc, ctx, o.sender)
+	case *bill.Payment:
+		ctx := o.context
+		// Payments (211 / 212 lifecycle messages) share the CDAR Flow 6
+		// contexts with statuses.
+		if ctx.GuidelineID == ContextEN16931V2017.GuidelineID {
+			ctx = ContextCDARFlow6
+		}
+		return newCDARFromPayment(doc, ctx, o.sender)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}

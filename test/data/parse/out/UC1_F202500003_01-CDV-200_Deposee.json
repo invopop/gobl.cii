@@ -4,38 +4,20 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7c14eedd1a6a3bdeef7a94f1c7212e168a06fac9ce68fa7f10c4cdf82a0885ab"
+			"val": "0de122be8fe78e2d1b46c2d51e40bd742314516a2bc145be6065242f8515728c"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "update",
 		"issue_date": "2025-07-01",
 		"issue_time": "15:15:00",
 		"code": "F202500003_200_20250701151000380_20250701",
-		"ext": {
-			"fr-ctc-status-code": "200"
-		},
 		"supplier": {
-			"identities": [
-				{
-					"code": "100000009",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			]
-		},
-		"issuer": {
-			"ext": {
-				"fr-ctc-role": "WK"
-			}
-		},
-		"recipient": {
 			"name": "VENDEUR",
 			"identities": [
 				{
@@ -53,7 +35,7 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "SE"
 			}
 		},
 		"lines": [
@@ -64,6 +46,9 @@
 					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003"
+				},
+				"ext": {
+					"fr-ctc-flow6-status": "200"
 				}
 			}
 		]

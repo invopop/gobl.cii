@@ -4,21 +4,22 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2f4beeb3def3ee40df6b651dfeeaef7eec29c7946ae712ea87fb9686d501877a"
+			"val": "d318e6b5564f1c8a500a09624ff84f599c76388b82a98bae49b5b8d4fc44bead"
 		}
 	},
 	"doc": {
-		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$schema": "https://gobl.org/draft-0/bill/payment",
 		"$addons": [
-			"fr-ctc-v1"
+			"fr-ctc-flow6-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "update",
-		"issue_date": "2025-07-01",
-		"issue_time": "15:10:00",
-		"code": "STATUS-211",
+		"type": "receipt",
+		"code": "PAY-212",
+		"issue_date": "2025-07-02",
+		"currency": "EUR",
 		"ext": {
-			"fr-ctc-status-code": "211"
+			"fr-ctc-flow6-condition": "MEN",
+			"fr-ctc-flow6-status": "212"
 		},
 		"supplier": {
 			"name": "VENDEUR",
@@ -38,7 +39,7 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "SE"
+				"fr-ctc-flow6-role": "SE"
 			}
 		},
 		"customer": {
@@ -59,54 +60,27 @@
 				}
 			],
 			"ext": {
-				"fr-ctc-role": "BY"
-			}
-		},
-		"issuer": {
-			"name": "PA-FR",
-			"identities": [
-				{
-					"code": "200000008",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "9998_PEP"
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "WK"
-			}
-		},
-		"recipient": {
-			"name": "PPF",
-			"identities": [
-				{
-					"code": "9998",
-					"ext": {
-						"iso-scheme-id": "0238"
-					}
-				}
-			],
-			"ext": {
-				"fr-ctc-role": "DFH"
+				"fr-ctc-flow6-role": "BY"
 			}
 		},
 		"lines": [
 			{
-				"index": 1,
-				"key": "paid",
-				"doc": {
+				"i": 1,
+				"document": {
 					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003"
-				}
+				},
+				"amount": "500.00",
+				"due": "250.00"
 			}
-		]
+		],
+		"methods": [
+			{
+				"key": "credit-transfer",
+				"amount": "500.00"
+			}
+		],
+		"total": "500.00"
 	}
 }

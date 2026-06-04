@@ -9,27 +9,27 @@
     </ram:GuidelineSpecifiedDocumentContextParameter>
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
-    <ram:ID>STATUS-212</ram:ID>
+    <ram:ID>PAY-212</ram:ID>
     <ram:IssueDateTime>
-      <udt:DateTimeString format="204">20250701151000</udt:DateTimeString>
+      <udt:DateTimeString format="204">20250702000000</udt:DateTimeString>
     </ram:IssueDateTime>
     <ram:SenderTradeParty>
       <ram:RoleCode>WK</ram:RoleCode>
     </ram:SenderTradeParty>
     <ram:IssuerTradeParty>
-      <ram:GlobalID schemeID="0002">200000008</ram:GlobalID>
-      <ram:Name>ACHETEUR</ram:Name>
-      <ram:RoleCode>BY</ram:RoleCode>
-      <ram:URIUniversalCommunication>
-        <ram:URIID schemeID="0225">200000008_PEP</ram:URIID>
-      </ram:URIUniversalCommunication>
-    </ram:IssuerTradeParty>
-    <ram:RecipientTradeParty>
       <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
       <ram:Name>VENDEUR</ram:Name>
       <ram:RoleCode>SE</ram:RoleCode>
       <ram:URIUniversalCommunication>
         <ram:URIID schemeID="0225">100000009_PEP</ram:URIID>
+      </ram:URIUniversalCommunication>
+    </ram:IssuerTradeParty>
+    <ram:RecipientTradeParty>
+      <ram:GlobalID schemeID="0002">200000008</ram:GlobalID>
+      <ram:Name>ACHETEUR</ram:Name>
+      <ram:RoleCode>BY</ram:RoleCode>
+      <ram:URIUniversalCommunication>
+        <ram:URIID schemeID="0225">200000008_PEP</ram:URIID>
       </ram:URIUniversalCommunication>
     </ram:RecipientTradeParty>
   </rsm:ExchangedDocument>
@@ -39,7 +39,7 @@
     </ram:MultipleReferencesIndicator>
     <ram:TypeCode>23</ram:TypeCode>
     <ram:IssueDateTime>
-      <udt:DateTimeString format="204">20250701151000</udt:DateTimeString>
+      <udt:DateTimeString format="204">20250702000000</udt:DateTimeString>
     </ram:IssueDateTime>
     <ram:ReferenceReferencedDocument>
       <ram:IssuerAssignedID>F202500003</ram:IssuerAssignedID>
@@ -56,6 +56,10 @@
         <ram:SpecifiedDocumentCharacteristic>
           <ram:TypeCode>MEN</ram:TypeCode>
           <ram:ValueAmount currencyID="EUR">500.00</ram:ValueAmount>
+        </ram:SpecifiedDocumentCharacteristic>
+        <ram:SpecifiedDocumentCharacteristic>
+          <ram:TypeCode>RAP</ram:TypeCode>
+          <ram:ValueAmount currencyID="EUR">250.00</ram:ValueAmount>
         </ram:SpecifiedDocumentCharacteristic>
       </ram:SpecifiedDocumentStatus>
     </ram:ReferenceReferencedDocument>

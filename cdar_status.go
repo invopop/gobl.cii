@@ -2,15 +2,13 @@ package cii
 
 import (
 	"fmt"
-	"strconv"
 
-	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -19,6 +17,7 @@ const (
 	cdarDateTimeFormat = "204" // CCYYMMDDHHMMSS
 	cdarDateFormat     = "102" // CCYYMMDD
 	schemeIDSIREN      = "0002"
+	schemeIDPDP        = "0238" // Matricule PDP / PPF
 )
 
 // CDAR GuidelineID URNs per BR-FR-CDV-02 (MDT-3). Used as the stable
@@ -33,13 +32,31 @@ const (
 	CDARGuidelinePPF = "urn.cpro.gouv.fr:1p0:CDV:einvoicingF2"
 )
 
-// cdarAckTypeByGuideline maps a CDAR GuidelineID to the wire TypeCode
-// emitted on the AcknowledgementDocument. Lookups against an unknown
-// guideline return "", which the generator treats as "fall back to the
-// Status.Type derivation" for older callers.
-var cdarAckTypeByGuideline = map[string]string{
-	CDARGuidelineInvoice: "23",
-	CDARGuidelinePPF:     "305",
+// cdarAckTypeForCode maps a CDAR ProcessConditionCode to the ack
+// TypeCode (MDT-77): transmission-phase codes (200/201/202/203/213) are
+// platform-issued and ride TypeCode 305; treatment-phase codes
+// (204-210 and the 211/212 payment events) are business-issued and
+// ride TypeCode 23. The guideline (invoice vs einvoicingF2) is an
+// independent axis that only encodes the destination — the official
+// UC corpus carries 305 Déposée copies under the end-party "invoice"
+// guideline and 23 Encaissée copies under the PPF guideline.
+func cdarAckTypeForCode(code cbc.Code) string {
+	switch code {
+	case "200", "201", "202", "203", "213":
+		return "305"
+	default:
+		return "23"
+	}
+}
+
+// buyerIssuedProcessCodes lists the CDAR ProcessConditionCodes for
+// lifecycle events declared by the invoice recipient: the Customer is
+// the CDV issuer and the Supplier its business recipient. 209
+// (Complétée) is seller-issued; the platform codes (305 phase) carry
+// the sending platform (WK) in the issuer slot.
+var buyerIssuedProcessCodes = map[cbc.Code]bool{
+	"204": true, "205": true, "206": true, "207": true,
+	"208": true, "210": true,
 }
 
 // NewCDARFromStatus is the exported entry point for converting a
@@ -47,6 +64,11 @@ var cdarAckTypeByGuideline = map[string]string{
 // Most callers should use Convert with a *gobl.Envelope wrapping the
 // status; this helper is useful when the caller wants to bypass
 // envelope-level validation (for example, in tests).
+//
+// The status must carry the flow6 extensions (fr-ctc-flow6-status on
+// each line, fr-ctc-flow6-role on the parties) — run Calculate on the
+// enclosing envelope with the fr-ctc-flow6-v1 addon declared so the
+// normalizer derives them.
 //
 // SenderTradeParty is emitted as a bare <ram:RoleCode>WK</ram:RoleCode>.
 // To carry an identified platform party in that slot, use
@@ -63,22 +85,17 @@ func NewCDARFromStatusWithSender(st *bill.Status, ctx Context, sender *org.Party
 	return newCDAR(st, ctx, sender)
 }
 
-// ParseCDARStatus parses a raw CDAR XML byte slice into a *bill.Status
-// without going through an envelope.
-func ParseCDARStatus(data []byte) (*bill.Status, error) {
-	return parseStatus(data)
-}
-
 // newCDAR converts a *bill.Status into a CDAR XML document.
 //
-// The CDAR wire layout (ack TypeCode 23 vs 305 and the corresponding
-// trade-party shape) is driven entirely by the caller-supplied Context —
-// not by bill.Status.Type. The GOBL Type field is a lifecycle category
-// (response / update / system) and is used only by flow6 to disambiguate
-// the ProcessConditionCode for a given StatusLine.Key. The CDAR phase
-// (treatment vs transmission) is a separate axis chosen at conversion
-// time via ContextCDARFlow6 (treatment, 23) or ContextCDARFlow6PPF
-// (transmission, 305).
+// Two independent axes drive the wire layout:
+//
+//   - The ack TypeCode (MDT-77) follows the ProcessConditionCode's
+//     phase — see cdarAckTypeForCode — together with the issuer slot
+//     (business party for 23, platform for 305).
+//   - The caller-supplied Context picks the destination: ContextCDARFlow6
+//     (end-party copy, "invoice" guideline + REGULATED) or
+//     ContextCDARFlow6PPF ("einvoicingF2" guideline, single PPF
+//     recipient).
 func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
 	if st == nil {
 		return nil, fmt.Errorf("nil bill.Status")
@@ -88,12 +105,8 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
 	if guideline == "" {
 		guideline = ContextCDARFlow6.GuidelineID
 	}
-	// Resolve the ack TypeCode from the Context's GuidelineID. This is the
-	// single discriminator for "what shape of CDAR are we producing".
-	ackType := cdarAckTypeByGuideline[guideline]
-	if ackType == "" {
-		ackType = "23"
-	}
+	code := firstLineProcessCode(st)
+	ackType := cdarAckTypeForCode(code)
 
 	cdar := NewCDAR()
 	cdar.ExchangedDocumentContext = &CDARExchangedContext{
@@ -112,23 +125,42 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
 	if st.Series != "" && cdar.ExchangedDocument.ID == "" {
 		cdar.ExchangedDocument.ID = string(st.Series)
 	}
-	// Direct mapping — flow6 validations guarantee st.Issuer and
-	// st.Recipient are present (MDG-16, MDG-23).
+
+	// Party slots are derived from the status semantics — bill.Status
+	// only carries the business parties (Supplier / Customer); the
+	// platform (WK) and PPF (DFH) parties are transport-level and
+	// injected here:
 	//
-	//   SenderTradeParty (MDT-21):  bare <RoleCode>WK</RoleCode> by
+	//   SenderTradeParty (MDT-21): bare <RoleCode>WK</RoleCode> by
 	//     default; overridden by the WithSenderTradeParty option.
-	//   IssuerTradeParty (MDG-16):  st.Issuer.
-	//   RecipientTradeParty (MDG-23): st.Recipient.
+	//   IssuerTradeParty (MDG-16): the business party declaring the
+	//     event on 23-phase codes (Customer for 204-210, Supplier for
+	//     209); the sending platform on 305-phase codes.
+	//   RecipientTradeParty (MDG-23): the single PPF party on the
+	//     einvoicingF2 guideline; otherwise the issuer's counterparty.
 	if sender == nil {
 		sender = bareWKParty()
 	}
 	cdar.ExchangedDocument.SenderTradeParty = newCDARTradeParty(sender)
-	if st.Issuer != nil {
-		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(st.Issuer)
+
+	issuer, recipient := sender, st.Supplier
+	switch {
+	case buyerIssuedProcessCodes[code]:
+		issuer, recipient = st.Customer, st.Supplier
+	case code == "209":
+		issuer, recipient = st.Supplier, st.Customer
 	}
-	if st.Recipient != nil {
+	if issuer != nil {
+		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(issuer)
+	}
+
+	if guideline == CDARGuidelinePPF {
 		cdar.ExchangedDocument.RecipientTradeParties = []*CDARTradeParty{
-			newCDARTradeParty(st.Recipient),
+			ppfTradeParty(),
+		}
+	} else if recipient != nil {
+		cdar.ExchangedDocument.RecipientTradeParties = []*CDARTradeParty{
+			newCDARTradeParty(recipient),
 		}
 	}
 
@@ -146,10 +178,22 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
 	return cdar, nil
 }
 
+// firstLineProcessCode returns the flow6 ProcessConditionCode of the
+// status's first line (flow6 validation enforces exactly one line).
+func firstLineProcessCode(st *bill.Status) cbc.Code {
+	for _, line := range st.Lines {
+		if line == nil {
+			continue
+		}
+		return line.Ext.Get(flow6.ExtKeyStatus)
+	}
+	return ""
+}
+
 func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType string) (*CDARAcknowledgement, error) {
-	processCode, ok := ctc.CDARProcessCodeFor(line.Key, st.Type)
-	if !ok {
-		return nil, fmt.Errorf("no CDAR process code for status line key %q with type %q", line.Key, st.Type)
+	processCode := line.Ext.Get(flow6.ExtKeyStatus)
+	if processCode == "" {
+		return nil, fmt.Errorf("status line %q missing %s extension; run Calculate with the %s addon declared", line.Key, flow6.ExtKeyStatus, flow6.V1)
 	}
 
 	ack := &CDARAcknowledgement{
@@ -159,7 +203,7 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 	}
 
 	ref := &CDARReferencedDocument{
-		ProcessConditionCode: processCode,
+		ProcessConditionCode: processCode.String(),
 	}
 	if line.Doc != nil {
 		ref.IssuerAssignedID = string(line.Doc.Code)
@@ -187,51 +231,23 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 	// Action when both are present, or emit one per Reason / Action alone.
 	var statuses []*CDARDocumentStatus
 	seq := 0
-	if len(line.Reasons) == 0 && len(line.Actions) == 0 {
-		// no extra status info
-	} else if len(line.Reasons) > 0 && len(line.Actions) > 0 {
+	switch {
+	case len(line.Reasons) > 0 && len(line.Actions) > 0:
 		for _, reason := range line.Reasons {
 			for _, action := range line.Actions {
 				seq++
-				ds, err := newCDARDocumentStatus(reason, action, seq)
-				if err != nil {
-					return nil, err
-				}
-				statuses = append(statuses, ds)
+				statuses = append(statuses, newCDARDocumentStatus(reason, action, seq))
 			}
 		}
-	} else if len(line.Reasons) > 0 {
+	case len(line.Reasons) > 0:
 		for _, reason := range line.Reasons {
 			seq++
-			ds, err := newCDARDocumentStatus(reason, nil, seq)
-			if err != nil {
-				return nil, err
-			}
-			statuses = append(statuses, ds)
+			statuses = append(statuses, newCDARDocumentStatus(reason, nil, seq))
 		}
-	} else {
+	case len(line.Actions) > 0:
 		for _, action := range line.Actions {
 			seq++
-			ds, err := newCDARDocumentStatus(nil, action, seq)
-			if err != nil {
-				return nil, err
-			}
-			statuses = append(statuses, ds)
-		}
-	}
-
-	// Append characteristics derived from StatusLine.Complements (e.g. the
-	// MEN amount on a paid line) onto the first / new status if no reason.
-	cChars := characteristicsFromComplements(line.Complements, "")
-	if len(cChars) > 0 {
-		if len(statuses) == 0 {
-			seq++
-			statuses = append(statuses, &CDARDocumentStatus{
-				SequenceNumeric:                  seq,
-				SpecifiedDocumentCharacteristics: cChars,
-			})
-		} else {
-			statuses[0].SpecifiedDocumentCharacteristics = append(statuses[0].SpecifiedDocumentCharacteristics, cChars...)
+			statuses = append(statuses, newCDARDocumentStatus(nil, action, seq))
 		}
 	}
 
@@ -240,85 +256,47 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 	return ack, nil
 }
 
-func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) (*CDARDocumentStatus, error) {
+// newCDARDocumentStatus maps a (Reason, Action) pair onto a CDAR
+// SpecifiedDocumentStatus. The CDAR codes are read straight from the
+// flow6 extensions — normalizeReason / normalizeAction guarantee they
+// are populated whenever the Key is set, so no fallback tables are
+// needed here.
+func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) *CDARDocumentStatus {
 	ds := &CDARDocumentStatus{SequenceNumeric: seq}
 	if reason != nil {
-		// ReasonCode: ext value if set, else default-for-key.
-		code := reason.Ext.Get(ctc.ExtKeyReasonCode).String()
-		if code == "" {
-			if def, ok := ctc.CDARReasonCodeFor(reason.Key); ok {
-				code = def
-			}
-		}
-		ds.ReasonCode = code
+		ds.ReasonCode = reason.Ext.Get(flow6.ExtKeyReason).String()
 		if reason.Description != "" {
 			ds.Reason = []string{reason.Description}
 		}
-		// Append per-reason characteristics
-		// (caller may attach Complements at the StatusLine level; here we
-		// only emit reason-level if any characteristics are tagged with
-		// the reason's ext code.)
 	}
 	if action != nil {
-		if code, ok := ctc.CDARActionCodeFor(action.Key); ok {
-			ds.RequestedActionCode = code
-		}
+		ds.RequestedActionCode = action.Ext.Get(flow6.ExtKeyAction).String()
 		if action.Description != "" {
 			ds.RequestedAction = action.Description
 		}
 	}
-	return ds, nil
-}
-
-// characteristicsFromComplements pulls ctc.Characteristic instances out of
-// a Complements slice and builds CDAR characteristics. If reasonCode is
-// non-empty, only characteristics matching that ReasonCode (or with an
-// empty ReasonCode) are returned; if empty, all are returned.
-func characteristicsFromComplements(comps []*schema.Object, reasonCode cbc.Code) []*CDARDocumentCharacteristic {
-	var out []*CDARDocumentCharacteristic
-	for _, obj := range comps {
-		if obj == nil {
-			continue
-		}
-		c, ok := obj.Instance().(*ctc.Characteristic)
-		if !ok || c == nil {
-			continue
-		}
-		if reasonCode != "" && c.ReasonCode != "" && c.ReasonCode != reasonCode {
-			continue
-		}
-		dc := &CDARDocumentCharacteristic{
-			ID:       c.ID,
-			TypeCode: string(c.TypeCode),
-			Name:     c.Name,
-			Location: c.Location,
-		}
-		if c.Changed != nil {
-			dc.ValueChangedIndicator = &CDARIndicatorString{
-				Value: strconv.FormatBool(*c.Changed),
-			}
-		}
-		if c.Percent != nil {
-			dc.ValuePercent = c.Percent.StringWithoutSymbol()
-		}
-		if c.Amount != nil {
-			dc.ValueAmount = &CDARValueAmount{
-				Value:      c.Amount.Value.String(),
-				CurrencyID: c.Amount.Currency.String(),
-			}
-		}
-		out = append(out, dc)
-	}
-	return out
+	return ds
 }
 
 // bareWKParty returns a minimal *org.Party tagged with the WK platform role
 // — used as the SenderTradeParty (always) and as the IssuerTradeParty
-// fallback for ack 305 when no platform identity is supplied. Matches the
-// UC1 corpus shape of <ram:RoleCode>WK</ram:RoleCode> with no body.
+// fallback for platform-issued codes when no platform identity is supplied.
+// Matches the UC1 corpus shape of <ram:RoleCode>WK</ram:RoleCode> with no
+// body.
 func bareWKParty() *org.Party {
 	return &org.Party{
-		Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleWK),
+		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RolePlatform),
+	}
+}
+
+// ppfTradeParty returns the constant CDAR trade party for the Portail
+// Public de Facturation — GlobalID 9998 under the 0238 (matricule PDP)
+// scheme with the DFH role, per BR-FR-CDV-02 — the single recipient of
+// einvoicingF2 transmissions.
+func ppfTradeParty() *CDARTradeParty {
+	return &CDARTradeParty{
+		GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDPDP, Value: "9998"}},
+		RoleCode:  flow6.RolePPF.String(),
 	}
 }
 
@@ -330,7 +308,7 @@ func newCDARTradeParty(p *org.Party) *CDARTradeParty {
 		Name: p.Name,
 	}
 	if !p.Ext.IsZero() {
-		tp.RoleCode = p.Ext.Get(ctc.ExtKeyRole).String()
+		tp.RoleCode = p.Ext.Get(flow6.ExtKeyRole).String()
 	}
 	for _, id := range p.Identities {
 		if id == nil || id.Ext.IsZero() {

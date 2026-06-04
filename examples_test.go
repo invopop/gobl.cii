@@ -12,10 +12,8 @@ import (
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/tax"
+	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/uuid"
 	"github.com/invopop/phive"
 	"github.com/stretchr/testify/assert"
@@ -232,62 +230,49 @@ var cdarConvertFixtures = []struct {
 	processCode string
 	fixtureName string
 	dir         string
+	payment     bool
 }{
 	// Buyer-issued ack 23 — Issuer = Customer, Recipient = Supplier
-	{"204", "status-204-prise-en-charge.json", "cdar"},
-	{"205", "status-205-approuvee.json", "cdar"},
-	{"206", "status-206-approuvee-partiellement.json", "cdar"},
-	{"207", "status-207-litige.json", "cdar"},
-	{"208", "status-208-suspendue.json", "cdar"},
-	{"210", "status-210-refusee.json", "cdar"},
-	// Seller-issued ack 23 — Issuer = Supplier, Recipient = Customer
-	{"209", "status-209-completee.json", "cdar"},
-	{"212", "status-212-encaissee.json", "cdar"},
-	// Platform-issued ack 23 — caller-supplied Issuer/Recipient
-	{"213", "status-213-rejetee-semantique.json", "cdar"},
+	{"204", "status-204-prise-en-charge.json", "cdar", false},
+	{"205", "status-205-approuvee.json", "cdar", false},
+	{"206", "status-206-approuvee-partiellement.json", "cdar", false},
+	{"207", "status-207-litige.json", "cdar", false},
+	{"208", "status-208-suspendue.json", "cdar", false},
+	{"210", "status-210-refusee.json", "cdar", false},
+	// Platform-issued ack 23
+	{"213", "status-213-rejetee-semantique.json", "cdar", false},
+	// Seller-issued payment receipt (212 Encaissée) — bill.Payment
+	{"212", "payment-212-encaissee.json", "cdar", true},
 	// PPF transmissions (305)
-	{"200", "status-200-deposee.json", "cdar-PPF"},
-	{"211", "status-211-paiement.json", "cdar-PPF"},
-}
-
-// contextForDir returns the CDAR Context bound to a fixture directory.
-func contextForDir(dir string) (cii.Context, bool) {
-	for _, c := range cdarConvertContexts {
-		if c.dir == dir {
-			return c.context, true
-		}
-	}
-	return cii.Context{}, false
+	{"200", "status-200-deposee.json", "cdar-PPF", false},
+	{"212", "payment-212-encaissee.json", "cdar-PPF", true},
+	// NOTE: 209 (Complétée) has no flow6 (Type, Key) mapping yet and 211
+	// (Paiement transmis) is out of the mandatory-status scope; both are
+	// omitted until needed.
 }
 
 // regenerateCDARFixtures rebuilds the JSON fixtures for TestConvertCDAR from
-// the synthetic-status factory. Only runs under -update.
-//
-// For PPF-context fixtures the Issuer is rewritten as the WK platform
-// and the Recipient is replaced with the canonical PPF party — those
-// are the only spec-conformant shapes for ack TypeCode 305.
+// the synthetic-status / synthetic-payment factories. Only runs under
+// -update. PPF (305) wire shape — WK issuer, PPF recipient — is derived
+// by the converter from the Context, so the fixtures carry only the
+// business parties.
 func regenerateCDARFixtures(t *testing.T) {
 	t.Helper()
 	for _, f := range cdarConvertFixtures {
-		ctx, ok := contextForDir(f.dir)
-		require.True(t, ok, "no context bound to dir %q", f.dir)
-
-		st := buildSyntheticStatus(t, f.processCode)
-		if ctx.GuidelineID == cii.CDARGuidelinePPF {
-			// 305 / PPF: Issuer is the WK platform; Recipient is the PPF.
-			st.Issuer = &org.Party{
-				Name:       "PA-FR",
-				Identities: st.Issuer.Identities, // keep some SIREN for traceability
-				Inboxes:    []*org.Inbox{{Scheme: "0225", Code: "9998_PEP"}},
-				Ext:        tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleWK),
-			}
-			st.Recipient = ppfRecipient()
+		var env *gobl.Envelope
+		var err error
+		if f.payment {
+			pmt := buildSyntheticPayment(t, num.MakeAmount(25000, 2))
+			env, err = gobl.Envelop(pmt)
+			require.NoError(t, err, "envelope for %s", f.processCode)
+			pmt.UUID = staticUUID
+		} else {
+			st := buildSyntheticStatus(t, f.processCode)
+			env, err = gobl.Envelop(st)
+			require.NoError(t, err, "envelope for %s", f.processCode)
+			st.UUID = staticUUID
 		}
-
-		env, err := gobl.Envelop(st)
-		require.NoError(t, err, "envelope for %s", f.processCode)
 		env.Head.UUID = staticUUID
-		st.UUID = staticUUID
 		require.NoError(t, env.Calculate())
 		require.NoError(t, env.Validate())
 
@@ -382,11 +367,25 @@ func TestParseCDAR(t *testing.T) {
 			require.NoError(t, err)
 
 			env.Head.UUID = staticUUID
-			if st, ok := env.Extract().(*bill.Status); ok {
-				st.UUID = staticUUID
+			// Parse dispatches on the ProcessConditionCode: statuses and
+			// payments (211 / 212) come back as different documents.
+			switch doc := env.Extract().(type) {
+			case *bill.Status:
+				doc.UUID = staticUUID
+			case *bill.Payment:
+				doc.UUID = staticUUID
+			default:
+				t.Fatalf("parsed document should be a status or payment, got %T", doc)
 			}
 			require.NoError(t, env.Calculate())
-			require.NoError(t, env.Validate(), "parsed envelope must satisfy GOBL validation")
+			// PPF transmission copies (305) only carry the platform-level
+			// parties (WK / DFH) plus the seller SIREN — they cannot
+			// satisfy the full B2B document rules and are never parsed
+			// into bill documents in production (the PPF leg stays raw
+			// CDAR). The B2B fixtures must validate cleanly.
+			if !strings.Contains(inName, "POUR_PPF") {
+				require.NoError(t, env.Validate(), "parsed envelope must satisfy GOBL validation")
+			}
 
 			outPath := filepath.Join(getParsePath(), pathOut, outName)
 			if *updateOut {
@@ -397,10 +396,7 @@ func TestParseCDAR(t *testing.T) {
 				require.NoError(t, os.WriteFile(outPath, data, 0644))
 			}
 
-			st, ok := env.Extract().(*bill.Status)
-			require.True(t, ok, "Document should be a bill.Status")
-
-			data, err := json.MarshalIndent(st, "", "\t")
+			data, err := json.MarshalIndent(env.Extract(), "", "\t")
 			require.NoError(t, err)
 
 			expectedRaw, err := os.ReadFile(outPath)
@@ -408,13 +404,10 @@ func TestParseCDAR(t *testing.T) {
 
 			var expectedEnv gobl.Envelope
 			require.NoError(t, json.Unmarshal(expectedRaw, &expectedEnv))
-			expectedStatus, ok := expectedEnv.Extract().(*bill.Status)
-			require.True(t, ok, "Expected document should be a bill.Status")
-
-			expectedData, err := json.MarshalIndent(expectedStatus, "", "\t")
+			expectedData, err := json.MarshalIndent(expectedEnv.Extract(), "", "\t")
 			require.NoError(t, err)
 
-			assert.JSONEq(t, string(expectedData), string(data), "Status should match the expected JSON. Update with --update flag.")
+			assert.JSONEq(t, string(expectedData), string(data), "Document should match the expected JSON. Update with --update flag.")
 		})
 	}
 }

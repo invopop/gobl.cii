@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -15,7 +16,7 @@ import (
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/schema"
+	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 	"github.com/invopop/phive"
 	"github.com/stretchr/testify/assert"
@@ -24,67 +25,25 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// allProcessCodes is the canonical list of CDAR ProcessConditionCodes
-// supported by Flow 6 (200..213, excluding the unused values).
-var allProcessCodes = []string{
-	"200", "201", "202", "203", "204", "205", "206",
-	"207", "208", "209", "210", "211", "212", "213",
+// statusProcessCodes lists the CDAR ProcessConditionCodes carried by
+// bill.Status documents for which flow6 derives a (Status.Type,
+// StatusLine.Key) pair. 203 (Mise à disposition) and 209 (Complétée)
+// have no key mapping in flow6 yet and are excluded; 211 / 212 are
+// bill.Payment lifecycle codes — see the payment tests.
+var statusProcessCodes = []string{
+	"200", "201", "202", "204", "205", "206",
+	"207", "208", "210", "213",
 }
 
-func TestFlow6CodeTablesRoundTrip(t *testing.T) {
-	t.Run("process codes", func(t *testing.T) {
-		for _, code := range allProcessCodes {
-			key, typ, ok := ctc.StatusKeyFor(code)
-			require.True(t, ok, "process code %s should resolve to a key", code)
-			out, ok := ctc.CDARProcessCodeFor(key, typ)
-			require.True(t, ok)
-			require.Equal(t, code, out, "round-trip mismatch for %s", code)
-		}
-	})
-
-	t.Run("action codes", func(t *testing.T) {
-		actions := []string{"NOA", "PIN", "NIN", "CNF", "CNP", "CNA", "OTH"}
-		for _, code := range actions {
-			key, ok := ctc.ActionKeyFor(code)
-			require.True(t, ok)
-			out, ok := ctc.CDARActionCodeFor(key)
-			require.True(t, ok)
-			require.Equal(t, code, out)
-		}
-	})
-
-	t.Run("reason default codes", func(t *testing.T) {
-		// At least all the default-for-key buckets should round-trip.
-		buckets := []cbc.Key{
-			bill.ReasonKeyOther, bill.ReasonKeyFinanceTerms,
-			bill.ReasonKeyLegal, bill.ReasonKeyNotRecognized,
-			bill.ReasonKeyUnknownReceiver, bill.ReasonKeyReferences,
-			bill.ReasonKeyPrices, bill.ReasonKeyQuantity,
-			bill.ReasonKeyItems, bill.ReasonKeyPaymentTerms,
-			bill.ReasonKeyQuality, bill.ReasonKeyDelivery,
-		}
-		for _, key := range buckets {
-			code, ok := ctc.CDARReasonCodeFor(key)
-			require.True(t, ok, "no default code for bucket %s", key)
-			outKey, ok := ctc.ReasonKeyFor(code)
-			require.True(t, ok)
-			require.Equal(t, key, outKey, "round-trip for bucket %s broke", key)
-		}
-	})
-}
-
-
-// findSEPartyAcross returns whichever of Supplier/Issuer/Recipient on st
-// carries fr-ctc-role=SE — used in tests that don't run the flow6
-// normaliser (which would otherwise auto-fill st.Supplier from the SE
-// party in the other slots). Falls back to a SIREN-only party with no
-// role (e.g. from ref.IssuerTradeParty).
-func findSEPartyAcross(st *bill.Status) *org.Party {
-	for _, p := range []*org.Party{st.Supplier, st.Issuer, st.Recipient} {
+// findSEParty returns the parsed status party carrying fr-ctc-flow6-role=SE
+// — the Supplier slot under the role-based parse mapping — falling back
+// to a role-less SIREN-only party (e.g. from ref.IssuerTradeParty).
+func findSEParty(st *bill.Status) *org.Party {
+	for _, p := range []*org.Party{st.Supplier, st.Customer} {
 		if p == nil {
 			continue
 		}
-		if p.Ext.Get(ctc.ExtKeyRole) == ctc.RoleSE {
+		if p.Ext.Get(flow6.ExtKeyRole) == flow6.RoleSeller {
 			return p
 		}
 		if p.Ext.IsZero() {
@@ -113,81 +72,41 @@ func defaultReasonForCode(code string) (string, bool) {
 	return "", false
 }
 
+func testSIRENParty(name, siren string) *org.Party {
+	return &org.Party{
+		Name: name,
+		Identities: []*org.Identity{
+			{
+				Code: cbc.Code(siren),
+				Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
+			},
+		},
+		Inboxes: []*org.Inbox{
+			{Scheme: "0225", Code: cbc.Code(siren + "_PEP")},
+		},
+	}
+}
+
 // buildSyntheticStatus builds a minimal but valid bill.Status for the
-// given Flow 6 process code.
+// given Flow 6 process code, normalized through the flow6 addon so the
+// converter's extension reads are populated.
 func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 	t.Helper()
-	key, typ, ok := ctc.StatusKeyFor(code)
-	require.True(t, ok, "unknown process code %s", code)
 
 	st := &bill.Status{
-		Type:      typ,
 		Code:      cbc.Code("STATUS-" + code),
 		IssueDate: cal.MakeDate(2025, time.July, 1),
 		IssueTime: cal.NewTime(15, 10, 0),
-		Supplier: &org.Party{
-			Name: "VENDEUR",
-			Identities: []*org.Identity{
-				{
-					Code: "100000009",
-					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
-				},
-			},
-			Inboxes: []*org.Inbox{
-				{Scheme: "0225", Code: "100000009_PEP"},
-			},
-			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleSE),
-		},
-		Customer: &org.Party{
-			Name: "ACHETEUR",
-			Identities: []*org.Identity{
-				{
-					Code: "200000008",
-					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
-				},
-			},
-			Inboxes: []*org.Inbox{
-				{Scheme: "0225", Code: "200000008_PEP"},
-			},
-			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleBY),
-		},
-		// Issuer = the buyer-end-party reporting the status (UC1 default
-		// pattern: buyer-platform sends 23 acks). For PPF / 305 callers
-		// would set this to a WK platform party instead.
-		Issuer: &org.Party{
-			Name: "ACHETEUR",
-			Identities: []*org.Identity{
-				{
-					Code: "200000008",
-					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
-				},
-			},
-			Inboxes: []*org.Inbox{
-				{Scheme: "0225", Code: "200000008_PEP"},
-			},
-			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleBY),
-		},
-		// Recipient = the seller-end-party (counterparty of the buyer
-		// issuer). Must carry an inbox per BR-FR-CDV-08.
-		Recipient: &org.Party{
-			Name: "VENDEUR",
-			Identities: []*org.Identity{
-				{
-					Code: "100000009",
-					Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, "0002"),
-				},
-			},
-			Inboxes: []*org.Inbox{
-				{Scheme: "0225", Code: "100000009_PEP"},
-			},
-			Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleSE),
-		},
+		Supplier:  testSIRENParty("VENDEUR", "100000009"),
+		Customer:  testSIRENParty("ACHETEUR", "200000008"),
 	}
-	st.SetAddons(ctc.V1)
+	st.SetAddons(flow6.V1)
 
 	docDate := cal.MakeDate(2025, time.July, 1)
 	line := &bill.StatusLine{
-		Key: key,
+		// Pin the CDAR ProcessConditionCode directly; flow6's reverse
+		// mapping derives Status.Type and StatusLine.Key from it.
+		Ext: tax.MakeExtensions().Set(flow6.ExtKeyStatus, cbc.Code(code)),
 		Doc: &org.DocumentRef{
 			Code:      cbc.Code("F202500003"),
 			IssueDate: &docDate,
@@ -203,35 +122,34 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 		// ReasonCode extension, matching whichever bucket the code rolls
 		// up to (AUTRE → other, TX_TVA_ERR → legal, etc.).
 		line.Reasons = []*bill.Reason{{
-			Ext:         tax.MakeExtensions().Set(ctc.ExtKeyReasonCode, cbc.Code(reasonCode)),
+			Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(reasonCode)),
 			Description: "Motif " + reasonCode,
 		}}
 		line.Actions = []*bill.Action{{Key: bill.ActionKeyReissue, Description: "Créer une facture rectificative"}}
 	}
 
-	// Code 212 (paid) — attach an MEN amount as a complement so we exercise
-	// the characteristic round-trip from the StatusLine level.
-	if code == "212" {
-		amt := currency.Amount{
-			Currency: currency.EUR,
-			Value:    num.MakeAmount(50000, 2),
-		}
-		obj, err := schema.NewObject(&ctc.Characteristic{
-			TypeCode: ctc.TypeCodeAmountReceived,
-			Amount:   &amt,
-		})
-		require.NoError(t, err)
-		line.Complements = append(line.Complements, obj)
-	}
-
 	st.Lines = []*bill.StatusLine{line}
-	return st
+	return calculateStatus(t, st)
+}
+
+// calculateStatus runs the status through an envelope Calculate so the
+// flow6 normalizer fills the derived fields (Type, line keys, roles,
+// reason / action extensions).
+func calculateStatus(t *testing.T, st *bill.Status) *bill.Status {
+	t.Helper()
+	env, err := gobl.Envelop(st)
+	require.NoError(t, err, "envelop status")
+	out, ok := env.Extract().(*bill.Status)
+	require.True(t, ok, "extract status")
+	return out
 }
 
 func TestCDARStatusRoundTripPerCode(t *testing.T) {
-	for _, code := range allProcessCodes {
+	for _, code := range statusProcessCodes {
 		t.Run("CDV-"+code, func(t *testing.T) {
 			st := buildSyntheticStatus(t, code)
+			require.NotEmpty(t, st.Type, "flow6 should derive a status type for %s", code)
+			require.NotEmpty(t, st.Lines[0].Key, "flow6 should derive a line key for %s", code)
 
 			// Generate CDAR
 			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
@@ -247,23 +165,23 @@ func TestCDARStatusRoundTripPerCode(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, parsed)
 
-			// Now turn that parsed CDAR back into a *bill.Status via the
-			// public Parse path (uses parseStatus internally).
+			// Now turn that parsed CDAR back into a *bill.Status and
+			// normalize it so the flow6 reverse mapping recovers the
+			// GOBL-level fields from the extensions.
 			out, err := cii.ParseCDARStatus(data)
 			require.NoError(t, err)
 			require.NotNil(t, out)
-
-			// Type must round-trip.
-			expectedKey, expectedType, _ := ctc.StatusKeyFor(code)
-			require.Equal(t, expectedType, out.Type, "type mismatch for %s", code)
 			require.Len(t, out.Lines, 1, "should have one line for %s", code)
-			require.Equal(t, expectedKey, out.Lines[0].Key)
+			require.Equal(t, cbc.Code(code), out.Lines[0].Ext.Get(flow6.ExtKeyStatus))
+
+			out = calculateStatus(t, out)
+			require.Equal(t, st.Type, out.Type, "type mismatch for %s", code)
+			require.Equal(t, st.Lines[0].Key, out.Lines[0].Key, "line key mismatch for %s", code)
 
 			// Seller's SIREN is preserved somewhere in the parsed status —
-			// either on Supplier (filled by the flow6 normaliser when the
-			// envelope is calculated) or on whichever of Issuer/Recipient
-			// carries the SE role.
-			seller := findSEPartyAcross(out)
+			// either on Supplier (SE-roled trade party) or recovered from
+			// the MDT-129 ref.IssuerTradeParty SIREN-only slot.
+			seller := findSEParty(out)
 			require.NotNil(t, seller, "no SE-roled party in parsed status %s", code)
 			found := ""
 			for _, id := range seller.Identities {
@@ -276,60 +194,31 @@ func TestCDARStatusRoundTripPerCode(t *testing.T) {
 	}
 }
 
-func TestCDARStatusRejectionWithCharacteristic(t *testing.T) {
-	// Build a 207 (En litige) status with a characteristic on the reason.
-	st := buildSyntheticStatus(t, "207")
+func TestCDARStatusReasonRoundTrip(t *testing.T) {
+	st := buildSyntheticStatus(t, "210")
 	require.Len(t, st.Lines, 1)
-	line := st.Lines[0]
-	require.Len(t, line.Reasons, 1)
-
-	changed := true
-	pct, err := num.PercentageFromString("10.00%")
-	require.NoError(t, err)
-
-	obj, err := schema.NewObject(&ctc.Characteristic{
-		ID:         "BT-152",
-		TypeCode:   ctc.TypeCodeInvalidData,
-		Name:       "Taux TVA",
-		Changed:    &changed,
-		Percent:    &pct,
-		ReasonCode: "TX_TVA_ERR",
-	})
-	require.NoError(t, err)
-	line.Complements = append(line.Complements, obj)
+	require.Len(t, st.Lines[0].Reasons, 1)
 
 	cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
 	require.NoError(t, err)
-
 	data, err := cdar.Bytes()
 	require.NoError(t, err)
 
-	parsed, err := cii.ParseCDARStatus(data)
+	out, err := cii.ParseCDARStatus(data)
 	require.NoError(t, err)
-	require.NotNil(t, parsed)
-	require.Len(t, parsed.Lines, 1)
+	out = calculateStatus(t, out)
 
-	// The characteristic should be present on the parsed status line.
-	require.NotEmpty(t, parsed.Lines[0].Complements,
-		"characteristic complement should be preserved on round-trip")
+	require.Len(t, out.Lines, 1)
+	require.Len(t, out.Lines[0].Reasons, 1)
+	reason := out.Lines[0].Reasons[0]
+	assert.Equal(t, cbc.Code("TX_TVA_ERR"), reason.Ext.Get(flow6.ExtKeyReason))
+	assert.Equal(t, "Motif TX_TVA_ERR", reason.Description)
+	assert.NotEmpty(t, reason.Key, "flow6 should recover the reason bucket from the code")
 
-	var found *ctc.Characteristic
-	for _, c := range parsed.Lines[0].Complements {
-		if inst, ok := c.Instance().(*ctc.Characteristic); ok {
-			if inst.TypeCode == ctc.TypeCodeInvalidData {
-				found = inst
-				break
-			}
-		}
-	}
-	require.NotNil(t, found, "DIV characteristic should be present")
-	assert.Equal(t, "BT-152", found.ID)
-	assert.Equal(t, "Taux TVA", found.Name)
-	require.NotNil(t, found.Percent)
-	assert.Equal(t, "10.00", found.Percent.StringWithoutSymbol())
-	require.NotNil(t, found.Changed)
-	assert.True(t, *found.Changed)
-	assert.Equal(t, cbc.Code("TX_TVA_ERR"), found.ReasonCode)
+	require.Len(t, out.Lines[0].Actions, 1)
+	action := out.Lines[0].Actions[0]
+	assert.Equal(t, cbc.Code("NIN"), action.Ext.Get(flow6.ExtKeyAction))
+	assert.Equal(t, bill.ActionKeyReissue, action.Key)
 }
 
 // TestCDARSenderTradeParty checks that NewCDARFromStatusWithSender (and
@@ -350,7 +239,7 @@ func TestCDARSenderTradeParty(t *testing.T) {
 		Inboxes: []*org.Inbox{
 			{Scheme: "0225", Code: "9998_PEP"},
 		},
-		Ext: tax.MakeExtensions().Set(ctc.ExtKeyRole, ctc.RoleWK),
+		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RolePlatform),
 	}
 
 	cdar, err := cii.NewCDARFromStatusWithSender(st, cii.ContextCDARFlow6, platform)
@@ -361,7 +250,7 @@ func TestCDARSenderTradeParty(t *testing.T) {
 	assert.Equal(t, "9998", cdar.ExchangedDocument.SenderTradeParty.GlobalIDs[0].Value)
 	assert.Equal(t, "WK", cdar.ExchangedDocument.SenderTradeParty.RoleCode)
 
-	// IssuerTradeParty stays as the end-party (Customer, default for ack 23).
+	// IssuerTradeParty is the Customer — 205 is a buyer-issued code.
 	require.NotNil(t, cdar.ExchangedDocument.IssuerTradeParty)
 	assert.Equal(t, "ACHETEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
 
@@ -372,6 +261,98 @@ func TestCDARSenderTradeParty(t *testing.T) {
 	assert.Empty(t, bare.ExchangedDocument.SenderTradeParty.Name)
 	assert.Empty(t, bare.ExchangedDocument.SenderTradeParty.GlobalIDs)
 	assert.Equal(t, "WK", bare.ExchangedDocument.SenderTradeParty.RoleCode)
+}
+
+// buildSyntheticPayment builds a minimal bill.Payment receipt (CDAR 212,
+// Encaissée) referencing an invoice, normalized through the flow6 addon.
+// due, when non-zero, models a partial cash-in with a remainder.
+func buildSyntheticPayment(t *testing.T, due num.Amount) *bill.Payment {
+	t.Helper()
+
+	docDate := cal.MakeDate(2025, time.July, 1)
+	line := &bill.PaymentLine{
+		Document: &org.DocumentRef{
+			Code:      cbc.Code("F202500003"),
+			IssueDate: &docDate,
+			Type:      "380",
+		},
+		Amount: num.MakeAmount(50000, 2),
+	}
+	if !due.IsZero() {
+		line.Due = &due
+	}
+
+	pmt := &bill.Payment{
+		Type:      bill.PaymentTypeReceipt,
+		Code:      cbc.Code("PAY-212"),
+		IssueDate: cal.MakeDate(2025, time.July, 2),
+		Currency:  currency.EUR,
+		Supplier:  testSIRENParty("VENDEUR", "100000009"),
+		Customer:  testSIRENParty("ACHETEUR", "200000008"),
+		Lines:     []*bill.PaymentLine{line},
+		Methods:   []*pay.Record{{Key: pay.MeansKeyCreditTransfer, Amount: num.MakeAmount(50000, 2)}},
+	}
+	pmt.SetAddons(flow6.V1)
+
+	env, err := gobl.Envelop(pmt)
+	require.NoError(t, err, "envelop payment")
+	out, ok := env.Extract().(*bill.Payment)
+	require.True(t, ok, "extract payment")
+	return out
+}
+
+func TestCDARPaymentRoundTrip(t *testing.T) {
+	pmt := buildSyntheticPayment(t, num.Amount{})
+	require.Equal(t, cbc.Code("212"), pmt.Ext.Get(flow6.ExtKeyStatus),
+		"flow6 should derive 212 for a receipt")
+
+	cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
+	require.NoError(t, err)
+	require.NotNil(t, cdar)
+
+	// The receipt is declared by the supplier towards the customer.
+	require.NotNil(t, cdar.ExchangedDocument.IssuerTradeParty)
+	assert.Equal(t, "VENDEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
+	require.Len(t, cdar.ExchangedDocument.RecipientTradeParties, 1)
+	assert.Equal(t, "ACHETEUR", cdar.ExchangedDocument.RecipientTradeParties[0].Name)
+
+	data, err := cdar.Bytes()
+	require.NoError(t, err)
+	require.NotEmpty(t, data)
+
+	out, err := cii.ParseCDARPayment(data)
+	require.NoError(t, err)
+	require.NotNil(t, out)
+
+	assert.Equal(t, bill.PaymentTypeReceipt, out.Type)
+	assert.Equal(t, cbc.Code("212"), out.Ext.Get(flow6.ExtKeyStatus))
+	assert.Equal(t, currency.EUR, out.Currency)
+	require.Len(t, out.Lines, 1)
+	assert.Equal(t, "500.00", out.Lines[0].Amount.String())
+	require.NotNil(t, out.Lines[0].Document)
+	assert.Equal(t, cbc.Code("F202500003"), out.Lines[0].Document.Code)
+
+	// Parties round-trip by role.
+	require.NotNil(t, out.Supplier)
+	assert.Equal(t, "VENDEUR", out.Supplier.Name)
+	require.NotNil(t, out.Customer)
+	assert.Equal(t, "ACHETEUR", out.Customer.Name)
+}
+
+func TestCDARPaymentPartialRoundTrip(t *testing.T) {
+	pmt := buildSyntheticPayment(t, num.MakeAmount(25000, 2))
+
+	cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
+	require.NoError(t, err)
+	data, err := cdar.Bytes()
+	require.NoError(t, err)
+
+	out, err := cii.ParseCDARPayment(data)
+	require.NoError(t, err)
+	require.Len(t, out.Lines, 1)
+	assert.Equal(t, "500.00", out.Lines[0].Amount.String(), "MEN amount")
+	require.NotNil(t, out.Lines[0].Due, "RAP remainder should round-trip")
+	assert.Equal(t, "250.00", out.Lines[0].Due.String())
 }
 
 // TestCDARSchematron generates a CDAR for each process code and validates it
@@ -388,7 +369,7 @@ func TestCDARSchematron(t *testing.T) {
 	defer conn.Close() //nolint:errcheck
 	pc := phive.NewValidationServiceClient(conn)
 
-	for _, code := range allProcessCodes {
+	for _, code := range statusProcessCodes {
 		t.Run("CDV-"+code, func(t *testing.T) {
 			st := buildSyntheticStatus(t, code)
 			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
@@ -406,4 +387,21 @@ func TestCDARSchematron(t *testing.T) {
 				"CDAR for code %s failed Phive validation: %s", code, string(out))
 		})
 	}
+
+	t.Run("CDV-212-payment", func(t *testing.T) {
+		pmt := buildSyntheticPayment(t, num.MakeAmount(25000, 2))
+		cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
+		require.NoError(t, err)
+		data, err := cdar.Bytes()
+		require.NoError(t, err)
+
+		resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+			Vesid:      cii.ContextCDARFlow6.VESID,
+			XmlContent: data,
+		})
+		require.NoError(t, err)
+		out, _ := json.MarshalIndent(resp.Results, "", "  ")
+		require.True(t, resp.Success,
+			"CDAR for payment 212 failed Phive validation: %s", string(out))
+	})
 }

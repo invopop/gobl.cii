@@ -17,12 +17,7 @@
       <ram:RoleCode>WK</ram:RoleCode>
     </ram:SenderTradeParty>
     <ram:IssuerTradeParty>
-      <ram:GlobalID schemeID="0002">200000008</ram:GlobalID>
-      <ram:Name>ACHETEUR</ram:Name>
-      <ram:RoleCode>BY</ram:RoleCode>
-      <ram:URIUniversalCommunication>
-        <ram:URIID schemeID="0225">200000008_PEP</ram:URIID>
-      </ram:URIUniversalCommunication>
+      <ram:RoleCode>WK</ram:RoleCode>
     </ram:IssuerTradeParty>
     <ram:RecipientTradeParty>
       <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
@@ -37,7 +32,7 @@
     <ram:MultipleReferencesIndicator>
       <udt:Indicator>false</udt:Indicator>
     </ram:MultipleReferencesIndicator>
-    <ram:TypeCode>23</ram:TypeCode>
+    <ram:TypeCode>305</ram:TypeCode>
     <ram:IssueDateTime>
       <udt:DateTimeString format="204">20250701151000</udt:DateTimeString>
     </ram:IssueDateTime>

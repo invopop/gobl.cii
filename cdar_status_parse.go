@@ -5,33 +5,60 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/currency"
-	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
-	"github.com/invopop/xmlctx"
 )
 
-// parseStatus converts a raw CDAR XML byte slice into a *bill.Status.
-func parseStatus(data []byte) (*bill.Status, error) {
-	cdar := new(CDAR)
-	if err := xmlctx.Unmarshal(data, cdar, xmlctx.WithNamespaces(
-		map[string]string{
-			"rsm": NamespaceCDARRSM,
-			"ram": NamespaceRAM,
-			"qdt": NamespaceQDT,
-			"udt": NamespaceUDT,
-		},
-	)); err != nil {
-		return nil, fmt.Errorf("error unmarshaling CDAR: %w", err)
+// ParseCDARStatus parses a raw CDAR XML byte slice into a *bill.Status
+// without going through an envelope.
+//
+// The returned status carries the CDAR codes on the flow6 extensions
+// (fr-ctc-flow6-status / -reason / -action) with the addon declared;
+// the GOBL-level fields they derive (Status.Type, line and reason keys)
+// are filled by the flow6 normalizer when the document is calculated —
+// wrap it in an envelope (gobl.Envelop / Envelope.Insert) or run
+// Calculate to complete it.
+func ParseCDARStatus(data []byte) (*bill.Status, error) {
+	cdar, err := UnmarshalCDAR(data)
+	if err != nil {
+		return nil, err
 	}
 	return goblStatusFromCDAR(cdar)
+}
+
+// parseCDAR converts a raw CDAR XML byte slice into the GOBL document
+// matching its ProcessConditionCode: payment lifecycle codes (211 /
+// 212) produce a *bill.Payment, everything else a *bill.Status.
+func parseCDAR(data []byte) (any, error) {
+	cdar, err := UnmarshalCDAR(data)
+	if err != nil {
+		return nil, err
+	}
+	if code := cdarProcessCode(cdar); code == "211" || code == "212" {
+		return goblPaymentFromCDAR(cdar)
+	}
+	return goblStatusFromCDAR(cdar)
+}
+
+// cdarProcessCode returns the ProcessConditionCode of the first
+// referenced document in the CDAR, or "".
+func cdarProcessCode(cdar *CDAR) string {
+	for _, ack := range cdar.AcknowledgementDocuments {
+		if ack == nil {
+			continue
+		}
+		for _, ref := range ack.ReferenceReferencedDocument {
+			if ref != nil && ref.ProcessConditionCode != "" {
+				return ref.ProcessConditionCode
+			}
+		}
+	}
+	return ""
 }
 
 func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
@@ -39,7 +66,7 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 		return nil, fmt.Errorf("invalid CDAR document")
 	}
 	st := &bill.Status{}
-	st.SetAddons(ctc.V1)
+	st.SetAddons(flow6.V1)
 
 	if cdar.ExchangedDocument.ID != "" {
 		st.Code = cbc.Code(cdar.ExchangedDocument.ID)
@@ -55,56 +82,60 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 		}
 	}
 
-	// Determine type from first acknowledgement's process code.
-	if len(cdar.AcknowledgementDocuments) > 0 {
-		ack := cdar.AcknowledgementDocuments[0]
-		for _, ref := range ack.ReferenceReferencedDocument {
-			if ref == nil {
+	// bill.Status only has the two business-party slots. Map the CDAR
+	// trade parties onto them by their RoleCode: SE → Supplier, BY →
+	// Customer. Platform-level parties (WK sender, DFH PPF) have no
+	// GOBL slot and are dropped — they are transport detail that the
+	// generator re-derives.
+	assignStatusParty := func(tp *CDARTradeParty) {
+		p := goblPartyFromCDAR(tp)
+		if p == nil {
+			return
+		}
+		switch p.Ext.Get(flow6.ExtKeyRole) {
+		case flow6.RoleSeller:
+			if st.Supplier == nil {
+				st.Supplier = p
+			}
+		case flow6.RoleBuyer:
+			if st.Customer == nil {
+				st.Customer = p
+			}
+		}
+	}
+	assignStatusParty(cdar.ExchangedDocument.IssuerTradeParty)
+	for _, rp := range cdar.ExchangedDocument.RecipientTradeParties {
+		assignStatusParty(rp)
+	}
+
+	// Fall back to the canonical MDT-129 ref.IssuerTradeParty slot for
+	// the Supplier — that's where the wire spec puts the seller's SIREN,
+	// and it's always present (BR-FR-CDV-13). The fallback Supplier
+	// carries just the SIREN; richer seller data only exists when the
+	// SE party also appears at the ExchangedDocument level.
+	if st.Supplier == nil {
+		for _, ack := range cdar.AcknowledgementDocuments {
+			if ack == nil {
 				continue
 			}
-			if _, typ, ok := ctc.StatusKeyFor(ref.ProcessConditionCode); ok {
-				st.Type = typ
+			for _, ref := range ack.ReferenceReferencedDocument {
+				if ref != nil && ref.IssuerTradeParty != nil {
+					if p := goblPartyFromCDAR(ref.IssuerTradeParty); p != nil {
+						st.Supplier = p
+						break
+					}
+				}
+			}
+			if st.Supplier != nil {
 				break
 			}
 		}
 	}
 
-	// Direct, by-name mapping that mirrors the writer:
-	//   ExchangedDocument.IssuerTradeParty (MDG-16) → st.Issuer
-	//   ExchangedDocument.RecipientTradeParty (MDG-23) → st.Recipient
-	//
-	// flow6's normaliser auto-fills Supplier/Customer from whichever of
-	// these two parties carries the SE/BY role, so a parsed status that
-	// only has Issuer + Recipient still ends up with the seller and
-	// buyer mapped onto Supplier/Customer for downstream consumers.
-	if p := goblPartyFromCDAR(cdar.ExchangedDocument.IssuerTradeParty); p != nil {
-		st.Issuer = p
-	}
-	for _, rp := range cdar.ExchangedDocument.RecipientTradeParties {
-		if p := goblPartyFromCDAR(rp); p != nil {
-			st.Recipient = p
-			break // CDAR carries a single business-counterparty Recipient
-		}
-	}
-
-	// Populate Supplier from the canonical MDT-129 ref.IssuerTradeParty
-	// slot — that's where the wire spec puts the seller's SIREN, and
-	// it's always present (BR-FR-CDV-13). The parsed Supplier carries
-	// just the SIREN; richer seller data (name, inbox, role) shows up
-	// under whichever of Issuer / Recipient holds the SE party.
-	if st.Supplier == nil && len(cdar.AcknowledgementDocuments) > 0 {
-		ack := cdar.AcknowledgementDocuments[0]
-		for _, ref := range ack.ReferenceReferencedDocument {
-			if ref != nil && ref.IssuerTradeParty != nil {
-				if p := goblPartyFromCDAR(ref.IssuerTradeParty); p != nil {
-					st.Supplier = p
-					break
-				}
-			}
-		}
-	}
-
-	// Build StatusLines from each AcknowledgementDocument.
+	// Build StatusLines from each AcknowledgementDocument. The CDAR
+	// ProcessConditionCode is pinned on the fr-ctc-flow6-status ext;
+	// flow6's reverse mapping derives line.Key and Status.Type from it
+	// at normalize-time.
 	for _, ack := range cdar.AcknowledgementDocuments {
 		if ack == nil {
 			continue
@@ -113,36 +144,19 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 			if ref == nil {
 				continue
 			}
-			line, err := goblStatusLineFromCDAR(ref)
-			if err != nil {
-				return nil, err
-			}
-			st.Lines = append(st.Lines, line)
+			st.Lines = append(st.Lines, goblStatusLineFromCDAR(ref))
 		}
 	}
 
 	return st, nil
 }
 
-func goblStatusLineFromCDAR(ref *CDARReferencedDocument) (*bill.StatusLine, error) {
+func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 	line := &bill.StatusLine{}
 	if ref.ProcessConditionCode != "" {
-		if key, _, ok := ctc.StatusKeyFor(ref.ProcessConditionCode); ok {
-			line.Key = key
-		}
+		line.Ext = line.Ext.Set(flow6.ExtKeyStatus, cbc.Code(ref.ProcessConditionCode))
 	}
-	if ref.IssuerAssignedID != "" {
-		dr := &org.DocumentRef{Code: cbc.Code(ref.IssuerAssignedID)}
-		if ref.TypeCode != "" {
-			dr.Type = cbc.Key(ref.TypeCode)
-		}
-		if ref.FormattedIssueDateTime != nil && ref.FormattedIssueDateTime.DateTimeString != nil {
-			d, _, err := parseCDARDateTime(ref.FormattedIssueDateTime.DateTimeString.Value)
-			if err == nil {
-				dd := d
-				dr.IssueDate = &dd
-			}
-		}
+	if dr := goblDocRefFromCDAR(ref); dr != nil {
 		line.Doc = dr
 	}
 
@@ -151,66 +165,52 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) (*bill.StatusLine, erro
 			continue
 		}
 		if ds.ReasonCode != "" {
-			r := &bill.Reason{}
-			if key, ok := ctc.ReasonKeyFor(ds.ReasonCode); ok {
-				r.Key = key
+			// Reason.Key is recovered from the ext by flow6's
+			// prepareReasonKey at normalize-time.
+			r := &bill.Reason{
+				Ext: tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(ds.ReasonCode)),
 			}
-			r.Ext = tax.MakeExtensions().Set(ctc.ExtKeyReasonCode, cbc.Code(ds.ReasonCode))
 			if len(ds.Reason) > 0 {
 				r.Description = ds.Reason[0]
 			}
 			line.Reasons = append(line.Reasons, r)
 		}
 		if ds.RequestedActionCode != "" {
-			a := &bill.Action{}
-			if key, ok := ctc.ActionKeyFor(ds.RequestedActionCode); ok {
-				a.Key = key
+			// Action.Key is recovered from the ext by flow6's
+			// prepareActionKey at normalize-time.
+			a := &bill.Action{
+				Ext: tax.MakeExtensions().Set(flow6.ExtKeyAction, cbc.Code(ds.RequestedActionCode)),
 			}
 			if ds.RequestedAction != "" {
 				a.Description = ds.RequestedAction
 			}
 			line.Actions = append(line.Actions, a)
 		}
-		// Map characteristics into Complements.
-		for _, dc := range ds.SpecifiedDocumentCharacteristics {
-			if dc == nil {
-				continue
-			}
-			c := &ctc.Characteristic{
-				ID:       dc.ID,
-				TypeCode: cbc.Code(dc.TypeCode),
-				Name:     dc.Name,
-				Location: dc.Location,
-			}
-			if ds.ReasonCode != "" {
-				c.ReasonCode = cbc.Code(ds.ReasonCode)
-			}
-			if dc.ValueChangedIndicator != nil && dc.ValueChangedIndicator.Value != "" {
-				if v, err := strconv.ParseBool(dc.ValueChangedIndicator.Value); err == nil {
-					c.Changed = &v
-				}
-			}
-			if dc.ValuePercent != "" {
-				if p, err := num.PercentageFromString(dc.ValuePercent + "%"); err == nil {
-					c.Percent = &p
-				}
-			}
-			if dc.ValueAmount != nil && dc.ValueAmount.Value != "" {
-				if v, err := num.AmountFromString(dc.ValueAmount.Value); err == nil {
-					c.Amount = &currency.Amount{
-						Currency: currency.Code(dc.ValueAmount.CurrencyID),
-						Value:    v,
-					}
-				}
-			}
-			obj, err := schema.NewObject(c)
-			if err != nil {
-				return nil, fmt.Errorf("wrap characteristic: %w", err)
-			}
-			line.Complements = append(line.Complements, obj)
+		// SpecifiedDocumentCharacteristics (field-level corrections,
+		// DIV/DVA/MAJ…) are not mapped: deep characteristic support is
+		// deferred — the reason codes carry the mandatory payload.
+	}
+	return line
+}
+
+// goblDocRefFromCDAR maps the referenced-document identity (invoice
+// number, type code, issue date) onto an org.DocumentRef.
+func goblDocRefFromCDAR(ref *CDARReferencedDocument) *org.DocumentRef {
+	if ref.IssuerAssignedID == "" {
+		return nil
+	}
+	dr := &org.DocumentRef{Code: cbc.Code(ref.IssuerAssignedID)}
+	if ref.TypeCode != "" {
+		dr.Type = cbc.Key(ref.TypeCode)
+	}
+	if ref.FormattedIssueDateTime != nil && ref.FormattedIssueDateTime.DateTimeString != nil {
+		d, _, err := parseCDARDateTime(ref.FormattedIssueDateTime.DateTimeString.Value)
+		if err == nil {
+			dd := d
+			dr.IssueDate = &dd
 		}
 	}
-	return line, nil
+	return dr
 }
 
 func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
@@ -219,7 +219,7 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 	}
 	p := &org.Party{Name: tp.Name}
 	if tp.RoleCode != "" {
-		p.Ext = tax.MakeExtensions().Set(ctc.ExtKeyRole, cbc.Code(tp.RoleCode))
+		p.Ext = tax.MakeExtensions().Set(flow6.ExtKeyRole, cbc.Code(tp.RoleCode))
 	}
 	for _, gid := range tp.GlobalIDs {
 		if gid == nil || gid.Value == "" {
@@ -272,4 +272,3 @@ func parseCDARDateTime(s string) (cal.Date, *cal.Time, error) {
 	}
 	return date, nil, nil
 }
-
