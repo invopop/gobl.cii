@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "df29b6e9360913873e7c84b6108db2fa3b531f45c32b18553c2b50a0fccd926b"
+			"val": "5970fc8373b2229e0aab15e4188b6f2adb54fb7c1c014f5583e467af76f2b911"
 		}
 	},
 	"doc": {
@@ -14,7 +14,7 @@
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "receipt",
-		"code": "F202500003_212_20250701151000380_20250701",
+		"code": "F202500003_212_20250701151000#380_20250701",
 		"issue_date": "2025-08-02",
 		"issue_time": "10:05:00",
 		"currency": "EUR",

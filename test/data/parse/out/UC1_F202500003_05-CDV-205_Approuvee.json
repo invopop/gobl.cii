@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a46a098ee2c5d1618ca0c6b5df495dbfa2f7f2e6a53a8f70ba1de7900c2b82a7"
+			"val": "104976613780e24364f9808559e481dba4f7cea55093c127e95fd0655779b551"
 		}
 	},
 	"doc": {
@@ -16,7 +16,7 @@
 		"type": "response",
 		"issue_date": "2025-07-02",
 		"issue_time": "10:05:00",
-		"code": "F202500003_205_20250701161000380_20250701",
+		"code": "F202500003_205_20250701161000#380_20250701",
 		"supplier": {
 			"name": "VENDEUR",
 			"identities": [

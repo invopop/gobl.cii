@@ -4,8 +4,9 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "710d05e4f14ffdb28d2eb213be18b1b6379142662c40dfd4b7dcba62859403af"
-		}
+			"val": "bc0cebb466430d9d85f66682a91e106c183ba32a6bed81d8a00bf7b203af5639"
+		},
+		"to": "iso6523-actorid-upis::9930:DE282741168"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -83,6 +84,11 @@
 						"given": "John",
 						"surname": "Doe"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9930:DE282741168"
 				}
 			],
 			"inboxes": [

@@ -3,7 +3,7 @@ module github.com/invopop/gobl.cii
 go 1.24.4
 
 require (
-	github.com/invopop/gobl v0.403.0
+	github.com/invopop/gobl v0.403.1-0.20260609131918-abf22fe63a79
 	github.com/invopop/phive v0.6.0
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
@@ -33,7 +33,6 @@ require (
 	github.com/invopop/gobl.fr.ctc v0.0.0
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/magefile/mage v1.15.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
