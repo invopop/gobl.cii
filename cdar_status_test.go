@@ -27,12 +27,13 @@ import (
 
 // statusProcessCodes lists the CDAR ProcessConditionCodes carried by
 // bill.Status documents for which flow6 derives a (Status.Type,
-// StatusLine.Key) pair. 203 (Mise à disposition) and 209 (Complétée)
-// have no key mapping in flow6 yet and are excluded; 211 / 212 are
-// bill.Payment lifecycle codes — see the payment tests.
+// StatusLine.Key) pair. 203 (Mise à disposition) rides (response,
+// other) and 209 (Complétée) rides (update, other) — both with the ext
+// as source of truth; 211 / 212 are bill.Payment lifecycle codes — see
+// the payment tests.
 var statusProcessCodes = []string{
-	"200", "201", "202", "204", "205", "206",
-	"207", "208", "210", "213",
+	"200", "201", "202", "203", "204", "205",
+	"206", "207", "208", "209", "210", "213",
 }
 
 // findSEParty returns the parsed status party carrying fr-ctc-flow6-role=SE
@@ -314,12 +315,13 @@ func TestCDARStatusFromToRouting(t *testing.T) {
 		assert.Equal(t, "ACHETEUR", cdar.ExchangedDocument.RecipientTradeParties[0].Name)
 	})
 
-	t.Run("209: builder-set From/To keeps the supplier as issuer", func(t *testing.T) {
-		// 209 (Complétée) is supplier-issued but rides the `response`
-		// status type, whose auto-derivation points From at the
-		// Customer — the builder must pin the direction explicitly.
+	t.Run("209: auto From/To follows the supplier-side update type", func(t *testing.T) {
+		// 209 (Complétée) is supplier-issued and rides the `update`
+		// status type, so the envelope auto-derives From at the
+		// supplier — no explicit pinning needed.
 		env := envelopWithEndpoints(t, "209")
-		env.Head.From, env.Head.To = supplierURI, customerURI
+		assert.Equal(t, supplierURI, env.Head.From)
+		assert.Equal(t, customerURI, env.Head.To)
 		cdar := convert(t, env)
 		assert.Equal(t, "VENDEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
 		require.Len(t, cdar.ExchangedDocument.RecipientTradeParties, 1)
