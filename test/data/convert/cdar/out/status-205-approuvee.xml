@@ -43,11 +43,16 @@
     </ram:IssueDateTime>
     <ram:ReferenceReferencedDocument>
       <ram:IssuerAssignedID>F202500003</ram:IssuerAssignedID>
+      <ram:StatusCode>1</ram:StatusCode>
       <ram:TypeCode>380</ram:TypeCode>
+      <ram:ReceiptDateTime>
+        <udt:DateTimeString format="204">20250701000000</udt:DateTimeString>
+      </ram:ReceiptDateTime>
       <ram:FormattedIssueDateTime>
         <qdt:DateTimeString format="102">20250701</qdt:DateTimeString>
       </ram:FormattedIssueDateTime>
       <ram:ProcessConditionCode>205</ram:ProcessConditionCode>
+      <ram:ProcessCondition>Approuvée</ram:ProcessCondition>
       <ram:IssuerTradeParty>
         <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
       </ram:IssuerTradeParty>

@@ -160,6 +160,13 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 	if dr := goblDocRefFromCDAR(ref); dr != nil {
 		line.Doc = dr
 	}
+	// MDT-95: when the referenced invoice was received / deposited —
+	// the date this lifecycle row is effective from.
+	if ref.ReceiptDateTime != nil && ref.ReceiptDateTime.DateTimeString != nil {
+		if d, _, err := parseCDARDateTime(ref.ReceiptDateTime.DateTimeString.Value); err == nil {
+			line.Date = &d
+		}
+	}
 
 	for _, ds := range ref.SpecifiedDocumentStatuses {
 		if ds == nil {

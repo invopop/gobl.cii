@@ -43,11 +43,13 @@
     </ram:IssueDateTime>
     <ram:ReferenceReferencedDocument>
       <ram:IssuerAssignedID>F202500003</ram:IssuerAssignedID>
+      <ram:StatusCode>47</ram:StatusCode>
       <ram:TypeCode>380</ram:TypeCode>
       <ram:FormattedIssueDateTime>
         <qdt:DateTimeString format="102">20250701</qdt:DateTimeString>
       </ram:FormattedIssueDateTime>
       <ram:ProcessConditionCode>212</ram:ProcessConditionCode>
+      <ram:ProcessCondition>Encaissée</ram:ProcessCondition>
       <ram:IssuerTradeParty>
         <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
       </ram:IssuerTradeParty>

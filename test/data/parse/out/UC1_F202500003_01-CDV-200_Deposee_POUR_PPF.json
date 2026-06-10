@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "db60d13ecb6f0d81ace84445a0fb5f9886e2bae5f587ebf654a3c161a034d419"
+			"val": "be8496e4b156cb9900c57b20758834391c8b12abf8a1b12dd7afdee44944b30a"
 		}
 	},
 	"doc": {
@@ -34,6 +34,7 @@
 			{
 				"index": 1,
 				"key": "issued",
+				"date": "2025-07-01",
 				"doc": {
 					"type": "380",
 					"issue_date": "2025-07-01",

@@ -49,6 +49,40 @@ func cdarAckTypeForCode(code cbc.Code) string {
 	}
 }
 
+// cdarRefStatusCodes maps the ProcessConditionCode (MDT-105) onto the
+// referenced document's StatusCode (MDT-88, UNTDID 1373) as attested by
+// the official UC corpus. The schematron only allow-lists MDT-88
+// values per ack phase and admits its absence, so codes without an
+// attested pairing omit the optional element rather than guessing.
+var cdarRefStatusCodes = map[string]string{
+	"200": "10", "202": "43", "203": "48",
+	"204": "45", "205": "1", "207": "46",
+	"211": "47", "212": "47",
+}
+
+// cdarProcessConditions maps the ProcessConditionCode onto its French
+// label (MDT-106), following the corpus's underscored convention.
+var cdarProcessConditions = map[string]string{
+	"200": "Déposée",
+	"201": "Émise_par_la_plateforme",
+	"202": "Reçue",
+	"203": "Mise_à_disposition",
+	"204": "Prise_en_charge",
+	"205": "Approuvée",
+	"206": "Approuvée_partiellement",
+	"207": "En_litige",
+	"208": "Suspendue",
+	"209": "Complétée",
+	"210": "Refusée",
+	"211": "Paiement_transmis",
+	"212": "Encaissée",
+	"213": "Rejetée",
+}
+
+// cdarReferenceTypeCodePPF is the ReferenceTypeCode (MDT-97) carried on
+// the referenced document of PPF copies of lifecycle CDVs.
+const cdarReferenceTypeCodePPF = "urn.cpro.gouv.fr:1p0:CDV:einvoicingF2"
+
 // buyerIssuedProcessCodes lists the CDAR ProcessConditionCodes for
 // lifecycle events declared by the invoice recipient: the Customer is
 // the CDV issuer and the Supplier its business recipient. 209
@@ -210,6 +244,10 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party, from, to cbc.URI) 
 		cdar.AcknowledgementDocuments = append(cdar.AcknowledgementDocuments, ack)
 	}
 
+	if guideline == CDARGuidelinePPF {
+		markPPFReferences(cdar)
+	}
+
 	return cdar, nil
 }
 
@@ -239,6 +277,12 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 
 	ref := &CDARReferencedDocument{
 		ProcessConditionCode: processCode.String(),
+		ProcessCondition:     cdarProcessConditions[processCode.String()],
+		StatusCode:           cdarRefStatusCodes[processCode.String()],
+	}
+	// MDT-95: when the referenced invoice was received / deposited.
+	if line.Date != nil {
+		ref.ReceiptDateTime = makeIssueDateTime(*line.Date, nil)
 	}
 	if line.Doc != nil {
 		ref.IssuerAssignedID = string(line.Doc.Code)
@@ -422,6 +466,22 @@ func partyIdentityCode(p *org.Party, scheme string) string {
 		}
 	}
 	return ""
+}
+
+// markPPFReferences stamps the PPF ReferenceTypeCode (MDT-97) on every
+// referenced document — the einvoicingF2 copies carry it per the UC
+// corpus.
+func markPPFReferences(cdar *CDAR) {
+	for _, ack := range cdar.AcknowledgementDocuments {
+		if ack == nil {
+			continue
+		}
+		for _, ref := range ack.ReferenceReferencedDocument {
+			if ref != nil {
+				ref.ReferenceTypeCode = cdarReferenceTypeCodePPF
+			}
+		}
+	}
 }
 
 func makeIssueDateTime(d cal.Date, t *cal.Time) *CDARIssueDateTime {

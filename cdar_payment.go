@@ -126,6 +126,10 @@ func newCDARFromPayment(pmt *bill.Payment, ctx Context, sender *org.Party, from,
 		cdar.AcknowledgementDocuments = append(cdar.AcknowledgementDocuments, ack)
 	}
 
+	if guideline == CDARGuidelinePPF {
+		markPPFReferences(cdar)
+	}
+
 	return cdar, nil
 }
 
@@ -138,6 +142,8 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 
 	ref := &CDARReferencedDocument{
 		ProcessConditionCode: processCode,
+		ProcessCondition:     cdarProcessConditions[processCode],
+		StatusCode:           cdarRefStatusCodes[processCode],
 	}
 	if line.Document != nil {
 		ref.IssuerAssignedID = string(line.Document.Code)

@@ -104,10 +104,14 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 	st.SetAddons(flow6.V1)
 
 	docDate := cal.MakeDate(2025, time.July, 1)
+	receiptDate := cal.MakeDate(2025, time.July, 1)
 	line := &bill.StatusLine{
 		// Pin the CDAR ProcessConditionCode directly; flow6's reverse
 		// mapping derives Status.Type and StatusLine.Key from it.
 		Ext: tax.MakeExtensions().Set(flow6.ExtKeyStatus, cbc.Code(code)),
+		// When the referenced invoice was received — emitted as the
+		// CDAR ReceiptDateTime (MDT-95).
+		Date: &receiptDate,
 		Doc: &org.DocumentRef{
 			Code:      cbc.Code("F202500003"),
 			IssueDate: &docDate,
@@ -465,6 +469,32 @@ func TestCDARPaymentPartialRoundTrip(t *testing.T) {
 // TestCDARSchematron generates a CDAR for each process code and validates it
 // against the live Phive instance using the fr.ctc:cdar VESID. Requires
 // `-validate` and a Phive gRPC service reachable on localhost:9091.
+// requireValidCDAR runs the CDAR bytes through Phive and fails on any
+// error OR WARNING. The BR-FR-CDV rule set is flagged `warning` in
+// cdar 1.3.1 — Phive's overall Success therefore proves only XSD
+// validity, and the warnings become fatal in the September 2026
+// schematron update, so they are treated as failures already.
+func requireValidCDAR(t *testing.T, pc phive.ValidationServiceClient, data []byte, label string) {
+	t.Helper()
+	resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+		Vesid:      cii.ContextCDARFlow6.VESID,
+		XmlContent: data,
+	})
+	require.NoError(t, err)
+	out, _ := json.MarshalIndent(resp.Results, "", "  ")
+	require.True(t, resp.Success,
+		"CDAR for %s failed Phive validation: %s", label, string(out))
+	var warnings []*phive.ValidationError
+	for _, layer := range resp.Results {
+		warnings = append(warnings, layer.Warnings...)
+	}
+	if len(warnings) > 0 {
+		wout, _ := json.MarshalIndent(warnings, "", "  ")
+		t.Fatalf("CDAR for %s has %d schematron warning(s) — fatal from September 2026: %s",
+			label, len(warnings), string(wout))
+	}
+}
+
 func TestCDARSchematron(t *testing.T) {
 	if !*validate {
 		t.Skip("requires -validate flag and a running Phive gRPC service")
@@ -476,39 +506,35 @@ func TestCDARSchematron(t *testing.T) {
 	defer conn.Close() //nolint:errcheck
 	pc := phive.NewValidationServiceClient(conn)
 
+	contexts := []struct {
+		name string
+		ctx  cii.Context
+	}{
+		{"b2b", cii.ContextCDARFlow6},
+		{"ppf", cii.ContextCDARFlow6PPF},
+	}
+
 	for _, code := range statusProcessCodes {
-		t.Run("CDV-"+code, func(t *testing.T) {
-			st := buildSyntheticStatus(t, code)
-			cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
+		for _, c := range contexts {
+			t.Run("CDV-"+code+"-"+c.name, func(t *testing.T) {
+				st := buildSyntheticStatus(t, code)
+				cdar, err := cii.NewCDARFromStatus(st, c.ctx)
+				require.NoError(t, err)
+				data, err := cdar.Bytes()
+				require.NoError(t, err)
+				requireValidCDAR(t, pc, data, "code "+code+" ("+c.name+")")
+			})
+		}
+	}
+
+	for _, c := range contexts {
+		t.Run("CDV-212-payment-"+c.name, func(t *testing.T) {
+			pmt := buildSyntheticPayment(t, num.MakeAmount(25000, 2))
+			cdar, err := cii.NewCDARFromPayment(pmt, c.ctx)
 			require.NoError(t, err)
 			data, err := cdar.Bytes()
 			require.NoError(t, err)
-
-			resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-				Vesid:      cii.ContextCDARFlow6.VESID,
-				XmlContent: data,
-			})
-			require.NoError(t, err)
-			out, _ := json.MarshalIndent(resp.Results, "", "  ")
-			require.True(t, resp.Success,
-				"CDAR for code %s failed Phive validation: %s", code, string(out))
+			requireValidCDAR(t, pc, data, "payment 212 ("+c.name+")")
 		})
 	}
-
-	t.Run("CDV-212-payment", func(t *testing.T) {
-		pmt := buildSyntheticPayment(t, num.MakeAmount(25000, 2))
-		cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
-		require.NoError(t, err)
-		data, err := cdar.Bytes()
-		require.NoError(t, err)
-
-		resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-			Vesid:      cii.ContextCDARFlow6.VESID,
-			XmlContent: data,
-		})
-		require.NoError(t, err)
-		out, _ := json.MarshalIndent(resp.Results, "", "  ")
-		require.True(t, resp.Success,
-			"CDAR for payment 212 failed Phive validation: %s", string(out))
-	})
 }

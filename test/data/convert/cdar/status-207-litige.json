@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ee30b4ea228c50a395f5e9bfa0823534c911b5ba0ddb1944896b74e8cf407b40"
+			"val": "4a93690332be011cb57e535b3a6a7604e32dec370bf6bdfb2bc08c2f35fac775"
 		},
 		"from": "iso6523-actorid-upis::0225:200000008_PEP",
 		"to": "iso6523-actorid-upis::0225:100000009_PEP"
@@ -75,6 +75,7 @@
 			{
 				"index": 1,
 				"key": "rejected",
+				"date": "2025-07-01",
 				"doc": {
 					"type": "380",
 					"issue_date": "2025-07-01",
@@ -84,6 +85,22 @@
 					{
 						"key": "legal",
 						"description": "Motif TX_TVA_ERR",
+						"faults": [
+							{
+								"code": "DIV",
+								"message": "Taux TVA (BT-152): 10.00%",
+								"paths": [
+									"/rsm:CrossIndustryInvoice/ram:ApplicableTradeTax/ram:RateApplicablePercent"
+								]
+							},
+							{
+								"code": "DVA",
+								"message": "Taux TVA (BT-152): 20.00%",
+								"paths": [
+									"/rsm:CrossIndustryInvoice/ram:ApplicableTradeTax/ram:RateApplicablePercent"
+								]
+							}
+						],
 						"ext": {
 							"fr-ctc-flow6-condition": "DIV",
 							"fr-ctc-flow6-reason": "TX_TVA_ERR"

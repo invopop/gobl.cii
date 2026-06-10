@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5d93c68a5fda271f0c6af21405249a7c647f93ce41dcbd4f672fc3d98a38c41f"
+			"val": "e8ac22a01635acdc41436229b8b4b42aa25252f3b7f5ea2f69c8ffad007d456f"
 		},
 		"from": "iso6523-actorid-upis::0225:100000009_STATUTS"
 	},
@@ -48,6 +48,7 @@
 			{
 				"index": 1,
 				"key": "issued",
+				"date": "2025-07-01",
 				"doc": {
 					"type": "380",
 					"issue_date": "2025-07-01",

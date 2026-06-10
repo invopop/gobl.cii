@@ -44,10 +44,14 @@
     <ram:ReferenceReferencedDocument>
       <ram:IssuerAssignedID>F202500003</ram:IssuerAssignedID>
       <ram:TypeCode>380</ram:TypeCode>
+      <ram:ReceiptDateTime>
+        <udt:DateTimeString format="204">20250701000000</udt:DateTimeString>
+      </ram:ReceiptDateTime>
       <ram:FormattedIssueDateTime>
         <qdt:DateTimeString format="102">20250701</qdt:DateTimeString>
       </ram:FormattedIssueDateTime>
       <ram:ProcessConditionCode>208</ram:ProcessConditionCode>
+      <ram:ProcessCondition>Suspendue</ram:ProcessCondition>
       <ram:IssuerTradeParty>
         <ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
       </ram:IssuerTradeParty>
@@ -57,6 +61,16 @@
         <ram:RequestedActionCode>NIN</ram:RequestedActionCode>
         <ram:RequestedAction>Créer une facture rectificative</ram:RequestedAction>
         <ram:SequenceNumeric>1</ram:SequenceNumeric>
+        <ram:SpecifiedDocumentCharacteristic>
+          <ram:TypeCode>DIV</ram:TypeCode>
+          <ram:Name>Taux TVA (BT-152): 10.00%</ram:Name>
+          <ram:Location>/rsm:CrossIndustryInvoice/ram:ApplicableTradeTax/ram:RateApplicablePercent</ram:Location>
+        </ram:SpecifiedDocumentCharacteristic>
+        <ram:SpecifiedDocumentCharacteristic>
+          <ram:TypeCode>DVA</ram:TypeCode>
+          <ram:Name>Taux TVA (BT-152): 20.00%</ram:Name>
+          <ram:Location>/rsm:CrossIndustryInvoice/ram:ApplicableTradeTax/ram:RateApplicablePercent</ram:Location>
+        </ram:SpecifiedDocumentCharacteristic>
       </ram:SpecifiedDocumentStatus>
     </ram:ReferenceReferencedDocument>
   </rsm:AcknowledgementDocument>
