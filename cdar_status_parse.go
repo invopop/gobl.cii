@@ -3,6 +3,7 @@ package cii
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/invopop/gobl.fr.ctc/addon/flow6"
@@ -164,15 +165,32 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 		if ds == nil {
 			continue
 		}
+		var r *bill.Reason
 		if ds.ReasonCode != "" {
 			// Reason.Key is recovered from the ext by flow6's
 			// prepareReasonKey at normalize-time.
-			r := &bill.Reason{
-				Ext: tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(ds.ReasonCode)),
+			r = &bill.Reason{
+				Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(ds.ReasonCode)),
+				Description: strings.Join(ds.Reason, "\n"),
 			}
-			if len(ds.Reason) > 0 {
-				r.Description = ds.Reason[0]
+		}
+		// Field-level corrections and amount markers
+		// (SpecifiedDocumentCharacteristics: DIV/DVA/MAJ, MAP/MNA…)
+		// become faults on the status's reason, so the inbound detail
+		// is preserved for display.
+		for _, dc := range ds.SpecifiedDocumentCharacteristics {
+			f := goblFaultFromCDAR(dc)
+			if f == nil {
+				continue
 			}
+			if r == nil {
+				// Characteristics without a ReasonCode still need a
+				// host; "other" is the neutral bucket.
+				r = &bill.Reason{Key: bill.ReasonKeyOther}
+			}
+			r.Faults = append(r.Faults, f)
+		}
+		if r != nil {
 			line.Reasons = append(line.Reasons, r)
 		}
 		if ds.RequestedActionCode != "" {
@@ -186,11 +204,64 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 			}
 			line.Actions = append(line.Actions, a)
 		}
-		// SpecifiedDocumentCharacteristics (field-level corrections,
-		// DIV/DVA/MAJ…) are not mapped: deep characteristic support is
-		// deferred — the reason codes carry the mandatory payload.
 	}
 	return line
+}
+
+// goblFaultFromCDAR maps a SpecifiedDocumentCharacteristic onto a
+// bill.Fault: the CharacteristicTypeCode (MDT-207) becomes the fault
+// code, the XML Location (MDT-213) the fault path, and the remaining
+// detail — data name (MDT-211), business-term ID (MDT-206) and the
+// typed value (amount / percent / date) — composes the human-readable
+// message, e.g. "Taux TVA (BT-152): 10.00%".
+func goblFaultFromCDAR(dc *CDARDocumentCharacteristic) *bill.Fault {
+	if dc == nil {
+		return nil
+	}
+	code := dc.TypeCode
+	if code == "" {
+		code = dc.ID
+	}
+	if code == "" {
+		return nil
+	}
+	f := &bill.Fault{Code: cbc.Code(code)}
+
+	msg := dc.Name
+	if dc.ID != "" && dc.TypeCode != "" {
+		if msg != "" {
+			msg += " (" + dc.ID + ")"
+		} else {
+			msg = dc.ID
+		}
+	}
+	var value string
+	switch {
+	case dc.ValueAmount != nil && dc.ValueAmount.Value != "":
+		value = dc.ValueAmount.Value
+		if dc.ValueAmount.CurrencyID != "" {
+			value += " " + dc.ValueAmount.CurrencyID
+		}
+	case dc.ValuePercent != "":
+		value = dc.ValuePercent + "%"
+	case dc.ValueDateTime != nil && dc.ValueDateTime.DateTimeString != nil:
+		if d, _, err := parseCDARDateTime(dc.ValueDateTime.DateTimeString.Value); err == nil {
+			value = d.String()
+		}
+	}
+	if value != "" {
+		if msg != "" {
+			msg += ": " + value
+		} else {
+			msg = value
+		}
+	}
+	f.Message = msg
+
+	if dc.Location != "" {
+		f.Paths = []string{dc.Location}
+	}
+	return f
 }
 
 // goblDocRefFromCDAR maps the referenced-document identity (invoice

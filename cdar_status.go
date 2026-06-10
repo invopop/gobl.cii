@@ -291,17 +291,54 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 	return ack, nil
 }
 
+// statusCharacteristicTypeCodes is the MDT-207 vocabulary admissible on
+// a status-side SpecifiedDocumentCharacteristic. A fault whose code is
+// in this set emits it as the characteristic's TypeCode; other fault
+// codes (business rules, BT identifiers…) ride in the Name only, so
+// the generated CDV stays within the controlled list.
+var statusCharacteristicTypeCodes = map[cbc.Code]bool{
+	flow6.ConditionBankDetailsUpdate:  true, // CBB
+	flow6.ConditionInvalidData:        true, // DIV
+	flow6.ConditionExpectedData:       true, // DVA
+	flow6.ConditionReplacementData:    true, // MAJ
+	flow6.ConditionAmountApprovedHT:   true, // MAP
+	flow6.ConditionAmountApprovedTTC:  true, // MAPTTC
+	flow6.ConditionAmountRejectedHT:   true, // MNA
+	flow6.ConditionAmountRejectedTTC:  true, // MNATTC
+	flow6.ConditionDiscount:           true, // ESC
+	flow6.ConditionRebate:             true, // RAB
+	flow6.ConditionReduction:          true, // REM
+}
+
 // newCDARDocumentStatus maps a (Reason, Action) pair onto a CDAR
 // SpecifiedDocumentStatus. The CDAR codes are read straight from the
 // flow6 extensions — normalizeReason / normalizeAction guarantee they
 // are populated whenever the Key is set, so no fallback tables are
-// needed here.
+// needed here. Reason faults emit as SpecifiedDocumentCharacteristics
+// (field-level corrections): the fault code becomes the TypeCode when
+// it belongs to the MDT-207 vocabulary, the message the data Name and
+// the first path the XML Location.
 func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) *CDARDocumentStatus {
 	ds := &CDARDocumentStatus{SequenceNumeric: seq}
 	if reason != nil {
 		ds.ReasonCode = reason.Ext.Get(flow6.ExtKeyReason).String()
 		if reason.Description != "" {
 			ds.Reason = []string{reason.Description}
+		}
+		for _, f := range reason.Faults {
+			if f == nil {
+				continue
+			}
+			dc := &CDARDocumentCharacteristic{Name: f.Message}
+			if statusCharacteristicTypeCodes[f.Code] {
+				dc.TypeCode = f.Code.String()
+			} else if dc.Name == "" {
+				dc.Name = f.Code.String()
+			}
+			if len(f.Paths) > 0 {
+				dc.Location = f.Paths[0]
+			}
+			ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics, dc)
 		}
 	}
 	if action != nil {

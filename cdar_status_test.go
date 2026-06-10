@@ -125,6 +125,21 @@ func buildSyntheticStatus(t *testing.T, code string) *bill.Status {
 		line.Reasons = []*bill.Reason{{
 			Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(reasonCode)),
 			Description: "Motif " + reasonCode,
+			// A field-level correction pair, as a buyer's PA would
+			// attach to a dispute/rejection: emitted as
+			// SpecifiedDocumentCharacteristics on the CDV.
+			Faults: []*bill.Fault{
+				{
+					Code:    "DIV",
+					Message: "Taux TVA (BT-152): 10.00%",
+					Paths:   []string{"/rsm:CrossIndustryInvoice/ram:ApplicableTradeTax/ram:RateApplicablePercent"},
+				},
+				{
+					Code:    "DVA",
+					Message: "Taux TVA (BT-152): 20.00%",
+					Paths:   []string{"/rsm:CrossIndustryInvoice/ram:ApplicableTradeTax/ram:RateApplicablePercent"},
+				},
+			},
 		}}
 		line.Actions = []*bill.Action{{Key: bill.ActionKeyReissue, Description: "Créer une facture rectificative"}}
 	}

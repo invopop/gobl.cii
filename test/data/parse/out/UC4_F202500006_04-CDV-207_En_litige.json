@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "44009b52728dc14878b60c259af35739109b7ee56eacf0bd5114f8b23f39f2ec"
+			"val": "ef7198b4916b5b46f0e4c87f1c557b668983bec283ba30f1909cc970032451e0"
 		},
 		"from": "iso6523-actorid-upis::0225:200000008_STATUTS",
 		"to": "iso6523-actorid-upis::0225:100000009_STATUTS"
@@ -84,6 +84,22 @@
 					{
 						"key": "legal",
 						"description": "Taux de TVA erroné",
+						"faults": [
+							{
+								"code": "DIV",
+								"message": "Taux TVA (BT-152): 10.00%",
+								"paths": [
+									"/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent"
+								]
+							},
+							{
+								"code": "DVA",
+								"message": "Taux TVA (BT-152): 20.00%",
+								"paths": [
+									"/rsm:CrossIndustryInvoice/rsm:SupplyChainTradeTransaction/ram:IncludedSupplyChainTradeLineItem/ram:SpecifiedLineTradeSettlement/ram:ApplicableTradeTax/ram:RateApplicablePercent"
+								]
+							}
+						],
 						"ext": {
 							"fr-ctc-flow6-condition": "DIV",
 							"fr-ctc-flow6-reason": "TX_TVA_ERR"
