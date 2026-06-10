@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5970fc8373b2229e0aab15e4188b6f2adb54fb7c1c014f5583e467af76f2b911"
-		}
+			"val": "32a680e682988eb5cbcb74aaba5606aaeb208e6e19a1c372c8451d931d6f5999"
+		},
+		"from": "iso6523-actorid-upis::0225:100000009_STATUTS",
+		"to": "iso6523-actorid-upis::0225:200000008"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/payment",
@@ -32,6 +34,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:100000009_STATUTS"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "peppol",
@@ -51,6 +58,11 @@
 					"ext": {
 						"iso-scheme-id": "0002"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:200000008"
 				}
 			],
 			"inboxes": [

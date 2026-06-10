@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0b4990a070d90da8ada56588852f40620627918ece8f86224f93a84d70efe1fd"
-		}
+			"val": "c12b012f9b0f751d1bd83ee5cfb0507f1ba532a5625942a29e5b8458260bba58"
+		},
+		"from": "iso6523-actorid-upis::0225:200000008_PEP",
+		"to": "iso6523-actorid-upis::0225:100000009_PEP"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
@@ -27,6 +29,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:100000009_PEP"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "peppol",
@@ -46,6 +53,11 @@
 					"ext": {
 						"iso-scheme-id": "0002"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:200000008_PEP"
 				}
 			],
 			"inboxes": [

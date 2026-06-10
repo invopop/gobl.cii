@@ -25,7 +25,7 @@ import (
 // also emits a RAP (reste à payer) characteristic — one 212 per partial
 // cash-in event.
 func NewCDARFromPayment(pmt *bill.Payment, ctx Context) (*CDAR, error) {
-	return newCDARFromPayment(pmt, ctx, nil)
+	return newCDARFromPayment(pmt, ctx, nil, "", "")
 }
 
 // ParseCDARPayment parses a raw CDAR XML byte slice carrying a payment
@@ -46,10 +46,14 @@ func ParseCDARPayment(data []byte) (*bill.Payment, error) {
 // ExchangedDocument/SenderTradeParty (MDT-21) — typically the
 // dematerialisation platform's identity.
 func NewCDARFromPaymentWithSender(pmt *bill.Payment, ctx Context, sender *org.Party) (*CDAR, error) {
-	return newCDARFromPayment(pmt, ctx, sender)
+	return newCDARFromPayment(pmt, ctx, sender, "", "")
 }
 
-func newCDARFromPayment(pmt *bill.Payment, ctx Context, sender *org.Party) (*CDAR, error) {
+// newCDARFromPayment converts a *bill.Payment into a CDAR. from / to
+// carry the envelope's Head.From / Head.To routing URIs and, when they
+// resolve to one of the payment's business parties, pick the issuer /
+// recipient over the Payment.Type defaults.
+func newCDARFromPayment(pmt *bill.Payment, ctx Context, sender *org.Party, from, to cbc.URI) (*CDAR, error) {
 	if pmt == nil {
 		return nil, fmt.Errorf("nil bill.Payment")
 	}
@@ -94,6 +98,12 @@ func newCDARFromPayment(pmt *bill.Payment, ctx Context, sender *org.Party) (*CDA
 	issuer, recipient := pmt.Supplier, pmt.Customer
 	if pmt.Type == bill.PaymentTypeAdvice {
 		issuer, recipient = pmt.Customer, pmt.Supplier
+	}
+	if p := partyWithEndpointURI(from, pmt.Supplier, pmt.Customer); p != nil {
+		issuer = p
+	}
+	if p := partyWithEndpointURI(to, pmt.Supplier, pmt.Customer); p != nil {
+		recipient = p
 	}
 	if issuer != nil {
 		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(issuer)

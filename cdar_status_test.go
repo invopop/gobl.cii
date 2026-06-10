@@ -263,6 +263,96 @@ func TestCDARSenderTradeParty(t *testing.T) {
 	assert.Equal(t, "WK", bare.ExchangedDocument.SenderTradeParty.RoleCode)
 }
 
+// TestCDARStatusFromToRouting covers the envelope Head.From / Head.To
+// routing URIs steering the CDAR issuer / recipient slots on
+// business-issued (23-phase) codes.
+func TestCDARStatusFromToRouting(t *testing.T) {
+	const (
+		supplierURI = cbc.URI("iso6523-actorid-upis::0225:100000009")
+		customerURI = cbc.URI("iso6523-actorid-upis::0225:200000008")
+	)
+
+	// envelopWithEndpoints re-envelops a calculated status after giving
+	// both parties an endpoint, so Envelope.Calculate auto-fills
+	// Head.From / Head.To from the document's type semantics.
+	envelopWithEndpoints := func(t *testing.T, code string) *gobl.Envelope {
+		t.Helper()
+		st := buildSyntheticStatus(t, code)
+		st.Supplier.Endpoints = []*org.Endpoint{{URI: supplierURI}}
+		st.Customer.Endpoints = []*org.Endpoint{{URI: customerURI}}
+		env, err := gobl.Envelop(st)
+		require.NoError(t, err)
+		return env
+	}
+
+	convert := func(t *testing.T, env *gobl.Envelope) *cii.CDAR {
+		t.Helper()
+		out, err := cii.Convert(env, cii.WithContext(cii.ContextCDARFlow6))
+		require.NoError(t, err)
+		cdar, ok := out.(*cii.CDAR)
+		require.True(t, ok)
+		return cdar
+	}
+
+	t.Run("205: auto From/To matches the buyer-issued default", func(t *testing.T) {
+		env := envelopWithEndpoints(t, "205")
+		// response → Customer issues, Supplier receives.
+		assert.Equal(t, customerURI, env.Head.From)
+		assert.Equal(t, supplierURI, env.Head.To)
+		cdar := convert(t, env)
+		assert.Equal(t, "ACHETEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
+		require.Len(t, cdar.ExchangedDocument.RecipientTradeParties, 1)
+		assert.Equal(t, "VENDEUR", cdar.ExchangedDocument.RecipientTradeParties[0].Name)
+	})
+
+	t.Run("205: operator-set From/To overrides the default", func(t *testing.T) {
+		env := envelopWithEndpoints(t, "205")
+		env.Head.From, env.Head.To = supplierURI, customerURI
+		cdar := convert(t, env)
+		assert.Equal(t, "VENDEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
+		require.Len(t, cdar.ExchangedDocument.RecipientTradeParties, 1)
+		assert.Equal(t, "ACHETEUR", cdar.ExchangedDocument.RecipientTradeParties[0].Name)
+	})
+
+	t.Run("209: builder-set From/To keeps the supplier as issuer", func(t *testing.T) {
+		// 209 (Complétée) is supplier-issued but rides the `response`
+		// status type, whose auto-derivation points From at the
+		// Customer — the builder must pin the direction explicitly.
+		env := envelopWithEndpoints(t, "209")
+		env.Head.From, env.Head.To = supplierURI, customerURI
+		cdar := convert(t, env)
+		assert.Equal(t, "VENDEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
+		require.Len(t, cdar.ExchangedDocument.RecipientTradeParties, 1)
+		assert.Equal(t, "ACHETEUR", cdar.ExchangedDocument.RecipientTradeParties[0].Name)
+	})
+
+	t.Run("209: no From/To falls back to the supplier-issued heuristic", func(t *testing.T) {
+		st := buildSyntheticStatus(t, "209")
+		// Strip the routing addresses so neither flow6's inbox→endpoint
+		// derivation nor the envelope's auto From/To can kick in.
+		for _, p := range []*org.Party{st.Supplier, st.Customer} {
+			p.Inboxes = nil
+			p.Endpoints = nil
+		}
+		env, err := gobl.Envelop(st)
+		require.NoError(t, err)
+		assert.Empty(t, env.Head.From, "no endpoints, no auto From")
+		cdar := convert(t, env)
+		assert.Equal(t, "VENDEUR", cdar.ExchangedDocument.IssuerTradeParty.Name)
+	})
+
+	t.Run("201: platform-issued code ignores From/To", func(t *testing.T) {
+		env := envelopWithEndpoints(t, "201")
+		env.Head.From, env.Head.To = customerURI, supplierURI
+		cdar := convert(t, env)
+		// 305-phase issuer stays the sending platform (bare WK).
+		assert.Equal(t, "WK", cdar.ExchangedDocument.SenderTradeParty.RoleCode)
+		if itp := cdar.ExchangedDocument.IssuerTradeParty; itp != nil {
+			assert.NotEqual(t, "ACHETEUR", itp.Name)
+		}
+	})
+}
+
 // buildSyntheticPayment builds a minimal bill.Payment receipt (CDAR 212,
 // Encaissée) referencing an invoice, normalized through the flow6 addon.
 // due, when non-zero, models a partial cash-in with a remainder.

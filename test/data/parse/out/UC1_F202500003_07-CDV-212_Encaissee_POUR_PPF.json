@@ -4,8 +4,9 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f0aa884cb04c909a92c48b9b932fd0646c476788a4d369a32e16ed7fb9f5d5de"
-		}
+			"val": "af7399db972ede48371cfad6655ea578b7dd15fb01d955deee176986b3b84c5c"
+		},
+		"from": "iso6523-actorid-upis::0225:100000009_STATUTS"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/payment",
@@ -30,6 +31,11 @@
 					"ext": {
 						"iso-scheme-id": "0002"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:100000009_STATUTS"
 				}
 			],
 			"inboxes": [

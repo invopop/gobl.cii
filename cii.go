@@ -311,6 +311,13 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		opt(o)
 	}
 
+	// Head.From / Head.To routing URIs steer the CDAR issuer/recipient
+	// slots for lifecycle documents.
+	var from, to cbc.URI
+	if env.Head != nil {
+		from, to = env.Head.From, env.Head.To
+	}
+
 	switch doc := env.Extract().(type) {
 	case *bill.Invoice:
 		// Check addons
@@ -333,7 +340,7 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		if ctx.GuidelineID == ContextEN16931V2017.GuidelineID {
 			ctx = ContextCDARFlow6
 		}
-		return newCDAR(doc, ctx, o.sender)
+		return newCDAR(doc, ctx, o.sender, from, to)
 	case *bill.Payment:
 		ctx := o.context
 		// Payments (211 / 212 lifecycle messages) share the CDAR Flow 6
@@ -341,7 +348,7 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		if ctx.GuidelineID == ContextEN16931V2017.GuidelineID {
 			ctx = ContextCDARFlow6
 		}
-		return newCDARFromPayment(doc, ctx, o.sender)
+		return newCDARFromPayment(doc, ctx, o.sender, from, to)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}

@@ -74,7 +74,7 @@ var buyerIssuedProcessCodes = map[cbc.Code]bool{
 // To carry an identified platform party in that slot, use
 // NewCDARFromStatusWithSender or pass WithSenderTradeParty to Convert.
 func NewCDARFromStatus(st *bill.Status, ctx Context) (*CDAR, error) {
-	return newCDAR(st, ctx, nil)
+	return newCDAR(st, ctx, nil, "", "")
 }
 
 // NewCDARFromStatusWithSender is the same as NewCDARFromStatus but
@@ -82,7 +82,28 @@ func NewCDARFromStatus(st *bill.Status, ctx Context) (*CDAR, error) {
 // ExchangedDocument/SenderTradeParty (MDT-21) — typically the
 // dematerialisation platform's identity (Name + GlobalID + Inbox).
 func NewCDARFromStatusWithSender(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
-	return newCDAR(st, ctx, sender)
+	return newCDAR(st, ctx, sender, "", "")
+}
+
+// partyWithEndpointURI returns the first party that carries the given
+// URI among its endpoints, or nil. Used to resolve the envelope's
+// Head.From / Head.To routing addresses back to the document's
+// business-party slots.
+func partyWithEndpointURI(uri cbc.URI, parties ...*org.Party) *org.Party {
+	if uri == "" {
+		return nil
+	}
+	for _, p := range parties {
+		if p == nil {
+			continue
+		}
+		for _, e := range p.Endpoints {
+			if e != nil && e.URI == uri {
+				return p
+			}
+		}
+	}
+	return nil
 }
 
 // newCDAR converts a *bill.Status into a CDAR XML document.
@@ -96,7 +117,13 @@ func NewCDARFromStatusWithSender(st *bill.Status, ctx Context, sender *org.Party
 //     (end-party copy, "invoice" guideline + REGULATED) or
 //     ContextCDARFlow6PPF ("einvoicingF2" guideline, single PPF
 //     recipient).
-func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
+//
+// from / to carry the envelope's Head.From / Head.To routing URIs: on
+// business-issued (23-phase) codes they pick the issuer / recipient
+// party when they resolve to one of the status's business parties,
+// overriding the per-code defaults. Platform-issued (305-phase) codes
+// keep the sending platform in the issuer slot regardless.
+func newCDAR(st *bill.Status, ctx Context, sender *org.Party, from, to cbc.URI) (*CDAR, error) {
 	if st == nil {
 		return nil, fmt.Errorf("nil bill.Status")
 	}
@@ -149,6 +176,14 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party) (*CDAR, error) {
 		issuer, recipient = st.Customer, st.Supplier
 	case code == "209":
 		issuer, recipient = st.Supplier, st.Customer
+	}
+	if ackType == "23" {
+		if p := partyWithEndpointURI(from, st.Supplier, st.Customer); p != nil {
+			issuer = p
+		}
+		if p := partyWithEndpointURI(to, st.Supplier, st.Customer); p != nil {
+			recipient = p
+		}
 	}
 	if issuer != nil {
 		cdar.ExchangedDocument.IssuerTradeParty = newCDARTradeParty(issuer)
