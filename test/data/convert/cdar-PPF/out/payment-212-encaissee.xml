@@ -7,6 +7,7 @@
   </rsm:ExchangedDocumentContext>
   <rsm:ExchangedDocument>
     <ram:ID>PAY-212</ram:ID>
+    <ram:Name>Encaissée</ram:Name>
     <ram:IssueDateTime>
       <udt:DateTimeString format="204">20250702000000</udt:DateTimeString>
     </ram:IssueDateTime>
@@ -38,9 +39,12 @@
       <ram:IssuerAssignedID>F202500003</ram:IssuerAssignedID>
       <ram:StatusCode>47</ram:StatusCode>
       <ram:TypeCode>380</ram:TypeCode>
+      <ram:ReceiptDateTime>
+        <udt:DateTimeString format="204">20250702000000</udt:DateTimeString>
+      </ram:ReceiptDateTime>
       <ram:ReferenceTypeCode>urn.cpro.gouv.fr:1p0:CDV:einvoicingF2</ram:ReferenceTypeCode>
       <ram:FormattedIssueDateTime>
-        <qdt:DateTimeString format="102">20250701</qdt:DateTimeString>
+        <qdt:DateTimeString format="204">20250701000000</qdt:DateTimeString>
       </ram:FormattedIssueDateTime>
       <ram:ProcessConditionCode>212</ram:ProcessConditionCode>
       <ram:ProcessCondition>Encaissée</ram:ProcessCondition>

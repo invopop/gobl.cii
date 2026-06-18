@@ -176,8 +176,17 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 	if condition == "" {
 		condition = flow6.ConditionAmountReceived
 	}
-	ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics,
-		newCDARAmountCharacteristic(condition, line.Amount, pmt.Currency))
+	// PPF rejects an encaissement whose cashed amount (MDT-215) is not
+	// split by VAT rate (MDT-224) — P1.18 / G7.45, motif REJ_ENCAISSEMENT.
+	// When the payment line carries a tax breakdown, emit one
+	// characteristic per distinct rate (gross amount + percentage);
+	// otherwise fall back to a single amount-only characteristic.
+	if split := newCDARVATSplitCharacteristics(condition, line, pmt.Currency); len(split) > 0 {
+		ds.SpecifiedDocumentCharacteristics = split
+	} else {
+		ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics,
+			newCDARAmountCharacteristic(condition, line.Amount, pmt.Currency))
+	}
 	if line.Due != nil && condition != flow6.ConditionAmountRemaining {
 		ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics,
 			newCDARAmountCharacteristic(flow6.ConditionAmountRemaining, *line.Due, pmt.Currency))
@@ -186,6 +195,35 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 
 	ack.ReferenceReferencedDocument = []*CDARReferencedDocument{ref}
 	return ack
+}
+
+// newCDARVATSplitCharacteristics breaks a payment line's cashed amount
+// down by VAT rate into one MDT-215 (ValueAmount, gross per rate) /
+// MDT-224 (ValuePercent) characteristic per distinct rate, as PPF
+// requires for an encaissement. Returns nil when the line carries no
+// tax breakdown so the caller can keep the amount-only form.
+func newCDARVATSplitCharacteristics(typeCode cbc.Code, line *bill.PaymentLine, cur currency.Code) []*CDARDocumentCharacteristic {
+	if line == nil || line.Tax == nil {
+		return nil
+	}
+	var chars []*CDARDocumentCharacteristic
+	for _, cat := range line.Tax.Categories {
+		if cat == nil {
+			continue
+		}
+		for _, rt := range cat.Rates {
+			if rt == nil || rt.Percent == nil {
+				continue
+			}
+			gross := rt.Base.Add(rt.Amount)
+			chars = append(chars, &CDARDocumentCharacteristic{
+				TypeCode:     typeCode.String(),
+				ValueAmount:  &CDARValueAmount{Value: gross.String(), CurrencyID: cur.String()},
+				ValuePercent: rt.Percent.Amount().Rescale(2).String(),
+			})
+		}
+	}
+	return chars
 }
 
 func newCDARAmountCharacteristic(typeCode cbc.Code, amount num.Amount, cur currency.Code) *CDARDocumentCharacteristic {

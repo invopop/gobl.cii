@@ -466,6 +466,52 @@ func TestCDARPaymentPartialRoundTrip(t *testing.T) {
 	assert.Equal(t, "250.00", out.Lines[0].Due.String())
 }
 
+// TestCDARPaymentPPFEncaissement covers the PPF (einvoicingF2) profile
+// fields that live 0654 rejections flagged on a 212: the cashed amount
+// must be split by VAT rate (MDT-215/MDT-224), and the document must
+// carry a Name (MDT-5), a ReceiptDateTime (MDG-34) and a 204-format
+// FormattedIssueDateTime (MDT-100).
+func TestCDARPaymentPPFEncaissement(t *testing.T) {
+	pmt := buildSyntheticPayment(t, num.Amount{})
+	pmt.Lines[0].Tax = &tax.Total{
+		Categories: []*tax.CategoryTotal{
+			{
+				Code: "VAT",
+				Rates: []*tax.RateTotal{
+					{
+						Base:    num.MakeAmount(50000, 2),
+						Percent: num.NewPercentage(200, 3), // 20.0%
+						Amount:  num.MakeAmount(10000, 2),
+					},
+				},
+			},
+		},
+	}
+
+	cdar, err := cii.NewCDARFromPaymentWithSender(pmt, cii.ContextCDARFlow6PPF, cii.PPFPlatformParty("0431"))
+	require.NoError(t, err)
+
+	assert.Equal(t, "Encaissée", cdar.ExchangedDocument.Name, "MDT-5")
+	require.NotNil(t, cdar.ExchangedDocument.SenderTradeParty)
+	require.Len(t, cdar.ExchangedDocument.SenderTradeParty.GlobalIDs, 1, "MDT-19")
+	assert.Equal(t, "0238", cdar.ExchangedDocument.SenderTradeParty.GlobalIDs[0].SchemeID)
+	assert.Equal(t, "0431", cdar.ExchangedDocument.SenderTradeParty.GlobalIDs[0].Value)
+
+	require.Len(t, cdar.AcknowledgementDocuments, 1)
+	ref := cdar.AcknowledgementDocuments[0].ReferenceReferencedDocument[0]
+	require.NotNil(t, ref.ReceiptDateTime, "MDG-34")
+	require.NotNil(t, ref.FormattedIssueDateTime)
+	assert.Equal(t, "204", ref.FormattedIssueDateTime.DateTimeString.Format, "MDT-100")
+	assert.Len(t, ref.FormattedIssueDateTime.DateTimeString.Value, 14)
+
+	require.Len(t, ref.SpecifiedDocumentStatuses, 1)
+	chars := ref.SpecifiedDocumentStatuses[0].SpecifiedDocumentCharacteristics
+	require.Len(t, chars, 1, "one characteristic per VAT rate")
+	assert.Equal(t, "20.00", chars[0].ValuePercent, "MDT-224")
+	require.NotNil(t, chars[0].ValueAmount)
+	assert.Equal(t, "600.00", chars[0].ValueAmount.Value, "MDT-215 gross per rate")
+}
+
 // TestCDARSchematron generates a CDAR for each process code and validates it
 // against the live Phive instance using the fr.ctc:cdar VESID. Requires
 // `-validate` and a Phive gRPC service reachable on localhost:9091.

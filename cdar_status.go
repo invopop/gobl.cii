@@ -405,6 +405,25 @@ func bareWKParty() *org.Party {
 	}
 }
 
+// PPFPlatformParty builds the dematerialisation platform's (PDP) sender
+// party for a CDV transmitted to the PPF: role WK with the platform's PA
+// matricule as a GlobalID under the 0238 scheme. PPF rejects a CDV whose
+// SenderTradeParty has no GlobalID (MDT-19). Pass it via
+// WithSenderTradeParty; an empty matricule returns the bare WK party.
+func PPFPlatformParty(matricule string) *org.Party {
+	p := bareWKParty()
+	if matricule == "" {
+		return p
+	}
+	p.Identities = []*org.Identity{
+		{
+			Code: cbc.Code(matricule),
+			Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, schemeIDPDP),
+		},
+	}
+	return p
+}
+
 // ppfTradeParty returns the constant CDAR trade party for the Portail
 // Public de Facturation — GlobalID 9998 under the 0238 (matricule PDP)
 // scheme with the DFH role, per BR-FR-CDV-02 — the single recipient of
@@ -468,20 +487,58 @@ func partyIdentityCode(p *org.Party, scheme string) string {
 	return ""
 }
 
-// markPPFReferences stamps the PPF ReferenceTypeCode (MDT-97) on every
-// referenced document — the einvoicingF2 copies carry it per the UC
-// corpus.
+// markPPFReferences applies the PPF (einvoicingF2) profile corrections
+// that PPF QUAL enforces on a transmitted CDV beyond the XSD/schematron
+// (BR-FR-CDV cardinalities). Each was confirmed against live 0654
+// rejections of the lifecycle copies:
+//   - MDT-97: ReferenceTypeCode stamped on every referenced document.
+//   - MDT-5: ExchangedDocument/Name is mandatory; default it to the
+//     status label (ProcessCondition) when the caller left it empty.
+//   - MDT-100: FormattedIssueDateTime must be format 204 (14-char
+//     CCYYMMDDHHMMSS); the corpus's 102 (8-char) form is rejected for
+//     "longueur maximale".
+//   - MDG-34: ReferenceReferencedDocument/ReceiptDateTime is mandatory;
+//     fall back to the acknowledgement's own IssueDateTime when absent.
 func markPPFReferences(cdar *CDAR) {
+	var label string
 	for _, ack := range cdar.AcknowledgementDocuments {
 		if ack == nil {
 			continue
 		}
 		for _, ref := range ack.ReferenceReferencedDocument {
-			if ref != nil {
-				ref.ReferenceTypeCode = cdarReferenceTypeCodePPF
+			if ref == nil {
+				continue
+			}
+			ref.ReferenceTypeCode = cdarReferenceTypeCodePPF
+			if label == "" {
+				label = ref.ProcessCondition
+			}
+			promoteCDARDateTo204(ref.FormattedIssueDateTime)
+			if ref.ReceiptDateTime == nil {
+				ref.ReceiptDateTime = ack.IssueDateTime
 			}
 		}
 	}
+	if cdar.ExchangedDocument != nil && cdar.ExchangedDocument.Name == "" {
+		cdar.ExchangedDocument.Name = label
+	}
+}
+
+// promoteCDARDateTo204 rewrites a FormattedIssueDateTime carrying the
+// date-only 102 form (CCYYMMDD) into the full 204 datetime PPF requires
+// (MDT-100 / G7.06), padding the time component with zeroes.
+func promoteCDARDateTo204(f *CDARFormattedIssueDateTime) {
+	if f == nil || f.DateTimeString == nil {
+		return
+	}
+	dts := f.DateTimeString
+	if dts.Format == cdarDateTimeFormat {
+		return
+	}
+	if len(dts.Value) == 8 {
+		dts.Value += "000000"
+	}
+	dts.Format = cdarDateTimeFormat
 }
 
 func makeIssueDateTime(d cal.Date, t *cal.Time) *CDARIssueDateTime {
