@@ -56,6 +56,9 @@
         <ram:RequestedActionCode>NIN</ram:RequestedActionCode>
         <ram:RequestedAction>Créer une facture rectificative</ram:RequestedAction>
         <ram:SequenceNumeric>1</ram:SequenceNumeric>
+        <ram:IncludedNote>
+          <ram:Content>Motif REJ_SEMAN</ram:Content>
+        </ram:IncludedNote>
         <ram:SpecifiedDocumentCharacteristic>
           <ram:TypeCode>DIV</ram:TypeCode>
           <ram:Name>Taux TVA (BT-152): 10.00%</ram:Name>

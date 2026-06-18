@@ -221,6 +221,16 @@ func TestCDARStatusReasonRoundTrip(t *testing.T) {
 
 	cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
 	require.NoError(t, err)
+
+	// MDT-126: a Refusée status must carry the comment as
+	// SpecifiedDocumentStatus/IncludedNote/Content, or PPF 601s it.
+	require.NotEmpty(t, cdar.AcknowledgementDocuments)
+	ref := cdar.AcknowledgementDocuments[0].ReferenceReferencedDocument[0]
+	require.NotEmpty(t, ref.SpecifiedDocumentStatuses)
+	notes := ref.SpecifiedDocumentStatuses[0].IncludedNotes
+	require.Len(t, notes, 1, "MDT-126 comment required for a Refusée status")
+	assert.Equal(t, []string{"Motif TX_TVA_ERR"}, notes[0].Content)
+
 	data, err := cdar.Bytes()
 	require.NoError(t, err)
 

@@ -368,6 +368,10 @@ func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) *C
 		ds.ReasonCode = reason.Ext.Get(flow6.ExtKeyReason).String()
 		if reason.Description != "" {
 			ds.Reason = []string{reason.Description}
+			// MDT-126: PPF makes the free-text comment mandatory for a
+			// Refusée / Suspendue status (and accepts it for others), carried
+			// as SpecifiedDocumentStatus/IncludedNote/Content.
+			ds.IncludedNotes = []*CDARNote{{Content: []string{reason.Description}}}
 		}
 		for _, f := range reason.Faults {
 			if f == nil {
