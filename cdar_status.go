@@ -282,7 +282,12 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 		ref.ReceiptDateTime = makeIssueDateTime(*line.Date, nil)
 	}
 	if line.Doc != nil {
-		ref.IssuerAssignedID = string(line.Doc.Code)
+		// IssuerAssignedID carries the referenced invoice's full number
+		// (series + code). The receiver keys its invoice directory on the
+		// same Series.Join(Code), and the parse-back has no series field —
+		// dropping the series here would make the round-trip reference
+		// unresolvable.
+		ref.IssuerAssignedID = line.Doc.Series.Join(line.Doc.Code).String()
 		if line.Doc.IssueDate != nil {
 			ref.FormattedIssueDateTime = &CDARFormattedIssueDateTime{
 				DateTimeString: &CDARQDTDateTimeString{

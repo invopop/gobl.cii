@@ -143,7 +143,10 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 		StatusCode:           cdarRefStatusCodes[processCode],
 	}
 	if line.Document != nil {
-		ref.IssuerAssignedID = string(line.Document.Code)
+		// IssuerAssignedID carries the referenced invoice's full number
+		// (series + code) so the receiver can resolve it against its invoice
+		// directory keyed on Series.Join(Code) — see cdar_status.go.
+		ref.IssuerAssignedID = line.Document.Series.Join(line.Document.Code).String()
 		if line.Document.IssueDate != nil {
 			ref.FormattedIssueDateTime = &CDARFormattedIssueDateTime{
 				DateTimeString: &CDARQDTDateTimeString{
