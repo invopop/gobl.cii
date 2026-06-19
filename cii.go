@@ -162,10 +162,17 @@ var ContextChorusProV1 = Context{
 // is independent of the context — it follows the ProcessConditionCode's
 // phase (see cdarAckTypeForCode).
 var ContextCDARFlow6 = Context{
-	GuidelineID: CDARGuidelineInvoice,
-	BusinessID:  "REGULATED",
-	Addons:      []cbc.Key{flow6.V1},
-	VESID:       "fr.ctc:cdar:1.3.1",
+	// GuidelineID is the Peppol document-type customization used for the
+	// busdox SMP lookup / SBD (the receiver registers this exact id);
+	// OutputGuidelineID keeps the internal CDV guideline (BR-FR-CDV-02) in
+	// the CDAR XML's GuidelineParameter. They differ: the network identifies
+	// the doc by the Peppol id, the XML carries the cpro guideline.
+	GuidelineID:       "urn:peppol:france:billing:cdv:1.0",
+	OutputGuidelineID: CDARGuidelineInvoice,
+	BusinessID:        "REGULATED",
+	Version:           VersionD22B,
+	Addons:            []cbc.Key{flow6.V1},
+	VESID:             "fr.ctc:cdar:1.3.1",
 }
 
 // ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR copies sent to

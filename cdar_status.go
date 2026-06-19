@@ -162,10 +162,7 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party, from, to cbc.URI) 
 		return nil, fmt.Errorf("nil bill.Status")
 	}
 
-	guideline := ctx.GuidelineID
-	if guideline == "" {
-		guideline = ContextCDARFlow6.GuidelineID
-	}
+	guideline := cdarXMLGuideline(ctx)
 	code := firstLineProcessCode(st)
 	ackType := cdarAckTypeForCode(code)
 
@@ -403,6 +400,24 @@ func newCDARDocumentStatus(reason *bill.Reason, action *bill.Action, seq int) *C
 // fallback for platform-issued codes when no platform identity is supplied.
 // Matches the UC1 corpus shape of <ram:RoleCode>WK</ram:RoleCode> with no
 // body.
+// cdarXMLGuideline resolves the GuidelineParameter.ID written into the CDAR
+// XML. OutputGuidelineID wins when set — it carries the internal CDV guideline
+// (BR-FR-CDV-02), kept distinct from GuidelineID which is the Peppol busdox
+// customization used for SMP/SBD routing. Falls back to GuidelineID, then the
+// Flow 6 default.
+func cdarXMLGuideline(ctx Context) string {
+	if ctx.OutputGuidelineID != "" {
+		return ctx.OutputGuidelineID
+	}
+	if ctx.GuidelineID != "" {
+		return ctx.GuidelineID
+	}
+	if ContextCDARFlow6.OutputGuidelineID != "" {
+		return ContextCDARFlow6.OutputGuidelineID
+	}
+	return ContextCDARFlow6.GuidelineID
+}
+
 func bareWKParty() *org.Party {
 	return &org.Party{
 		Ext: tax.MakeExtensions().Set(flow6.ExtKeyRole, flow6.RolePlatform),

@@ -63,10 +63,7 @@ func newCDARFromPayment(pmt *bill.Payment, ctx Context, sender *org.Party, from,
 		return nil, fmt.Errorf("payment missing %s extension; run Calculate with the %s addon declared", flow6.ExtKeyStatus, flow6.V1)
 	}
 
-	guideline := ctx.GuidelineID
-	if guideline == "" {
-		guideline = ContextCDARFlow6.GuidelineID
-	}
+	guideline := cdarXMLGuideline(ctx)
 	// 211 / 212 are treatment-phase, business-issued events.
 	ackType := cdarAckTypeForCode(processCode)
 
