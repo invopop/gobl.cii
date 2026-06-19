@@ -75,6 +75,13 @@ type Context struct {
 	// is used. This allows the context to be identified by one ID externally while
 	// generating different values in the XML output.
 	OutputGuidelineID string
+	// OutputBusinessID optionally specifies a different BusinessID to write
+	// into the generated CII/CDAR XML's BusinessProcessParameter. If empty,
+	// BusinessID is used. This lets BusinessID carry the external busdox
+	// process id (SMP/SBD routing) while the XML keeps a distinct value
+	// (e.g. CDAR MDT-2 "REGULATED" vs busdox process
+	// urn:peppol:france:billing:regulated).
+	OutputBusinessID  string
 	Version           string
 	Addons            []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
@@ -169,7 +176,11 @@ var ContextCDARFlow6 = Context{
 	// the doc by the Peppol id, the XML carries the cpro guideline.
 	GuidelineID:       "urn:peppol:france:billing:cdv:1.0",
 	OutputGuidelineID: CDARGuidelineInvoice,
-	BusinessID:        "REGULATED",
+	// BusinessID is the busdox SBD/SMP process id the receiver registers its
+	// CDV service under (cenbii-procid-ubl scheme); OutputBusinessID keeps the
+	// CDAR XML's BusinessProcessParameter at the CDV MDT-2 "REGULATED" value.
+	BusinessID:        ProfileIDPeppolFranceBilling,
+	OutputBusinessID:  "REGULATED",
 	Version:           VersionD22B,
 	Addons:            []cbc.Key{flow6.V1},
 	VESID:             "fr.ctc:cdar:1.3.1",

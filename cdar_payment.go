@@ -71,8 +71,8 @@ func newCDARFromPayment(pmt *bill.Payment, ctx Context, sender *org.Party, from,
 	cdar.ExchangedDocumentContext = &CDARExchangedContext{
 		GuidelineParameter: &CDARDocumentContextParameter{ID: guideline},
 	}
-	if ctx.BusinessID != "" {
-		cdar.ExchangedDocumentContext.BusinessProcessParameter = &CDARDocumentContextParameter{ID: ctx.BusinessID}
+	if bp := cdarBusinessProcessID(ctx); bp != "" {
+		cdar.ExchangedDocumentContext.BusinessProcessParameter = &CDARDocumentContextParameter{ID: bp}
 	}
 
 	cdar.ExchangedDocument = &CDARExchangedDocument{

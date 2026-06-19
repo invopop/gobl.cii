@@ -172,8 +172,8 @@ func newCDAR(st *bill.Status, ctx Context, sender *org.Party, from, to cbc.URI) 
 	}
 	// BusinessProcessParameter is only present on the end-party
 	// "invoice" guideline (REGULATED); PPF transmissions omit it.
-	if ctx.BusinessID != "" {
-		cdar.ExchangedDocumentContext.BusinessProcessParameter = &CDARDocumentContextParameter{ID: ctx.BusinessID}
+	if bp := cdarBusinessProcessID(ctx); bp != "" {
+		cdar.ExchangedDocumentContext.BusinessProcessParameter = &CDARDocumentContextParameter{ID: bp}
 	}
 
 	cdar.ExchangedDocument = &CDARExchangedDocument{
@@ -416,6 +416,18 @@ func cdarXMLGuideline(ctx Context) string {
 		return ContextCDARFlow6.OutputGuidelineID
 	}
 	return ContextCDARFlow6.GuidelineID
+}
+
+// cdarBusinessProcessID resolves the BusinessProcessParameter.ID written into
+// the CDAR XML (MDT-2). OutputBusinessID wins when set — it carries the CDV
+// "REGULATED" value, kept distinct from BusinessID which is the Peppol busdox
+// process id used for SMP/SBD routing. Returns "" when neither is set, in
+// which case no BusinessProcessParameter is emitted (PPF transmissions).
+func cdarBusinessProcessID(ctx Context) string {
+	if ctx.OutputBusinessID != "" {
+		return ctx.OutputBusinessID
+	}
+	return ctx.BusinessID
 }
 
 func bareWKParty() *org.Party {
