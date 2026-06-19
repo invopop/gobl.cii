@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "af7399db972ede48371cfad6655ea578b7dd15fb01d955deee176986b3b84c5c"
+			"val": "e20e94c7f21541eb2106d68b66cf34ae2343927190e1afc9aa3e1019680f5090"
 		},
 		"from": "iso6523-actorid-upis::0225:100000009_STATUTS"
 	},
@@ -55,7 +55,15 @@
 				"document": {
 					"type": "380",
 					"issue_date": "2025-07-01",
-					"code": "F202500003"
+					"code": "F202500003",
+					"identities": [
+						{
+							"code": "100000009",
+							"ext": {
+								"iso-scheme-id": "0002"
+							}
+						}
+					]
 				},
 				"amount": "12000"
 			}

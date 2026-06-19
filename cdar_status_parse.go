@@ -273,6 +273,13 @@ func goblFaultFromCDAR(dc *CDARDocumentCharacteristic) *bill.Fault {
 
 // goblDocRefFromCDAR maps the referenced-document identity (invoice
 // number, type code, issue date) onto an org.DocumentRef.
+//
+// The CDAR's IssuerTradeParty names the referenced invoice's issuer (its
+// supplier). The CDAR's own SE/BY trade parties describe the status issuer,
+// which for buyer-issued events (e.g. a 211 payment advice) is the buyer, not
+// the invoice supplier — so the invoice's supplier identity survives only here.
+// It is carried onto the doc ref's Identities so a recipient can resolve the
+// invoice by its supplier SIREN regardless of who issued the status.
 func goblDocRefFromCDAR(ref *CDARReferencedDocument) *org.DocumentRef {
 	if ref.IssuerAssignedID == "" {
 		return nil
@@ -287,6 +294,9 @@ func goblDocRefFromCDAR(ref *CDARReferencedDocument) *org.DocumentRef {
 			dd := d
 			dr.IssueDate = &dd
 		}
+	}
+	if issuer := goblPartyFromCDAR(ref.IssuerTradeParty); issuer != nil {
+		dr.Identities = issuer.Identities
 	}
 	return dr
 }
