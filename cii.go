@@ -81,9 +81,9 @@ type Context struct {
 	// process id (SMP/SBD routing) while the XML keeps a distinct value
 	// (e.g. CDAR MDT-2 "REGULATED" vs busdox process
 	// urn:peppol:france:billing:regulated).
-	OutputBusinessID  string
-	Version           string
-	Addons            []cbc.Key
+	OutputBusinessID string
+	Version          string
+	Addons           []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
 }
@@ -179,11 +179,11 @@ var ContextCDARFlow6 = Context{
 	// BusinessID is the busdox SBD/SMP process id the receiver registers its
 	// CDV service under (cenbii-procid-ubl scheme); OutputBusinessID keeps the
 	// CDAR XML's BusinessProcessParameter at the CDV MDT-2 "REGULATED" value.
-	BusinessID:        ProfileIDPeppolFranceBilling,
-	OutputBusinessID:  "REGULATED",
-	Version:           VersionD22B,
-	Addons:            []cbc.Key{flow6.V1},
-	VESID:             "fr.ctc:cdar:1.3.1",
+	BusinessID:       ProfileIDPeppolFranceBilling,
+	OutputBusinessID: "REGULATED",
+	Version:          VersionD22B,
+	Addons:           []cbc.Key{flow6.V1},
+	VESID:            "fr.ctc:cdar:1.3.1",
 }
 
 // ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR copies sent to

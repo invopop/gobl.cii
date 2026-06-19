@@ -29,6 +29,13 @@ const (
 	pathParse       = "parse"
 	pathOut         = "out"
 
+	// Convert fixture directory / context names, shared across the
+	// conversion tests (also used in invoice_probe_test.go).
+	dirCDAR      = "cdar"
+	dirCDARPPF   = "cdar-PPF"
+	dirFRFacturX = "peppol-france-facturx"
+	dirFRCIUS    = "peppol-france-cius"
+
 	staticUUID uuid.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 )
 
@@ -63,8 +70,8 @@ func TestConvertToInvoice(t *testing.T) {
 		{"FacturX", cii.ContextFacturXV1, "facturx"},
 		{"XRechnung", cii.ContextXRechnungV3, "xrechnung"},
 		{"ChorusPro", cii.ContextChorusProV1, "choruspro"},
-		{"PeppolFranceFacturX", cii.ContextPeppolFranceFacturXV1, "peppol-france-facturx"},
-		{"PeppolFranceCIUS", cii.ContextPeppolFranceCIUSV1, "peppol-france-cius"},
+		{"PeppolFranceFacturX", cii.ContextPeppolFranceFacturXV1, dirFRFacturX},
+		{"PeppolFranceCIUS", cii.ContextPeppolFranceCIUSV1, dirFRCIUS},
 		{"ZUGFeRD", cii.ContextZUGFeRDV2, "zugferd"},
 	}
 
@@ -133,8 +140,8 @@ func TestParseInvoice(t *testing.T) {
 		{"FacturX", "facturx"},
 		{"XRechnung", "xrechnung"},
 		{"ChorusPro", "choruspro"},
-		{"PeppolFranceFacturX", "peppol-france-facturx"},
-		{"PeppolFranceCIUS", "peppol-france-cius"},
+		{"PeppolFranceFacturX", dirFRFacturX},
+		{"PeppolFranceCIUS", dirFRCIUS},
 		{"PeppolFranceExtended", "peppol-france-extended"},
 	}
 
@@ -217,8 +224,8 @@ var cdarConvertContexts = []struct {
 	dir     string
 	context cii.Context
 }{
-	{"CDARFlow6", "cdar", cii.ContextCDARFlow6},
-	{"CDARFlow6PPF", "cdar-PPF", cii.ContextCDARFlow6PPF},
+	{"CDARFlow6", dirCDAR, cii.ContextCDARFlow6},
+	{"CDARFlow6PPF", dirCDARPPF, cii.ContextCDARFlow6PPF},
 }
 
 // cdarConvertFixtures lists the synthetic CDAR status fixtures used to
@@ -232,19 +239,19 @@ var cdarConvertFixtures = []struct {
 	payment     bool
 }{
 	// Buyer-issued ack 23 — Issuer = Customer, Recipient = Supplier
-	{"204", "status-204-prise-en-charge.json", "cdar", false},
-	{"205", "status-205-approuvee.json", "cdar", false},
-	{"206", "status-206-approuvee-partiellement.json", "cdar", false},
-	{"207", "status-207-litige.json", "cdar", false},
-	{"208", "status-208-suspendue.json", "cdar", false},
-	{"210", "status-210-refusee.json", "cdar", false},
+	{"204", "status-204-prise-en-charge.json", dirCDAR, false},
+	{"205", "status-205-approuvee.json", dirCDAR, false},
+	{"206", "status-206-approuvee-partiellement.json", dirCDAR, false},
+	{"207", "status-207-litige.json", dirCDAR, false},
+	{"208", "status-208-suspendue.json", dirCDAR, false},
+	{"210", "status-210-refusee.json", dirCDAR, false},
 	// Platform-issued ack 23
-	{"213", "status-213-rejetee-semantique.json", "cdar", false},
+	{"213", "status-213-rejetee-semantique.json", dirCDAR, false},
 	// Seller-issued payment receipt (212 Encaissée) — bill.Payment
-	{"212", "payment-212-encaissee.json", "cdar", true},
+	{"212", "payment-212-encaissee.json", dirCDAR, true},
 	// PPF transmissions (305)
-	{"200", "status-200-deposee.json", "cdar-PPF", false},
-	{"212", "payment-212-encaissee.json", "cdar-PPF", true},
+	{"200", "status-200-deposee.json", dirCDARPPF, false},
+	{"212", "payment-212-encaissee.json", dirCDARPPF, true},
 	// NOTE: 209 (Complétée) has no flow6 (Type, Key) mapping yet and 211
 	// (Paiement transmis) is out of the mandatory-status scope; both are
 	// omitted until needed.

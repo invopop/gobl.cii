@@ -24,10 +24,10 @@ type franceInvoiceProbe struct {
 // franceInvoiceProbes drives TestProbeFranceInvoices over the same fixtures
 // that feed TestConvertToInvoice, but through the warnings-as-errors gate.
 var franceInvoiceProbes = []franceInvoiceProbe{
-	{"CIUS/380", "peppol-france-cius", "invoice-standard.json", cii.ContextPeppolFranceCIUSV1},
-	{"CIUS/381", "peppol-france-cius", "credit-note.json", cii.ContextPeppolFranceCIUSV1},
-	{"FacturX/380", "peppol-france-facturx", "invoice-standard.json", cii.ContextPeppolFranceFacturXV1},
-	{"FacturX/381", "peppol-france-facturx", "credit-note.json", cii.ContextPeppolFranceFacturXV1},
+	{"CIUS/380", dirFRCIUS, "invoice-standard.json", cii.ContextPeppolFranceCIUSV1},
+	{"CIUS/381", dirFRCIUS, "credit-note.json", cii.ContextPeppolFranceCIUSV1},
+	{"FacturX/380", dirFRFacturX, "invoice-standard.json", cii.ContextPeppolFranceFacturXV1},
+	{"FacturX/381", dirFRFacturX, "credit-note.json", cii.ContextPeppolFranceFacturXV1},
 }
 
 // TestProbeFranceInvoices converts each French CTC invoice fixture and

@@ -343,17 +343,17 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 // codes (business rules, BT identifiers…) ride in the Name only, so
 // the generated CDV stays within the controlled list.
 var statusCharacteristicTypeCodes = map[cbc.Code]bool{
-	flow6.ConditionBankDetailsUpdate:  true, // CBB
-	flow6.ConditionInvalidData:        true, // DIV
-	flow6.ConditionExpectedData:       true, // DVA
-	flow6.ConditionReplacementData:    true, // MAJ
-	flow6.ConditionAmountApprovedHT:   true, // MAP
-	flow6.ConditionAmountApprovedTTC:  true, // MAPTTC
-	flow6.ConditionAmountRejectedHT:   true, // MNA
-	flow6.ConditionAmountRejectedTTC:  true, // MNATTC
-	flow6.ConditionDiscount:           true, // ESC
-	flow6.ConditionRebate:             true, // RAB
-	flow6.ConditionReduction:          true, // REM
+	flow6.ConditionBankDetailsUpdate: true, // CBB
+	flow6.ConditionInvalidData:       true, // DIV
+	flow6.ConditionExpectedData:      true, // DVA
+	flow6.ConditionReplacementData:   true, // MAJ
+	flow6.ConditionAmountApprovedHT:  true, // MAP
+	flow6.ConditionAmountApprovedTTC: true, // MAPTTC
+	flow6.ConditionAmountRejectedHT:  true, // MNA
+	flow6.ConditionAmountRejectedTTC: true, // MNATTC
+	flow6.ConditionDiscount:          true, // ESC
+	flow6.ConditionRebate:            true, // RAB
+	flow6.ConditionReduction:         true, // REM
 }
 
 // newCDARDocumentStatus maps a (Reason, Action) pair onto a CDAR
