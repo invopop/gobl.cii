@@ -356,6 +356,20 @@ func TestConvertCDAR(t *testing.T) {
 	}
 }
 
+// cdarFixturesNeedingRouting names the CDV fixtures whose issuer party omits
+// its electronic address from the document body (as a conformant CDV may): the
+// parser must hydrate the missing inbox from the transport routing. The other
+// fixtures already carry both party inboxes.
+var cdarFixturesNeedingRouting = map[string]bool{
+	"UC1_F202500003_04-CDV-204_Prise_en_charge.xml":    true,
+	"UC1_F202500003_05-CDV-205_Approuvee.xml":          true,
+	"UC1_F202500003_06-CDV-211_Paiement_transmis.xml":  true,
+	"UC1_F202500003_07-CDV-212_Encaissee.xml":          true,
+	"UC1_F202500003_07-CDV-212_Encaissee_POUR_PPF.xml": true,
+	"UC4_F202500006_04-CDV-207_En_litige.xml":          true,
+	"UC5_F202500007_04-CDV-207_En_litige.xml":          true,
+}
+
 func TestParseCDAR(t *testing.T) {
 	examples, err := filepath.Glob(filepath.Join(getParsePath(), "UC*.xml"))
 	require.NoError(t, err)
@@ -369,7 +383,20 @@ func TestParseCDAR(t *testing.T) {
 			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			env, err := cii.Parse(xmlData)
+			// A conformant CDV need not repeat a party's electronic address in
+			// the body (it travels at the SBD layer). For the fixtures whose
+			// issuer omits it, supply the transport routing the Peppol layer
+			// would provide — the two business participants — so the parser
+			// hydrates the missing party inbox (BR-FR-CDV-08). Fixtures that
+			// already carry both inboxes are parsed without routing.
+			var parseOpts []cii.ParseOption
+			if cdarFixturesNeedingRouting[inName] {
+				parseOpts = append(parseOpts, cii.WithRouting(
+					"0225:100000009_STATUTS",
+					"0225:200000008_STATUTS",
+				))
+			}
+			env, err := cii.Parse(xmlData, parseOpts...)
 			require.NoError(t, err)
 
 			env.Head.UUID = staticUUID

@@ -38,7 +38,7 @@ func ParseCDARPayment(data []byte) (*bill.Payment, error) {
 	if err != nil {
 		return nil, err
 	}
-	return goblPaymentFromCDAR(cdar)
+	return goblPaymentFromCDAR(cdar, routing{})
 }
 
 // NewCDARFromPaymentWithSender is the same as NewCDARFromPayment but
@@ -242,7 +242,7 @@ func newCDARAmountCharacteristic(typeCode cbc.Code, amount num.Amount, cur curre
 // CDARs carry no payment-method detail, so a single bare pay.Record
 // with the line amount is synthesized to satisfy the core "at least
 // one payment method" rule; the receiving system can enrich it.
-func goblPaymentFromCDAR(cdar *CDAR) (*bill.Payment, error) {
+func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 	if cdar == nil || cdar.ExchangedDocument == nil {
 		return nil, fmt.Errorf("invalid CDAR document")
 	}
@@ -320,6 +320,7 @@ func goblPaymentFromCDAR(cdar *CDAR) (*bill.Payment, error) {
 		pmt.Methods = []*pay.Record{{Key: pay.MeansKeyOther, Amount: total}}
 	}
 
+	hydratePartyInboxes(pmt.Supplier, pmt.Customer, r)
 	return pmt, nil
 }
 

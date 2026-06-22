@@ -29,21 +29,21 @@ func ParseCDARStatus(data []byte) (*bill.Status, error) {
 	if err != nil {
 		return nil, err
 	}
-	return goblStatusFromCDAR(cdar)
+	return goblStatusFromCDAR(cdar, routing{})
 }
 
 // parseCDAR converts a raw CDAR XML byte slice into the GOBL document
 // matching its ProcessConditionCode: payment lifecycle codes (211 /
 // 212) produce a *bill.Payment, everything else a *bill.Status.
-func parseCDAR(data []byte) (any, error) {
+func parseCDAR(data []byte, r routing) (any, error) {
 	cdar, err := UnmarshalCDAR(data)
 	if err != nil {
 		return nil, err
 	}
 	if code := cdarProcessCode(cdar); code == "211" || code == "212" {
-		return goblPaymentFromCDAR(cdar)
+		return goblPaymentFromCDAR(cdar, r)
 	}
-	return goblStatusFromCDAR(cdar)
+	return goblStatusFromCDAR(cdar, r)
 }
 
 // cdarProcessCode returns the ProcessConditionCode of the first
@@ -62,7 +62,7 @@ func cdarProcessCode(cdar *CDAR) string {
 	return ""
 }
 
-func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
+func goblStatusFromCDAR(cdar *CDAR, r routing) (*bill.Status, error) {
 	if cdar == nil || cdar.ExchangedDocument == nil {
 		return nil, fmt.Errorf("invalid CDAR document")
 	}
@@ -149,6 +149,7 @@ func goblStatusFromCDAR(cdar *CDAR) (*bill.Status, error) {
 		}
 	}
 
+	hydratePartyInboxes(st.Supplier, st.Customer, r)
 	return st, nil
 }
 
@@ -299,6 +300,89 @@ func goblDocRefFromCDAR(ref *CDARReferencedDocument) *org.DocumentRef {
 		dr.Identities = issuer.Identities
 	}
 	return dr
+}
+
+// participantInbox parses a Peppol participant id into an org.Inbox. It accepts
+// both the bare "scheme:code" form the Peppol layer returns (e.g.
+// "0225:698680774") and the full "iso6523-actorid-upis::scheme:code" endpoint
+// URI. Returns nil when the value is empty or has no scheme separator.
+func participantInbox(uri cbc.URI) *org.Inbox {
+	s := string(uri)
+	if s == "" {
+		return nil
+	}
+	if i := strings.Index(s, "::"); i >= 0 { // drop the iso6523-actorid-upis authority
+		s = s[i+2:]
+	}
+	i := strings.Index(s, ":")
+	if i < 0 {
+		return nil
+	}
+	return &org.Inbox{Scheme: cbc.Code(s[:i]), Code: cbc.Code(s[i+1:])}
+}
+
+// hydratePartyInboxes fills a business party's Peppol inbox from the envelope's
+// transport routing (the SBD From / To) when the CDV body omitted it. A
+// conformant CDAR need not repeat the issuer's electronic address in the
+// document body — it travels at the SBD layer — yet BR-FR-CDV-08 requires every
+// non-WK/DFH party to carry an inbox, so a received status would otherwise fail
+// validation. Each routing participant is matched to the party whose SIREN it
+// carries; any leftover participant fills a party still missing an inbox.
+// Parties that already have an inbox are left untouched.
+func hydratePartyInboxes(supplier, customer *org.Party, r routing) {
+	parties := make([]*org.Party, 0, 2)
+	for _, p := range []*org.Party{supplier, customer} {
+		if p != nil {
+			parties = append(parties, p)
+		}
+	}
+	if len(parties) == 0 {
+		return
+	}
+
+	inboxes := make([]*org.Inbox, 0, 2)
+	for _, uri := range []cbc.URI{r.from, r.to} {
+		if ib := participantInbox(uri); ib != nil {
+			inboxes = append(inboxes, ib)
+		}
+	}
+	used := make([]bool, len(inboxes))
+
+	// First pass: match each participant to the party carrying its SIREN.
+	for _, p := range parties {
+		if len(p.Inboxes) > 0 {
+			continue
+		}
+		siren := partyIdentityCode(p, schemeIDSIREN)
+		if siren == "" {
+			continue
+		}
+		for i, ib := range inboxes {
+			if used[i] {
+				continue
+			}
+			if code := ib.Code.String(); code == siren || strings.HasPrefix(code, siren) {
+				p.Inboxes = []*org.Inbox{ib}
+				used[i] = true
+				break
+			}
+		}
+	}
+
+	// Second pass: assign any leftover participant to a party still missing one.
+	for _, p := range parties {
+		if len(p.Inboxes) > 0 {
+			continue
+		}
+		for i := range inboxes {
+			if used[i] {
+				continue
+			}
+			p.Inboxes = []*org.Inbox{inboxes[i]}
+			used[i] = true
+			break
+		}
+	}
 }
 
 func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
