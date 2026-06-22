@@ -313,10 +313,13 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 		if gid == nil || gid.Value == "" {
 			continue
 		}
-		p.Identities = append(p.Identities, &org.Identity{
-			Code: cbc.Code(gid.Value),
-			Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, cbc.Code(gid.SchemeID)),
-		})
+		id := &org.Identity{Code: cbc.Code(gid.Value)}
+		// Only carry the ISO 6523 scheme when the GlobalID actually has one —
+		// an empty schemeID would otherwise become a present-but-empty ext.
+		if gid.SchemeID != "" {
+			id.Ext = tax.MakeExtensions().Set(iso.ExtKeySchemeID, cbc.Code(gid.SchemeID))
+		}
+		p.Identities = append(p.Identities, id)
 	}
 	if tp.URIUniversalCommunication != nil && tp.URIUniversalCommunication.URIID != nil {
 		ib := &org.Inbox{
@@ -352,9 +355,18 @@ func parseCDARDateTime(s string) (cal.Date, *cal.Time, error) {
 	}
 	date := cal.MakeDate(y, time.Month(m), d)
 	if len(s) >= 14 {
-		hh, _ := strconv.Atoi(s[8:10])
-		mm, _ := strconv.Atoi(s[10:12])
-		ss, _ := strconv.Atoi(s[12:14])
+		hh, err := strconv.Atoi(s[8:10])
+		if err != nil {
+			return cal.Date{}, nil, err
+		}
+		mm, err := strconv.Atoi(s[10:12])
+		if err != nil {
+			return cal.Date{}, nil, err
+		}
+		ss, err := strconv.Atoi(s[12:14])
+		if err != nil {
+			return cal.Date{}, nil, err
+		}
 		t := cal.MakeTime(hh, mm, ss)
 		return date, &t, nil
 	}
