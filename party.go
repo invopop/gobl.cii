@@ -124,7 +124,7 @@ func newParty(party *org.Party, ctx Context) *Party {
 					Value: id.Code.String(),
 				}
 				if id.Ext.Has(iso.ExtKeySchemeID) {
-					p.LegalOrganization.ID.SchemeID = id.Ext[iso.ExtKeySchemeID].String()
+					p.LegalOrganization.ID.SchemeID = id.Ext.Get(iso.ExtKeySchemeID).String()
 				}
 				continue
 			}
@@ -132,7 +132,7 @@ func newParty(party *org.Party, ctx Context) *Party {
 			// GlobalID: identity with scheme ID and no scope
 			if id.Ext.Has(iso.ExtKeySchemeID) {
 				p.GlobalID = &PartyID{
-					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
 					Value:    id.Code.String(),
 				}
 				continue

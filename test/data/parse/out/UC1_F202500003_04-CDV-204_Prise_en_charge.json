@@ -1,0 +1,98 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "7f3352ba394ae627ef4f545bcbf7f5dd462775cad64130fee96558c765a00a5a"
+		},
+		"from": "iso6523-actorid-upis::0225:200000008_STATUTS",
+		"to": "iso6523-actorid-upis::0225:100000009_STATUTS"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2025-07-01",
+		"issue_time": "18:10:00",
+		"code": "F202500003_204_20250701161000#380_20250701",
+		"supplier": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:100000009_STATUTS"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0225",
+					"code": "100000009_STATUTS"
+				}
+			],
+			"ext": {
+				"fr-ctc-flow6-role": "SE"
+			}
+		},
+		"customer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:200000008_STATUTS"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0225",
+					"code": "200000008_STATUTS"
+				}
+			],
+			"ext": {
+				"fr-ctc-flow6-role": "BY"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "processing",
+				"date": "2025-07-01",
+				"doc": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003",
+					"identities": [
+						{
+							"code": "100000009",
+							"ext": {
+								"iso-scheme-id": "0002"
+							}
+						}
+					]
+				},
+				"ext": {
+					"fr-ctc-flow6-status": "204"
+				}
+			}
+		]
+	}
+}

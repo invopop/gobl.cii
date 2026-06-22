@@ -27,9 +27,9 @@ func goblNewParty(party *Party) *org.Party {
 			Scope: org.IdentityScopeLegal,
 		}
 		if party.LegalOrganization.ID.SchemeID != "" {
-			identity.Ext = tax.Extensions{
+			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
 				iso.ExtKeySchemeID: cbc.Code(party.LegalOrganization.ID.SchemeID),
-			}
+			})
 		}
 		p.Identities = append(p.Identities, identity)
 	}
@@ -40,9 +40,9 @@ func goblNewParty(party *Party) *org.Party {
 			Code: cbc.Code(party.ID.Value),
 		}
 		if party.ID.SchemeID != "" {
-			identity.Ext = tax.Extensions{
+			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
 				iso.ExtKeySchemeID: cbc.Code(party.ID.SchemeID),
-			}
+			})
 		}
 		p.Identities = append(p.Identities, identity)
 	}
@@ -59,9 +59,9 @@ func goblNewParty(party *Party) *org.Party {
 	// Global ID is not yet mapped to the ISO 6523 ICD, its identifier is used as the label
 	if party.GlobalID != nil {
 		p.Identities = append(p.Identities, &org.Identity{
-			Ext: tax.Extensions{
+			Ext: tax.ExtensionsOf(cbc.CodeMap{
 				iso.ExtKeySchemeID: cbc.Code(party.GlobalID.SchemeID),
-			},
+			}),
 			Code: cbc.Code(party.GlobalID.Value),
 		})
 	}

@@ -8,14 +8,16 @@ import (
 	"io"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.fr.ctc/addon/flow2"
+	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
-	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 )
 
 var (
@@ -47,7 +49,7 @@ const (
 // Common Guideline and VESID values reused across multiple contexts.
 const (
 	guidelineIDEN16931V2017 = "urn:cen.eu:en16931:2017"
-	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.13"
+	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.16"
 )
 
 // Profile ID codes
@@ -73,8 +75,15 @@ type Context struct {
 	// is used. This allows the context to be identified by one ID externally while
 	// generating different values in the XML output.
 	OutputGuidelineID string
-	Version           string
-	Addons            []cbc.Key
+	// OutputBusinessID optionally specifies a different BusinessID to write
+	// into the generated CII/CDAR XML's BusinessProcessParameter. If empty,
+	// BusinessID is used. This lets BusinessID carry the external busdox
+	// process id (SMP/SBD routing) while the XML keeps a distinct value
+	// (e.g. CDAR MDT-2 "REGULATED" vs busdox process
+	// urn:peppol:france:billing:regulated).
+	OutputBusinessID string
+	Version          string
+	Addons           []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
 }
@@ -115,8 +124,8 @@ var ContextPeppolFranceFacturXV1 = Context{
 	BusinessID:        ProfileIDPeppolFranceBilling,
 	OutputGuidelineID: guidelineIDEN16931V2017 + "#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Version:           VersionD16B,
-	Addons:            []cbc.Key{ctc.Flow2V1},
-	VESID:             "fr.factur-x:en16931:1.0.8",
+	Addons:            []cbc.Key{flow2.V1},
+	VESID:             "fr.ctc:extended-cii:1.3.1",
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
@@ -125,8 +134,8 @@ var ContextPeppolFranceCIUSV1 = Context{
 	BusinessID:        ProfileIDPeppolFranceBilling,
 	OutputGuidelineID: guidelineIDEN16931V2017,
 	Version:           VersionD22B,
-	Addons:            []cbc.Key{ctc.Flow2V1},
-	VESID:             vesIDEN16931CII,
+	Addons:            []cbc.Key{flow2.V1},
+	VESID:             "fr.ctc:cii:1.3.1",
 }
 
 // ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
@@ -154,12 +163,46 @@ var ContextChorusProV1 = Context{
 	VESID:       "", // ChorusPro does not have a specific VESID
 }
 
+// ContextCDARFlow6 is used for French CTC Flow 6 CDARs addressed to an
+// end-party: the GuidelineID is the "invoice" URN (BR-FR-CDV-02) with
+// the REGULATED BusinessProcessParameter. The ack TypeCode (23 vs 305)
+// is independent of the context — it follows the ProcessConditionCode's
+// phase (see cdarAckTypeForCode).
+var ContextCDARFlow6 = Context{
+	// GuidelineID is the Peppol document-type customization used for the
+	// busdox SMP lookup / SBD (the receiver registers this exact id);
+	// OutputGuidelineID keeps the internal CDV guideline (BR-FR-CDV-02) in
+	// the CDAR XML's GuidelineParameter. They differ: the network identifies
+	// the doc by the Peppol id, the XML carries the cpro guideline.
+	GuidelineID:       "urn:peppol:france:billing:cdv:1.0",
+	OutputGuidelineID: CDARGuidelineInvoice,
+	// BusinessID is the busdox SBD/SMP process id the receiver registers its
+	// CDV service under (cenbii-procid-ubl scheme); OutputBusinessID keeps the
+	// CDAR XML's BusinessProcessParameter at the CDV MDT-2 "REGULATED" value.
+	BusinessID:       ProfileIDPeppolFranceBilling,
+	OutputBusinessID: "REGULATED",
+	Version:          VersionD22B,
+	Addons:           []cbc.Key{flow6.V1},
+	VESID:            "fr.ctc:cdar:1.3.1",
+}
+
+// ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR copies sent to
+// the PPF: the GuidelineID is the einvoicingF2 URN per BR-FR-CDV-02, no
+// BusinessProcessParameter is emitted, and the single recipient is the
+// PPF party (9998 / 0238 / DFH).
+var ContextCDARFlow6PPF = Context{
+	GuidelineID: CDARGuidelinePPF,
+	Addons:      []cbc.Key{flow6.V1},
+	VESID:       "fr.ctc:cdar:1.3.1",
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
 var contexts = []Context{
 	ContextEN16931V2017, ContextPeppolV3, ContextFacturXV1,
 	ContextPeppolFranceFacturXV1, ContextPeppolFranceCIUSV1,
 	ContextZUGFeRDV2, ContextXRechnungV3, ContextChorusProV1,
+	ContextCDARFlow6, ContextCDARFlow6PPF,
 }
 
 // FindContext looks up a context by GuidelineID and optionally BusinessID.
@@ -224,26 +267,63 @@ func isFrenchBillingMode(businessID string) bool {
 // a GOBL envelope. If the type is unsupported, an
 // ErrUnknownDocumentType is provided. CDAR and other non-invoice CII
 // documents are not supported by Parse and should be handled using Unmarshal.
-func Parse(data []byte) (*gobl.Envelope, error) {
+func Parse(data []byte, opts ...ParseOption) (*gobl.Envelope, error) {
+	var r routing
+	for _, opt := range opts {
+		opt(&r)
+	}
+
 	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err
 	}
 
-	if ns != NamespaceRSM {
+	env := gobl.NewEnvelope()
+	switch ns {
+	case NamespaceRSM:
+		res, err := parseInvoice(data)
+		if err != nil {
+			return nil, err
+		}
+		if err := env.Insert(res); err != nil {
+			return nil, err
+		}
+		return env, nil
+	case NamespaceCDARRSM:
+		res, err := parseCDAR(data, r)
+		if err != nil {
+			return nil, err
+		}
+		if err := env.Insert(res); err != nil {
+			return nil, err
+		}
+		return env, nil
+	default:
 		return nil, ErrUnknownDocumentType
 	}
+}
 
-	env := gobl.NewEnvelope()
-	res, err := parseInvoice(data)
-	if err != nil {
-		return nil, err
-	}
+// routing carries the envelope's transport addresses (the SBD From / To the
+// Peppol layer received) so CDAR parsing can hydrate a business party's inbox
+// when the CDV body omits it — see hydratePartyInboxes. Values are Peppol
+// participant ids in either "scheme:code" or "iso6523-actorid-upis::scheme:code"
+// form.
+type routing struct {
+	from, to cbc.URI
+}
 
-	if err := env.Insert(res); err != nil {
-		return nil, err
+// ParseOption configures Parse.
+type ParseOption func(*routing)
+
+// WithRouting supplies the envelope's From / To transport addresses to Parse.
+// On a received CDAR the issuer party's electronic address may be absent from
+// the document body (carried instead at the SBD/transport layer); these let the
+// parser populate the missing party inbox so the result satisfies BR-FR-CDV-08.
+func WithRouting(from, to cbc.URI) ParseOption {
+	return func(r *routing) {
+		r.from = from
+		r.to = to
 	}
-	return env, nil
 }
 
 // Unmarshal detects the document type and unmarshals XML into the appropriate
@@ -277,6 +357,13 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		opt(o)
 	}
 
+	// Head.From / Head.To routing URIs steer the CDAR issuer/recipient
+	// slots for lifecycle documents.
+	var from, to cbc.URI
+	if env.Head != nil {
+		from, to = env.Head.From, env.Head.To
+	}
+
 	switch doc := env.Extract().(type) {
 	case *bill.Invoice:
 		// Check addons
@@ -292,6 +379,22 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		}
 
 		return newInvoice(doc, o.context)
+	case *bill.Status:
+		ctx := o.context
+		// If the caller didn't override the default invoice context, fall back
+		// to the CDAR Flow 6 context for status documents.
+		if ctx.GuidelineID == ContextEN16931V2017.GuidelineID {
+			ctx = ContextCDARFlow6
+		}
+		return newCDAR(doc, ctx, o.sender, from, to)
+	case *bill.Payment:
+		ctx := o.context
+		// Payments (211 / 212 lifecycle messages) share the CDAR Flow 6
+		// contexts with statuses.
+		if ctx.GuidelineID == ContextEN16931V2017.GuidelineID {
+			ctx = ContextCDARFlow6
+		}
+		return newCDARFromPayment(doc, ctx, o.sender, from, to)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
@@ -299,6 +402,7 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 
 type options struct {
 	context Context
+	sender  *org.Party
 }
 
 // Option is used to define configuration options to use during the
@@ -309,6 +413,20 @@ type Option func(*options)
 func WithContext(context Context) Option {
 	return func(o *options) {
 		o.context = context
+	}
+}
+
+// WithSenderTradeParty pins the *org.Party emitted as the CDAR
+// ExchangedDocument/SenderTradeParty (MDT-21). Use this to carry the
+// dematerialisation platform's identity (Name + GlobalID + Inbox +
+// RoleCode) on the wire when it isn't anonymous. When unset, the writer
+// emits a bare <ram:RoleCode>WK</ram:RoleCode> — matching the anonymous-
+// platform pattern used throughout the official UC1 corpus.
+//
+// The option is a no-op for non-CDAR conversions.
+func WithSenderTradeParty(p *org.Party) Option {
+	return func(o *options) {
+		o.sender = p
 	}
 }
 

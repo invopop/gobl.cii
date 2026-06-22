@@ -69,7 +69,7 @@ func (out *Invoice) addHeader(inv *bill.Invoice) error {
 }
 
 func getTypeCode(inv *bill.Invoice) (string, error) {
-	if inv.Tax == nil || inv.Tax.Ext == nil || inv.Tax.Ext[untdid.ExtKeyDocumentType].String() == "" {
+	if inv.Tax == nil || inv.Tax.Ext.Len() == 0 || inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String() == "" {
 		return "", validation.Errors{
 			"tax": validation.Errors{
 				"ext": validation.Errors{

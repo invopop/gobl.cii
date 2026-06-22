@@ -385,7 +385,7 @@ func newPayee(party *org.Party, ctx Context) *Party {
 }
 
 func getPaymentMeansCode(instr *pay.Instructions) (string, error) {
-	if instr == nil || instr.Ext == nil || instr.Ext[untdid.ExtKeyPaymentMeans].String() == "" {
+	if instr == nil || instr.Ext.Len() == 0 || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return "", validation.Errors{
 			"instructions": validation.Errors{
 				"ext": validation.Errors{
@@ -407,7 +407,7 @@ func goblAddTaxNotes(taxes []*Tax, inv *bill.Invoice) {
 		note := &tax.Note{
 			Category: cbc.Code(t.TypeCode),
 			Text:     t.ExemptionReason,
-			Ext:      tax.Extensions{untdid.ExtKeyTaxCategory: cbc.Code(t.CategoryCode)},
+			Ext:      tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTaxCategory: cbc.Code(t.CategoryCode)}),
 		}
 		inv.Tax = inv.Tax.MergeNotes(note)
 	}

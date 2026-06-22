@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "eff0a80dd01248ae7b853aa309390616a6154e5e1a3e014d2b4d43776569c8d4"
-		}
+			"val": "46b5b7129031e58e7770489ab0a273be525fb1e0a30a3f06983892d751f46f83"
+		},
+		"from": "iso6523-actorid-upis::9920:ESB85905495",
+		"to": "iso6523-actorid-upis::9920:X3157928M"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -36,6 +38,11 @@
 						"given": "John",
 						"surname": "Doe"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:ESB85905495"
 				}
 			],
 			"inboxes": [
@@ -77,6 +84,11 @@
 					"ext": {
 						"iso-scheme-id": "0088"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:X3157928M"
 				}
 			],
 			"inboxes": [
@@ -139,7 +151,7 @@
 				"name": "Salescompany ltd.",
 				"tax_id": {
 					"country": "NO",
-					"code": "123456789MVA",
+					"code": "923456783",
 					"scheme": "VAT"
 				},
 				"people": [
@@ -147,6 +159,11 @@
 						"name": {
 							"given": "Antonio Salesmacher"
 						}
+					}
+				],
+				"endpoints": [
+					{
+						"uri": "iso6523-actorid-upis::9920:X3157928M"
 					}
 				],
 				"inboxes": [

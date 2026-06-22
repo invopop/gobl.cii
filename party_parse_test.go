@@ -48,7 +48,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.NotNil(t, seller)
 
 		assert.NotNil(t, seller.TaxID)
-		assert.Equal(t, cbc.Code("967611265MVA"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("967611265"), seller.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
 
 		assert.Equal(t, "Tax handling company AS", seller.Name)
@@ -63,7 +63,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.NotNil(t, supplier)
 
 		assert.Equal(t, "Salescompany ltd.", supplier.Name)
-		assert.Equal(t, cbc.Code("123456789MVA"), supplier.TaxID.Code)
+		assert.Equal(t, cbc.Code("123456789"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
 		assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
 
@@ -87,7 +87,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.NotNil(t, customer)
 
 		assert.Equal(t, "The Buyercompany", customer.Name)
-		assert.Equal(t, cbc.Code("987654321MVA"), customer.TaxID.Code)
+		assert.Equal(t, cbc.Code("987654321"), customer.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
 		require.Len(t, customer.Identities, 2)
 		// BT-47: Legal registration identifier
@@ -95,7 +95,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, org.IdentityScopeLegal, customer.Identities[0].Scope)
 		// GlobalID
 		assert.Equal(t, "3456789012098", customer.Identities[1].Code.String())
-		assert.Equal(t, "0088", customer.Identities[1].Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "0088", customer.Identities[1].Ext.Get(iso.ExtKeySchemeID).String())
 	})
 
 	t.Run("CII-IN_SE-R-003.xml", func(t *testing.T) {

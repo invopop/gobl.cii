@@ -76,7 +76,7 @@ func TestNewSettlement(t *testing.T) {
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 
-		inv.Payment.Instructions.Ext = nil
+		inv.Payment.Instructions.Ext = tax.ExtensionsOf(cbc.CodeMap{})
 
 		_, err := cii.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")

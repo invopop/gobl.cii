@@ -1,0 +1,98 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "8402e7d6260a81f600db6b5559757b99826963047387f13a4445a979507f7103"
+		},
+		"from": "iso6523-actorid-upis::0225:100000009_PEP",
+		"to": "iso6523-actorid-upis::0225:200000008_PEP"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/payment",
+		"$addons": [
+			"fr-ctc-flow6-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "receipt",
+		"code": "PAY-212",
+		"issue_date": "2025-07-02",
+		"currency": "EUR",
+		"ext": {
+			"fr-ctc-flow6-condition": "MEN",
+			"fr-ctc-flow6-status": "212"
+		},
+		"supplier": {
+			"name": "VENDEUR",
+			"identities": [
+				{
+					"code": "100000009",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:100000009_PEP"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0225",
+					"code": "100000009_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-flow6-role": "SE"
+			}
+		},
+		"customer": {
+			"name": "ACHETEUR",
+			"identities": [
+				{
+					"code": "200000008",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:200000008_PEP"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0225",
+					"code": "200000008_PEP"
+				}
+			],
+			"ext": {
+				"fr-ctc-flow6-role": "BY"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"document": {
+					"type": "380",
+					"issue_date": "2025-07-01",
+					"code": "F202500003"
+				},
+				"amount": "500.00",
+				"due": "250.00"
+			}
+		],
+		"methods": [
+			{
+				"key": "credit-transfer",
+				"amount": "500.00"
+			}
+		],
+		"total": "500.00"
+	}
+}

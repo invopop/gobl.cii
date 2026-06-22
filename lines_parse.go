@@ -134,9 +134,9 @@ func goblLineProduct(prod *Product, item *org.Item) {
 
 	if prod.GlobalID != nil {
 		item.Identities = append(item.Identities, &org.Identity{
-			Ext: tax.Extensions{
+			Ext: tax.ExtensionsOf(cbc.CodeMap{
 				iso.ExtKeySchemeID: cbc.Code(prod.GlobalID.SchemeID),
-			},
+			}),
 			Code: cbc.Code(prod.GlobalID.Value),
 		})
 	}
@@ -189,9 +189,9 @@ func goblLineAgreement(ag *LineAgreement, l *bill.Line) {
 			Code: cbc.Code(ag.AdditionalReference.ID),
 		}
 		if ag.AdditionalReference.RefCode != nil {
-			l.Identifier.Ext = tax.Extensions{
+			l.Identifier.Ext = tax.ExtensionsOf(cbc.CodeMap{
 				untdid.ExtKeyReference: cbc.Code(*ag.AdditionalReference.RefCode),
-			}
+			})
 		}
 	}
 
@@ -245,12 +245,12 @@ func goblLineTaxes(taxes []*Tax, l *bill.Line, taxMap map[string]*taxCategoryInf
 			})
 		}
 		if tt.CategoryCode != "" {
-			l.Taxes[i].Ext = tax.Extensions{
+			l.Taxes[i].Ext = tax.ExtensionsOf(cbc.CodeMap{
 				untdid.ExtKeyTaxCategory: cbc.Code(tt.CategoryCode),
-			}
+			})
 			key := buildTaxCategoryKey(tt.TypeCode, tt.CategoryCode, tt.RateApplicablePercent)
 			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
-				l.Taxes[i].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+				l.Taxes[i].Ext = l.Taxes[i].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
 		}
 		if tt.RateApplicablePercent != "" {
