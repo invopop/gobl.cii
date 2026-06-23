@@ -239,6 +239,18 @@ func newLine(l *bill.Line) *Line {
 		lineItem.Product.Description = &it.Description
 	}
 
+	// BT-155: Seller's item identifier
+	if it.Ref != "" {
+		ref := it.Ref.String()
+		lineItem.Product.SellerAssignedID = &ref
+	}
+
+	// BT-159: Item country of origin
+	if it.Origin != "" {
+		origin := string(it.Origin)
+		lineItem.Product.Origin = &origin
+	}
+
 	if len(l.Notes) > 0 {
 		var notes []*Note
 		for _, n := range l.Notes {
