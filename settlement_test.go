@@ -39,6 +39,24 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "102", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.DateFormat.Format)
 	})
 
+	t.Run("correction without preceding date", func(t *testing.T) {
+		// A preceding reference (BT-25) without an issue date (BT-26, optional) is
+		// valid GOBL; the FormattedIssueDateTime element must be omitted rather than
+		// rendered empty, which would fail the CII XSD.
+		env := loadEnvelope(t, "en16931/correction-invoice.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.NotEmpty(t, inv.Preceding)
+		inv.Preceding[0].IssueDate = nil
+
+		doc, err := cii.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		rd := doc.Transaction.Settlement.ReferencedDocument[0]
+		assert.Equal(t, "SAMPLE-001", rd.IssuerAssignedID)
+		assert.Nil(t, rd.IssueDate, "empty FormattedIssueDateTime must be omitted, not rendered empty")
+	})
+
 	t.Run("invoice-complete.json", func(t *testing.T) {
 		doc, err := newInvoiceFrom(t, "en16931/invoice-complete.json")
 		require.NoError(t, err)

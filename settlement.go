@@ -159,14 +159,16 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 
 	if len(inv.Preceding) > 0 {
 		pre := inv.Preceding[0]
-		stlm.ReferencedDocument = []*ReferencedDocument{
-			{
-				IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
-				IssueDate: &FormattedIssueDate{
-					DateFormat: documentDate(pre.IssueDate),
-				},
-			},
+		rd := &ReferencedDocument{
+			IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
 		}
+		// IssueDate (BT-26) is optional; only emit FormattedIssueDateTime when the
+		// preceding reference actually has a date, otherwise it renders as an empty
+		// element and fails the CII XSD.
+		if d := documentDate(pre.IssueDate); d != nil {
+			rd.IssueDate = &FormattedIssueDate{DateFormat: d}
+		}
+		stlm.ReferencedDocument = []*ReferencedDocument{rd}
 	}
 	if inv.Payment != nil && inv.Payment.Payee != nil {
 		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
