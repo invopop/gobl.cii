@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
+	"github.com/invopop/gobl/tax"
 )
 
 // NewCDARFromPayment converts a *bill.Payment into a CDAR XML document
@@ -166,13 +167,8 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 			ref.TypeCode = string(line.Document.Type)
 		}
 	}
-	if pmt.Supplier != nil {
-		if siren := partyIdentityCode(pmt.Supplier, schemeIDSIREN); siren != "" {
-			ref.IssuerTradeParty = &CDARTradeParty{
-				GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDSIREN, Value: siren}},
-			}
-		}
-	}
+	// MDT-129: the referenced invoice's issuer (seller, or buyer if self-billed).
+	ref.IssuerTradeParty = cdarReferencedIssuer(line.Document, pmt.Supplier, pmt.Customer)
 
 	// Amounts ride as document characteristics on a single status
 	// entry: the payment's condition extension types the line amount
@@ -340,6 +336,8 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 	if dr := goblDocRefFromCDAR(ref); dr != nil {
 		line.Document = dr
 	}
+	var vatRates []*tax.RateTotal
+	var vatSum *num.Amount
 	for _, ds := range ref.SpecifiedDocumentStatuses {
 		if ds == nil {
 			continue
@@ -363,6 +361,40 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 				line.Amount = amount
 				pmt.Ext = pmt.Ext.Set(flow6.ExtKeyCondition, cbc.Code(dc.TypeCode))
 			}
+			// MDT-224: a percentage on the characteristic means the cashed
+			// amount is split by VAT rate (BR-FR-CDV-14, 212 Encaissée). The
+			// amount is the gross (TTC) per rate; recover the base and VAT so
+			// the parsed payment carries the tax breakdown the Flow 6 rules
+			// require and the CDV round-trips.
+			if dc.ValuePercent != "" {
+				pct, err := num.PercentageFromString(dc.ValuePercent + "%")
+				if err != nil {
+					continue
+				}
+				vat := pct.From(amount)
+				vatRates = append(vatRates, &tax.RateTotal{
+					Base:    amount.Divide(pct.Factor()),
+					Percent: &pct,
+					Amount:  vat,
+				})
+				if vatSum == nil {
+					sum := vat
+					vatSum = &sum
+				} else {
+					sum := vatSum.Add(vat)
+					vatSum = &sum
+				}
+			}
+		}
+	}
+	if len(vatRates) > 0 && vatSum != nil {
+		line.Tax = &tax.Total{
+			Categories: []*tax.CategoryTotal{{
+				Code:   tax.CategoryVAT,
+				Rates:  vatRates,
+				Amount: *vatSum,
+			}},
+			Sum: *vatSum,
 		}
 	}
 	return line

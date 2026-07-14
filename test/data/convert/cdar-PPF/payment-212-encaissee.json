@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8402e7d6260a81f600db6b5559757b99826963047387f13a4445a979507f7103"
+			"val": "007520e52576915d6540b0f3926044d557d5da9657730176bf888d22fa859fe2"
 		},
 		"from": "iso6523-actorid-upis::0225:100000009_PEP",
 		"to": "iso6523-actorid-upis::0225:200000008_PEP"
@@ -81,10 +81,29 @@
 				"document": {
 					"type": "380",
 					"issue_date": "2025-07-01",
-					"code": "F202500003"
+					"code": "F202500003",
+					"ext": {
+						"untdid-document-type": "380"
+					}
 				},
 				"amount": "500.00",
-				"due": "250.00"
+				"due": "250.00",
+				"tax": {
+					"categories": [
+						{
+							"code": "VAT",
+							"rates": [
+								{
+									"base": "416.67",
+									"percent": "20%",
+									"amount": "83.33"
+								}
+							],
+							"amount": "83.33"
+						}
+					],
+					"sum": "83.33"
+				}
 			}
 		],
 		"methods": [

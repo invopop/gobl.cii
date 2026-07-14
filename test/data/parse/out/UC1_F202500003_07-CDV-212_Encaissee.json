@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "11c8a47ad5bfe99abd7bb842963474535a3d39686e4077522f7c0a0f74b7bee2"
+			"val": "a22ec36515fdb916226a654d2fcb1b441e7ef9b0ddc5a48caf3a9f9b30a498f4"
 		},
 		"from": "iso6523-actorid-upis::0225:100000009_STATUTS",
 		"to": "iso6523-actorid-upis::0225:200000008"
@@ -94,7 +94,23 @@
 						"untdid-document-type": "380"
 					}
 				},
-				"amount": "12000"
+				"amount": "12000",
+				"tax": {
+					"categories": [
+						{
+							"code": "VAT",
+							"rates": [
+								{
+									"base": "10000",
+									"percent": "20.00%",
+									"amount": "2000"
+								}
+							],
+							"amount": "2000.00"
+						}
+					],
+					"sum": "2000.00"
+				}
 			}
 		],
 		"methods": [

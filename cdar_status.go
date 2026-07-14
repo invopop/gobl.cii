@@ -305,13 +305,8 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 			ref.TypeCode = string(line.Doc.Type)
 		}
 	}
-	if st.Supplier != nil {
-		if siren := partyIdentityCode(st.Supplier, schemeIDSIREN); siren != "" {
-			ref.IssuerTradeParty = &CDARTradeParty{
-				GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDSIREN, Value: siren}},
-			}
-		}
-	}
+	// MDT-129: the referenced invoice's issuer (seller, or buyer if self-billed).
+	ref.IssuerTradeParty = cdarReferencedIssuer(line.Doc, st.Supplier, st.Customer)
 
 	// Build the SpecifiedDocumentStatus list. Pair each Reason with each
 	// Action when both are present, or emit one per Reason / Action alone.
@@ -517,7 +512,13 @@ func partyIdentityCode(p *org.Party, scheme string) string {
 	if p == nil {
 		return ""
 	}
-	for _, id := range p.Identities {
+	return identitiesSIREN(p.Identities, scheme)
+}
+
+// identitiesSIREN returns the code of the first identity carrying the given
+// ISO/IEC 6523 scheme extension, or "".
+func identitiesSIREN(ids []*org.Identity, scheme string) string {
+	for _, id := range ids {
 		if id == nil || id.Ext.IsZero() {
 			continue
 		}
@@ -526,6 +527,35 @@ func partyIdentityCode(p *org.Party, scheme string) string {
 		}
 	}
 	return ""
+}
+
+// cdarReferencedIssuer builds the MDT-129 referenced-invoice issuer party for a
+// CDV — whoever legally issued the invoice the status/payment is about.
+//
+// The doc ref's own Identities win when present: that is the faithful issuer a
+// parsed CDAR round-trips (or one an informed caller set), and it names the
+// real issuer regardless of self-billing or richer party info. When absent, the
+// issuer is derived by role — the seller (supplier) normally, or the buyer
+// (customer) when the referenced invoice is self-billed and the buyer issues it
+// in the seller's name.
+func cdarReferencedIssuer(docRef *org.DocumentRef, supplier, customer *org.Party) *CDARTradeParty {
+	var siren string
+	if docRef != nil {
+		siren = identitiesSIREN(docRef.Identities, schemeIDSIREN)
+	}
+	if siren == "" {
+		issuer := supplier
+		if docRef != nil && flow6.IsSelfBilledDocType(docRef.Ext.Get(untdid.ExtKeyDocumentType)) {
+			issuer = customer
+		}
+		siren = partyIdentityCode(issuer, schemeIDSIREN)
+	}
+	if siren == "" {
+		return nil
+	}
+	return &CDARTradeParty{
+		GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDSIREN, Value: siren}},
+	}
 }
 
 // markPPFReferences applies the PPF (einvoicingF2) profile corrections
