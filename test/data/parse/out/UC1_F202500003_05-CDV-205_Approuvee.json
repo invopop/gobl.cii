@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "11f00ddefd2499b6b354bfd57a0a828faee47290b8f1298dabd0b668c884c67b"
+			"val": "9db3a090d3eb722c1acef44fdd380a5436265b7d93104ac8bf5e7c7f2fb6729d"
 		},
 		"from": "iso6523-actorid-upis::0225:200000008_STATUTS",
 		"to": "iso6523-actorid-upis::0225:100000009_STATUTS"
@@ -77,7 +77,6 @@
 				"key": "accepted",
 				"date": "2025-07-01",
 				"doc": {
-					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003",
 					"identities": [
@@ -87,7 +86,10 @@
 								"iso-scheme-id": "0002"
 							}
 						}
-					]
+					],
+					"ext": {
+						"untdid-document-type": "380"
+					}
 				},
 				"ext": {
 					"fr-ctc-flow6-status": "205"

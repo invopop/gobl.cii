@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "72c49ecae6792d664c685727e32f5147c79e44de406738de615025137a92889d"
+			"val": "62753c6180589e38c437747b799a471bef3f0b945a983be954ec9231c3a4b6ee"
 		},
 		"from": "iso6523-actorid-upis::0225:200000008_STATUTS",
 		"to": "iso6523-actorid-upis::0225:100000009_STATUTS"
@@ -77,7 +77,6 @@
 				"key": "rejected",
 				"date": "2025-07-02",
 				"doc": {
-					"type": "380",
 					"issue_date": "2025-07-02",
 					"code": "F202500007",
 					"identities": [
@@ -87,7 +86,10 @@
 								"iso-scheme-id": "0002"
 							}
 						}
-					]
+					],
+					"ext": {
+						"untdid-document-type": "380"
+					}
 				},
 				"reasons": [
 					{
