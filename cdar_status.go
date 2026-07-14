@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
@@ -296,7 +297,11 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 				},
 			}
 		}
-		if line.Doc.Type != "" {
+		// MDT-91: prefer the untdid-document-type extension (canonical for a
+		// document reference), fall back to the legacy Type key.
+		if dt := line.Doc.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
+			ref.TypeCode = dt.String()
+		} else if line.Doc.Type != "" {
 			ref.TypeCode = string(line.Doc.Type)
 		}
 	}

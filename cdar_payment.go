@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
@@ -155,7 +156,13 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 				},
 			}
 		}
-		if line.Document.Type != "" {
+		// MDT-91: the referenced invoice's document type code. Prefer the
+		// untdid-document-type extension (the canonical GOBL representation
+		// for a document reference, as gobl.ubl emits) and fall back to the
+		// legacy Type key.
+		if dt := line.Document.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
+			ref.TypeCode = dt.String()
+		} else if line.Document.Type != "" {
 			ref.TypeCode = string(line.Document.Type)
 		}
 	}
