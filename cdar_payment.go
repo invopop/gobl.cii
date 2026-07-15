@@ -356,6 +356,11 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 				due := amount
 				line.Due = &due
 			case flow6.ConditionAmountReceived, flow6.ConditionAmountPaid:
+				// The cashed amount (MDT-215). This assumes a single
+				// cashed-amount characteristic; a 212 whose amount is split
+				// across several VAT rates repeats this characteristic per
+				// rate, in which case only the last rate's amount is kept here
+				// (the per-rate VAT breakdown below is still captured in full).
 				line.Amount = amount
 				pmt.Ext = pmt.Ext.Set(flow6.ExtKeyCondition, cbc.Code(dc.TypeCode))
 			}
