@@ -305,8 +305,8 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 			ref.TypeCode = string(line.Doc.Type)
 		}
 	}
-	// MDT-129: the referenced invoice's issuer (seller, or buyer if self-billed).
-	ref.IssuerTradeParty = cdarReferencedIssuer(line.Doc, st.Supplier, st.Customer)
+	// MDT-129: the referenced invoice's issuer (its supplier).
+	ref.IssuerTradeParty = cdarReferencedIssuer(line.Doc, st.Supplier)
 
 	// Build the SpecifiedDocumentStatus list. Pair each Reason with each
 	// Action when both are present, or emit one per Reason / Action alone.
@@ -530,25 +530,22 @@ func identitiesSIREN(ids []*org.Identity, scheme string) string {
 }
 
 // cdarReferencedIssuer builds the MDT-129 referenced-invoice issuer party for a
-// CDV — whoever legally issued the invoice the status/payment is about.
+// CDV — the party that issued the invoice the status/payment is about.
 //
 // The doc ref's own Identities win when present: that is the faithful issuer a
-// parsed CDAR round-trips (or one an informed caller set), and it names the
-// real issuer regardless of self-billing or richer party info. When absent, the
-// issuer is derived by role — the seller (supplier) normally, or the buyer
-// (customer) when the referenced invoice is self-billed and the buyer issues it
-// in the seller's name.
-func cdarReferencedIssuer(docRef *org.DocumentRef, supplier, customer *org.Party) *CDARTradeParty {
+// parsed CDAR round-trips (or one an informed caller set), and it carries
+// richer info than a single derived SIREN. When absent, the issuer is the
+// invoice supplier (seller). PPF names the supplier as the referenced-invoice
+// issuer even for a self-billed invoice (UNTDID 389) — confirmed on QUAL
+// 2026-07-15, where PPF's own 250 ack for a self-billed extract reported the
+// supplier SIREN as MDT-129 — so there is no buyer swap for self-billing.
+func cdarReferencedIssuer(docRef *org.DocumentRef, supplier *org.Party) *CDARTradeParty {
 	var siren string
 	if docRef != nil {
 		siren = identitiesSIREN(docRef.Identities, schemeIDSIREN)
 	}
 	if siren == "" {
-		issuer := supplier
-		if docRef != nil && flow6.IsSelfBilledDocType(docRef.Ext.Get(untdid.ExtKeyDocumentType)) {
-			issuer = customer
-		}
-		siren = partyIdentityCode(issuer, schemeIDSIREN)
+		siren = partyIdentityCode(supplier, schemeIDSIREN)
 	}
 	if siren == "" {
 		return nil

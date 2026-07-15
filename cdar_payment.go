@@ -167,8 +167,8 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 			ref.TypeCode = string(line.Document.Type)
 		}
 	}
-	// MDT-129: the referenced invoice's issuer (seller, or buyer if self-billed).
-	ref.IssuerTradeParty = cdarReferencedIssuer(line.Document, pmt.Supplier, pmt.Customer)
+	// MDT-129: the referenced invoice's issuer (its supplier).
+	ref.IssuerTradeParty = cdarReferencedIssuer(line.Document, pmt.Supplier)
 
 	// Amounts ride as document characteristics on a single status
 	// entry: the payment's condition extension types the line amount

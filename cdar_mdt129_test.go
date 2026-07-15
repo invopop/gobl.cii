@@ -63,26 +63,26 @@ func mdt129Issuer(t *testing.T, docType cbc.Code, docIDs []*org.Identity) string
 	return refs[0].IssuerTradeParty.GlobalIDs[0].Value
 }
 
-// TestCDARReferencedIssuerMDT129 covers the referenced-invoice issuer (MDT-129)
-// derivation: seller by default, buyer for a self-billed reference, and an
-// explicit doc-ref identity overriding the role derivation entirely.
+// TestCDARReferencedIssuerMDT129 covers the referenced-invoice issuer (MDT-129):
+// the invoice supplier (seller), including for a self-billed reference — PPF
+// names the supplier as MDT-129 even for a self-billed extract (confirmed on
+// QUAL 2026-07-15) — with an explicit doc-ref identity overriding the default.
 func TestCDARReferencedIssuerMDT129(t *testing.T) {
-	t.Run("normal invoice (380): issuer is the seller", func(t *testing.T) {
+	t.Run("normal invoice (380): issuer is the supplier", func(t *testing.T) {
 		assert.Equal(t, "100000009", mdt129Issuer(t, "380", nil))
 	})
 
-	t.Run("self-billed invoice (389): issuer is the buyer", func(t *testing.T) {
-		assert.Equal(t, "200000008", mdt129Issuer(t, "389", nil))
+	t.Run("self-billed invoice (389): issuer is still the supplier", func(t *testing.T) {
+		assert.Equal(t, "100000009", mdt129Issuer(t, "389", nil))
 	})
 
-	t.Run("self-billed credit note (261): issuer is the buyer", func(t *testing.T) {
-		assert.Equal(t, "200000008", mdt129Issuer(t, "261", nil))
+	t.Run("self-billed credit note (261): issuer is still the supplier", func(t *testing.T) {
+		assert.Equal(t, "100000009", mdt129Issuer(t, "261", nil))
 	})
 
-	t.Run("explicit doc-ref identity wins over role derivation", func(t *testing.T) {
+	t.Run("explicit doc-ref identity wins over the supplier default", func(t *testing.T) {
 		// A parsed CDAR round-trips the true issuer onto the doc ref's
-		// identities; that identity is authoritative even when the type would
-		// otherwise derive a different party.
+		// identities; that identity is authoritative.
 		explicit := []*org.Identity{{
 			Code: "123456782",
 			Ext:  tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0002"}),
