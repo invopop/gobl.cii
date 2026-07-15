@@ -157,14 +157,12 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 				},
 			}
 		}
-		// MDT-91: the referenced invoice's document type code. Prefer the
-		// untdid-document-type extension (the canonical GOBL representation
-		// for a document reference, as gobl.ubl emits) and fall back to the
-		// legacy Type key.
+		// MDT-91: the referenced invoice's document type code, from the
+		// canonical untdid-document-type extension. The flow6 addon migrates a
+		// legacy Type key into this extension on normalize and requires it, so
+		// a calculated document always carries it — no Type fallback needed.
 		if dt := line.Document.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
 			ref.TypeCode = dt.String()
-		} else if line.Document.Type != "" {
-			ref.TypeCode = string(line.Document.Type)
 		}
 	}
 	// MDT-129: the referenced invoice's issuer (its supplier).

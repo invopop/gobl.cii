@@ -297,12 +297,11 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 				},
 			}
 		}
-		// MDT-91: prefer the untdid-document-type extension (canonical for a
-		// document reference), fall back to the legacy Type key.
+		// MDT-91: from the canonical untdid-document-type extension. The flow6
+		// addon migrates a legacy Type key into it on normalize and requires
+		// it, so a calculated document always carries it — no Type fallback.
 		if dt := line.Doc.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
 			ref.TypeCode = dt.String()
-		} else if line.Doc.Type != "" {
-			ref.TypeCode = string(line.Doc.Type)
 		}
 	}
 	// MDT-129: the referenced invoice's issuer (its supplier).
