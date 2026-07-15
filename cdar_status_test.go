@@ -399,8 +399,8 @@ func buildSyntheticPayment(t *testing.T, due num.Amount) *bill.Payment {
 		},
 		Amount: num.MakeAmount(50000, 2),
 	}
-	// A 212 Encaissée must split the cashed amount by VAT rate (MDT-224,
-	// BR-FR-CDV-14): 500.00 TTC = 416.67 base + 83.33 VAT @ 20%.
+	// A 212 Encaissée with an amount must carry the VAT rate:
+	// 500.00 TTC = 416.67 base + 83.33 VAT @ 20%.
 	pct := num.MakePercentage(20, 2)
 	line.Tax = &tax.Total{
 		Categories: []*tax.CategoryTotal{{

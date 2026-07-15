@@ -364,11 +364,10 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 				line.Amount = amount
 				pmt.Ext = pmt.Ext.Set(flow6.ExtKeyCondition, cbc.Code(dc.TypeCode))
 			}
-			// MDT-224: a percentage on the characteristic means the cashed
-			// amount is split by VAT rate (BR-FR-CDV-14, 212 Encaissée). The
-			// amount is the gross (TTC) per rate; recover the base and VAT so
-			// the parsed payment carries the tax breakdown the Flow 6 rules
-			// require and the CDV round-trips.
+			// A percentage on the characteristic means the cashed amount is
+			// split by VAT rate (212 Encaissée). The amount is the gross (TTC)
+			// per rate; recover the base and VAT so the parsed payment carries
+			// the tax breakdown the Flow 6 rules require and the CDV round-trips.
 			if dc.ValuePercent != "" {
 				pct, err := num.PercentageFromString(dc.ValuePercent + "%")
 				if err != nil {
