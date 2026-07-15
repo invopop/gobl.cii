@@ -263,14 +263,17 @@ func isFrenchBillingMode(businessID string) bool {
 	return false
 }
 
-// Parse parses a raw XML CII invoice document and converts it into
-// a GOBL envelope. If the type is unsupported, an
-// ErrUnknownDocumentType is provided. CDAR and other non-invoice CII
-// documents are not supported by Parse and should be handled using Unmarshal.
+// Parse parses a raw XML CII document — an invoice or a CDAR acknowledgement —
+// and converts it into a GOBL envelope, dispatching on the root element.
+// Unsupported types return ErrUnknownDocumentType. When WithRouting is
+// supplied, the transport addresses are recorded on the envelope's Head.From /
+// Head.To (see WithRouting).
 func Parse(data []byte, opts ...ParseOption) (*gobl.Envelope, error) {
 	var r routing
 	for _, opt := range opts {
-		opt(&r)
+		if opt != nil {
+			opt(&r)
+		}
 	}
 
 	ns, err := extractRootNamespace(data)
@@ -278,36 +281,44 @@ func Parse(data []byte, opts ...ParseOption) (*gobl.Envelope, error) {
 		return nil, err
 	}
 
-	env := gobl.NewEnvelope()
+	var res any
 	switch ns {
 	case NamespaceRSM:
-		res, err := parseInvoice(data)
-		if err != nil {
-			return nil, err
-		}
-		if err := env.Insert(res); err != nil {
-			return nil, err
-		}
-		return env, nil
+		res, err = parseInvoice(data)
 	case NamespaceCDARRSM:
-		res, err := parseCDAR(data, r)
-		if err != nil {
-			return nil, err
-		}
-		if err := env.Insert(res); err != nil {
-			return nil, err
-		}
-		return env, nil
+		res, err = parseCDAR(data, r)
 	default:
 		return nil, ErrUnknownDocumentType
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	env := gobl.NewEnvelope()
+
+	// A parsed document is one we received: its transport addresses are the
+	// ones the Peppol layer routed it with (who sent it → who received it),
+	// supplied via WithRouting as fully-qualified participant URIs. Set
+	// Head.From / Head.To from those args verbatim, BEFORE calculation, so GOBL
+	// respects them — normalizeRouting only fills empty routing fields, so it
+	// won't overwrite them with the document-derived, OUTGOING-direction guess
+	// (supplier → customer) that is wrong for a received document.
+	env.Head.From = r.from
+	env.Head.To = r.to
+
+	if err := env.Insert(res); err != nil {
+		return nil, err
+	}
+
+	return env, nil
 }
 
-// routing carries the envelope's transport addresses (the SBD From / To the
-// Peppol layer received) so CDAR parsing can hydrate a business party's inbox
-// when the CDV body omits it — see hydratePartyInboxes. Values are Peppol
-// participant ids in either "scheme:code" or "iso6523-actorid-upis::scheme:code"
-// form.
+// routing carries the envelope's transport addresses — the SBD From / To the
+// Peppol layer received, as fully-qualified participant URIs (e.g.
+// "iso6523-actorid-upis::0225:code"). They are recorded verbatim on
+// Head.From/To (see Parse) and are also read to hydrate a business party's
+// inbox when the CDV body omits it (see hydratePartyInboxes, which also
+// tolerates a bare "scheme:code").
 type routing struct {
 	from, to cbc.URI
 }
@@ -315,10 +326,12 @@ type routing struct {
 // ParseOption configures Parse.
 type ParseOption func(*routing)
 
-// WithRouting supplies the envelope's From / To transport addresses to Parse.
-// On a received CDAR the issuer party's electronic address may be absent from
-// the document body (carried instead at the SBD/transport layer); these let the
-// parser populate the missing party inbox so the result satisfies BR-FR-CDV-08.
+// WithRouting supplies the transport addresses a received document was routed
+// with — the Peppol SBD From / To — as fully-qualified participant URIs (e.g.
+// "iso6523-actorid-upis::0225:code"). They are recorded verbatim on the
+// envelope's Head.From / Head.To to mark who sent and who received the document,
+// and also populate a party inbox the CDAR body may omit (carried at the SBD
+// layer instead), so the result satisfies BR-FR-CDV-08.
 func WithRouting(from, to cbc.URI) ParseOption {
 	return func(r *routing) {
 		r.from = from
