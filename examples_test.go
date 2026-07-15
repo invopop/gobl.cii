@@ -392,8 +392,8 @@ func TestParseCDAR(t *testing.T) {
 			var parseOpts []cii.ParseOption
 			if cdarFixturesNeedingRouting[inName] {
 				parseOpts = append(parseOpts, cii.WithRouting(
-					"0225:100000009_STATUTS",
-					"0225:200000008_STATUTS",
+					"iso6523-actorid-upis::0225:100000009_STATUTS",
+					"iso6523-actorid-upis::0225:200000008_STATUTS",
 				))
 			}
 			env, err := cii.Parse(xmlData, parseOpts...)
@@ -557,17 +557,23 @@ func TestParseRoutingFromArgs(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(getParsePath(), "UC1_F202500003_07-CDV-212_Encaissee.xml"))
 	require.NoError(t, err)
 
-	t.Run("short-form args are canonicalized onto Head.From/To", func(t *testing.T) {
-		env, err := cii.Parse(data, cii.WithRouting("0225:200000008_STATUTS", "0225:100000009_STATUTS"))
+	t.Run("routing args are recorded verbatim on Head.From/To", func(t *testing.T) {
+		// The args are the fully-qualified participant URIs the Peppol layer
+		// supplies, REVERSED vs the 212's outgoing direction (whose From would
+		// be the supplier) — proving the args win over GOBL's derivation.
+		env, err := cii.Parse(data, cii.WithRouting(
+			"iso6523-actorid-upis::0225:200000008_STATUTS",
+			"iso6523-actorid-upis::0225:100000009_STATUTS",
+		))
 		require.NoError(t, err)
 		assert.Equal(t, "iso6523-actorid-upis::0225:200000008_STATUTS", string(env.Head.From))
 		assert.Equal(t, "iso6523-actorid-upis::0225:100000009_STATUTS", string(env.Head.To))
-	})
 
-	t.Run("already-qualified args are kept verbatim", func(t *testing.T) {
-		env, err := cii.Parse(data, cii.WithRouting("iso6523-actorid-upis::0225:200000008_STATUTS", ""))
-		require.NoError(t, err)
+		// The contract is that a later calculation must NOT overwrite the
+		// routing: normalizeRouting only fills empty fields, so the transport
+		// direction survives instead of being re-derived from the document.
+		require.NoError(t, env.Calculate())
 		assert.Equal(t, "iso6523-actorid-upis::0225:200000008_STATUTS", string(env.Head.From))
+		assert.Equal(t, "iso6523-actorid-upis::0225:100000009_STATUTS", string(env.Head.To))
 	})
-
 }
