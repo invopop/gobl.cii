@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
@@ -278,29 +279,54 @@ func Parse(data []byte, opts ...ParseOption) (*gobl.Envelope, error) {
 		return nil, err
 	}
 
-	env := gobl.NewEnvelope()
+	var res any
 	switch ns {
 	case NamespaceRSM:
-		res, err := parseInvoice(data)
-		if err != nil {
-			return nil, err
-		}
-		if err := env.Insert(res); err != nil {
-			return nil, err
-		}
-		return env, nil
+		res, err = parseInvoice(data)
 	case NamespaceCDARRSM:
-		res, err := parseCDAR(data, r)
-		if err != nil {
-			return nil, err
-		}
-		if err := env.Insert(res); err != nil {
-			return nil, err
-		}
-		return env, nil
+		res, err = parseCDAR(data, r)
 	default:
 		return nil, ErrUnknownDocumentType
 	}
+	if err != nil {
+		return nil, err
+	}
+
+	env := gobl.NewEnvelope()
+
+	// A parsed document is one we received: its transport addresses are the
+	// ones the Peppol layer routed it with (who sent it → who received it),
+	// supplied via WithRouting. Set Head.From / Head.To from those args BEFORE
+	// calculation so GOBL respects them — normalizeRouting only fills empty
+	// routing fields, so it won't overwrite these with the document-derived,
+	// OUTGOING-direction guess (supplier → customer) that is wrong for a
+	// received document.
+	env.Head.From = participantURI(r.from)
+	env.Head.To = participantURI(r.to)
+
+	if err := env.Insert(res); err != nil {
+		return nil, err
+	}
+
+	return env, nil
+}
+
+// peppolParticipantAuthority is the ISO 6523 actor-id URI authority Peppol
+// participant identifiers are qualified with.
+const peppolParticipantAuthority = "iso6523-actorid-upis"
+
+// participantURI canonicalizes a Peppol participant id — accepted in either
+// "scheme:code" or "iso6523-actorid-upis::scheme:code" form — to the full
+// absolute-URI form GOBL requires on Head.From / Head.To. Empty in, empty out.
+func participantURI(uri cbc.URI) cbc.URI {
+	s := string(uri)
+	if s == "" {
+		return ""
+	}
+	if strings.Contains(s, "::") {
+		return uri // already authority-qualified
+	}
+	return cbc.URI(peppolParticipantAuthority + "::" + s)
 }
 
 // routing carries the envelope's transport addresses (the SBD From / To the

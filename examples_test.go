@@ -547,3 +547,27 @@ func removeLastEntry(dir string) string {
 	i := strings.LastIndex(dir, lastEntry)
 	return dir[:i]
 }
+
+// TestParseRoutingFromArgs verifies that a received CDAR takes its transport
+// Head.From/To from the routing args (who routed it to us), overriding GOBL's
+// document-derived, outgoing (supplier->customer) assumption. The 212's
+// outgoing From would be the supplier (100000009); the args here are the
+// REVERSE, so seeing 200000008 as From proves the args win.
+func TestParseRoutingFromArgs(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join(getParsePath(), "UC1_F202500003_07-CDV-212_Encaissee.xml"))
+	require.NoError(t, err)
+
+	t.Run("short-form args are canonicalized onto Head.From/To", func(t *testing.T) {
+		env, err := cii.Parse(data, cii.WithRouting("0225:200000008_STATUTS", "0225:100000009_STATUTS"))
+		require.NoError(t, err)
+		assert.Equal(t, "iso6523-actorid-upis::0225:200000008_STATUTS", string(env.Head.From))
+		assert.Equal(t, "iso6523-actorid-upis::0225:100000009_STATUTS", string(env.Head.To))
+	})
+
+	t.Run("already-qualified args are kept verbatim", func(t *testing.T) {
+		env, err := cii.Parse(data, cii.WithRouting("iso6523-actorid-upis::0225:200000008_STATUTS", ""))
+		require.NoError(t, err)
+		assert.Equal(t, "iso6523-actorid-upis::0225:200000008_STATUTS", string(env.Head.From))
+	})
+
+}
