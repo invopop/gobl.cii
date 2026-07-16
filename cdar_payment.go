@@ -201,8 +201,10 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 // newCDARVATSplitCharacteristics breaks a payment line's cashed amount
 // down by VAT rate into one MDT-215 (ValueAmount, gross per rate) /
 // MDT-224 (ValuePercent) characteristic per distinct rate, as PPF
-// requires for an encaissement. Returns nil when the line carries no
-// tax breakdown so the caller can keep the amount-only form.
+// requires for an encaissement. The amount is derived entirely from the
+// rate (Base+Amount), not from line.Amount, which is just their sum. An
+// exempt or zero rate emits a 0.00 percentage. Returns nil when the line
+// carries no tax breakdown so the caller can keep the amount-only form.
 func newCDARVATSplitCharacteristics(typeCode cbc.Code, line *bill.PaymentLine, cur currency.Code) []*CDARDocumentCharacteristic {
 	if line == nil || line.Tax == nil {
 		return nil
@@ -213,14 +215,23 @@ func newCDARVATSplitCharacteristics(typeCode cbc.Code, line *bill.PaymentLine, c
 			continue
 		}
 		for _, rt := range cat.Rates {
-			if rt == nil || rt.Percent == nil {
+			if rt == nil {
 				continue
+			}
+			// The MEN characteristic has a single percentage field and no
+			// exemption concept, and P1.18 requires MDT-224 whenever the
+			// amount (MDT-215) is present. An exempt rate (Percent nil) and a
+			// zero rate therefore both surface as 0.00 — GOBL keeps them
+			// apart, the CDV cannot.
+			pct := "0.00"
+			if rt.Percent != nil {
+				pct = rt.Percent.Amount().Rescale(2).String()
 			}
 			gross := rt.Base.Add(rt.Amount)
 			chars = append(chars, &CDARDocumentCharacteristic{
 				TypeCode:     typeCode.String(),
 				ValueAmount:  &CDARValueAmount{Value: gross.String(), CurrencyID: cur.String()},
-				ValuePercent: rt.Percent.Amount().Rescale(2).String(),
+				ValuePercent: pct,
 			})
 		}
 	}
@@ -336,6 +347,7 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 	}
 	var vatRates []*tax.RateTotal
 	var vatSum *num.Amount
+	var cashed *num.Amount
 	for _, ds := range ref.SpecifiedDocumentStatuses {
 		if ds == nil {
 			continue
@@ -356,12 +368,17 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 				due := amount
 				line.Due = &due
 			case flow6.ConditionAmountReceived, flow6.ConditionAmountPaid:
-				// The cashed amount (MDT-215). This assumes a single
-				// cashed-amount characteristic; a 212 whose amount is split
-				// across several VAT rates repeats this characteristic per
-				// rate, in which case only the last rate's amount is kept here
-				// (the per-rate VAT breakdown below is still captured in full).
-				line.Amount = amount
+				// The cashed amount (MDT-215). When it is split across several
+				// VAT rates the characteristic repeats once per rate, each
+				// carrying that rate's gross; sum them so Amount holds the
+				// full cashed total rather than the last rate alone.
+				if cashed == nil {
+					c := amount
+					cashed = &c
+				} else {
+					c := cashed.Add(amount)
+					cashed = &c
+				}
 				pmt.Ext = pmt.Ext.Set(flow6.ExtKeyCondition, cbc.Code(dc.TypeCode))
 			}
 			// A percentage on the characteristic means the cashed amount is
@@ -388,6 +405,9 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 				}
 			}
 		}
+	}
+	if cashed != nil {
+		line.Amount = *cashed
 	}
 	if len(vatRates) > 0 && vatSum != nil {
 		line.Tax = &tax.Total{
