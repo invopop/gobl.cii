@@ -1,11 +1,13 @@
 package cii
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/tax"
 )
 
 // Line defines the structure of the IncludedSupplyChainTradeLineItem in the CII standard
@@ -19,8 +21,15 @@ type Line struct {
 
 // LineDoc defines the structure of the AssociatedDocumentLineDocument in the CII standard
 type LineDoc struct {
-	ID   string  `xml:"ram:LineID"`
-	Note []*Note `xml:"ram:IncludedNote,omitempty"`
+	ID string `xml:"ram:LineID"`
+	// ParentLineID (BT-X-304 / EXT-FR-FE-162) references the LineID of the
+	// parent line in an EXTENDED-CTC-FR line hierarchy.
+	ParentLineID string `xml:"ram:ParentLineID,omitempty"`
+	// LineStatusReasonCode (BT-X-8 / EXT-FR-FE-163) carries the line subtype
+	// in a hierarchy: GROUP (aggregating header) or DETAIL (leaf). XSD order
+	// places it after the optional LineStatusCode, which we never emit.
+	LineStatusReasonCode string  `xml:"ram:LineStatusReasonCode,omitempty"`
+	Note                 []*Note `xml:"ram:IncludedNote,omitempty"`
 }
 
 // LineAgreement defines the structure of the SpecifiedLineTradeAgreement in the CII standard
@@ -113,15 +122,89 @@ type Summation struct {
 	Amount string `xml:"ram:LineTotalAmount"`
 }
 
-func (out *Invoice) addLines(lines []*bill.Line) error {
-	var Lines []*Line
+// Line subtype codes (BT-X-8 / EXT-FR-FE-163) for the EXTENDED-CTC-FR
+// line hierarchy.
+const (
+	lineSubtypeGroup  = "GROUP"
+	lineSubtypeDetail = "DETAIL"
+)
 
+func (out *Invoice) addLines(lines []*bill.Line, ctx Context) error {
+	// The EXTENDED-CTC-FR profile is the only CII context that supports a
+	// line hierarchy (parent/child via ParentLineID + subtype). For every
+	// other guideline a Breakdown is informational only and is not emitted,
+	// preserving the prior flat behaviour.
+	hierarchy := ctx.Is(ContextPeppolFranceFacturXV1)
+
+	var Lines []*Line
 	for _, l := range lines {
-		Lines = append(Lines, newLine(l))
+		if hierarchy && len(l.Breakdown) > 0 {
+			Lines = append(Lines, newHierarchyLines(l)...)
+			continue
+		}
+		if line := newLine(l); line != nil {
+			Lines = append(Lines, line)
+		}
 	}
 
 	out.Transaction.Lines = Lines
 	return nil
+}
+
+// newHierarchyLines maps a bill.Line carrying a Breakdown onto an
+// EXTENDED-CTC-FR line hierarchy: the line itself becomes a GROUP header
+// (aggregating, carries no VAT so it is excluded from the VAT breakdown
+// and the BT-106 sum) whose BT-131 equals the sum of its children, and
+// each SubLine becomes a DETAIL child carrying the parent line's VAT
+// category (SubLines have no taxes of their own) and pointing back via
+// ParentLineID. See BR-FREXT-06 (subtype required when a parent is set)
+// and BR-FREXT-08 (GROUP net = Σ children).
+func newHierarchyLines(l *bill.Line) []*Line {
+	group := newLine(l)
+	if group == nil {
+		return nil
+	}
+	group.LineDoc.LineStatusReasonCode = lineSubtypeGroup
+	if group.TradeSettlement != nil {
+		group.TradeSettlement.ApplicableTradeTax = nil
+	}
+
+	lines := []*Line{group}
+	parentID := group.LineDoc.ID
+	for i, sub := range l.Breakdown {
+		if sub == nil || sub.Item == nil {
+			continue
+		}
+		child := newLine(subLineAsLine(sub, l.Taxes, i+1))
+		if child == nil {
+			continue
+		}
+		child.LineDoc.ID = fmt.Sprintf("%s.%d", parentID, i+1)
+		child.LineDoc.ParentLineID = parentID
+		child.LineDoc.LineStatusReasonCode = lineSubtypeDetail
+		lines = append(lines, child)
+	}
+	return lines
+}
+
+// subLineAsLine adapts a bill.SubLine into a bill.Line so it can reuse
+// newLine. SubLines carry no taxes of their own, so the parent line's tax
+// set is inherited — the whole hierarchy shares one VAT category.
+func subLineAsLine(sub *bill.SubLine, taxes tax.Set, index int) *bill.Line {
+	return &bill.Line{
+		Index:      index,
+		Quantity:   sub.Quantity,
+		Item:       sub.Item,
+		Identifier: sub.Identifier,
+		Period:     sub.Period,
+		Order:      sub.Order,
+		Cost:       sub.Cost,
+		Discounts:  sub.Discounts,
+		Charges:    sub.Charges,
+		Notes:      sub.Notes,
+		Taxes:      taxes,
+		Total:      sub.Total,
+	}
 }
 
 func newLine(l *bill.Line) *Line {
@@ -154,6 +237,18 @@ func newLine(l *bill.Line) *Line {
 
 	if it.Description != "" {
 		lineItem.Product.Description = &it.Description
+	}
+
+	// BT-155: Seller's item identifier
+	if it.Ref != "" {
+		ref := it.Ref.String()
+		lineItem.Product.SellerAssignedID = &ref
+	}
+
+	// BT-159: Item country of origin
+	if it.Origin != "" {
+		origin := string(it.Origin)
+		lineItem.Product.Origin = &origin
 	}
 
 	if len(l.Notes) > 0 {
