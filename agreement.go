@@ -15,7 +15,7 @@ type Agreement struct {
 	Purchase           *IssuerID             `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	Contract           *IssuerID             `xml:"ram:ContractReferencedDocument,omitempty"`
 	AdditionalDocument []*AdditionalDocument `xml:"ram:AdditionalReferencedDocument,omitempty"`
-	Project            *Project              `xml:"ram:SpecifiedProcurringProject,omitempty"`
+	Project            *Project              `xml:"ram:SpecifiedProcuringProject,omitempty"`
 }
 
 // Project defines common architecture of document reference fields in the CII standard
