@@ -50,6 +50,11 @@
 					]
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:ESB85905495"
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "9920",
@@ -83,6 +88,11 @@
 						"given": "IT",
 						"surname": "Team"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:ESB85905495"
 				}
 			],
 			"inboxes": [

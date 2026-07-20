@@ -3,6 +3,7 @@ package cii
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -77,6 +78,25 @@ type Email struct {
 // SchemeIDEmail represents the Scheme ID for email addresses
 const SchemeIDEmail = "EM"
 
+// mailtoScheme is the URI scheme GOBL uses for email endpoints
+// (e.g. "mailto:billing@example.com").
+const mailtoScheme = "mailto"
+
+// peppolEndpointScheme is the URI scheme GOBL uses for Peppol participant
+// identifier endpoints (e.g. "iso6523-actorid-upis::9930:111111125").
+const peppolEndpointScheme = "iso6523-actorid-upis"
+
+// splitPeppolEndpoint splits the opaque part of an
+// "iso6523-actorid-upis::<scheme>:<code>" URI (which URL parsing exposes
+// as ":<scheme>:<code>") into its scheme and code components.
+func splitPeppolEndpoint(opaque string) (scheme, code string, ok bool) {
+	parts := strings.SplitN(strings.TrimPrefix(opaque, ":"), ":", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", false
+	}
+	return parts[0], parts[1], true
+}
+
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
 func newParty(party *org.Party, ctx Context) *Party {
 	if party == nil {
@@ -150,7 +170,7 @@ func newParty(party *org.Party, ctx Context) *Party {
 		applyChorusPro(party, p)
 	}
 
-	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
+	p.URIUniversalCommunication = newURIUniversalCommunication(party)
 
 	if p.LegalOrganization != nil && p.LegalOrganization.ID != nil && p.LegalOrganization.ID.Value == "" {
 		p.LegalOrganization.ID = nil
@@ -272,24 +292,28 @@ func contactName(p *org.Name) string {
 	return fmt.Sprintf("%s %s", g, s)
 }
 
-func newURIUniversalCommunication(inboxes []*org.Inbox) *URIUniversalCommunication {
-	if len(inboxes) == 0 {
+// newURIUniversalCommunication maps a party's preferred electronic address
+// (its first endpoint) to a CII URIUniversalCommunication. It understands the
+// two URI forms emitted by GOBL normalization:
+//   - "mailto:<address>"                      -> schemeID "EM"
+//   - "iso6523-actorid-upis::<scheme>:<code>" -> schemeID "<scheme>"
+func newURIUniversalCommunication(party *org.Party) *URIUniversalCommunication {
+	ep := party.FirstEndpoint()
+	if ep == nil {
 		return nil
 	}
-	ib := inboxes[0]
-	if ib.Email != "" {
-		return &URIUniversalCommunication{
-			ID: &PartyID{
-				Value:    ib.Email,
-				SchemeID: SchemeIDEmail,
-			},
+	switch ep.URI.Scheme() {
+	case mailtoScheme:
+		if addr := ep.URI.Opaque(); addr != "" {
+			return &URIUniversalCommunication{
+				ID: &PartyID{Value: addr, SchemeID: SchemeIDEmail},
+			}
 		}
-	} else if ib.Code != "" {
-		return &URIUniversalCommunication{
-			ID: &PartyID{
-				Value:    ib.Code.String(),
-				SchemeID: ib.Scheme.String(),
-			},
+	case peppolEndpointScheme:
+		if scheme, code, ok := splitPeppolEndpoint(ep.URI.Opaque()); ok {
+			return &URIUniversalCommunication{
+				ID: &PartyID{Value: code, SchemeID: scheme},
+			}
 		}
 	}
 	return nil
