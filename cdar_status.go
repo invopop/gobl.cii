@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
@@ -296,17 +297,15 @@ func newCDARAcknowledgement(st *bill.Status, line *bill.StatusLine, ackType stri
 				},
 			}
 		}
-		if line.Doc.Type != "" {
-			ref.TypeCode = string(line.Doc.Type)
+		// MDT-91: from the canonical untdid-document-type extension. The flow6
+		// addon migrates a legacy Type key into it on normalize and requires
+		// it, so a calculated document always carries it — no Type fallback.
+		if dt := line.Doc.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
+			ref.TypeCode = dt.String()
 		}
 	}
-	if st.Supplier != nil {
-		if siren := partyIdentityCode(st.Supplier, schemeIDSIREN); siren != "" {
-			ref.IssuerTradeParty = &CDARTradeParty{
-				GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDSIREN, Value: siren}},
-			}
-		}
-	}
+	// MDT-129: the referenced invoice's issuer (its supplier).
+	ref.IssuerTradeParty = cdarReferencedIssuer(line.Doc, st.Supplier)
 
 	// Build the SpecifiedDocumentStatus list. Pair each Reason with each
 	// Action when both are present, or emit one per Reason / Action alone.
@@ -512,7 +511,13 @@ func partyIdentityCode(p *org.Party, scheme string) string {
 	if p == nil {
 		return ""
 	}
-	for _, id := range p.Identities {
+	return identitiesSIREN(p.Identities, scheme)
+}
+
+// identitiesSIREN returns the code of the first identity carrying the given
+// ISO/IEC 6523 scheme extension, or "".
+func identitiesSIREN(ids []*org.Identity, scheme string) string {
+	for _, id := range ids {
 		if id == nil || id.Ext.IsZero() {
 			continue
 		}
@@ -521,6 +526,32 @@ func partyIdentityCode(p *org.Party, scheme string) string {
 		}
 	}
 	return ""
+}
+
+// cdarReferencedIssuer builds the MDT-129 referenced-invoice issuer party for a
+// CDV — the party that issued the invoice the status/payment is about.
+//
+// The doc ref's own Identities win when present: that is the faithful issuer a
+// parsed CDAR round-trips (or one an informed caller set), and it carries
+// richer info than a single derived SIREN. When absent, the issuer is the
+// invoice supplier (seller). PPF names the supplier as the referenced-invoice
+// issuer even for a self-billed invoice (UNTDID 389) — confirmed on QUAL
+// 2026-07-15, where PPF's own 250 ack for a self-billed extract reported the
+// supplier SIREN as MDT-129 — so there is no buyer swap for self-billing.
+func cdarReferencedIssuer(docRef *org.DocumentRef, supplier *org.Party) *CDARTradeParty {
+	var siren string
+	if docRef != nil {
+		siren = identitiesSIREN(docRef.Identities, schemeIDSIREN)
+	}
+	if siren == "" {
+		siren = partyIdentityCode(supplier, schemeIDSIREN)
+	}
+	if siren == "" {
+		return nil
+	}
+	return &CDARTradeParty{
+		GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDSIREN, Value: siren}},
+	}
 }
 
 // markPPFReferences applies the PPF (einvoicingF2) profile corrections

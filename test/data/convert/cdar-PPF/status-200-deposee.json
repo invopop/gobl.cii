@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fd77f56957a5db671395c9773aeecac8cc4e05cb2321dc8a9f75be7f7e001c81"
+			"val": "0824567a500bd55c145c1d829ec1d932d0b923214c20186415e6c5b215a477e7"
 		},
 		"from": "iso6523-actorid-upis::0225:100000009_PEP",
 		"to": "iso6523-actorid-upis::0225:200000008_PEP"
@@ -79,7 +79,10 @@
 				"doc": {
 					"type": "380",
 					"issue_date": "2025-07-01",
-					"code": "F202500003"
+					"code": "F202500003",
+					"ext": {
+						"untdid-document-type": "380"
+					}
 				},
 				"ext": {
 					"fr-ctc-flow6-status": "200"

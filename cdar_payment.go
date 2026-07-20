@@ -5,11 +5,13 @@ import (
 
 	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
+	"github.com/invopop/gobl/tax"
 )
 
 // NewCDARFromPayment converts a *bill.Payment into a CDAR XML document
@@ -155,17 +157,16 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 				},
 			}
 		}
-		if line.Document.Type != "" {
-			ref.TypeCode = string(line.Document.Type)
+		// MDT-91: the referenced invoice's document type code, from the
+		// canonical untdid-document-type extension. The flow6 addon migrates a
+		// legacy Type key into this extension on normalize and requires it, so
+		// a calculated document always carries it — no Type fallback needed.
+		if dt := line.Document.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
+			ref.TypeCode = dt.String()
 		}
 	}
-	if pmt.Supplier != nil {
-		if siren := partyIdentityCode(pmt.Supplier, schemeIDSIREN); siren != "" {
-			ref.IssuerTradeParty = &CDARTradeParty{
-				GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDSIREN, Value: siren}},
-			}
-		}
-	}
+	// MDT-129: the referenced invoice's issuer (its supplier).
+	ref.IssuerTradeParty = cdarReferencedIssuer(line.Document, pmt.Supplier)
 
 	// Amounts ride as document characteristics on a single status
 	// entry: the payment's condition extension types the line amount
@@ -200,8 +201,10 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 // newCDARVATSplitCharacteristics breaks a payment line's cashed amount
 // down by VAT rate into one MDT-215 (ValueAmount, gross per rate) /
 // MDT-224 (ValuePercent) characteristic per distinct rate, as PPF
-// requires for an encaissement. Returns nil when the line carries no
-// tax breakdown so the caller can keep the amount-only form.
+// requires for an encaissement. The amount is derived entirely from the
+// rate (Base+Amount), not from line.Amount, which is just their sum. An
+// exempt or zero rate emits a 0.00 percentage. Returns nil when the line
+// carries no tax breakdown so the caller can keep the amount-only form.
 func newCDARVATSplitCharacteristics(typeCode cbc.Code, line *bill.PaymentLine, cur currency.Code) []*CDARDocumentCharacteristic {
 	if line == nil || line.Tax == nil {
 		return nil
@@ -212,14 +215,23 @@ func newCDARVATSplitCharacteristics(typeCode cbc.Code, line *bill.PaymentLine, c
 			continue
 		}
 		for _, rt := range cat.Rates {
-			if rt == nil || rt.Percent == nil {
+			if rt == nil {
 				continue
+			}
+			// The MEN characteristic has a single percentage field and no
+			// exemption concept, and P1.18 requires MDT-224 whenever the
+			// amount (MDT-215) is present. An exempt rate (Percent nil) and a
+			// zero rate therefore both surface as 0.00 — GOBL keeps them
+			// apart, the CDV cannot.
+			pct := "0.00"
+			if rt.Percent != nil {
+				pct = rt.Percent.Amount().Rescale(2).String()
 			}
 			gross := rt.Base.Add(rt.Amount)
 			chars = append(chars, &CDARDocumentCharacteristic{
 				TypeCode:     typeCode.String(),
 				ValueAmount:  &CDARValueAmount{Value: gross.String(), CurrencyID: cur.String()},
-				ValuePercent: rt.Percent.Amount().Rescale(2).String(),
+				ValuePercent: pct,
 			})
 		}
 	}
@@ -333,6 +345,9 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 	if dr := goblDocRefFromCDAR(ref); dr != nil {
 		line.Document = dr
 	}
+	var vatRates []*tax.RateTotal
+	var vatSum *num.Amount
+	var cashed *num.Amount
 	for _, ds := range ref.SpecifiedDocumentStatuses {
 		if ds == nil {
 			continue
@@ -353,9 +368,55 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 				due := amount
 				line.Due = &due
 			case flow6.ConditionAmountReceived, flow6.ConditionAmountPaid:
-				line.Amount = amount
+				// The cashed amount (MDT-215). When it is split across several
+				// VAT rates the characteristic repeats once per rate, each
+				// carrying that rate's gross; sum them so Amount holds the
+				// full cashed total rather than the last rate alone.
+				if cashed == nil {
+					c := amount
+					cashed = &c
+				} else {
+					c := cashed.Add(amount)
+					cashed = &c
+				}
 				pmt.Ext = pmt.Ext.Set(flow6.ExtKeyCondition, cbc.Code(dc.TypeCode))
 			}
+			// A percentage on the characteristic means the cashed amount is
+			// split by VAT rate (212 Encaissée). The amount is the gross (TTC)
+			// per rate; recover the base and VAT so the parsed payment carries
+			// the tax breakdown the Flow 6 rules require and the CDV round-trips.
+			if dc.ValuePercent != "" {
+				pct, err := num.PercentageFromString(dc.ValuePercent + "%")
+				if err != nil {
+					continue
+				}
+				vat := pct.From(amount)
+				vatRates = append(vatRates, &tax.RateTotal{
+					Base:    amount.Divide(pct.Factor()),
+					Percent: &pct,
+					Amount:  vat,
+				})
+				if vatSum == nil {
+					sum := vat
+					vatSum = &sum
+				} else {
+					sum := vatSum.Add(vat)
+					vatSum = &sum
+				}
+			}
+		}
+	}
+	if cashed != nil {
+		line.Amount = *cashed
+	}
+	if len(vatRates) > 0 && vatSum != nil {
+		line.Tax = &tax.Total{
+			Categories: []*tax.CategoryTotal{{
+				Code:   tax.CategoryVAT,
+				Rates:  vatRates,
+				Amount: *vatSum,
+			}},
+			Sum: *vatSum,
 		}
 	}
 	return line

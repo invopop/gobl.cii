@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
@@ -287,7 +288,10 @@ func goblDocRefFromCDAR(ref *CDARReferencedDocument) *org.DocumentRef {
 	}
 	dr := &org.DocumentRef{Code: cbc.Code(ref.IssuerAssignedID)}
 	if ref.TypeCode != "" {
-		dr.Type = cbc.Key(ref.TypeCode)
+		// MDT-91 → the canonical untdid-document-type extension (not the Type
+		// key), so the referenced type is represented the same way inbound and
+		// outbound and downstream can always rely on the extension.
+		dr.Ext = dr.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.TypeCode))
 	}
 	if ref.FormattedIssueDateTime != nil && ref.FormattedIssueDateTime.DateTimeString != nil {
 		d, _, err := parseCDARDateTime(ref.FormattedIssueDateTime.DateTimeString.Value)

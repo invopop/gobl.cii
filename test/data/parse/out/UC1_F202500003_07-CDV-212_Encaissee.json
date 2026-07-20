@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2f72240d9b376a5ffc154361c0aea58142b35a45ac32b00401b586e196084cd6"
+			"val": "a22ec36515fdb916226a654d2fcb1b441e7ef9b0ddc5a48caf3a9f9b30a498f4"
 		},
 		"from": "iso6523-actorid-upis::0225:100000009_STATUTS",
 		"to": "iso6523-actorid-upis::0225:200000008"
@@ -80,7 +80,6 @@
 			{
 				"i": 1,
 				"document": {
-					"type": "380",
 					"issue_date": "2025-07-01",
 					"code": "F202500003",
 					"identities": [
@@ -90,9 +89,28 @@
 								"iso-scheme-id": "0002"
 							}
 						}
-					]
+					],
+					"ext": {
+						"untdid-document-type": "380"
+					}
 				},
-				"amount": "12000"
+				"amount": "12000",
+				"tax": {
+					"categories": [
+						{
+							"code": "VAT",
+							"rates": [
+								{
+									"base": "10000",
+									"percent": "20.00%",
+									"amount": "2000"
+								}
+							],
+							"amount": "2000.00"
+						}
+					],
+					"sum": "2000.00"
+				}
 			}
 		],
 		"methods": [
