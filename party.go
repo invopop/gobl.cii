@@ -95,6 +95,11 @@ func newParty(party *org.Party, ctx Context) *Party {
 		}
 	}
 
+	// BT-33: additional legal information (ram:Description)
+	if party.Registration != nil && party.Registration.Other != "" {
+		p.Description = party.Registration.Other
+	}
+
 	if party.TaxID != nil && party.TaxID.Code != "" {
 		// Assumes VAT ID being used instead of possible tax number
 		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
