@@ -65,7 +65,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "Salescompany ltd.", supplier.Name)
 		assert.Equal(t, cbc.Code("123456789"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
-		assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
+		assert.Equal(t, "mailto:inbox@example.com", supplier.Endpoints[0].URI.String())
 
 		require.Len(t, supplier.Addresses, 1)
 		assert.Equal(t, "Main street 34", supplier.Addresses[0].Street)
@@ -81,7 +81,7 @@ func TestParseCtoGParty(t *testing.T) {
 		require.Len(t, supplier.Telephones, 1)
 		assert.Equal(t, "46211230", supplier.Telephones[0].Number)
 
-		assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
+		assert.Equal(t, "mailto:inbox@example.com", supplier.Endpoints[0].URI.String())
 
 		customer := inv.Customer
 		require.NotNil(t, customer)
@@ -107,7 +107,6 @@ func TestParseCtoGParty(t *testing.T) {
 		supplier := inv.Supplier
 		require.NotNil(t, supplier)
 
-		assert.Equal(t, "5566778899", supplier.Inboxes[0].Code.String())
-		assert.Equal(t, "0007", supplier.Inboxes[0].Scheme.String())
+		assert.Equal(t, "iso6523-actorid-upis::0007:5566778899", supplier.Endpoints[0].URI.String())
 	})
 }
