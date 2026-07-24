@@ -26,6 +26,10 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		ord.Code = cbc.Code(tr.Agreement.BuyerReference)
 	}
 
+	if tr.Settlement.Invoicer != nil {
+		ord.Issuer = goblNewParty(tr.Settlement.Invoicer)
+	}
+
 	if tr.Agreement.Sales != nil {
 		ord.Sales = []*org.DocumentRef{
 			{
@@ -152,5 +156,6 @@ func goblOrderingHasData(ord *bill.Ordering) bool {
 		ord.Sales != nil ||
 		ord.Purchases != nil ||
 		ord.Projects != nil ||
-		ord.Contracts != nil
+		ord.Contracts != nil ||
+		ord.Issuer != nil
 }
