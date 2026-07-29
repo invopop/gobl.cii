@@ -19,6 +19,7 @@ type Settlement struct {
 	CreditorRefID      string                `xml:"ram:CreditorReferenceID,omitempty"`
 	PaymentReference   string                `xml:"ram:PaymentReference,omitempty"`
 	Currency           string                `xml:"ram:InvoiceCurrencyCode"`
+	Invoicer           *Party                `xml:"ram:InvoicerTradeParty,omitempty"`
 	Payee              *Party                `xml:"ram:PayeeTradeParty,omitempty"`
 	PaymentMeans       []*PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
 	Tax                []*Tax                `xml:"ram:ApplicableTradeTax"`
@@ -169,6 +170,9 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 			rd.IssueDate = &FormattedIssueDate{DateFormat: d}
 		}
 		stlm.ReferencedDocument = []*ReferencedDocument{rd}
+	}
+	if inv.Ordering != nil && inv.Ordering.Issuer != nil {
+		stlm.Invoicer = newParty(inv.Ordering.Issuer, ctx)
 	}
 	if inv.Payment != nil && inv.Payment.Payee != nil {
 		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
