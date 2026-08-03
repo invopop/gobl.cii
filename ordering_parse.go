@@ -30,6 +30,11 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		ord.Issuer = goblNewParty(tr.Settlement.Invoicer)
 	}
 
+	// BT-19: Buyer accounting reference
+	if tr.Settlement.AccountingAccount != nil && tr.Settlement.AccountingAccount.ID != "" {
+		ord.Cost = cbc.Code(tr.Settlement.AccountingAccount.ID)
+	}
+
 	if tr.Agreement.Sales != nil {
 		ord.Sales = []*org.DocumentRef{
 			{

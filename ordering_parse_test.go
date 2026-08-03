@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,4 +35,16 @@ func TestParseCtoGOrdering(t *testing.T) {
 		assert.Equal(t, "2014-08-31", inv.Ordering.Period.End.String(), "OrderingPeriod end date should match")
 	})
 
+}
+
+func TestParseCtoGOrderingCost(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "CII_example2.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotNil(t, inv.Ordering, "Ordering should not be nil")
+	// BT-19: Buyer accounting reference
+	assert.Equal(t, cbc.Code("Project cost code 123"), inv.Ordering.Cost)
 }
