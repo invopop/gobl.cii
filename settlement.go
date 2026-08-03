@@ -28,6 +28,7 @@ type Settlement struct {
 	PaymentTerms       []*Terms              `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`
 	Summary            *Summary              `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
 	ReferencedDocument []*ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
+	AccountingAccount  *AccountingAccount    `xml:"ram:ReceivableSpecifiedTradeAccountingAccount,omitempty"`
 	Advance            []*Advance            `xml:"ram:SpecifiedAdvancePayment,omitempty"`
 }
 
@@ -173,6 +174,12 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	}
 	if inv.Ordering != nil && inv.Ordering.Issuer != nil {
 		stlm.Invoicer = newParty(inv.Ordering.Issuer, ctx)
+	}
+	// BT-19: Buyer accounting reference
+	if inv.Ordering != nil && inv.Ordering.Cost != "" {
+		stlm.AccountingAccount = &AccountingAccount{
+			ID: inv.Ordering.Cost.String(),
+		}
 	}
 	if inv.Payment != nil && inv.Payment.Payee != nil {
 		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
