@@ -422,9 +422,6 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 		}
 	}
 	if cashed != nil {
-		// A negative cashed amount is a refund: GOBL keeps amounts
-		// positive and carries the direction on the Refund flag, so flip
-		// the line and the recovered tax breakdown along with it.
 		if cashed.IsNegative() {
 			line.Refund = true
 			*cashed = cashed.Negate()
