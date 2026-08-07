@@ -487,6 +487,95 @@ func TestCDARPaymentPartialRoundTrip(t *testing.T) {
 	assert.Equal(t, "250.00", out.Lines[0].Due.String())
 }
 
+// TestCDARPaymentNoAmount covers a 211 (Paiement transmis) CDV with no
+// SpecifiedDocumentCharacteristic — no MPA amount, no currency. It must
+// still parse (currency defaults to EUR via the FR regime), with the
+// missing amount surfacing as a validation error instead.
+func TestCDARPaymentNoAmount(t *testing.T) {
+	data := []byte(`<rsm:CrossDomainAcknowledgementAndResponse xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossDomainAcknowledgementAndResponse:100">
+	<rsm:ExchangedDocumentContext>
+		<ram:BusinessProcessSpecifiedDocumentContextParameter>
+			<ram:ID>REGULATED</ram:ID>
+		</ram:BusinessProcessSpecifiedDocumentContextParameter>
+		<ram:GuidelineSpecifiedDocumentContextParameter>
+			<ram:ID>urn.cpro.gouv.fr:1p0:CDV:invoice</ram:ID>
+		</ram:GuidelineSpecifiedDocumentContextParameter>
+	</rsm:ExchangedDocumentContext>
+	<rsm:ExchangedDocument>
+		<ram:ID>d6e83535-452d-470a-8673-62708e82732a</ram:ID>
+		<ram:Name>F202500003_04-CDV-211_Paiement_transmis</ram:Name>
+		<ram:IssueDateTime>
+			<udt:DateTimeString format="204">20260805200314</udt:DateTimeString>
+		</ram:IssueDateTime>
+		<ram:SenderTradeParty>
+			<ram:RoleCode>WK</ram:RoleCode>
+		</ram:SenderTradeParty>
+		<ram:IssuerTradeParty>
+			<ram:GlobalID schemeID="0002">200000008</ram:GlobalID>
+			<ram:RoleCode>BY</ram:RoleCode>
+		</ram:IssuerTradeParty>
+		<ram:RecipientTradeParty>
+			<ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
+			<ram:Name>VENDEUR</ram:Name>
+			<ram:RoleCode>SE</ram:RoleCode>
+			<ram:URIUniversalCommunication>
+				<ram:URIID schemeID="0225">100000009</ram:URIID>
+			</ram:URIUniversalCommunication>
+		</ram:RecipientTradeParty>
+	</rsm:ExchangedDocument>
+	<rsm:AcknowledgementDocument>
+		<ram:MultipleReferencesIndicator>
+			<udt:Indicator>false</udt:Indicator>
+		</ram:MultipleReferencesIndicator>
+		<ram:TypeCode>23</ram:TypeCode>
+		<ram:IssueDateTime>
+			<udt:DateTimeString format="204">20260805200314</udt:DateTimeString>
+		</ram:IssueDateTime>
+		<ram:ReferenceReferencedDocument>
+			<ram:IssuerAssignedID>F202500003</ram:IssuerAssignedID>
+			<ram:StatusCode>47</ram:StatusCode>
+			<ram:TypeCode>380</ram:TypeCode>
+			<ram:ReceiptDateTime>
+				<udt:DateTimeString format="204">20260805200314</udt:DateTimeString>
+			</ram:ReceiptDateTime>
+			<ram:FormattedIssueDateTime>
+				<qdt:DateTimeString format="102">20260720</qdt:DateTimeString>
+			</ram:FormattedIssueDateTime>
+			<ram:ProcessConditionCode>211</ram:ProcessConditionCode>
+			<ram:ProcessCondition>Paiement_transmis</ram:ProcessCondition>
+			<ram:IssuerTradeParty>
+				<ram:GlobalID schemeID="0002">100000009</ram:GlobalID>
+			</ram:IssuerTradeParty>
+			<ram:SpecifiedDocumentStatus>
+				<ram:SequenceNumeric>4</ram:SequenceNumeric>
+			</ram:SpecifiedDocumentStatus>
+		</ram:ReferenceReferencedDocument>
+	</rsm:AcknowledgementDocument>
+</rsm:CrossDomainAcknowledgementAndResponse>`)
+
+	env, err := cii.Parse(data)
+	require.NoError(t, err, "an amount-less 211 must still produce an envelope")
+
+	pmt, ok := env.Extract().(*bill.Payment)
+	require.True(t, ok, "211 parses as a payment")
+	assert.Equal(t, bill.PaymentTypeAdvice, pmt.Type)
+	assert.Equal(t, cbc.Code("211"), pmt.Ext.Get(flow6.ExtKeyStatus))
+	assert.Equal(t, "FR", pmt.Country.String(),
+		"parser pins the FR regime")
+	assert.Equal(t, currency.EUR, pmt.Currency,
+		"currency defaults to EUR via the FR regime")
+
+	require.Len(t, pmt.Lines, 1)
+	assert.True(t, pmt.Lines[0].Amount.IsZero(), "no amount is invented")
+	require.NotNil(t, pmt.Lines[0].Document)
+	assert.Equal(t, cbc.Code("F202500003"), pmt.Lines[0].Document.Code)
+
+	// The missing amount makes the document invalid, not unparseable.
+	err = env.Validate()
+	require.Error(t, err, "zero amount must fail validation")
+	assert.Contains(t, err.Error(), "amount")
+}
+
 // TestCDARPaymentPPFEncaissement covers the PPF (einvoicingF2) profile
 // fields that live 0654 rejections flagged on a 212: the cashed amount
 // must be split by VAT rate (MDT-215/MDT-224), and the document must

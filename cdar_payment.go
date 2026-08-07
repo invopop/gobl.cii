@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
@@ -260,6 +261,7 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 	}
 	pmt := &bill.Payment{}
 	pmt.SetAddons(flow6.V1)
+	pmt.SetRegime(l10n.FR.Tax())
 
 	code := cbc.Code(cdarProcessCode(cdar))
 	switch code {
