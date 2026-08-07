@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
@@ -260,6 +261,14 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 	}
 	pmt := &bill.Payment{}
 	pmt.SetAddons(flow6.V1)
+	// A Flow 6 CDV is a French domestic exchange, so pin the FR regime. The
+	// parties carry only a SIREN (no tax ID), leaving GOBL nothing else to
+	// derive a regime — and hence a currency — from when the CDAR omits the
+	// amount characteristics entirely (some platforms emit a 211 with no
+	// MPA). With the regime set the currency defaults to EUR and the
+	// document parses; the missing amount then surfaces as a validation
+	// error ("amount must be positive") instead of aborting calculation.
+	pmt.SetRegime(l10n.FR.Tax())
 
 	code := cbc.Code(cdarProcessCode(cdar))
 	switch code {
