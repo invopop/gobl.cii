@@ -261,9 +261,6 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 	}
 	pmt := &bill.Payment{}
 	pmt.SetAddons(flow6.V1)
-	// Pin the FR regime so the currency can default to EUR even when the
-	// CDAR carries no amount characteristics (the parties have no tax ID
-	// to derive it from).
 	pmt.SetRegime(l10n.FR.Tax())
 
 	code := cbc.Code(cdarProcessCode(cdar))
