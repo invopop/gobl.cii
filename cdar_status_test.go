@@ -487,15 +487,10 @@ func TestCDARPaymentPartialRoundTrip(t *testing.T) {
 	assert.Equal(t, "250.00", out.Lines[0].Due.String())
 }
 
-// TestCDARPaymentNoAmount covers a 211 (Paiement transmis) CDV seen in
-// the wild whose SpecifiedDocumentStatus carries no
-// SpecifiedDocumentCharacteristic at all — no MPA amount, and therefore
-// no currency either. The spec only mandates the amount characteristic
-// for a 212 (BR-FR-CDV-14), so the document must still parse: the FR
-// regime pinned by the parser lets GOBL default the currency to EUR,
-// and the absent amount surfaces as a validation error on the envelope
-// (stored as invalid) rather than fabricating a value or aborting
-// calculation with "currency: required, unable to determine".
+// TestCDARPaymentNoAmount covers a 211 (Paiement transmis) CDV with no
+// SpecifiedDocumentCharacteristic — no MPA amount, no currency. It must
+// still parse (currency defaults to EUR via the FR regime), with the
+// missing amount surfacing as a validation error instead.
 func TestCDARPaymentNoAmount(t *testing.T) {
 	data := []byte(`<rsm:CrossDomainAcknowledgementAndResponse xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100" xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:qdt="urn:un:unece:uncefact:data:standard:QualifiedDataType:100" xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossDomainAcknowledgementAndResponse:100">
 	<rsm:ExchangedDocumentContext>
