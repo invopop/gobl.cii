@@ -183,8 +183,6 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 	// When the payment line carries a tax breakdown, emit one
 	// characteristic per distinct rate (gross amount + percentage);
 	// otherwise fall back to a single amount-only characteristic.
-	// A refund line reverses the flow of funds: the CDV carries the sign
-	// on the amounts themselves, so emit them negated.
 	if split := newCDARVATSplitCharacteristics(condition, line, pmt.Currency); len(split) > 0 {
 		ds.SpecifiedDocumentCharacteristics = split
 	} else {
