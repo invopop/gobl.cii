@@ -565,7 +565,7 @@ func TestCDARPaymentNoAmount(t *testing.T) {
 	require.True(t, ok, "211 parses as a payment")
 	assert.Equal(t, bill.PaymentTypeAdvice, pmt.Type)
 	assert.Equal(t, cbc.Code("211"), pmt.Ext.Get(flow6.ExtKeyStatus))
-	assert.Equal(t, "FR", pmt.Regime.Country.String(),
+	assert.Equal(t, "FR", pmt.Country.String(),
 		"parser pins the FR regime")
 	assert.Equal(t, currency.EUR, pmt.Currency,
 		"currency defaults to EUR via the FR regime")
