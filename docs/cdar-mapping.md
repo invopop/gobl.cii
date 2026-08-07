@@ -203,6 +203,10 @@ Special rule (BR-FR-CDV-14): a `paid` (212) status line MUST carry a
 characteristic with `TypeCode = MEN` (Montant Encaissé) and
 `Amount.{Value, Currency}` populated.
 
+Refunds: a payment line with `Refund` set emits its MEN / MPA amounts
+(and per-rate grosses) negated in the CDV; parsing maps negative cashed
+amounts back to a positive `Amount` with `Refund = true`.
+
 When a Reason and a Characteristic are linked by their CDAR ReasonCode
 the writer keeps them in the same `SpecifiedDocumentStatus` entry; the
 `Characteristic.ReasonCode` field, when set, must match the

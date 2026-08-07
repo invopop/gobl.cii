@@ -3,6 +3,7 @@ package cii_test
 import (
 	"testing"
 
+	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
@@ -157,4 +158,70 @@ func TestCDARPaymentAmountDerivedFromRates(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "820.00", out.Lines[0].Amount.String(),
 		"parsed Amount is the Σ of grosses, not the bogus input")
+}
+
+// TestCDARPaymentRefundRoundTrip covers negative payments: a line with
+// Refund set emits its CDV amounts negated, and a CDV with negative
+// cashed amounts parses back into a positive Amount with Refund set.
+func TestCDARPaymentRefundRoundTrip(t *testing.T) {
+	t.Run("vat split", func(t *testing.T) {
+		pmt := buildSyntheticPayment(t, num.Amount{})
+		pmt.Lines[0].Refund = true
+		pmt.Lines[0].Tax = &tax.Total{
+			Categories: []*tax.CategoryTotal{{Code: tax.CategoryVAT, Rates: []*tax.RateTotal{
+				vatRate(amt(50000), amt(10000), pct(20)), // gross 600.00
+			}}},
+		}
+
+		cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
+		require.NoError(t, err)
+		chars := cdar.AcknowledgementDocuments[0].ReferenceReferencedDocument[0].
+			SpecifiedDocumentStatuses[0].SpecifiedDocumentCharacteristics
+		require.Len(t, chars, 1)
+		assert.Equal(t, "-600.00", chars[0].ValueAmount.Value, "refund gross is negated")
+		assert.Equal(t, rate20, chars[0].ValuePercent)
+
+		data, err := cdar.Bytes()
+		require.NoError(t, err)
+		out, err := cii.ParseCDARPayment(data)
+		require.NoError(t, err)
+		require.Len(t, out.Lines, 1)
+		assert.True(t, out.Lines[0].Refund, "negative cashed amount parses as a refund")
+		assert.Equal(t, grossStd, out.Lines[0].Amount.String(), "Amount stays positive")
+
+		require.NotNil(t, out.Lines[0].Tax)
+		rates := out.Lines[0].Tax.Categories[0].Rates
+		require.Len(t, rates, 1)
+		assert.Equal(t, "500.00", rates[0].Base.String(), "recovered base is positive")
+		assert.Equal(t, "100.00", rates[0].Amount.String(), "recovered VAT is positive")
+
+		require.Len(t, out.Methods, 1)
+		assert.Equal(t, "-600.00", out.Methods[0].Amount.String(),
+			"synthesized method carries the negated total")
+
+		env, err := gobl.Envelop(out)
+		require.NoError(t, err, "refund payment must calculate")
+		require.NoError(t, env.Validate(), "refund payment must pass flow6 validation")
+	})
+
+	t.Run("amount only", func(t *testing.T) {
+		pmt := buildSyntheticPayment(t, num.Amount{})
+		pmt.Lines[0].Refund = true
+		pmt.Lines[0].Tax = nil
+
+		cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
+		require.NoError(t, err)
+		chars := cdar.AcknowledgementDocuments[0].ReferenceReferencedDocument[0].
+			SpecifiedDocumentStatuses[0].SpecifiedDocumentCharacteristics
+		require.Len(t, chars, 1)
+		assert.Equal(t, "-500.00", chars[0].ValueAmount.Value, "refund amount is negated")
+
+		data, err := cdar.Bytes()
+		require.NoError(t, err)
+		out, err := cii.ParseCDARPayment(data)
+		require.NoError(t, err)
+		require.Len(t, out.Lines, 1)
+		assert.True(t, out.Lines[0].Refund)
+		assert.Equal(t, "500.00", out.Lines[0].Amount.String())
+	})
 }

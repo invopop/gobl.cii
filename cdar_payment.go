@@ -183,11 +183,17 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 	// When the payment line carries a tax breakdown, emit one
 	// characteristic per distinct rate (gross amount + percentage);
 	// otherwise fall back to a single amount-only characteristic.
+	// A refund line reverses the flow of funds: the CDV carries the sign
+	// on the amounts themselves, so emit them negated.
 	if split := newCDARVATSplitCharacteristics(condition, line, pmt.Currency); len(split) > 0 {
 		ds.SpecifiedDocumentCharacteristics = split
 	} else {
+		amount := line.Amount
+		if line.Refund {
+			amount = amount.Negate()
+		}
 		ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics,
-			newCDARAmountCharacteristic(condition, line.Amount, pmt.Currency))
+			newCDARAmountCharacteristic(condition, amount, pmt.Currency))
 	}
 	if line.Due != nil && condition != flow6.ConditionAmountRemaining {
 		ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics,
@@ -229,6 +235,9 @@ func newCDARVATSplitCharacteristics(typeCode cbc.Code, line *bill.PaymentLine, c
 				pct = rt.Percent.Amount().Rescale(2).String()
 			}
 			gross := rt.Base.Add(rt.Amount)
+			if line.Refund {
+				gross = gross.Negate()
+			}
 			chars = append(chars, &CDARDocumentCharacteristic{
 				TypeCode:     typeCode.String(),
 				ValueAmount:  &CDARValueAmount{Value: gross.String(), CurrencyID: cur.String()},
@@ -325,7 +334,11 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 				pmt.Supplier = goblPartyFromCDAR(ref.IssuerTradeParty)
 			}
 			line := goblPaymentLineFromCDAR(pmt, ref)
-			total = total.Add(line.Amount)
+			a := line.Amount
+			if line.Refund {
+				a = a.Negate()
+			}
+			total = total.MatchPrecision(a).Add(a)
 			pmt.Lines = append(pmt.Lines, line)
 		}
 	}
@@ -409,6 +422,20 @@ func goblPaymentLineFromCDAR(pmt *bill.Payment, ref *CDARReferencedDocument) *bi
 		}
 	}
 	if cashed != nil {
+		// A negative cashed amount is a refund: GOBL keeps amounts
+		// positive and carries the direction on the Refund flag, so flip
+		// the line and the recovered tax breakdown along with it.
+		if cashed.IsNegative() {
+			line.Refund = true
+			*cashed = cashed.Negate()
+			for _, rt := range vatRates {
+				rt.Base = rt.Base.Negate()
+				rt.Amount = rt.Amount.Negate()
+			}
+			if vatSum != nil {
+				*vatSum = vatSum.Negate()
+			}
+		}
 		line.Amount = *cashed
 	}
 	if len(vatRates) > 0 && vatSum != nil {
