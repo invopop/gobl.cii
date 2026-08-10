@@ -43,7 +43,7 @@ func TestParseCtoGPayment(t *testing.T) {
 	assert.Equal(t, "Schidt", payment.Instructions.Card.Holder)
 
 	assert.Len(t, payment.Instructions.CreditTransfer, 1)
-	assert.Equal(t, "123456789012345678", payment.Instructions.CreditTransfer[0].IBAN)
+	assert.Equal(t, cbc.Code("123456789012345678"), payment.Instructions.CreditTransfer[0].IBAN)
 
 	// BT-91: Debtor account IBAN
 	require.NotNil(t, payment.Instructions.DirectDebit)

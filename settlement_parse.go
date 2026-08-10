@@ -172,16 +172,16 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		ac := pm.Creditor
 		ct := new(pay.CreditTransfer)
 		if ac.IBAN != "" {
-			ct.IBAN = ac.IBAN
+			ct.IBAN = cbc.Code(ac.IBAN)
 		}
 		if ac.Name != "" {
 			ct.Name = ac.Name
 		}
 		if ac.Number != "" {
-			ct.Number = ac.Number
+			ct.Number = cbc.Code(ac.Number)
 		}
 		if pm.CreditorInstitution != nil && pm.CreditorInstitution.BIC != "" {
-			ct.BIC = pm.CreditorInstitution.BIC
+			ct.BIC = cbc.Code(pm.CreditorInstitution.BIC)
 		}
 		inst.CreditTransfer = append(inst.CreditTransfer, ct)
 	}

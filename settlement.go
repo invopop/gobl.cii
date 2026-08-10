@@ -257,14 +257,14 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 		var c *Creditor
 		if ct.IBAN != "" {
 			c = &Creditor{}
-			c.IBAN = ct.IBAN
+			c.IBAN = ct.IBAN.String()
 		}
 
 		if ct.Number != "" {
 			if c == nil {
 				c = &Creditor{}
 			}
-			c.Number = ct.Number
+			c.Number = ct.Number.String()
 		}
 
 		if c != nil {
@@ -273,7 +273,7 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 
 		if ct.BIC != "" {
 			pm.CreditorInstitution = &CreditorInstitution{
-				BIC: instr.CreditTransfer[0].BIC,
+				BIC: instr.CreditTransfer[0].BIC.String(),
 			}
 		}
 	}

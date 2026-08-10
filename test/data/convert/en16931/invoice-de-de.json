@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fcd2cde559618cbca72b3201ffbbbcda0ccfe04fe4733b9a18f8c014d2abc703"
+			"val": "a75726dbfc8068002abbf3f3724cf85359386592fc8fb02912b7295530ae1673"
 		}
 	},
 	"doc": {
@@ -140,7 +140,7 @@
 				"name": "Salescompany ltd.",
 				"tax_id": {
 					"country": "NO",
-					"code": "923456783",
+					"code": "923456783MVA",
 					"scheme": "VAT"
 				},
 				"identities": [
