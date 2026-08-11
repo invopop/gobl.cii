@@ -39,6 +39,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "mailto:inbox@example.com"
+				}
+			],
 			"inboxes": [
 				{
 					"email": "inbox@example.com"

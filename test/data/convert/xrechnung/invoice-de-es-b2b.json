@@ -52,6 +52,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "mailto:billing@example.com"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "email",
@@ -84,6 +89,11 @@
 				"country": "ES",
 				"code": "B98602642"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:ESB85905495"
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "9920",

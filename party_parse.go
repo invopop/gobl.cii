@@ -95,13 +95,29 @@ func goblPartyContact(party *Party, p *org.Party) {
 			}
 		}
 	}
-	if uc := party.URIUniversalCommunication; uc != nil {
-		if uc.ID.SchemeID == SchemeIDEmail {
-			p.Inboxes = []*org.Inbox{{Email: uc.ID.Value}}
-		} else {
-			p.Inboxes = []*org.Inbox{{Scheme: cbc.Code(uc.ID.SchemeID), Code: cbc.Code(uc.ID.Value)}}
+	if uc := party.URIUniversalCommunication; uc != nil && uc.ID != nil {
+		if ep := goblEndpoint(uc.ID.SchemeID, uc.ID.Value); ep != nil {
+			p.Endpoints = []*org.Endpoint{ep}
 		}
 	}
+}
+
+// goblEndpoint maps a CII URIUniversalCommunication (schemeID + value) to a
+// GOBL endpoint URI:
+//   - schemeID "EM" -> "mailto:<value>"
+//   - any other EAS -> "iso6523-actorid-upis::<schemeID>:<value>"
+func goblEndpoint(schemeID, value string) *org.Endpoint {
+	if value == "" || schemeID == "" {
+		return nil
+	}
+	var uri cbc.URI
+	switch schemeID {
+	case SchemeIDEmail: // email
+		uri = cbc.URI(mailtoScheme + ":" + value)
+	default:
+		uri = cbc.URI(peppolEndpointScheme + "::" + schemeID + ":" + value)
+	}
+	return &org.Endpoint{URI: uri}
 }
 
 func goblPartyTaxRegistrations(party *Party, p *org.Party) {
