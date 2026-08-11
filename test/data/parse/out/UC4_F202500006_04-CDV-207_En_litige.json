@@ -6,8 +6,8 @@
 			"alg": "sha256",
 			"val": "330c94557a5491bd5ac608d25d7fbeb37f6839e18cc61a615ae472d5ed39839f"
 		},
-		"from": "iso6523-actorid-upis::0225:200000008_STATUTS",
-		"to": "iso6523-actorid-upis::0225:100000009_STATUTS"
+		"from": "iso6523-actorid-upis::0225:100000009_STATUTS",
+		"to": "iso6523-actorid-upis::0225:200000008_STATUTS"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
