@@ -10,8 +10,6 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	"github.com/invopop/gobl.fr.ctc/addon/flow6"
-	"github.com/invopop/gobl/addons/de/xrechnung"
-	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/addons/fr/facturx"
@@ -50,6 +48,14 @@ const (
 const (
 	guidelineIDEN16931V2017 = "urn:cen.eu:en16931:2017"
 	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.16"
+)
+
+// German addon keys. The addons themselves live in gobl.de.xinvoice;
+// naming the keys here avoids importing that module, which would be a
+// dependency cycle.
+const (
+	addonKeyXRechnung cbc.Key = "de-xrechnung-v3"
+	addonKeyZUGFeRD   cbc.Key = "de-zugferd-v2"
 )
 
 // Profile ID codes
@@ -142,7 +148,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 var ContextZUGFeRDV2 = Context{
 	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{zugferd.V2},
+	Addons:      []cbc.Key{addonKeyZUGFeRD},
 	VESID:       "de.zugferd:en16931:2.4",
 }
 
@@ -151,7 +157,7 @@ var ContextXRechnungV3 = Context{
 	GuidelineID: guidelineIDEN16931V2017 + "#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
-	Addons:      []cbc.Key{xrechnung.V3},
+	Addons:      []cbc.Key{addonKeyXRechnung},
 	VESID:       "de.xrechnung:cii:3.0.2",
 }
 

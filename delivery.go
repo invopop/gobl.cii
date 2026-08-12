@@ -3,7 +3,6 @@ package cii
 import (
 	"slices"
 
-	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
@@ -57,7 +56,7 @@ func newDelivery(inv *bill.Invoice) *Delivery {
 				}
 			}
 		}
-	} else if documentType := inv.Tax.Ext.Get(untdid.ExtKeyDocumentType); slices.Contains(inv.GetAddons(), zugferd.V2) && documentType.String() != "386" {
+	} else if documentType := inv.Tax.Ext.Get(untdid.ExtKeyDocumentType); slices.Contains(inv.GetAddons(), addonKeyZUGFeRD) && documentType.String() != "386" {
 		// Helper for Zugferd BR-FX-EN-04 rule in case delivery
 		// is not specified in the invoice (imported invoice)
 		// TODO: move logic to addon
