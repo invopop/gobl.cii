@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9eff5f6ef3a471d0c991d98b4cd3da27b2ad789bee7418d1aafd8678354bd029"
+			"val": "f3636822b5513381ddb8748dd2ac71645070d8c999727d32bb4d512dcae6aafb"
 		}
 	},
 	"doc": {
@@ -23,7 +23,10 @@
 			{
 				"issue_date": "2024-02-13",
 				"series": "SAMPLE",
-				"code": "001"
+				"code": "001",
+				"ext": {
+					"untdid-document-type": "380"
+				}
 			}
 		],
 		"tax": {

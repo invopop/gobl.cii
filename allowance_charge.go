@@ -3,6 +3,7 @@ package cii
 import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/tax"
 )
@@ -27,12 +28,16 @@ func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return nil
 	}
+	var notes []*tax.Note
+	if inv.Tax != nil {
+		notes = inv.Tax.Notes
+	}
 	ac := make([]*AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	for i, c := range inv.Charges {
-		ac[i] = newCharge(c)
+		ac[i] = newCharge(c, notes)
 	}
 	for i, d := range inv.Discounts {
-		ac[i+len(inv.Charges)] = newDiscount(d)
+		ac[i+len(inv.Charges)] = newDiscount(d, notes)
 	}
 	return ac
 }
@@ -51,7 +56,7 @@ func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
 	return ac
 }
 
-func newCharge(c *bill.Charge) *AllowanceCharge {
+func newCharge(c *bill.Charge, notes []*tax.Note) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
 		Amount:          c.Amount.Rescale(2).String(),
@@ -73,11 +78,12 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 	}
 	if c.Taxes != nil {
 		ac.Tax = makeTaxCategory(c.Taxes[0])
+		applyExemptionReason(ac.Tax, c.Taxes[0], notes)
 	}
 	return ac
 }
 
-func newDiscount(d *bill.Discount) *AllowanceCharge {
+func newDiscount(d *bill.Discount, notes []*tax.Note) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
 		Amount:          d.Amount.Rescale(2).String(),
@@ -97,6 +103,7 @@ func newDiscount(d *bill.Discount) *AllowanceCharge {
 	}
 	if d.Taxes != nil {
 		ac.Tax = makeTaxCategory(d.Taxes[0])
+		applyExemptionReason(ac.Tax, d.Taxes[0], notes)
 	}
 
 	return ac
@@ -151,4 +158,17 @@ func makeTaxCategory(t *tax.Combo) *Tax {
 		}
 	}
 	return c
+}
+
+// applyExemptionReason sets the exemption reason code and text on an
+// AllowanceCharge's own tax category. Only valid at the document (and CII
+// AllowanceCharge) level - line-level ApplicableTradeTax does not permit
+// ram:ExemptionReasonCode in at least the Factur-X profile.
+func applyExemptionReason(c *Tax, t *tax.Combo, notes []*tax.Note) {
+	if t.Ext.Has(cef.ExtKeyVATEX) {
+		c.ExemptionReasonCode = t.Ext.Get(cef.ExtKeyVATEX).String()
+	}
+	if note := findTaxNote(notes, t.Category, t.Ext); note != nil {
+		c.ExemptionReason = note.Text
+	}
 }

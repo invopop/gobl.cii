@@ -28,6 +28,7 @@ type LineAgreement struct {
 	OrderReference      *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	AdditionalReference *LineDocReference   `xml:"ram:AdditionalReferencedDocument,omitempty"`
 	NetPrice            *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
+	ItemSellerParty     *Party              `xml:"ram:ItemSellerTradeParty,omitempty"`
 }
 
 // LineDocReference defines the structure of AdditionalReferencedDocument at line level
@@ -113,18 +114,18 @@ type Summation struct {
 	Amount string `xml:"ram:LineTotalAmount"`
 }
 
-func (out *Invoice) addLines(lines []*bill.Line) error {
+func (out *Invoice) addLines(lines []*bill.Line, ctx Context) error {
 	var Lines []*Line
 
 	for _, l := range lines {
-		Lines = append(Lines, newLine(l))
+		Lines = append(Lines, newLine(l, ctx))
 	}
 
 	out.Transaction.Lines = Lines
 	return nil
 }
 
-func newLine(l *bill.Line) *Line {
+func newLine(l *bill.Line, ctx Context) *Line {
 	if l.Item == nil {
 		return nil
 	}
@@ -159,10 +160,11 @@ func newLine(l *bill.Line) *Line {
 	if len(l.Notes) > 0 {
 		var notes []*Note
 		for _, n := range l.Notes {
-			notes = append(notes, &Note{
-				SubjectCode: n.Key.String(),
-				Content:     n.Text,
-			})
+			note := &Note{Content: n.Text}
+			if code := n.Ext.Get(untdid.ExtKeyTextSubject); code != "" {
+				note.SubjectCode = code.String()
+			}
+			notes = append(notes, note)
 		}
 		lineItem.LineDoc.Note = notes
 	}
@@ -191,6 +193,24 @@ func newLine(l *bill.Line) *Line {
 		}
 	}
 
+	if len(it.Attributes) > 0 {
+		for _, attr := range it.Attributes {
+			char := &Characteristic{Description: attr.Label}
+			switch {
+			case attr.Amount != nil:
+				// No CII element is available for a quantity+unit value
+				// (unlike UBL's ValueQuantity) - render as text.
+				char.Value = attr.Amount.String()
+				if attr.Unit != "" {
+					char.Value += " " + string(attr.Unit)
+				}
+			case attr.Text != "":
+				char.Value = attr.Text
+			}
+			lineItem.Product.Characteristics = append(lineItem.Product.Characteristics, char)
+		}
+	}
+
 	// BT-128: Invoice line object identifier
 	if l.Identifier != nil {
 		ref := &LineDocReference{
@@ -209,6 +229,10 @@ func newLine(l *bill.Line) *Line {
 		lineItem.Agreement.OrderReference = &LineOrderReference{
 			LineID: l.Order.String(),
 		}
+	}
+
+	if l.Seller != nil {
+		lineItem.Agreement.ItemSellerParty = newParty(l.Seller, ctx)
 	}
 
 	return lineItem

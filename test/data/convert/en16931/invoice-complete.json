@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "94ae7afa4e37e8fe9d9c60afbad226ca45ad7434e6af2ab448f40510edf0a508"
+			"val": "8d63c0340ff926f8c1d986c5a0309a7f9858517bab7d7731aeae9013d94acbf4"
 		}
 	},
 	"doc": {
@@ -167,7 +167,8 @@
 			},
 			"contracts": [
 				{
-					"code": "2013-05"
+					"code": "2013-05",
+					"reason": "MARCHE"
 				}
 			],
 			"receiving": [

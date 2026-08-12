@@ -85,6 +85,7 @@ type Advance struct {
 // ReferencedDocument defines the structure of InvoiceReferencedDocument of the CII standard
 type ReferencedDocument struct {
 	IssuerAssignedID string              `xml:"ram:IssuerAssignedID,omitempty"`
+	TypeCode         string              `xml:"ram:TypeCode,omitempty"`
 	IssueDate        *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
 }
 
@@ -163,6 +164,9 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		pre := inv.Preceding[0]
 		rd := &ReferencedDocument{
 			IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
+		}
+		if dt := pre.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
+			rd.TypeCode = dt.String()
 		}
 		// IssueDate (BT-26) is optional; only emit FormattedIssueDateTime when the
 		// preceding reference actually has a date, otherwise it renders as an empty
@@ -374,20 +378,23 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	}
 	// BT-120: Set exemption reason from tax notes
 	if inv.Tax != nil {
-		if note := findTaxNote(inv.Tax.Notes, category.Code, rate); note != nil {
+		if note := findTaxNote(inv.Tax.Notes, category.Code, rate.Ext); note != nil {
 			t.ExemptionReason = note.Text
 		}
 	}
 	return t
 }
 
+// newPayee builds a minimal PayeeTradeParty, keeping only Name, ID,
+// GlobalID and the electronic address. Reflects rules from CII-SR-352 to
+// 364 and CII-SR-364. These rules are warnings but have been added as they
+// produce cleaner invoices.
 func newPayee(party *org.Party, ctx Context) *Party {
-	// Reflects rules from CII-SR-352 to 364 and CII-SR-364
-	// These rules are warnings but have been added as they produce cleaner invoices
 	p := newParty(party, ctx)
 	payee := &Party{
-		Name: p.Name,
-		ID:   p.ID,
+		Name:                      p.Name,
+		ID:                        p.ID,
+		URIUniversalCommunication: p.URIUniversalCommunication,
 	}
 
 	if payee.ID != nil {
@@ -428,12 +435,12 @@ func goblAddTaxNotes(taxes []*Tax, inv *bill.Invoice) {
 
 // findTaxNote finds a tax note that matches the given category code and rate total
 // by comparing category and the UNTDID tax category extension.
-func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
+func findTaxNote(notes []*tax.Note, catCode cbc.Code, ext tax.Extensions) *tax.Note {
 	for _, n := range notes {
 		if n.Category != catCode {
 			continue
 		}
-		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == ext.Get(untdid.ExtKeyTaxCategory) {
 			return n
 		}
 	}

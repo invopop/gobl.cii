@@ -7,7 +7,6 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 )
@@ -27,13 +26,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 	pymt := &bill.PaymentDetails{}
 
 	if stlm.Payee != nil {
-		payee := &org.Party{Name: stlm.Payee.Name}
-		if stlm.Payee.PostalTradeAddress != nil {
-			payee.Addresses = []*org.Address{
-				goblNewAddress(stlm.Payee.PostalTradeAddress),
-			}
-		}
-		pymt.Payee = payee
+		pymt.Payee = goblNewParty(stlm.Payee)
 	}
 	if len(stlm.PaymentTerms) > 0 {
 		terms, err := goblNewTerms(stlm)
