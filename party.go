@@ -74,15 +74,12 @@ type Email struct {
 	URIID string `xml:"ram:URIID,omitempty"`
 }
 
-// Scheme IDs used to qualify party identifiers in CII documents.
 const (
 	// SchemeIDEmail represents the Scheme ID for email addresses
 	SchemeIDEmail = "EM"
-	// SchemeIDVAT qualifies a VAT registration identifier
-	// (BT-31, BT-48, BT-63).
+	// SchemeIDVAT represents a VAT registration (BT-31, BT-48, BT-63)
 	SchemeIDVAT = "VA"
-	// SchemeIDTaxRegistration qualifies a tax registration identifier other
-	// than a VAT number (BT-32), such as a French SIREN or SIRET.
+	// SchemeIDTaxRegistration represents a non-VAT tax registration (BT-32)
 	SchemeIDTaxRegistration = "FC"
 )
 
@@ -105,9 +102,7 @@ func newParty(party *org.Party, ctx Context) *Party {
 	}
 
 	if party.TaxID != nil && party.TaxID.Code != "" {
-		// BT-31/BT-48: VAT identifier. Assumes VAT ID being used instead of a
-		// possible tax number; other tax registrations are taken from the
-		// party's tax-scope identities below.
+		// BT-31/BT-48: VAT identifier, other registrations come from the identities below
 		p.SpecifiedTaxRegistration = append(p.SpecifiedTaxRegistration, &SpecifiedTaxRegistration{
 			ID: &PartyID{
 				Value:    party.TaxID.String(),
@@ -138,10 +133,7 @@ func newParty(party *org.Party, ctx Context) *Party {
 				continue
 			}
 
-			// BT-32: Tax registration identifier, used by parties without a
-			// VAT number. The EN 16931 CII schematron only accepts "FC" as the
-			// scheme here: BR-E-02, BR-Z-02 and BR-AE-02 all test for a
-			// SpecifiedTaxRegistration/ID with schemeID "VA" or "FC".
+			// BT-32: Tax registration identifier, "FC" required by BR-E-02, BR-Z-02, BR-AE-02
 			if id.Scope == org.IdentityScopeTax {
 				p.SpecifiedTaxRegistration = append(p.SpecifiedTaxRegistration, &SpecifiedTaxRegistration{
 					ID: &PartyID{

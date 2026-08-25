@@ -110,8 +110,7 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "5566778899", supplier.Inboxes[0].Code.String())
 		assert.Equal(t, "0007", supplier.Inboxes[0].Scheme.String())
 
-		// BT-32: an "FC" tax registration is kept as a tax-scope identity so
-		// that converting back out re-emits it as "FC" (BR-E-02, BR-Z-02).
+		// BT-32: an "FC" registration keeps the tax scope on the way in
 		var taxIDs []*org.Identity
 		for _, id := range supplier.Identities {
 			if id.Scope == org.IdentityScopeTax {

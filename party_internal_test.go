@@ -12,10 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestNewPartyTaxRegistrations covers the mapping of GOBL tax identifiers and
-// tax-scope identities onto ram:SpecifiedTaxRegistration. The EN 16931 CII
-// schematron only accepts "VA" (BT-31) and "FC" (BT-32) as scheme IDs there,
-// so BR-E-02/BR-Z-02/BR-AE-02 depend on these exact values.
+// TestNewPartyTaxRegistrations pins the scheme IDs on SpecifiedTaxRegistration,
+// which BR-E-02, BR-Z-02 and BR-AE-02 test for.
 func TestNewPartyTaxRegistrations(t *testing.T) {
 	t.Run("tax-scope identity becomes an FC registration", func(t *testing.T) {
 		p := newParty(&org.Party{
@@ -33,7 +31,7 @@ func TestNewPartyTaxRegistrations(t *testing.T) {
 		assert.Equal(t, SchemeIDTaxRegistration, p.SpecifiedTaxRegistration[0].ID.SchemeID)
 		assert.Equal(t, "483671517", p.SpecifiedTaxRegistration[0].ID.Value)
 
-		// It must not also fall through to BT-29 or the GlobalID.
+		// Must not also fall through to BT-29 or the GlobalID
 		assert.Nil(t, p.ID)
 		assert.Nil(t, p.GlobalID)
 	})
@@ -54,7 +52,6 @@ func TestNewPartyTaxRegistrations(t *testing.T) {
 			},
 		}, ContextEN16931V2017)
 
-		// BT-31 first, then BT-32.
 		require.Len(t, p.SpecifiedTaxRegistration, 2)
 		assert.Equal(t, SchemeIDVAT, p.SpecifiedTaxRegistration[0].ID.SchemeID)
 		assert.Equal(t, "FR39356000000", p.SpecifiedTaxRegistration[0].ID.Value)

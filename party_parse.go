@@ -124,8 +124,7 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 				}
 			}
 		case SchemeIDTaxRegistration:
-			// BT-32: a tax registration other than a VAT number, kept as a
-			// tax-scope identity so it converts back to an "FC" registration.
+			// BT-32: tax scope so it converts back out as "FC"
 			p.Identities = append(p.Identities, &org.Identity{
 				Scope:   org.IdentityScopeTax,
 				Country: l10n.ISOCountryCode(party.PostalTradeAddress.CountryID),
