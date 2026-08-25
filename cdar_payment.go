@@ -317,6 +317,7 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 	for _, rp := range cdar.ExchangedDocument.RecipientTradeParties {
 		assignPaymentParty(rp)
 	}
+	pmt.Supplier = supplierWithReferencedSIREN(pmt.Supplier, cdar)
 
 	var total num.Amount
 	for _, ackDoc := range cdar.AcknowledgementDocuments {
@@ -326,10 +327,6 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 		for _, ref := range ackDoc.ReferenceReferencedDocument {
 			if ref == nil {
 				continue
-			}
-			// Supplier fallback from the MDT-129 seller-SIREN slot.
-			if pmt.Supplier == nil && ref.IssuerTradeParty != nil {
-				pmt.Supplier = goblPartyFromCDAR(ref.IssuerTradeParty)
 			}
 			line := goblPaymentLineFromCDAR(pmt, ref)
 			a := line.Amount

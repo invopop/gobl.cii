@@ -507,21 +507,22 @@ func newCDARTradeParty(p *org.Party) *CDARTradeParty {
 	return tp
 }
 
-func partyIdentityCode(p *org.Party, scheme string) string {
+// partySIREN returns the party's SIREN (ISO/IEC 6523 scheme 0002), or "".
+func partySIREN(p *org.Party) string {
 	if p == nil {
 		return ""
 	}
-	return identitiesSIREN(p.Identities, scheme)
+	return identitiesSIREN(p.Identities)
 }
 
-// identitiesSIREN returns the code of the first identity carrying the given
-// ISO/IEC 6523 scheme extension, or "".
-func identitiesSIREN(ids []*org.Identity, scheme string) string {
+// identitiesSIREN returns the code of the first identity carrying the SIREN
+// ISO/IEC 6523 scheme (0002), or "".
+func identitiesSIREN(ids []*org.Identity) string {
 	for _, id := range ids {
 		if id == nil || id.Ext.IsZero() {
 			continue
 		}
-		if id.Ext.Get(iso.ExtKeySchemeID).String() == scheme {
+		if id.Ext.Get(iso.ExtKeySchemeID).String() == schemeIDSIREN {
 			return id.Code.String()
 		}
 	}
@@ -541,10 +542,10 @@ func identitiesSIREN(ids []*org.Identity, scheme string) string {
 func cdarReferencedIssuer(docRef *org.DocumentRef, supplier *org.Party) *CDARTradeParty {
 	var siren string
 	if docRef != nil {
-		siren = identitiesSIREN(docRef.Identities, schemeIDSIREN)
+		siren = identitiesSIREN(docRef.Identities)
 	}
 	if siren == "" {
-		siren = partyIdentityCode(supplier, schemeIDSIREN)
+		siren = partySIREN(supplier)
 	}
 	if siren == "" {
 		return nil
