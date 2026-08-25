@@ -1,0 +1,148 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "4997936e1af3be18b3fd1583ddb43027077a3f7d98acd5f853135553fb84af49"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017",
+			"fr-facturx-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "TEST-001",
+		"issue_date": "2026-08-24",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "exempt",
+					"text": "TVA non applicable, article 293 B du CGI",
+					"ext": {
+						"untdid-tax-category": "E"
+					}
+				}
+			]
+		},
+		"supplier": {
+			"name": "Franchise Test SARL",
+			"identities": [
+				{
+					"scope": "legal",
+					"country": "FR",
+					"type": "SIREN",
+					"code": "483671517",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"scope": "tax",
+					"country": "FR",
+					"type": "SIREN",
+					"code": "483671517",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "1 Rue Test",
+					"locality": "Paris",
+					"code": "75001",
+					"country": "FR"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.fr"
+				}
+			]
+		},
+		"customer": {
+			"name": "Customer SAS",
+			"tax_id": {
+				"country": "FR",
+				"code": "39356000000"
+			},
+			"addresses": [
+				{
+					"street": "1 Rue Test",
+					"locality": "Paris",
+					"code": "75001",
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Service",
+					"price": "100.00",
+					"unit": "one"
+				},
+				"sum": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "exempt",
+						"ext": {
+							"untdid-tax-category": "E"
+						}
+					}
+				],
+				"total": "100.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-09-24",
+						"amount": "100.00",
+						"percent": "100%"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "100.00",
+			"total": "100.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "exempt",
+								"ext": {
+									"untdid-tax-category": "E"
+								},
+								"base": "100.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "100.00",
+			"payable": "100.00"
+		}
+	}
+}
