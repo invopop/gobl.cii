@@ -154,7 +154,11 @@ func goblParseNotes(notes []*Note) []*org.Note {
 	}
 	out := make([]*org.Note, 0, len(notes))
 	for _, note := range notes {
-		out = append(out, goblParseNote(note))
+		n := &org.Note{Text: note.Content}
+		if note.SubjectCode != "" {
+			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
+		}
+		out = append(out, n)
 	}
 	return out
 }

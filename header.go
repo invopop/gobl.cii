@@ -56,7 +56,11 @@ func (out *Invoice) addHeader(inv *bill.Invoice) error {
 	if len(inv.Notes) > 0 {
 		notes := make([]*Note, 0, len(inv.Notes))
 		for _, n := range inv.Notes {
-			notes = append(notes, newNote(n))
+			note := &Note{Content: n.Text}
+			if code := n.Ext.Get(untdid.ExtKeyTextSubject); code != "" {
+				note.SubjectCode = code.String()
+			}
+			notes = append(notes, note)
 		}
 		h.IncludedNote = notes
 	}

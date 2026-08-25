@@ -170,8 +170,13 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 	}
 	l.Notes = make([]*org.Note, 0, len(lineDoc.Note))
 	for _, note := range lineDoc.Note {
-		n := goblParseNote(note)
-		n.Text = strings.TrimSpace(n.Text)
+		n := &org.Note{}
+		if note.Content != "" {
+			n.Text = strings.TrimSpace(note.Content)
+		}
+		if note.SubjectCode != "" {
+			n.Key = cbc.Key(note.SubjectCode)
+		}
 		l.Notes = append(l.Notes, n)
 	}
 }

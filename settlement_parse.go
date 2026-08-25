@@ -114,16 +114,8 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 					return nil, err
 				}
 				dd.Amount = amt
-			}
-			if term.Percent != "" {
-				// PartialPaymentPercent is a plain decimal without a percent
-				// symbol, which PercentageFromString requires to scale
-				// correctly (e.g. "30" means 30%).
-				ps := term.Percent
-				if !strings.HasSuffix(ps, "%") {
-					ps += "%"
-				}
-				p, err := num.PercentageFromString(ps)
+			} else if term.Percent != "" {
+				p, err := num.PercentageFromString(term.Percent)
 				if err != nil {
 					return nil, err
 				}
@@ -131,18 +123,6 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 			}
 			dates = append(dates, dd)
 		}
-	}
-
-	// BT-9 carries the date on which the amount due for payment falls due, so
-	// a single due date without an explicit amount covers the full payable
-	// amount.
-	if len(dates) == 1 && dates[0].Amount.IsZero() && dates[0].Percent == nil &&
-		settlement.Summary != nil && settlement.Summary.DuePayableAmount != "" {
-		amt, err := num.AmountFromString(settlement.Summary.DuePayableAmount)
-		if err != nil {
-			return nil, err
-		}
-		dates[0].Amount = amt
 	}
 
 	terms.DueDates = dates

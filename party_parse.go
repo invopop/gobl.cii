@@ -5,19 +5,8 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/dk"
-	"github.com/invopop/gobl/regimes/fr"
 	"github.com/invopop/gobl/tax"
 )
-
-// identitySchemeTypeMap reverses the ISO 6523 scheme codes that gobl's
-// en16931 addon assigns to regime-specific identity types, so parsed
-// identities recover their type.
-var identitySchemeTypeMap = map[cbc.Code]cbc.Code{
-	"0002": fr.IdentityTypeSIREN,
-	"0009": fr.IdentityTypeSIRET,
-	"0184": dk.IdentityTypeCVR,
-}
 
 func goblNewParty(party *Party) *org.Party {
 	p := &org.Party{
@@ -38,10 +27,8 @@ func goblNewParty(party *Party) *org.Party {
 			Scope: org.IdentityScopeLegal,
 		}
 		if party.LegalOrganization.ID.SchemeID != "" {
-			scheme := cbc.Code(party.LegalOrganization.ID.SchemeID)
-			identity.Type = identitySchemeTypeMap[scheme]
 			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: scheme,
+				iso.ExtKeySchemeID: cbc.Code(party.LegalOrganization.ID.SchemeID),
 			})
 		}
 		p.Identities = append(p.Identities, identity)
@@ -85,13 +72,13 @@ func goblNewParty(party *Party) *org.Party {
 func goblPartyContact(party *Party, p *org.Party) {
 	if party.Contact != nil {
 		if party.Contact.PersonName != "" {
-			person := &org.Person{
-				Name: &org.Name{
-					Given: party.Contact.PersonName,
+			p.People = []*org.Person{
+				{
+					Name: &org.Name{
+						Given: party.Contact.PersonName,
+					},
 				},
-				Role: party.Contact.Department,
 			}
-			p.People = []*org.Person{person}
 		}
 		if party.Contact.Phone != nil {
 			p.Telephones = []*org.Telephone{

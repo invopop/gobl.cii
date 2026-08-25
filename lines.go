@@ -159,7 +159,10 @@ func newLine(l *bill.Line) *Line {
 	if len(l.Notes) > 0 {
 		var notes []*Note
 		for _, n := range l.Notes {
-			notes = append(notes, newNote(n))
+			notes = append(notes, &Note{
+				SubjectCode: n.Key.String(),
+				Content:     n.Text,
+			})
 		}
 		lineItem.LineDoc.Note = notes
 	}

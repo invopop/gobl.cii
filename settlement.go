@@ -37,8 +37,8 @@ type Terms struct {
 	Description string     `xml:"ram:Description,omitempty"`
 	DueDate     *IssueDate `xml:"ram:DueDateDateTime,omitempty"`
 	Mandate     string     `xml:"ram:DirectDebitMandateID,omitempty"`
-	// Amount and Percent are only emitted for EXTENDED-based profiles, as
-	// PartialPaymentAmount is not part of the EN16931 profile schemas.
+	// Amount and Percent are parse-only: present in some CII documents but not emitted
+	// as PartialPaymentAmount is not in the EN16931/Factur-X/ZUGFeRD schema.
 	Amount  string `xml:"ram:PartialPaymentAmount,omitempty"`
 	Percent string `xml:"ram:PartialPaymentPercent,omitempty"`
 }
@@ -135,7 +135,7 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	}
 
 	if inv.Payment != nil && inv.Payment.Terms != nil {
-		stlm.PaymentTerms = newPaymentTerms(inv.Payment.Terms, ctx.ExtendedProfile)
+		stlm.PaymentTerms = newPaymentTerms(inv.Payment.Terms)
 	}
 
 	if inv.Totals != nil {
@@ -209,7 +209,7 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	return stlm, nil
 }
 
-func newPaymentTerms(terms *pay.Terms, extendedProfile bool) []*Terms {
+func newPaymentTerms(terms *pay.Terms) []*Terms {
 	description := terms.Notes
 	if len(terms.DueDates) == 0 {
 		if description == "" {
@@ -232,14 +232,6 @@ func newPaymentTerms(terms *pay.Terms, extendedProfile bool) []*Terms {
 		}
 		if dueDate.Date != nil {
 			term.DueDate = &IssueDate{DateFormat: documentDate(dueDate.Date)}
-		}
-		if extendedProfile {
-			if !dueDate.Amount.IsZero() {
-				term.Amount = dueDate.Amount.String()
-			}
-			if dueDate.Percent != nil {
-				term.Percent = dueDate.Percent.StringWithoutSymbol()
-			}
 		}
 		result = append(result, term)
 	}
@@ -273,14 +265,6 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 				c = &Creditor{}
 			}
 			c.Number = ct.Number.String()
-		}
-
-		// BT-85: payment account name
-		if ct.Name != "" {
-			if c == nil {
-				c = &Creditor{}
-			}
-			c.Name = ct.Name
 		}
 
 		if c != nil {

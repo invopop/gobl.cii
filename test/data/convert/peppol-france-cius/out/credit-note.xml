@@ -99,7 +99,6 @@
         <ram:TypeCode>30</ram:TypeCode>
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>FR7630006000011234567890189</ram:IBANID>
-          <ram:AccountName>Supplier SARL</ram:AccountName>
         </ram:PayeePartyCreditorFinancialAccount>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>

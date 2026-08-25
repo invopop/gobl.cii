@@ -86,10 +86,6 @@ type Context struct {
 	Addons           []cbc.Key
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
-	// ExtendedProfile marks contexts based on the Factur-X/ZUGFeRD EXTENDED
-	// profile, whose schema includes elements that EN 16931 profiles lack
-	// (e.g. PartialPaymentAmount on payment terms).
-	ExtendedProfile bool
 }
 
 // Is checks if two contexts are the same.
@@ -130,7 +126,6 @@ var ContextPeppolFranceFacturXV1 = Context{
 	Version:           VersionD16B,
 	Addons:            []cbc.Key{flow2.V1},
 	VESID:             "fr.ctc:extended-cii:1.3.1",
-	ExtendedProfile:   true,
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
