@@ -74,8 +74,14 @@ type Email struct {
 	URIID string `xml:"ram:URIID,omitempty"`
 }
 
-// SchemeIDEmail represents the Scheme ID for email addresses
-const SchemeIDEmail = "EM"
+const (
+	// SchemeIDEmail represents the Scheme ID for email addresses
+	SchemeIDEmail = "EM"
+	// SchemeIDVAT represents a VAT registration (BT-31, BT-48, BT-63)
+	SchemeIDVAT = "VA"
+	// SchemeIDTaxRegistration represents a non-VAT tax registration (BT-32)
+	SchemeIDTaxRegistration = "FC"
+)
 
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
 func newParty(party *org.Party, ctx Context) *Party {
@@ -96,15 +102,13 @@ func newParty(party *org.Party, ctx Context) *Party {
 	}
 
 	if party.TaxID != nil && party.TaxID.Code != "" {
-		// Assumes VAT ID being used instead of possible tax number
-		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
-			{
-				ID: &PartyID{
-					Value:    party.TaxID.String(),
-					SchemeID: mapGOBLTaxIDScheme(party.TaxID),
-				},
+		// BT-31/BT-48: VAT identifier, other registrations come from the identities below
+		p.SpecifiedTaxRegistration = append(p.SpecifiedTaxRegistration, &SpecifiedTaxRegistration{
+			ID: &PartyID{
+				Value:    party.TaxID.String(),
+				SchemeID: mapGOBLTaxIDScheme(party.TaxID),
 			},
-		}
+		})
 		// Override address country from tax ID (authoritative source)
 		if party.TaxID.Country != "" {
 			if p.PostalTradeAddress == nil {
@@ -126,6 +130,17 @@ func newParty(party *org.Party, ctx Context) *Party {
 				if id.Ext.Has(iso.ExtKeySchemeID) {
 					p.LegalOrganization.ID.SchemeID = id.Ext.Get(iso.ExtKeySchemeID).String()
 				}
+				continue
+			}
+
+			// BT-32: Tax registration identifier, "FC" required by BR-E-02, BR-Z-02, BR-AE-02
+			if id.Scope == org.IdentityScopeTax {
+				p.SpecifiedTaxRegistration = append(p.SpecifiedTaxRegistration, &SpecifiedTaxRegistration{
+					ID: &PartyID{
+						Value:    id.Code.String(),
+						SchemeID: SchemeIDTaxRegistration,
+					},
+				})
 				continue
 			}
 
@@ -216,7 +231,7 @@ func mapGOBLTaxIDScheme(id *tax.Identity) string {
 	s := id.GetScheme()
 	switch s {
 	case tax.CategoryVAT:
-		return "VA"
+		return SchemeIDVAT
 	default:
 		// TODO: cover more versions here.
 		return s.String()

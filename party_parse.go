@@ -111,7 +111,7 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 			continue
 		}
 		switch taxReg.ID.SchemeID {
-		case "VA":
+		case SchemeIDVAT:
 			if identity, err := tax.ParseIdentity(taxReg.ID.Value); err == nil {
 				if identity.Code != "" {
 					p.TaxID = identity
@@ -123,8 +123,10 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 					Code:    cbc.Code(taxReg.ID.Value),
 				}
 			}
-		case "FC":
+		case SchemeIDTaxRegistration:
+			// BT-32: tax scope so it converts back out as "FC"
 			p.Identities = append(p.Identities, &org.Identity{
+				Scope:   org.IdentityScopeTax,
 				Country: l10n.ISOCountryCode(party.PostalTradeAddress.CountryID),
 				Code:    cbc.Code(taxReg.ID.Value),
 			})
