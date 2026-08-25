@@ -50,6 +50,22 @@ func TestParseCtoGPayment(t *testing.T) {
 	assert.Equal(t, "098765432109876543", payment.Instructions.DirectDebit.Account)
 }
 
+func TestParseCtoGPaymentZeroPartialAmount(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "invoice-test-zero-partial.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	payment := inv.Payment
+	require.NotNil(t, payment)
+	require.NotNil(t, payment.Terms)
+	require.Len(t, payment.Terms.DueDates, 1)
+	dd := payment.Terms.DueDates[0]
+	assert.True(t, dd.Amount.IsZero(), "a zero PartialPaymentAmount should be treated as absent")
+	assert.Nil(t, dd.Percent)
+}
+
 func TestParseCtoGPaymentReference(t *testing.T) {
 	e, err := parseInvoiceFrom(t, "CII_example2.xml")
 	require.NoError(t, err)

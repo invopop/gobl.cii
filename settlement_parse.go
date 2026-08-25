@@ -113,7 +113,10 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 				if err != nil {
 					return nil, err
 				}
-				dd.Amount = amt
+				// A zero PartialPaymentAmount is treated as absent.
+				if !amt.IsZero() {
+					dd.Amount = amt
+				}
 			} else if term.Percent != "" {
 				p, err := num.PercentageFromString(term.Percent)
 				if err != nil {
