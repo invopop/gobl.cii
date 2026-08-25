@@ -99,6 +99,7 @@
         <ram:TypeCode>30</ram:TypeCode>
         <ram:PayeePartyCreditorFinancialAccount>
           <ram:IBANID>FR7630006000011234567890189</ram:IBANID>
+          <ram:AccountName>Supplier SARL</ram:AccountName>
         </ram:PayeePartyCreditorFinancialAccount>
       </ram:SpecifiedTradeSettlementPaymentMeans>
       <ram:ApplicableTradeTax>
@@ -112,6 +113,8 @@
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20240713</udt:DateTimeString>
         </ram:DueDateDateTime>
+        <ram:PartialPaymentAmount>120.00</ram:PartialPaymentAmount>
+        <ram:PartialPaymentPercent>10.0</ram:PartialPaymentPercent>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>1000.00</ram:LineTotalAmount>
