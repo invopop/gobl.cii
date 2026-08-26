@@ -110,29 +110,7 @@ func goblStatusFromCDAR(cdar *CDAR, r routing) (*bill.Status, error) {
 		assignStatusParty(rp)
 	}
 
-	// Fall back to the canonical MDT-129 ref.IssuerTradeParty slot for
-	// the Supplier — that's where the wire spec puts the seller's SIREN,
-	// and it's always present (BR-FR-CDV-13). The fallback Supplier
-	// carries just the SIREN; richer seller data only exists when the
-	// SE party also appears at the ExchangedDocument level.
-	if st.Supplier == nil {
-		for _, ack := range cdar.AcknowledgementDocuments {
-			if ack == nil {
-				continue
-			}
-			for _, ref := range ack.ReferenceReferencedDocument {
-				if ref != nil && ref.IssuerTradeParty != nil {
-					if p := goblPartyFromCDAR(ref.IssuerTradeParty); p != nil {
-						st.Supplier = p
-						break
-					}
-				}
-			}
-			if st.Supplier != nil {
-				break
-			}
-		}
-	}
+	st.Supplier = supplierWithReferencedSIREN(st.Supplier, cdar)
 
 	// Build StatusLines from each AcknowledgementDocument. The CDAR
 	// ProcessConditionCode is pinned on the fr-ctc-flow6-status ext;
@@ -357,7 +335,7 @@ func hydratePartyInboxes(supplier, customer *org.Party, r routing) {
 		if len(p.Inboxes) > 0 {
 			continue
 		}
-		siren := partyIdentityCode(p, schemeIDSIREN)
+		siren := partySIREN(p)
 		if siren == "" {
 			continue
 		}
@@ -420,6 +398,53 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 		return nil
 	}
 	return p
+}
+
+// supplierWithReferencedSIREN makes sure the supplier carries the referenced
+// invoice's issuer SIREN, which every CDV puts in MDT-129 (BR-FR-CDV-13).
+// With no SE party declared, the MDT-129 issuer becomes the supplier; an SE
+// party that came without a SIREN gets it added.
+func supplierWithReferencedSIREN(supplier *org.Party, cdar *CDAR) *org.Party {
+	issuer := referencedIssuerParty(cdar)
+	if issuer == nil {
+		return supplier
+	}
+	if supplier == nil {
+		return issuer
+	}
+	if partySIREN(supplier) == "" {
+		if siren := partySIREN(issuer); siren != "" {
+			supplier.Identities = append(supplier.Identities, sirenIdentity(siren))
+		}
+	}
+	return supplier
+}
+
+// referencedIssuerParty returns the first referenced document's issuer
+// (MDT-129) as a party, or nil.
+func referencedIssuerParty(cdar *CDAR) *org.Party {
+	for _, ack := range cdar.AcknowledgementDocuments {
+		if ack == nil {
+			continue
+		}
+		for _, ref := range ack.ReferenceReferencedDocument {
+			if ref == nil || ref.IssuerTradeParty == nil {
+				continue
+			}
+			if p := goblPartyFromCDAR(ref.IssuerTradeParty); p != nil {
+				return p
+			}
+		}
+	}
+	return nil
+}
+
+// sirenIdentity builds a SIREN identity under ISO 6523 scheme 0002.
+func sirenIdentity(siren string) *org.Identity {
+	return &org.Identity{
+		Code: cbc.Code(siren),
+		Ext:  tax.MakeExtensions().Set(iso.ExtKeySchemeID, schemeIDSIREN),
+	}
 }
 
 // parseCDARDateTime parses a CDAR CCYYMMDD or CCYYMMDDHHMMSS string into
