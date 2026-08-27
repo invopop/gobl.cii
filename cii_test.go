@@ -97,26 +97,84 @@ func TestFindContext(t *testing.T) {
 		assert.Equal(t, cii.ContextPeppolFranceCIUSV1.GuidelineID, ctx.GuidelineID)
 	})
 
-	t.Run("find France Factur-X by OutputGuidelineID", func(t *testing.T) {
-		ctx := cii.FindContext("urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", "")
-		require.NotNil(t, ctx)
-		assert.Equal(t, cii.ContextPeppolFranceFacturXV1.GuidelineID, ctx.GuidelineID)
-	})
-
-	t.Run("find France Factur-X by billing mode BusinessID", func(t *testing.T) {
-		ctx := cii.FindContext("urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", "B1")
-		require.NotNil(t, ctx)
-		assert.Equal(t, cii.ContextPeppolFranceFacturXV1.GuidelineID, ctx.GuidelineID)
-	})
-
 	t.Run("find XRechnung by GuidelineID", func(t *testing.T) {
 		ctx := cii.FindContext("urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0", "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0")
 		require.NotNil(t, ctx)
 		assert.Equal(t, cii.ContextXRechnungV3.GuidelineID, ctx.GuidelineID)
 	})
 
+	t.Run("find France Factur-X by the guideline it emits", func(t *testing.T) {
+		// A billing mode picks the French context; without one the same
+		// guideline is the plain Factur-X EXTENDED profile.
+		ctx := cii.FindContext(cii.ContextFacturXExtendedV1.GuidelineID, "B1")
+		require.NotNil(t, ctx)
+		assert.Equal(t, cii.ContextPeppolFranceFacturXV1.GuidelineID, ctx.GuidelineID)
+
+		ctx = cii.FindContext(cii.ContextFacturXExtendedV1.GuidelineID, "")
+		require.NotNil(t, ctx)
+		assert.Equal(t, cii.ContextFacturXExtendedV1.GuidelineID, ctx.GuidelineID)
+	})
+
+	t.Run("find hybrid profiles by GuidelineID", func(t *testing.T) {
+		for _, tc := range []struct {
+			name string
+			want cii.Context
+		}{
+			{"Factur-X BASIC", cii.ContextFacturXBasicV1},
+			{"Factur-X EXTENDED", cii.ContextFacturXExtendedV1},
+			{"ZUGFeRD BASIC", cii.ContextZUGFeRDBasicV2},
+			{"ZUGFeRD EXTENDED", cii.ContextZUGFeRDExtendedV2},
+		} {
+			t.Run(tc.name, func(t *testing.T) {
+				ctx := cii.FindContext(tc.want.GuidelineID, "")
+				require.NotNil(t, ctx)
+				assert.Equal(t, tc.want.GuidelineID, ctx.GuidelineID)
+				assert.Equal(t, tc.want.VESID, ctx.VESID)
+			})
+		}
+	})
+
 	t.Run("unknown GuidelineID returns nil", func(t *testing.T) {
 		ctx := cii.FindContext("unknown:guideline:id", "")
 		assert.Nil(t, ctx)
 	})
+}
+
+// TestHybridProfileGuidelines pins each hybrid context to the BT-24 value its
+// profile's codelist admits; a wrong value invalidates every document.
+func TestHybridProfileGuidelines(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		context   cii.Context
+		guideline string
+		vesID     string
+	}{
+		{"Factur-X BASIC", cii.ContextFacturXBasicV1,
+			"urn:cen.eu:en16931:2017#compliant#urn:factur-x.eu:1p0:basic", "fr.factur-x:basic:1.0.8"},
+		{"Factur-X EN 16931", cii.ContextFacturXV1,
+			"urn:cen.eu:en16931:2017", "fr.factur-x:en16931:1.0.8"},
+		{"Factur-X EXTENDED", cii.ContextFacturXExtendedV1,
+			"urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended", "fr.factur-x:extended:1.0.8"},
+		{"ZUGFeRD BASIC", cii.ContextZUGFeRDBasicV2,
+			"urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2p0:basic", "de.zugferd:basic:2.4"},
+		{"ZUGFeRD EN 16931", cii.ContextZUGFeRDV2,
+			"urn:cen.eu:en16931:2017", "de.zugferd:en16931:2.4"},
+		{"ZUGFeRD EXTENDED", cii.ContextZUGFeRDExtendedV2,
+			"urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended", "de.zugferd:extended:2.4"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.guideline, tc.context.GuidelineID)
+			assert.Equal(t, tc.vesID, tc.context.VESID)
+			assert.Empty(t, tc.context.OutputGuidelineID, "hybrid profiles emit their own GuidelineID")
+		})
+	}
+}
+
+// TestPeppolFranceFacturXEmitsFacturXGuideline checks BT-24 names a Factur-X
+// profile rather than the CTC one.
+func TestPeppolFranceFacturXEmitsFacturXGuideline(t *testing.T) {
+	assert.Equal(t,
+		cii.ContextFacturXExtendedV1.GuidelineID,
+		cii.ContextPeppolFranceFacturXV1.OutputGuidelineID,
+	)
 }

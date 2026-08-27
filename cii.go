@@ -52,6 +52,17 @@ const (
 	vesIDEN16931CII         = "eu.cen.en16931:cii:1.3.16"
 )
 
+// Hybrid-PDF guideline IDs. BT-24 is checked against a closed codelist per
+// profile (FX-SCH-A-000026), so these are not interchangeable. MINIMUM and
+// BASIC WL are omitted: not EN 16931 conformant, so out of scope here.
+const (
+	guidelineIDFacturXBasic    = guidelineIDEN16931V2017 + "#compliant#urn:factur-x.eu:1p0:basic"
+	guidelineIDFacturXExtended = guidelineIDEN16931V2017 + "#conformant#urn:factur-x.eu:1p0:extended"
+
+	guidelineIDZUGFeRDBasic    = guidelineIDEN16931V2017 + "#compliant#urn:zugferd.de:2p0:basic"
+	guidelineIDZUGFeRDExtended = guidelineIDEN16931V2017 + "#conformant#urn:zugferd.de:2p0:extended"
+)
+
 // Profile ID codes
 const (
 	ProfileIDPeppolBilling       = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
@@ -110,7 +121,7 @@ var ContextPeppolV3 = Context{
 	VESID:       vesIDEN16931CII,
 }
 
-// ContextFacturXV1 is used for Factur-X V1 documents.
+// ContextFacturXV1 is the Factur-X EN 16931 (COMFORT) profile.
 var ContextFacturXV1 = Context{
 	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD22B,
@@ -118,11 +129,29 @@ var ContextFacturXV1 = Context{
 	VESID:       "fr.factur-x:en16931:1.0.8",
 }
 
+// ContextFacturXBasicV1 is the Factur-X BASIC profile, a CIUS of EN 16931.
+var ContextFacturXBasicV1 = Context{
+	GuidelineID: guidelineIDFacturXBasic,
+	Version:     VersionD22B,
+	Addons:      []cbc.Key{facturx.V1},
+	VESID:       "fr.factur-x:basic:1.0.8",
+}
+
+// ContextFacturXExtendedV1 is the Factur-X EXTENDED profile.
+var ContextFacturXExtendedV1 = Context{
+	GuidelineID: guidelineIDFacturXExtended,
+	Version:     VersionD22B,
+	Addons:      []cbc.Key{facturx.V1},
+	VESID:       "fr.factur-x:extended:1.0.8",
+}
+
 // ContextPeppolFranceFacturXV1 is used for Peppol France Factur-X documents.
+// BT-24 carries the Factur-X EXTENDED guideline: Factur-X only accepts its own
+// per-profile values, and the CTC rules don't check BT-24 at all.
 var ContextPeppolFranceFacturXV1 = Context{
 	GuidelineID:       guidelineIDEN16931V2017 + "#conformant#urn:peppol:france:billing:Factur-X:1.0",
 	BusinessID:        ProfileIDPeppolFranceBilling,
-	OutputGuidelineID: guidelineIDEN16931V2017 + "#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
+	OutputGuidelineID: guidelineIDFacturXExtended,
 	Version:           VersionD16B,
 	Addons:            []cbc.Key{flow2.V1},
 	VESID:             "fr.ctc:extended-cii:1.3.1",
@@ -138,12 +167,28 @@ var ContextPeppolFranceCIUSV1 = Context{
 	VESID:             "fr.ctc:cii:1.3.1",
 }
 
-// ContextZUGFeRDV2 is the context used for ZUGFeRD documents.
+// ContextZUGFeRDV2 is the ZUGFeRD EN 16931 (COMFORT) profile.
 var ContextZUGFeRDV2 = Context{
 	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
 	VESID:       "de.zugferd:en16931:2.4",
+}
+
+// ContextZUGFeRDBasicV2 is the ZUGFeRD BASIC profile, a CIUS of EN 16931.
+var ContextZUGFeRDBasicV2 = Context{
+	GuidelineID: guidelineIDZUGFeRDBasic,
+	Version:     VersionD16B,
+	Addons:      []cbc.Key{zugferd.V2},
+	VESID:       "de.zugferd:basic:2.4",
+}
+
+// ContextZUGFeRDExtendedV2 is the ZUGFeRD EXTENDED profile.
+var ContextZUGFeRDExtendedV2 = Context{
+	GuidelineID: guidelineIDZUGFeRDExtended,
+	Version:     VersionD16B,
+	Addons:      []cbc.Key{zugferd.V2},
+	VESID:       "de.zugferd:extended:2.4",
 }
 
 // ContextXRechnungV3 is used for XRechnung documents
@@ -199,9 +244,11 @@ var ContextCDARFlow6PPF = Context{
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
 var contexts = []Context{
-	ContextEN16931V2017, ContextPeppolV3, ContextFacturXV1,
+	ContextEN16931V2017, ContextPeppolV3,
+	ContextFacturXV1, ContextFacturXBasicV1, ContextFacturXExtendedV1,
 	ContextPeppolFranceFacturXV1, ContextPeppolFranceCIUSV1,
-	ContextZUGFeRDV2, ContextXRechnungV3, ContextChorusProV1,
+	ContextZUGFeRDV2, ContextZUGFeRDBasicV2, ContextZUGFeRDExtendedV2,
+	ContextXRechnungV3, ContextChorusProV1,
 	ContextCDARFlow6, ContextCDARFlow6PPF,
 }
 

@@ -60,13 +60,22 @@ Contexts are supported to include specific Guideline and Business rules. Availab
 
 - `ContextEN16931V2017` (default)
 - `ContextPeppolV3`
-- `ContextFacturXV1`
 - `ContextXRechnungV3`
-- `ContextZUGFeRDV2`
 - `ContextChorusProV1`
 - `ContextPeppolFranceFacturXV1`
 - `ContextPeppolFranceCIUSV1`
-- `ContextPeppolFranceExtendedV1`
+- `ContextCDARFlow6`, `ContextCDARFlow6PPF`
+
+Factur-X and ZUGFeRD have one context per profile, since BT-24 is checked
+against a closed codelist per profile:
+
+| Profile  | Factur-X                   | ZUGFeRD                    |
+| -------- | -------------------------- | -------------------------- |
+| BASIC    | `ContextFacturXBasicV1`    | `ContextZUGFeRDBasicV2`    |
+| EN 16931 | `ContextFacturXV1`         | `ContextZUGFeRDV2`         |
+| EXTENDED | `ContextFacturXExtendedV1` | `ContextZUGFeRDExtendedV2` |
+
+MINIMUM and BASIC WL are not covered: they are not EN 16931 conformant.
 
 Example:
 
