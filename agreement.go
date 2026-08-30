@@ -13,7 +13,7 @@ type Agreement struct {
 	TaxRepresentative  *Party                `xml:"ram:SellerTaxRepresentativeTradeParty,omitempty"`
 	Sales              *IssuerID             `xml:"ram:SellerOrderReferencedDocument,omitempty"`
 	Purchase           *IssuerID             `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
-	Contract           *IssuerID             `xml:"ram:ContractReferencedDocument,omitempty"`
+	Contract           *ContractReference    `xml:"ram:ContractReferencedDocument,omitempty"`
 	AdditionalDocument []*AdditionalDocument `xml:"ram:AdditionalReferencedDocument,omitempty"`
 	Project            *Project              `xml:"ram:SpecifiedProcurringProject,omitempty"`
 }
@@ -46,6 +46,12 @@ type IssuerID struct {
 	ID string `xml:"ram:IssuerAssignedID,omitempty"`
 }
 
+// ContractReference defines the structure of ContractReferencedDocument of the CII standard
+type ContractReference struct {
+	ID                string `xml:"ram:IssuerAssignedID,omitempty"`
+	ReferenceTypeCode string `xml:"ram:ReferenceTypeCode,omitempty"`
+}
+
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
 func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 	out.Transaction.Agreement = new(Agreement)
@@ -73,9 +79,12 @@ func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 			agmt.Seller = newParty(inv.Ordering.Seller, ctx)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
-			c := inv.Ordering.Contracts[0].Code.String()
-			agmt.Contract = &IssuerID{
-				ID: c,
+			c := inv.Ordering.Contracts[0]
+			agmt.Contract = &ContractReference{
+				ID: c.Code.String(),
+			}
+			if c.Reason != "" {
+				agmt.Contract.ReferenceTypeCode = c.Reason
 			}
 		}
 		if len(inv.Ordering.Purchases) > 0 {

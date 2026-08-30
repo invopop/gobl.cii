@@ -92,6 +92,7 @@
       </ram:BuyerTradeParty>
       <ram:ContractReferencedDocument>
         <ram:IssuerAssignedID>2013-05</ram:IssuerAssignedID>
+        <ram:ReferenceTypeCode>MARCHE</ram:ReferenceTypeCode>
       </ram:ContractReferencedDocument>
     </ram:ApplicableHeaderTradeAgreement>
     <ram:ApplicableHeaderTradeDelivery>

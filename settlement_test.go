@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,6 +36,8 @@ func TestNewSettlement(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument[0].IssuerAssignedID)
+		// BT-25 type code (UNTDID 1001), sourced from the preceding doc's untdid-document-type extension.
+		assert.Equal(t, "380", doc.Transaction.Settlement.ReferencedDocument[0].TypeCode)
 		assert.Equal(t, "20240213", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.DateFormat.Value)
 		assert.Equal(t, "102", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.DateFormat.Format)
 	})
@@ -175,6 +178,59 @@ func TestTaxPointConversion(t *testing.T) {
 			assert.Empty(t, tax.DueDateTypeCode)
 		}
 	})
+}
+
+func TestPayeeInboxRoundTrip(t *testing.T) {
+	env := loadEnvelope(t, "en16931/invoice-complete.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotNil(t, inv.Payment)
+	inv.Payment.Payee = &org.Party{
+		Name: "Test Payee",
+		Inboxes: []*org.Inbox{
+			{Email: "payee@example.com"},
+		},
+	}
+
+	doc, err := cii.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	require.NotNil(t, doc.Transaction.Settlement.Payee)
+	require.NotNil(t, doc.Transaction.Settlement.Payee.URIUniversalCommunication)
+	assert.Equal(t, "payee@example.com", doc.Transaction.Settlement.Payee.URIUniversalCommunication.ID.Value)
+
+	data, err := doc.Bytes()
+	require.NoError(t, err)
+
+	parsed, err := cii.Parse(data)
+	require.NoError(t, err)
+	parsedInv, ok := parsed.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotNil(t, parsedInv.Payment)
+	require.NotNil(t, parsedInv.Payment.Payee)
+	require.NotEmpty(t, parsedInv.Payment.Payee.Inboxes)
+	assert.Equal(t, "payee@example.com", parsedInv.Payment.Payee.Inboxes[0].Email)
+}
+
+func TestPrecedingDocumentTypeRoundTrip(t *testing.T) {
+	env := loadEnvelope(t, "en16931/correction-invoice.json")
+	doc, err := cii.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	assert.Equal(t, "380", doc.Transaction.Settlement.ReferencedDocument[0].TypeCode)
+
+	data, err := doc.Bytes()
+	require.NoError(t, err)
+
+	parsed, err := cii.Parse(data)
+	require.NoError(t, err)
+	parsedInv, ok := parsed.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotEmpty(t, parsedInv.Preceding)
+	assert.Equal(t, cbc.Code("380"), parsedInv.Preceding[0].Ext.Get(untdid.ExtKeyDocumentType))
 }
 
 func TestTaxPointRoundTrip(t *testing.T) {

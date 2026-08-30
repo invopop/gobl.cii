@@ -132,7 +132,7 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 func (out *Invoice) addTransaction(inv *bill.Invoice, ctx Context) error {
 	out.Transaction = new(Transaction)
 
-	if err := out.addLines(inv.Lines); err != nil {
+	if err := out.addLines(inv.Lines, ctx); err != nil {
 		return err
 	}
 	if err := out.addAgreement(inv, ctx); err != nil {

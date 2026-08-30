@@ -102,6 +102,7 @@
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
       <ram:InvoiceReferencedDocument>
         <ram:IssuerAssignedID>SAMPLE-001</ram:IssuerAssignedID>
+        <ram:TypeCode>380</ram:TypeCode>
         <ram:FormattedIssueDateTime>
           <qdt:DateTimeString format="102">20240213</qdt:DateTimeString>
         </ram:FormattedIssueDateTime>

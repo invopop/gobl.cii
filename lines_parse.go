@@ -80,11 +80,9 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		}
 	}
 
-	if len(it.Product.Characteristics) > 0 {
-		l.Item.Meta = make(cbc.Meta)
-		for _, char := range it.Product.Characteristics {
-			key := formatKey(char.Description)
-			l.Item.Meta[key] = char.Value
+	for _, char := range it.Product.Characteristics {
+		if attr := goblItemAttribute(char); attr != nil {
+			l.Item.Attributes = append(l.Item.Attributes, attr)
 		}
 	}
 
@@ -163,6 +161,20 @@ func goblLineProduct(prod *Product, item *org.Item) {
 	}
 }
 
+// goblItemAttribute converts a CII ApplicableProductCharacteristic into a
+// GOBL org.Attribute. TypeCode isn't mapped: there's no corresponding slot
+// on org.Attribute for it alongside a text value. Unlike UBL, CII has no
+// element for a quantity+unit value, so it always round-trips as text.
+func goblItemAttribute(char *Characteristic) *org.Attribute {
+	if char.Description == "" || char.Value == "" {
+		return nil
+	}
+	return &org.Attribute{
+		Label: strings.TrimSpace(char.Description),
+		Text:  strings.TrimSpace(char.Value),
+	}
+}
+
 // goblLineNotes populates line notes from the CII line document.
 func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 	if lineDoc == nil || len(lineDoc.Note) == 0 {
@@ -175,7 +187,7 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 			n.Text = strings.TrimSpace(note.Content)
 		}
 		if note.SubjectCode != "" {
-			n.Key = cbc.Key(note.SubjectCode)
+			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
 		}
 		l.Notes = append(l.Notes, n)
 	}
@@ -198,6 +210,10 @@ func goblLineAgreement(ag *LineAgreement, l *bill.Line) {
 	// BT-132: Purchase order line reference
 	if ag.OrderReference != nil && ag.OrderReference.LineID != "" {
 		l.Order = cbc.Code(ag.OrderReference.LineID)
+	}
+
+	if ag.ItemSellerParty != nil {
+		l.Seller = goblNewParty(ag.ItemSellerParty)
 	}
 }
 

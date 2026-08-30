@@ -173,6 +173,9 @@ func goblParsePreceding(refs []*ReferencedDocument) ([]*org.DocumentRef, error) 
 		docRef := &org.DocumentRef{
 			Code: cbc.Code(ref.IssuerAssignedID),
 		}
+		if ref.TypeCode != "" {
+			docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.TypeCode))
+		}
 		if ref.IssueDate != nil && ref.IssueDate.DateFormat != nil {
 			refDate, err := parseDate(ref.IssueDate.DateFormat.Value)
 			if err != nil {

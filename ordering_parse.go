@@ -61,11 +61,13 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	}
 
 	if tr.Agreement.Contract != nil {
-		ord.Contracts = []*org.DocumentRef{
-			{
-				Code: cbc.Code(tr.Agreement.Contract.ID),
-			},
+		docRef := &org.DocumentRef{
+			Code: cbc.Code(tr.Agreement.Contract.ID),
 		}
+		if tr.Agreement.Contract.ReferenceTypeCode != "" {
+			docRef.Reason = tr.Agreement.Contract.ReferenceTypeCode
+		}
+		ord.Contracts = []*org.DocumentRef{docRef}
 	}
 
 	// Ordering period parsing
