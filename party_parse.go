@@ -20,6 +20,13 @@ func goblNewParty(party *Party) *org.Party {
 		}
 	}
 
+	// BT-33: additional legal information (ram:Description)
+	if party.Description != "" {
+		p.Registration = &org.Registration{
+			Other: party.Description,
+		}
+	}
+
 	// BT-30/BT-47: Legal registration identifier
 	if party.LegalOrganization != nil && party.LegalOrganization.ID != nil && party.LegalOrganization.ID.Value != "" {
 		identity := &org.Identity{
