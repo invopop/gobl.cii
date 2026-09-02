@@ -33,6 +33,7 @@ func TestParseCtoGPayment(t *testing.T) {
 	assert.Len(t, payment.Terms.DueDates, 1)
 	assert.Equal(t, "2024-10-01", payment.Terms.DueDates[0].Date.String())
 	assert.Equal(t, "20.00", payment.Terms.DueDates[0].Amount.String())
+	assert.Nil(t, payment.Terms.DueDates[0].Percent, "explicit partial amount must not be assumed to cover 100%")
 
 	assert.NotNil(t, payment.Instructions)
 	assert.Equal(t, pay.MeansKeyDebitTransfer, payment.Instructions.Key)
@@ -48,6 +49,21 @@ func TestParseCtoGPayment(t *testing.T) {
 	// BT-91: Debtor account IBAN
 	require.NotNil(t, payment.Instructions.DirectDebit)
 	assert.Equal(t, "098765432109876543", payment.Instructions.DirectDebit.Account)
+}
+
+func TestParseCtoGPaymentDueDatePercent(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "CII_example1.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	terms := inv.Payment.Terms
+	require.NotNil(t, terms)
+	require.Len(t, terms.DueDates, 1)
+	require.NotNil(t, terms.DueDates[0].Percent)
+	assert.Equal(t, "100%", terms.DueDates[0].Percent.String())
+	assert.Equal(t, inv.Totals.Payable.String(), terms.DueDates[0].Amount.String(), "amount should be calculated from the percent")
 }
 
 func TestParseCtoGPaymentReference(t *testing.T) {
