@@ -387,11 +387,15 @@ func newPayee(party *org.Party, ctx Context) *Party {
 	p := newParty(party, ctx)
 	payee := &Party{
 		Name: p.Name,
-		ID:   p.ID,
 	}
 
-	if payee.ID != nil {
-		payee.GlobalID = p.GlobalID
+	// BT-60 is 0..1, so unlike the seller and buyer (BT-29/BT-46) the payee
+	// keeps a single identifier even when the GOBL party carries several.
+	if id := firstPartyID(p.ID); id != nil {
+		payee.ID = []*PartyID{id}
+		if gid := firstPartyID(p.GlobalID); gid != nil {
+			payee.GlobalID = []*PartyID{gid}
+		}
 	}
 
 	return payee
