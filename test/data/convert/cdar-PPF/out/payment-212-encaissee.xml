@@ -23,7 +23,7 @@
       </ram:URIUniversalCommunication>
     </ram:IssuerTradeParty>
     <ram:RecipientTradeParty>
-      <ram:GlobalID schemeID="0238">9998</ram:GlobalID>
+      <ram:GlobalID schemeID="0238">0000</ram:GlobalID>
       <ram:RoleCode>DFH</ram:RoleCode>
     </ram:RecipientTradeParty>
   </rsm:ExchangedDocument>

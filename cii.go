@@ -234,7 +234,7 @@ var ContextCDARFlow6 = Context{
 // ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR copies sent to
 // the PPF: the GuidelineID is the einvoicingF2 URN per BR-FR-CDV-02, no
 // BusinessProcessParameter is emitted, and the single recipient is the
-// PPF party (9998 / 0238 / DFH).
+// PPF party (0000 / 0238 / DFH).
 var ContextCDARFlow6PPF = Context{
 	GuidelineID: CDARGuidelinePPF,
 	Addons:      []cbc.Key{flow6.V1},

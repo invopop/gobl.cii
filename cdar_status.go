@@ -19,6 +19,7 @@ const (
 	cdarDateFormat     = "102" // CCYYMMDD
 	schemeIDSIREN      = "0002"
 	schemeIDPDP        = "0238" // Matricule PDP / PPF
+	matriculePPF       = "0000" // PPF matricule under schemeIDPDP
 )
 
 // CDAR GuidelineID URNs per BR-FR-CDV-02 (MDT-3). Used as the stable
@@ -460,12 +461,11 @@ func PPFPlatformParty(matricule string) *org.Party {
 }
 
 // ppfTradeParty returns the constant CDAR trade party for the Portail
-// Public de Facturation — GlobalID 9998 under the 0238 (matricule PDP)
-// scheme with the DFH role, per BR-FR-CDV-02 — the single recipient of
+// Public de Facturation, per BR-FR-CDV-02 — the single recipient of
 // einvoicingF2 transmissions.
 func ppfTradeParty() *CDARTradeParty {
 	return &CDARTradeParty{
-		GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDPDP, Value: "9998"}},
+		GlobalIDs: []*CDARGlobalID{{SchemeID: schemeIDPDP, Value: matriculePPF}},
 		RoleCode:  flow6.RolePPF.String(),
 	}
 }
