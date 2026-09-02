@@ -127,6 +127,19 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	terms.DueDates = dates
 
+	// If there's only one due date, set its percent to 100, mirroring gobl.ubl.
+	// Unlike UBL, CII may carry an explicit partial payment amount or percent,
+	// which must be preserved when present.
+	if len(terms.DueDates) == 1 &&
+		terms.DueDates[0].Amount.IsZero() &&
+		terms.DueDates[0].Percent == nil {
+		percent, err := num.PercentageFromString("100%")
+		if err != nil {
+			return nil, err
+		}
+		terms.DueDates[0].Percent = &percent
+	}
+
 	if len(terms.DueDates) == 0 &&
 		terms.Notes == "" &&
 		terms.Key == "" &&
