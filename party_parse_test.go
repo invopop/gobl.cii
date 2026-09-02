@@ -44,25 +44,11 @@ func TestParseCtoGParty(t *testing.T) {
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
-		seller := inv.Supplier
-		require.NotNil(t, seller)
-
-		assert.NotNil(t, seller.TaxID)
-		assert.Equal(t, cbc.Code("967611265MVA"), seller.TaxID.Code)
-		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
-
-		assert.Equal(t, "Tax handling company AS", seller.Name)
-		require.Len(t, seller.Addresses, 1)
-		assert.Equal(t, "Regent street", seller.Addresses[0].Street)
-		assert.Equal(t, "Newtown", seller.Addresses[0].Locality)
-		assert.Equal(t, cbc.Code("202"), seller.Addresses[0].Code)
-		assert.Equal(t, l10n.ISOCountryCode("NO"), seller.Addresses[0].Country)
-
-		// Test parsing of supplier
-		supplier := inv.Ordering.Seller
+		supplier := inv.Supplier
 		require.NotNil(t, supplier)
 
 		assert.Equal(t, "Salescompany ltd.", supplier.Name)
+		require.NotNil(t, supplier.TaxID)
 		assert.Equal(t, cbc.Code("123456789MVA"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
 		assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
@@ -81,7 +67,19 @@ func TestParseCtoGParty(t *testing.T) {
 		require.Len(t, supplier.Telephones, 1)
 		assert.Equal(t, "46211230", supplier.Telephones[0].Number)
 
-		assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
+		// BG-11 tax representative, the party liable for the tax.
+		seller := inv.Ordering.Seller
+		require.NotNil(t, seller)
+
+		assert.Equal(t, "Tax handling company AS", seller.Name)
+		require.NotNil(t, seller.TaxID)
+		assert.Equal(t, cbc.Code("967611265MVA"), seller.TaxID.Code)
+		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
+		require.Len(t, seller.Addresses, 1)
+		assert.Equal(t, "Regent street", seller.Addresses[0].Street)
+		assert.Equal(t, "Newtown", seller.Addresses[0].Locality)
+		assert.Equal(t, cbc.Code("202"), seller.Addresses[0].Code)
+		assert.Equal(t, l10n.ISOCountryCode("NO"), seller.Addresses[0].Country)
 
 		customer := inv.Customer
 		require.NotNil(t, customer)
@@ -121,4 +119,60 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, l10n.ISOCountryCode("SE"), taxIDs[0].Country)
 		assert.Contains(t, taxIDs[0].Code.String(), "F-skatt")
 	})
+}
+
+// TestParseCtoGSupplierTaxRepresentative checks that the supplier keeps its own
+// BT-31 VAT number and BT-34 endpoint whether or not the invoice names a BG-11
+// tax representative. The two fixtures are the same invoice, one with the
+// SellerTaxRepresentativeTradeParty and one without.
+func TestParseCtoGSupplierTaxRepresentative(t *testing.T) {
+	tests := []struct {
+		name     string
+		file     string
+		repName  string   // BT-62, empty when there is no tax representative
+		repTaxID cbc.Code // BT-63
+	}{
+		{
+			name: "without tax representative",
+			file: "CII_example2_no_tax_representative.xml",
+		},
+		{
+			name:     "with tax representative",
+			file:     "CII_example2.xml",
+			repName:  "Tax handling company AS",
+			repTaxID: "967611265MVA",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e, err := parseInvoiceFrom(t, tt.file)
+			require.NoError(t, err)
+
+			inv, ok := e.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			supplier := inv.Supplier
+			require.NotNil(t, supplier)
+			assert.Equal(t, "Salescompany ltd.", supplier.Name)
+			require.NotNil(t, supplier.TaxID)
+			assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
+			assert.Equal(t, cbc.Code("123456789MVA"), supplier.TaxID.Code)
+			require.Len(t, supplier.Inboxes, 1)
+			assert.Equal(t, "inbox@example.com", supplier.Inboxes[0].Email)
+
+			var rep *org.Party
+			if inv.Ordering != nil {
+				rep = inv.Ordering.Seller
+			}
+			if tt.repName == "" {
+				assert.Nil(t, rep)
+				return
+			}
+			require.NotNil(t, rep)
+			assert.Equal(t, tt.repName, rep.Name)
+			require.NotNil(t, rep.TaxID)
+			assert.Equal(t, tt.repTaxID, rep.TaxID.Code)
+		})
+	}
 }

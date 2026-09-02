@@ -185,8 +185,9 @@ func goblParsePreceding(refs []*ReferencedDocument) ([]*org.DocumentRef, error) 
 	return out, nil
 }
 
-// goblApplyTaxRepresentative handles the tax representative party, moving the
-// original seller to ordering.seller and replacing the supplier.
+// goblApplyTaxRepresentative maps the BG-11 tax representative to
+// ordering.seller, the party liable for the tax when it is not the
+// supplier. The supplier keeps the BG-4 seller.
 func goblApplyTaxRepresentative(in *Invoice, out *bill.Invoice) {
 	if in.Transaction.Agreement.TaxRepresentative == nil {
 		return
@@ -194,8 +195,7 @@ func goblApplyTaxRepresentative(in *Invoice, out *bill.Invoice) {
 	if out.Ordering == nil {
 		out.Ordering = new(bill.Ordering)
 	}
-	out.Ordering.Seller = out.Supplier
-	out.Supplier = goblNewParty(in.Transaction.Agreement.TaxRepresentative)
+	out.Ordering.Seller = goblNewParty(in.Transaction.Agreement.TaxRepresentative)
 }
 
 // taxCategoryInfo holds tax category information from header-level tax summary.

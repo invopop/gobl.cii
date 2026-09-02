@@ -14,12 +14,17 @@ func TestNewAgreement(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t, "XR-2024-2", doc.Transaction.Agreement.BuyerReference)
-		assert.Equal(t, "Provide One GmbH", doc.Transaction.Agreement.TaxRepresentative.Name)
-		assert.Equal(t, "69190", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.Postcode)
-		assert.Equal(t, "Dietmar-Hopp-Allee 16", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.LineOne)
-		assert.Equal(t, "Walldorf", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.City)
-		assert.Equal(t, "DE", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.CountryID)
-		assert.Equal(t, "DE111111125", doc.Transaction.Agreement.TaxRepresentative.SpecifiedTaxRegistration[0].ID.Value)
+		// The supplier stays the seller, ordering.seller becomes the BG-11
+		// tax representative.
+		assert.Equal(t, "Provide One GmbH", doc.Transaction.Agreement.Seller.Name)
+		assert.Equal(t, "Salescompany ltd.", doc.Transaction.Agreement.TaxRepresentative.Name)
+		assert.Equal(t, "303", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.Postcode)
+		assert.Equal(t, "Main street 34", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.LineOne)
+		assert.Equal(t, "Big city", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.City)
+		assert.Equal(t, "NO", doc.Transaction.Agreement.TaxRepresentative.PostalTradeAddress.CountryID)
+		assert.Equal(t, "NO923456783MVA", doc.Transaction.Agreement.TaxRepresentative.SpecifiedTaxRegistration[0].ID.Value)
+		// BG-11 carries no ID (CII-SR-282 to 291).
+		assert.Nil(t, doc.Transaction.Agreement.TaxRepresentative.ID)
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {

@@ -60,17 +60,18 @@ func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 		agmt.Buyer = newParty(customer, ctx)
 	}
 	if inv.Ordering != nil {
+		// The party liable for the tax, when not the supplier, is the
+		// BG-11 tax representative, which only carries the name (BT-62),
+		// address (BG-12) and tax registration (BT-63). Reflects rules
+		// from CII-SR-282 to 291: they are warnings, but honouring them
+		// produces cleaner invoices.
 		if inv.Ordering.Seller != nil {
-			// Reflects rules from CII-SR-282 to 291
-			// These rules are warnings but have been added as they produce cleaner invoices
+			rep := newParty(inv.Ordering.Seller, ctx)
 			agmt.TaxRepresentative = &Party{
-				ID:                       agmt.Seller.ID,
-				Name:                     agmt.Seller.Name,
-				PostalTradeAddress:       agmt.Seller.PostalTradeAddress,
-				SpecifiedTaxRegistration: agmt.Seller.SpecifiedTaxRegistration,
+				Name:                     rep.Name,
+				PostalTradeAddress:       rep.PostalTradeAddress,
+				SpecifiedTaxRegistration: rep.SpecifiedTaxRegistration,
 			}
-
-			agmt.Seller = newParty(inv.Ordering.Seller, ctx)
 		}
 		if len(inv.Ordering.Contracts) > 0 {
 			c := inv.Ordering.Contracts[0].Code.String()
