@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/invopop/gobl v0.504.0
-	github.com/invopop/phive v0.6.0
+	github.com/invopop/phive v0.17.0
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
 	github.com/joho/godotenv v1.5.1
@@ -16,6 +16,7 @@ require (
 
 require (
 	github.com/expr-lang/expr v1.17.8 // indirect
+	github.com/invopop/tasks v0.1.0 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 )

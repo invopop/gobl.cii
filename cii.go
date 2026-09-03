@@ -154,7 +154,7 @@ var ContextPeppolFranceFacturXV1 = Context{
 	OutputGuidelineID: guidelineIDFacturXExtended,
 	Version:           VersionD16B,
 	Addons:            []cbc.Key{flow2.V1},
-	VESID:             "fr.ctc:extended-cii:1.3.1",
+	VESID:             "fr.ctc:extended-cii:1.4.0-03",
 }
 
 // ContextPeppolFranceCIUSV1 is used for Peppol France CIUS documents.
@@ -164,7 +164,7 @@ var ContextPeppolFranceCIUSV1 = Context{
 	OutputGuidelineID: guidelineIDEN16931V2017,
 	Version:           VersionD22B,
 	Addons:            []cbc.Key{flow2.V1},
-	VESID:             "fr.ctc:cii:1.3.1",
+	VESID:             "fr.ctc:cii:1.4.0-03",
 }
 
 // ContextZUGFeRDV2 is the ZUGFeRD EN 16931 (COMFORT) profile.
@@ -172,7 +172,7 @@ var ContextZUGFeRDV2 = Context{
 	GuidelineID: guidelineIDEN16931V2017,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
-	VESID:       "de.zugferd:en16931:2.4",
+	VESID:       "de.zugferd:en16931:2.5.2",
 }
 
 // ContextZUGFeRDBasicV2 is the ZUGFeRD BASIC profile, a CIUS of EN 16931.
@@ -180,7 +180,7 @@ var ContextZUGFeRDBasicV2 = Context{
 	GuidelineID: guidelineIDZUGFeRDBasic,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
-	VESID:       "de.zugferd:basic:2.4",
+	VESID:       "de.zugferd:basic:2.5.2",
 }
 
 // ContextZUGFeRDExtendedV2 is the ZUGFeRD EXTENDED profile.
@@ -188,7 +188,7 @@ var ContextZUGFeRDExtendedV2 = Context{
 	GuidelineID: guidelineIDZUGFeRDExtended,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{zugferd.V2},
-	VESID:       "de.zugferd:extended:2.4",
+	VESID:       "de.zugferd:extended:2.5.2",
 }
 
 // ContextXRechnungV3 is used for XRechnung documents
@@ -228,17 +228,17 @@ var ContextCDARFlow6 = Context{
 	OutputBusinessID: "REGULATED",
 	Version:          VersionD22B,
 	Addons:           []cbc.Key{flow6.V1},
-	VESID:            "fr.ctc:cdar:1.3.1",
+	VESID:            "fr.ctc:cdar:1.4.0-03",
 }
 
 // ContextCDARFlow6PPF is used for French CTC Flow 6 CDAR copies sent to
 // the PPF: the GuidelineID is the einvoicingF2 URN per BR-FR-CDV-02, no
 // BusinessProcessParameter is emitted, and the single recipient is the
-// PPF party (9998 / 0238 / DFH).
+// PPF party (0000 / 0238 / DFH).
 var ContextCDARFlow6PPF = Context{
 	GuidelineID: CDARGuidelinePPF,
 	Addons:      []cbc.Key{flow6.V1},
-	VESID:       "fr.ctc:cdar:1.3.1",
+	VESID:       "fr.ctc:cdar:1.4.0-03",
 }
 
 // contexts is used internally for reverse lookups during parsing.

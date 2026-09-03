@@ -156,11 +156,11 @@ func TestHybridProfileGuidelines(t *testing.T) {
 		{"Factur-X EXTENDED", cii.ContextFacturXExtendedV1,
 			"urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended", "fr.factur-x:extended:1.0.8"},
 		{"ZUGFeRD BASIC", cii.ContextZUGFeRDBasicV2,
-			"urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2p0:basic", "de.zugferd:basic:2.4"},
+			"urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2p0:basic", "de.zugferd:basic:2.5.2"},
 		{"ZUGFeRD EN 16931", cii.ContextZUGFeRDV2,
-			"urn:cen.eu:en16931:2017", "de.zugferd:en16931:2.4"},
+			"urn:cen.eu:en16931:2017", "de.zugferd:en16931:2.5.2"},
 		{"ZUGFeRD EXTENDED", cii.ContextZUGFeRDExtendedV2,
-			"urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended", "de.zugferd:extended:2.4"},
+			"urn:cen.eu:en16931:2017#conformant#urn:zugferd.de:2p0:extended", "de.zugferd:extended:2.5.2"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.guideline, tc.context.GuidelineID)

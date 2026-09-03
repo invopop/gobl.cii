@@ -37,8 +37,10 @@ github.com/invopop/gobl.fr.ctc v0.0.7 h1:O/ihT1EcFA7o8FuYG7EbL6LMVJ/rQrWV/C1nY5r
 github.com/invopop/gobl.fr.ctc v0.0.7/go.mod h1:YXJ0G7lCWxUehI4C2xBPL1y6rTNC29t/kOul7wY+3Xs=
 github.com/invopop/jsonschema v0.14.0 h1:MHQqLhvpNUZfw+hM3AZDYK7jxO8FZoQeQM77g8iyZjg=
 github.com/invopop/jsonschema v0.14.0/go.mod h1:ygm6C2EaVNMBDPpaPlnOA2pFAxBnxGjFlMZABxm9n2I=
-github.com/invopop/phive v0.6.0 h1:wtk5+ieD/muViF6SJXGGVA/vYPzed9NoaCl63TjmWU4=
-github.com/invopop/phive v0.6.0/go.mod h1:2Njf8Ci6tjfZkvq7VfdX5Esjx4Q3lzETciSFZ2afKFA=
+github.com/invopop/phive v0.17.0 h1:WS1jHTHUJkdZWc4vdQRSALPLPvIKQArJMdr762jZWnM=
+github.com/invopop/phive v0.17.0/go.mod h1:fNCMwaAGvxF5vr96fiQPsP4EOjq636yLG3tUdtHm0QI=
+github.com/invopop/tasks v0.1.0 h1:ixRMhY6qwTeUIj8pKjZ82NTnP0JFUq9/ZhbKgAUGYLs=
+github.com/invopop/tasks v0.1.0/go.mod h1:XzldN/a9/1LorDcuYNOKXy9HnKhDDMPP6uHqJfuoWqI=
 github.com/invopop/validation v0.8.0 h1:e5hXHGnONHImgJdonIpNbctg1hlWy1ncaHoVIQ0JWuw=
 github.com/invopop/validation v0.8.0/go.mod h1:nLLeXYPGwUNfdCdJo7/q3yaHO62LSx/3ri7JvgKR9vg=
 github.com/invopop/xmlctx v0.13.0 h1:ZNRMC0O/A5h8InoLVSA7tIjjrhJn/NDBYfByBUpSb+g=
