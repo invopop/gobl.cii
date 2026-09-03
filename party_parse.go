@@ -35,13 +35,16 @@ func goblNewParty(party *Party) *org.Party {
 	}
 
 	// BT-29/BT-46: Seller/Buyer identifier
-	if party.ID != nil && party.ID.Value != "" {
-		identity := &org.Identity{
-			Code: cbc.Code(party.ID.Value),
+	for _, partyID := range party.ID {
+		if partyID == nil || partyID.Value == "" {
+			continue
 		}
-		if party.ID.SchemeID != "" {
+		identity := &org.Identity{
+			Code: cbc.Code(partyID.Value),
+		}
+		if partyID.SchemeID != "" {
 			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(party.ID.SchemeID),
+				iso.ExtKeySchemeID: cbc.Code(partyID.SchemeID),
 			})
 		}
 		p.Identities = append(p.Identities, identity)
@@ -57,12 +60,15 @@ func goblNewParty(party *Party) *org.Party {
 	goblPartyTaxRegistrations(party, p)
 
 	// Global ID is not yet mapped to the ISO 6523 ICD, its identifier is used as the label
-	if party.GlobalID != nil {
+	for _, gid := range party.GlobalID {
+		if gid == nil {
+			continue
+		}
 		p.Identities = append(p.Identities, &org.Identity{
 			Ext: tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(party.GlobalID.SchemeID),
+				iso.ExtKeySchemeID: cbc.Code(gid.SchemeID),
 			}),
-			Code: cbc.Code(party.GlobalID.Value),
+			Code: cbc.Code(gid.Value),
 		})
 	}
 
@@ -164,4 +170,16 @@ func goblNewAddress(address *PostalTradeAddress) *org.Address {
 	}
 
 	return addr
+}
+
+// firstPartyID returns the first identifier carrying a value, or nil when the
+// slice holds none. BT-29/BT-46 are 0..n, but a few mappings (BT-71 delivery
+// location) only ever deal with a single entry.
+func firstPartyID(ids []*PartyID) *PartyID {
+	for _, id := range ids {
+		if id != nil && id.Value != "" {
+			return id
+		}
+	}
+	return nil
 }

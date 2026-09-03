@@ -47,14 +47,14 @@ func newDelivery(inv *bill.Invoice) *Delivery {
 			}
 			if id.Label != "" {
 				// When scheme ID is present, use GlobalID
-				d.Receiver.GlobalID = &PartyID{
+				d.Receiver.GlobalID = []*PartyID{{
 					Value:    id.Code.String(),
 					SchemeID: id.Label,
-				}
+				}}
 			} else {
-				d.Receiver.ID = &PartyID{
+				d.Receiver.ID = []*PartyID{{
 					Value: id.Code.String(),
-				}
+				}}
 			}
 		}
 	} else if documentType := inv.Tax.Ext.Get(untdid.ExtKeyDocumentType); slices.Contains(inv.GetAddons(), zugferd.V2) && documentType.String() != "386" {

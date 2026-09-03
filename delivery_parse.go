@@ -15,17 +15,17 @@ func goblNewDeliveryDetails(del *Delivery) (*bill.DeliveryDetails, error) {
 		// BT-71: Delivery location identifier stored on delivery identities
 		// (not party identities) to match UBL mapping pattern.
 		// GlobalID carries the scheme ID, plain ID does not.
-		if del.Receiver.GlobalID != nil && del.Receiver.GlobalID.Value != "" {
+		if gid := firstPartyID(del.Receiver.GlobalID); gid != nil {
 			d.Identities = []*org.Identity{
 				{
-					Code:  cbc.Code(del.Receiver.GlobalID.Value),
-					Label: del.Receiver.GlobalID.SchemeID,
+					Code:  cbc.Code(gid.Value),
+					Label: gid.SchemeID,
 				},
 			}
-		} else if del.Receiver.ID != nil && del.Receiver.ID.Value != "" {
+		} else if pid := firstPartyID(del.Receiver.ID); pid != nil {
 			d.Identities = []*org.Identity{
 				{
-					Code: cbc.Code(del.Receiver.ID.Value),
+					Code: cbc.Code(pid.Value),
 				},
 			}
 		}

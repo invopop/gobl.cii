@@ -13,8 +13,8 @@ import (
 
 // Party defines the structure of the TradePartyType of the CII standard
 type Party struct {
-	ID                        *PartyID                    `xml:"ram:ID,omitempty"`
-	GlobalID                  *PartyID                    `xml:"ram:GlobalID,omitempty"`
+	ID                        []*PartyID                  `xml:"ram:ID,omitempty"`
+	GlobalID                  []*PartyID                  `xml:"ram:GlobalID,omitempty"`
 	Name                      string                      `xml:"ram:Name,omitempty"`
 	Description               string                      `xml:"ram:Description,omitempty"`
 	LegalOrganization         *LegalOrganization          `xml:"ram:SpecifiedLegalOrganization,omitempty"`
@@ -146,18 +146,16 @@ func newParty(party *org.Party, ctx Context) *Party {
 
 			// GlobalID: identity with scheme ID and no scope
 			if id.Ext.Has(iso.ExtKeySchemeID) {
-				p.GlobalID = &PartyID{
+				p.GlobalID = append(p.GlobalID, &PartyID{
 					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
 					Value:    id.Code.String(),
-				}
+				})
 				continue
 			}
 			// BT-29/BT-46: Seller/Buyer identifier (no scheme, no scope)
-			if p.ID == nil {
-				p.ID = &PartyID{
-					Value: id.Code.String(),
-				}
-			}
+			p.ID = append(p.ID, &PartyID{
+				Value: id.Code.String(),
+			})
 		}
 	}
 
