@@ -171,8 +171,9 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 
 	// Amounts ride as document characteristics on a single status
 	// entry: the payment's condition extension types the line amount
-	// (MEN for receipts, MPA for advices) and any Due remainder emits
-	// an additional RAP characteristic for partial payments.
+	// (MEN for receipts, MPA for advices). The Due remainder is not
+	// mapped — no rule requires a RAP block, and one carrying MDT-215
+	// without MDT-224 is rejected (motif REJ_ENCAISSEMENT).
 	ds := &CDARDocumentStatus{SequenceNumeric: 1}
 	condition := pmt.Ext.Get(flow6.ExtKeyCondition)
 	if condition == "" {
@@ -192,10 +193,6 @@ func newCDARPaymentAcknowledgement(pmt *bill.Payment, line *bill.PaymentLine, ac
 		}
 		ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics,
 			newCDARAmountCharacteristic(condition, amount, pmt.Currency))
-	}
-	if line.Due != nil && condition != flow6.ConditionAmountRemaining {
-		ds.SpecifiedDocumentCharacteristics = append(ds.SpecifiedDocumentCharacteristics,
-			newCDARAmountCharacteristic(flow6.ConditionAmountRemaining, *line.Due, pmt.Currency))
 	}
 	ref.SpecifiedDocumentStatuses = []*CDARDocumentStatus{ds}
 

@@ -58,10 +58,6 @@
           <ram:ValueAmount currencyID="EUR">500.00</ram:ValueAmount>
           <ram:ValuePercent>20.00</ram:ValuePercent>
         </ram:SpecifiedDocumentCharacteristic>
-        <ram:SpecifiedDocumentCharacteristic>
-          <ram:TypeCode>RAP</ram:TypeCode>
-          <ram:ValueAmount currencyID="EUR">250.00</ram:ValueAmount>
-        </ram:SpecifiedDocumentCharacteristic>
       </ram:SpecifiedDocumentStatus>
     </ram:ReferenceReferencedDocument>
   </rsm:AcknowledgementDocument>
