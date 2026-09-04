@@ -108,6 +108,12 @@ func TestParseCtoGParty(t *testing.T) {
 		assert.Equal(t, "5566778899", supplier.Inboxes[0].Code.String())
 		assert.Equal(t, "0007", supplier.Inboxes[0].Scheme.String())
 
+		// BT-31: the fixture spells the scheme "VAT" instead of "VA",
+		// which must still be read as the VAT identifier.
+		require.NotNil(t, supplier.TaxID)
+		assert.Equal(t, l10n.TaxCountryCode("SE"), supplier.TaxID.Country)
+		assert.Equal(t, cbc.Code("123456789001"), supplier.TaxID.Code)
+
 		// BT-32: an "FC" registration keeps the tax scope on the way in
 		var taxIDs []*org.Identity
 		for _, id := range supplier.Identities {

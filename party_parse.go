@@ -1,6 +1,8 @@
 package cii
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -112,12 +114,13 @@ func goblPartyContact(party *Party, p *org.Party) {
 
 func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 	// Source: https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
+	country := partyCountryID(party)
 	for _, taxReg := range party.SpecifiedTaxRegistration {
 		if taxReg.ID == nil || taxReg.ID.Value == "" {
 			continue
 		}
-		switch taxReg.ID.SchemeID {
-		case SchemeIDVAT:
+		if isVATRegistration(taxReg.ID.SchemeID) {
+			// BT-31/BT-48/BT-63: VAT identifier
 			if identity, err := tax.ParseIdentity(taxReg.ID.Value); err == nil {
 				if identity.Code != "" {
 					p.TaxID = identity
@@ -125,19 +128,46 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 			} else {
 				// Fallback to preserve the tax id
 				p.TaxID = &tax.Identity{
-					Country: l10n.TaxCountryCode(party.PostalTradeAddress.CountryID),
+					Country: l10n.TaxCountryCode(country),
 					Code:    cbc.Code(taxReg.ID.Value),
 				}
 			}
-		case SchemeIDTaxRegistration:
-			// BT-32: tax scope so it converts back out as "FC"
-			p.Identities = append(p.Identities, &org.Identity{
-				Scope:   org.IdentityScopeTax,
-				Country: l10n.ISOCountryCode(party.PostalTradeAddress.CountryID),
-				Code:    cbc.Code(taxReg.ID.Value),
-			})
+			continue
 		}
+		// BT-32/BT-49: every other registration keeps the tax scope so it
+		// converts back out as a SpecifiedTaxRegistration. The scheme code
+		// itself is not modelled in GOBL: EN 16931 only ever uses "FC"
+		// here, and the identity type is reserved for national identifier
+		// types such as SIREN.
+		p.Identities = append(p.Identities, &org.Identity{
+			Scope:   org.IdentityScopeTax,
+			Country: l10n.ISOCountryCode(country),
+			Code:    cbc.Code(taxReg.ID.Value),
+		})
 	}
+}
+
+// isVATRegistration reports whether the scheme identifier of a
+// SpecifiedTaxRegistration marks it as the party's VAT identifier. "VA" is
+// the EN 16931 code; "VAT" is the UBL one, common enough in CII documents
+// in the wild that dropping the VAT number over it would be worse than
+// accepting it.
+func isVATRegistration(schemeID string) bool {
+	switch strings.ToUpper(schemeID) {
+	case SchemeIDVAT, SchemeIDVATAlt:
+		return true
+	}
+	return false
+}
+
+// partyCountryID returns the party's postal address country, or an empty
+// string when the party has no address. BG-5 and BG-8 are mandatory in EN
+// 16931, but parsing must not depend on the document being conformant.
+func partyCountryID(party *Party) string {
+	if party.PostalTradeAddress == nil {
+		return ""
+	}
+	return party.PostalTradeAddress.CountryID
 }
 
 func goblNewAddress(address *PostalTradeAddress) *org.Address {

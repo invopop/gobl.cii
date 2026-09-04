@@ -81,6 +81,9 @@ const (
 	SchemeIDVAT = "VA"
 	// SchemeIDTaxRegistration represents a non-VAT tax registration (BT-32)
 	SchemeIDTaxRegistration = "FC"
+	// SchemeIDVATAlt is the UBL spelling of a VAT registration, accepted
+	// when parsing but never emitted.
+	SchemeIDVATAlt = "VAT"
 )
 
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
@@ -118,9 +121,11 @@ func newParty(party *org.Party, ctx Context) *Party {
 		}
 	}
 	if len(party.Identities) > 0 {
+		legalSet := false
 		for _, id := range party.Identities {
-			// BT-30/BT-47: Legal registration identifier
-			if id.Scope == org.IdentityScopeLegal {
+			// BT-30/BT-47: Legal registration identifier. Only one is
+			// supported, any others fall through to the identifiers below.
+			if id.Scope == org.IdentityScopeLegal && !legalSet {
 				if p.LegalOrganization == nil {
 					p.LegalOrganization = &LegalOrganization{}
 				}
@@ -130,10 +135,13 @@ func newParty(party *org.Party, ctx Context) *Party {
 				if id.Ext.Has(iso.ExtKeySchemeID) {
 					p.LegalOrganization.ID.SchemeID = id.Ext.Get(iso.ExtKeySchemeID).String()
 				}
+				legalSet = true
 				continue
 			}
 
-			// BT-32: Tax registration identifier, "FC" required by BR-E-02, BR-Z-02, BR-AE-02
+			// BT-32: Tax registration identifier, "FC" required by BR-E-02, BR-Z-02, BR-AE-02.
+			// The identity type is a national identifier type (SIREN, SIRET, ...),
+			// never the EN 16931 tax scheme code, so it is not used here.
 			if id.Scope == org.IdentityScopeTax {
 				p.SpecifiedTaxRegistration = append(p.SpecifiedTaxRegistration, &SpecifiedTaxRegistration{
 					ID: &PartyID{
