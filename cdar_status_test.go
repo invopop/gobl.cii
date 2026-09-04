@@ -3,6 +3,7 @@ package cii_test
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -471,7 +472,7 @@ func TestCDARPaymentRoundTrip(t *testing.T) {
 	assert.Equal(t, "ACHETEUR", out.Customer.Name)
 }
 
-func TestCDARPaymentPartialRoundTrip(t *testing.T) {
+func TestCDARPaymentPartialDropsRAP(t *testing.T) {
 	pmt := buildSyntheticPayment(t, num.MakeAmount(25000, 2))
 
 	cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
@@ -479,11 +480,36 @@ func TestCDARPaymentPartialRoundTrip(t *testing.T) {
 	data, err := cdar.Bytes()
 	require.NoError(t, err)
 
+	assert.NotContains(t, string(data), "RAP", "the Due remainder must not be mapped")
+
 	out, err := cii.ParseCDARPayment(data)
 	require.NoError(t, err)
 	require.Len(t, out.Lines, 1)
 	assert.Equal(t, "500.00", out.Lines[0].Amount.String(), "MEN amount")
-	require.NotNil(t, out.Lines[0].Due, "RAP remainder should round-trip")
+	assert.Nil(t, out.Lines[0].Due)
+}
+
+// An inbound CDAR from another platform may still carry a RAP remainder, which
+// must keep parsing into the payment line's Due.
+func TestCDARPaymentParsesInboundRAP(t *testing.T) {
+	pmt := buildSyntheticPayment(t, num.MakeAmount(25000, 2))
+
+	cdar, err := cii.NewCDARFromPayment(pmt, cii.ContextCDARFlow6)
+	require.NoError(t, err)
+	data, err := cdar.Bytes()
+	require.NoError(t, err)
+
+	rap := "<ram:SpecifiedDocumentCharacteristic>" +
+		"<ram:TypeCode>RAP</ram:TypeCode>" +
+		"<ram:ValueAmount currencyID=\"EUR\">250.00</ram:ValueAmount>" +
+		"</ram:SpecifiedDocumentCharacteristic>"
+	withRAP := strings.Replace(string(data),
+		"</ram:SpecifiedDocumentStatus>", rap+"</ram:SpecifiedDocumentStatus>", 1)
+
+	out, err := cii.ParseCDARPayment([]byte(withRAP))
+	require.NoError(t, err)
+	require.Len(t, out.Lines, 1)
+	require.NotNil(t, out.Lines[0].Due, "inbound RAP should populate Due")
 	assert.Equal(t, "250.00", out.Lines[0].Due.String())
 }
 
