@@ -458,7 +458,7 @@
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>43.91</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
-        <ram:BasisAmount>231.11</ram:BasisAmount>
+        <ram:BasisAmount>231.09</ram:BasisAmount>
         <ram:CategoryCode>S</ram:CategoryCode>
         <ram:RateApplicablePercent>19.0</ram:RateApplicablePercent>
       </ram:ApplicableTradeTax>
@@ -468,11 +468,10 @@
         </ram:DueDateDateTime>
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
-        <ram:LineTotalAmount>231.11</ram:LineTotalAmount>
-        <ram:TaxBasisTotalAmount>231.11</ram:TaxBasisTotalAmount>
+        <ram:LineTotalAmount>231.09</ram:LineTotalAmount>
+        <ram:TaxBasisTotalAmount>231.09</ram:TaxBasisTotalAmount>
         <ram:TaxTotalAmount currencyID="EUR">43.91</ram:TaxTotalAmount>
-        <ram:RoundingAmount>-0.02</ram:RoundingAmount>
-        <ram:GrandTotalAmount>275.02</ram:GrandTotalAmount>
+        <ram:GrandTotalAmount>275.00</ram:GrandTotalAmount>
         <ram:DuePayableAmount>275.00</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
     </ram:ApplicableHeaderTradeSettlement>

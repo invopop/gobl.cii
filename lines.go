@@ -229,20 +229,7 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	}
 
 	if l.Period != nil {
-		stlm.Period = &Period{
-			Start: &IssueDate{
-				DateFormat: &Date{
-					Value:  formatIssueDate(l.Period.Start),
-					Format: issueDateFormat,
-				},
-			},
-			End: &IssueDate{
-				DateFormat: &Date{
-					Value:  formatIssueDate(l.Period.End),
-					Format: issueDateFormat,
-				},
-			},
-		}
+		stlm.Period = newPeriod(l.Period)
 	}
 
 	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
