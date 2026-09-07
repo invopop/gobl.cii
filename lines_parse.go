@@ -175,7 +175,7 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 			n.Text = strings.TrimSpace(note.Content)
 		}
 		if note.SubjectCode != "" {
-			n.Key = cbc.Key(note.SubjectCode)
+			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
 		}
 		l.Notes = append(l.Notes, n)
 	}
