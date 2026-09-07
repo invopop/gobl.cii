@@ -176,3 +176,35 @@ func TestParsePartyMultipleIdentifiers(t *testing.T) {
 		"0231:356000000",
 	}, got)
 }
+
+// TestParsePartyWithoutAddress guards the parser against a party that has no
+// PostalTradeAddress: BG-5 and BG-8 are mandatory in EN 16931, but the CII
+// schema leaves the address optional, and the tax registrations read the
+// country from it.
+func TestParsePartyWithoutAddress(t *testing.T) {
+	const in = `<ram:SellerTradeParty xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100">
+		<ram:Name>Fournisseur SARL</ram:Name>
+		<ram:SpecifiedTaxRegistration>
+			<ram:ID schemeID="FC">828701557</ram:ID>
+		</ram:SpecifiedTaxRegistration>
+		<ram:SpecifiedTaxRegistration>
+			<ram:ID schemeID="VA">FR18828701557</ram:ID>
+		</ram:SpecifiedTaxRegistration>
+	</ram:SellerTradeParty>`
+
+	party := new(Party)
+	require.NoError(t, xmlctx.Unmarshal([]byte(in), party, xmlctx.WithNamespaces(
+		map[string]string{nsPrefixRAM: NamespaceRAM},
+	)))
+	require.Nil(t, party.PostalTradeAddress)
+
+	var p *org.Party
+	require.NotPanics(t, func() { p = goblNewParty(party) })
+
+	require.NotNil(t, p.TaxID)
+	assert.Equal(t, cbc.Code("18828701557"), p.TaxID.Code)
+	require.Len(t, p.Identities, 1)
+	assert.Equal(t, org.IdentityScopeTax, p.Identities[0].Scope)
+	assert.Equal(t, cbc.Code("828701557"), p.Identities[0].Code)
+	assert.Empty(t, p.Identities[0].Country)
+}

@@ -112,6 +112,7 @@ func goblPartyContact(party *Party, p *org.Party) {
 
 func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 	// Source: https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
+	country := partyCountryID(party)
 	for _, taxReg := range party.SpecifiedTaxRegistration {
 		if taxReg.ID == nil || taxReg.ID.Value == "" {
 			continue
@@ -125,7 +126,7 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 			} else {
 				// Fallback to preserve the tax id
 				p.TaxID = &tax.Identity{
-					Country: l10n.TaxCountryCode(party.PostalTradeAddress.CountryID),
+					Country: l10n.TaxCountryCode(country),
 					Code:    cbc.Code(taxReg.ID.Value),
 				}
 			}
@@ -133,11 +134,21 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 			// BT-32: tax scope so it converts back out as "FC"
 			p.Identities = append(p.Identities, &org.Identity{
 				Scope:   org.IdentityScopeTax,
-				Country: l10n.ISOCountryCode(party.PostalTradeAddress.CountryID),
+				Country: l10n.ISOCountryCode(country),
 				Code:    cbc.Code(taxReg.ID.Value),
 			})
 		}
 	}
+}
+
+// partyCountryID returns the country of the party's postal address, or an
+// empty string when it has none. BG-5 and BG-8 are mandatory in EN 16931,
+// but the CII schema allows the address to be absent.
+func partyCountryID(party *Party) string {
+	if party.PostalTradeAddress == nil {
+		return ""
+	}
+	return party.PostalTradeAddress.CountryID
 }
 
 func goblNewAddress(address *PostalTradeAddress) *org.Address {
