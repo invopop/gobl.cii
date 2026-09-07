@@ -3,6 +3,12 @@ package cii_test
 import (
 	"testing"
 
+	cii "github.com/invopop/gobl.cii"
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,4 +33,37 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "20241012", doc.Transaction.Lines[0].TradeSettlement.Period.End.DateFormat.Value)
 	})
 
+}
+
+func TestLineNoteSubjectCodeRoundTrip(t *testing.T) {
+	env := loadEnvelope(t, "facturx/invoice-minimal.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	inv.Lines[0].Notes = []*org.Note{
+		{
+			Text: "Handle with care",
+			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: "AAI"}),
+		},
+	}
+
+	doc, err := cii.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	require.NotEmpty(t, doc.Transaction.Lines[0].LineDoc.Note)
+	assert.Equal(t, "Handle with care", doc.Transaction.Lines[0].LineDoc.Note[0].Content)
+	assert.Equal(t, "AAI", doc.Transaction.Lines[0].LineDoc.Note[0].SubjectCode)
+
+	data, err := doc.Bytes()
+	require.NoError(t, err)
+
+	outEnv, err := cii.Parse(data)
+	require.NoError(t, err)
+	outInv, ok := outEnv.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotEmpty(t, outInv.Lines[0].Notes)
+	n := outInv.Lines[0].Notes[0]
+	assert.Equal(t, "Handle with care", n.Text)
+	assert.Equal(t, cbc.Code("AAI"), n.Ext.Get(untdid.ExtKeyTextSubject))
 }

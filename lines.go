@@ -157,12 +157,13 @@ func newLine(l *bill.Line) *Line {
 	}
 
 	if len(l.Notes) > 0 {
-		var notes []*Note
+		notes := make([]*Note, 0, len(l.Notes))
 		for _, n := range l.Notes {
-			notes = append(notes, &Note{
-				SubjectCode: n.Key.String(),
-				Content:     n.Text,
-			})
+			note := &Note{Content: n.Text}
+			if code := n.Ext.Get(untdid.ExtKeyTextSubject); code != "" {
+				note.SubjectCode = code.String()
+			}
+			notes = append(notes, note)
 		}
 		lineItem.LineDoc.Note = notes
 	}
