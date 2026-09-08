@@ -185,13 +185,15 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
 	}
 
-	if inv.Delivery != nil && inv.Delivery.Period != nil {
+	// BG-14 is the period the invoice refers to, which GOBL keeps in
+	// Ordering.Period; Delivery.Period is when to expect delivery.
+	if inv.Ordering != nil && inv.Ordering.Period != nil {
 		stlm.Period = &Period{
 			Start: &IssueDate{
-				DateFormat: documentDate(&inv.Delivery.Period.Start),
+				DateFormat: documentDate(&inv.Ordering.Period.Start),
 			},
 			End: &IssueDate{
-				DateFormat: documentDate(&inv.Delivery.Period.End),
+				DateFormat: documentDate(&inv.Ordering.Period.End),
 			},
 		}
 	}
