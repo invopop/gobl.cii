@@ -46,6 +46,16 @@ func TestConvertInvoiceWithContext(t *testing.T) {
 		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", out.ExchangedContext.BusinessContext.ID)
 	})
 
+	t.Run("with France Extended context", func(t *testing.T) {
+		env := loadEnvelope(t, "peppol-france-extended/invoice-standard.json")
+		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextPeppolFranceExtendedV1))
+		require.NoError(t, err)
+
+		// BT-24 carries the extended-ctc-fr guideline, BT-23 the billing mode.
+		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", out.ExchangedContext.GuidelineContext.ID)
+		assert.Equal(t, "S1", out.ExchangedContext.BusinessContext.ID)
+	})
+
 	t.Run("with PEPPOL context", func(t *testing.T) {
 		env := loadEnvelope(t, "peppol/invoice-complete.json")
 		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextPeppolV3))
@@ -110,7 +120,30 @@ func TestFindContext(t *testing.T) {
 			require.NotNil(t, ctx, "mode %s", mode)
 			assert.Equal(t, cii.ContextPeppolFranceFacturXV1.GuidelineID, ctx.GuidelineID)
 			assert.Equal(t, cii.ContextPeppolFranceFacturXV1.VESID, ctx.VESID)
+
+			ctx = cii.FindContext(cii.ContextPeppolFranceExtendedV1.GuidelineID, mode)
+			require.NotNil(t, ctx, "mode %s", mode)
+			assert.Equal(t, cii.ContextPeppolFranceExtendedV1.GuidelineID, ctx.GuidelineID)
+			assert.Equal(t, cii.ContextPeppolFranceExtendedV1.VESID, ctx.VESID)
 		}
+	})
+
+	t.Run("find France Extended by full GuidelineID", func(t *testing.T) {
+		ctx := cii.FindContext("urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0", "urn:peppol:france:billing:regulated")
+		require.NotNil(t, ctx)
+		assert.Equal(t, cii.ContextPeppolFranceExtendedV1.GuidelineID, ctx.GuidelineID)
+	})
+
+	t.Run("find France Extended by the guideline it emits", func(t *testing.T) {
+		// The extended-ctc-fr guideline is unique to this context, so it
+		// resolves both with and without a billing mode BusinessID.
+		ctx := cii.FindContext("urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", "B1")
+		require.NotNil(t, ctx)
+		assert.Equal(t, cii.ContextPeppolFranceExtendedV1.GuidelineID, ctx.GuidelineID)
+
+		ctx = cii.FindContext("urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", "")
+		require.NotNil(t, ctx)
+		assert.Equal(t, cii.ContextPeppolFranceExtendedV1.GuidelineID, ctx.GuidelineID)
 	})
 
 	t.Run("find XRechnung by GuidelineID", func(t *testing.T) {
@@ -193,4 +226,12 @@ func TestPeppolFranceFacturXEmitsFacturXGuideline(t *testing.T) {
 		cii.ContextFacturXExtendedV1.GuidelineID,
 		cii.ContextPeppolFranceFacturXV1.OutputGuidelineID,
 	)
+}
+
+// TestPeppolFranceExtendedGuidelines pins the extended context's external
+// identification and the extended-ctc-fr guideline it emits in BT-24.
+func TestPeppolFranceExtendedGuidelines(t *testing.T) {
+	assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0", cii.ContextPeppolFranceExtendedV1.GuidelineID)
+	assert.Equal(t, "urn:peppol:france:billing:regulated", cii.ContextPeppolFranceExtendedV1.BusinessID)
+	assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", cii.ContextPeppolFranceExtendedV1.OutputGuidelineID)
 }

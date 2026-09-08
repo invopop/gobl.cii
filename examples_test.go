@@ -31,10 +31,15 @@ const (
 
 	// Convert fixture directory / context names, shared across the
 	// conversion tests (also used in invoice_probe_test.go).
-	dirCDAR      = "cdar"
-	dirCDARPPF   = "cdar-PPF"
-	dirFRFacturX = "peppol-france-facturx"
-	dirFRCIUS    = "peppol-france-cius"
+	dirCDAR       = "cdar"
+	dirCDARPPF    = "cdar-PPF"
+	dirFRFacturX  = "peppol-france-facturx"
+	dirFRCIUS     = "peppol-france-cius"
+	dirFRExtended = "peppol-france-extended"
+
+	// Flow 2 invoice fixture names shared by every French convert directory.
+	fixtureInvoiceStandard = "invoice-standard.json"
+	fixtureCreditNote      = "credit-note.json"
 
 	staticUUID uuid.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 )
@@ -72,6 +77,7 @@ func TestConvertToInvoice(t *testing.T) {
 		{"ChorusPro", cii.ContextChorusProV1, "choruspro"},
 		{"PeppolFranceFacturX", cii.ContextPeppolFranceFacturXV1, dirFRFacturX},
 		{"PeppolFranceCIUS", cii.ContextPeppolFranceCIUSV1, dirFRCIUS},
+		{"PeppolFranceExtended", cii.ContextPeppolFranceExtendedV1, dirFRExtended},
 		{"ZUGFeRD", cii.ContextZUGFeRDV2, "zugferd"},
 	}
 
@@ -142,7 +148,7 @@ func TestParseInvoice(t *testing.T) {
 		{"ChorusPro", "choruspro"},
 		{"PeppolFranceFacturX", dirFRFacturX},
 		{"PeppolFranceCIUS", dirFRCIUS},
-		{"PeppolFranceExtended", "peppol-france-extended"},
+		{"PeppolFranceExtended", dirFRExtended},
 	}
 
 	for _, ctx := range contexts {

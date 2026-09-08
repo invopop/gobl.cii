@@ -50,7 +50,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 
 	if ctx != nil {
 		out.Addons = tax.Addons{List: ctx.Addons}
-		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) {
+		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) || ctx.Is(ContextPeppolFranceExtendedV1) {
 			if in.ExchangedContext.BusinessContext != nil {
 				out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
 			}
