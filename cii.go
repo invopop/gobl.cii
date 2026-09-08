@@ -266,9 +266,22 @@ func FindContext(guidelineID string, businessID string) *Context {
 	// GuidelineID as EN16931 but can be identified by their BusinessID
 	// containing a billing mode code (e.g., "B1", "S1", "M4").
 	if isFrenchBillingMode(businessID) {
+		// OutputGuidelineID first: it holds the value French documents carry in
+		// the XML, and it is the only thing separating the CIUS from Factur-X. A
+		// pass over GuidelineID alone would match ContextEN16931 on the CIUS
+		// value and drop the addon.
 		for i := range contexts {
 			ctx := &contexts[i]
 			if ctx.OutputGuidelineID == guidelineID {
+				return ctx
+			}
+		}
+		// Then the spec-level identifier, for senders that put it in the document
+		// rather than in the SBDH. The billing mode already settled that this is
+		// a French document, so it only has to pick which French context.
+		for i := range contexts {
+			ctx := &contexts[i]
+			if ctx.GuidelineID == guidelineID {
 				return ctx
 			}
 		}
