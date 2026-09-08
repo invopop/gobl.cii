@@ -97,6 +97,22 @@ func TestFindContext(t *testing.T) {
 		assert.Equal(t, cii.ContextPeppolFranceCIUSV1.GuidelineID, ctx.GuidelineID)
 	})
 
+	t.Run("find the French contexts by their spec-level GuidelineID", func(t *testing.T) {
+		// Some senders put the identifier that names the profile on the network
+		// into the document instead of the guideline the profile emits.
+		for _, mode := range []string{"B1", "S1", "M4"} {
+			ctx := cii.FindContext(cii.ContextPeppolFranceCIUSV1.GuidelineID, mode)
+			require.NotNil(t, ctx, "mode %s", mode)
+			assert.Equal(t, cii.ContextPeppolFranceCIUSV1.GuidelineID, ctx.GuidelineID)
+			assert.Equal(t, cii.ContextPeppolFranceCIUSV1.VESID, ctx.VESID)
+
+			ctx = cii.FindContext(cii.ContextPeppolFranceFacturXV1.GuidelineID, mode)
+			require.NotNil(t, ctx, "mode %s", mode)
+			assert.Equal(t, cii.ContextPeppolFranceFacturXV1.GuidelineID, ctx.GuidelineID)
+			assert.Equal(t, cii.ContextPeppolFranceFacturXV1.VESID, ctx.VESID)
+		}
+	})
+
 	t.Run("find XRechnung by GuidelineID", func(t *testing.T) {
 		ctx := cii.FindContext("urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0", "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0")
 		require.NotNil(t, ctx)
