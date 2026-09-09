@@ -98,7 +98,7 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 
 	// Determine BusinessID to use in output
 	businessID := context.BusinessID
-	if context.Is(ContextPeppolFranceCIUSV1) || context.Is(ContextPeppolFranceFacturXV1) {
+	if context.Is(ContextPeppolFranceCIUSV1) || context.Is(ContextPeppolFranceFacturXV1) || context.Is(ContextPeppolFranceExtendedV1) {
 		if profile := inv.Tax.GetExt(dgfip.ExtKeyBillingMode); profile != cbc.CodeEmpty {
 			businessID = profile.String()
 		}

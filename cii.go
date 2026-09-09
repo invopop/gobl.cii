@@ -167,6 +167,17 @@ var ContextPeppolFranceCIUSV1 = Context{
 	VESID:             "fr.ctc:cii:1.4.0-03",
 }
 
+// ContextPeppolFranceExtendedV1 is used for Peppol France Extended documents,
+// which emit the extended-ctc-fr guideline in BT-24.
+var ContextPeppolFranceExtendedV1 = Context{
+	GuidelineID:       guidelineIDEN16931V2017 + "#conformant#urn:peppol:france:billing:extended:1.0",
+	BusinessID:        ProfileIDPeppolFranceBilling,
+	OutputGuidelineID: guidelineIDEN16931V2017 + "#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
+	Version:           VersionD22B,
+	Addons:            []cbc.Key{flow2.V1},
+	VESID:             "fr.ctc:extended-cii:1.4.0-03",
+}
+
 // ContextZUGFeRDV2 is the ZUGFeRD EN 16931 (COMFORT) profile.
 var ContextZUGFeRDV2 = Context{
 	GuidelineID: guidelineIDEN16931V2017,
@@ -246,7 +257,7 @@ var ContextCDARFlow6PPF = Context{
 var contexts = []Context{
 	ContextEN16931V2017, ContextPeppolV3,
 	ContextFacturXV1, ContextFacturXBasicV1, ContextFacturXExtendedV1,
-	ContextPeppolFranceFacturXV1, ContextPeppolFranceCIUSV1,
+	ContextPeppolFranceFacturXV1, ContextPeppolFranceCIUSV1, ContextPeppolFranceExtendedV1,
 	ContextZUGFeRDV2, ContextZUGFeRDBasicV2, ContextZUGFeRDExtendedV2,
 	ContextXRechnungV3, ContextChorusProV1,
 	ContextCDARFlow6, ContextCDARFlow6PPF,

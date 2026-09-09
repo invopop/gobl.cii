@@ -64,6 +64,7 @@ Contexts are supported to include specific Guideline and Business rules. Availab
 - `ContextChorusProV1`
 - `ContextPeppolFranceFacturXV1`
 - `ContextPeppolFranceCIUSV1`
+- `ContextPeppolFranceExtendedV1`
 - `ContextCDARFlow6`, `ContextCDARFlow6PPF`
 
 Factur-X and ZUGFeRD have one context per profile, since BT-24 is checked
