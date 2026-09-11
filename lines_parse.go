@@ -220,16 +220,16 @@ func goblLinePeriod(p *Period) (*cal.Period, error) {
 		if err != nil {
 			return nil, err
 		}
-		per.Start = start
+		per.Start = &start
 	}
 	if p.End != nil && p.End.DateFormat != nil {
 		end, err := parseDate(p.End.DateFormat.Value)
 		if err != nil {
 			return nil, err
 		}
-		per.End = end
+		per.End = &end
 	}
-	if per.Start.IsZero() && per.End.IsZero() {
+	if per.Start == nil && per.End == nil {
 		return nil, nil
 	}
 	return per, nil

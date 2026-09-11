@@ -455,6 +455,9 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		if err := doc.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
 		}
+		if err := roundToCurrency(doc); err != nil {
+			return nil, fmt.Errorf("cannot round invoice to currency precision: %w", err)
+		}
 
 		return newInvoice(doc, o.context)
 	case *bill.Status:

@@ -188,13 +188,12 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	// BG-14 is the period the invoice refers to, which GOBL keeps in
 	// Ordering.Period; Delivery.Period is when to expect delivery.
 	if inv.Ordering != nil && inv.Ordering.Period != nil {
-		stlm.Period = &Period{
-			Start: &IssueDate{
-				DateFormat: documentDate(&inv.Ordering.Period.Start),
-			},
-			End: &IssueDate{
-				DateFormat: documentDate(&inv.Ordering.Period.End),
-			},
+		stlm.Period = &Period{}
+		if d := documentDate(inv.Ordering.Period.Start); d != nil {
+			stlm.Period.Start = &IssueDate{DateFormat: d}
+		}
+		if d := documentDate(inv.Ordering.Period.End); d != nil {
+			stlm.Period.End = &IssueDate{DateFormat: d}
 		}
 	}
 
@@ -309,31 +308,33 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 }
 
 func newSummary(totals *bill.Totals, currency string) *Summary {
+	// BT-106 to BT-115: the document totals, each capped at the currency's
+	// precision by BR-DEC-09 through BR-DEC-18.
 	s := &Summary{
-		LineTotalAmount:     totals.Sum.String(),
-		TaxBasisTotalAmount: totals.Total.String(),
-		GrandTotalAmount:    totals.TotalWithTax.String(),
-		DuePayableAmount:    totals.Payable.String(),
+		LineTotalAmount:     rescaleToCurrency(totals.Sum, currency),
+		TaxBasisTotalAmount: rescaleToCurrency(totals.Total, currency),
+		GrandTotalAmount:    rescaleToCurrency(totals.TotalWithTax, currency),
+		DuePayableAmount:    rescaleToCurrency(totals.Payable, currency),
 		TaxTotalAmount: &TaxTotalAmount{
-			Amount:   totals.Tax.String(),
+			Amount:   rescaleToCurrency(totals.Tax, currency),
 			Currency: currency,
 		},
 	}
 	if totals.Due != nil {
-		s.DuePayableAmount = totals.Due.String()
+		s.DuePayableAmount = rescaleToCurrency(*totals.Due, currency)
 	}
 	if totals.Charge != nil {
-		s.Charges = totals.Charge.String()
+		s.Charges = rescaleToCurrency(*totals.Charge, currency)
 	}
 	if totals.Discount != nil {
-		s.Discounts = totals.Discount.String()
+		s.Discounts = rescaleToCurrency(*totals.Discount, currency)
 	}
 	if totals.Advances != nil {
-		s.TotalPrepaidAmount = totals.Advances.String()
+		s.TotalPrepaidAmount = rescaleToCurrency(*totals.Advances, currency)
 	}
 
 	if totals.Rounding != nil {
-		s.RoundingAmount = totals.Rounding.String()
+		s.RoundingAmount = rescaleToCurrency(*totals.Rounding, currency)
 	}
 
 	return s
@@ -355,10 +356,13 @@ func newTaxes(inv *bill.Invoice, total *tax.Total) []*Tax {
 
 func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	cat := rate.Ext.Get(untdid.ExtKeyTaxCategory)
+	ccy := inv.Currency.String()
+	// BT-116/BT-117: the taxable base and tax amount per category, capped at
+	// the currency's precision by BR-DEC-19 and BR-DEC-20.
 	t := &Tax{
-		CalculatedAmount: rate.Amount.Rescale(2).String(),
+		CalculatedAmount: rescaleToCurrency(rate.Amount, ccy),
 		TypeCode:         category.Code.String(),
-		BasisAmount:      rate.Base.String(),
+		BasisAmount:      rescaleToCurrency(rate.Base, ccy),
 		CategoryCode:     cat.String(),
 	}
 

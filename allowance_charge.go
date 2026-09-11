@@ -24,41 +24,42 @@ type Indicator struct {
 }
 
 func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
+	ccy := inv.Currency.String()
 	if inv.Charges == nil && inv.Discounts == nil {
 		return nil
 	}
 	ac := make([]*AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	for i, c := range inv.Charges {
-		ac[i] = newCharge(c)
+		ac[i] = newCharge(c, ccy)
 	}
 	for i, d := range inv.Discounts {
-		ac[i+len(inv.Charges)] = newDiscount(d)
+		ac[i+len(inv.Charges)] = newDiscount(d, ccy)
 	}
 	return ac
 }
 
-func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
+func newLineAllowanceCharges(line *bill.Line, ccy string) []*AllowanceCharge {
 	if line.Charges == nil && line.Discounts == nil {
 		return nil
 	}
 	ac := make([]*AllowanceCharge, len(line.Charges)+len(line.Discounts))
 	for i, charge := range line.Charges {
-		ac[i] = makeLineCharge(charge)
+		ac[i] = makeLineCharge(charge, ccy)
 	}
 	for i, discount := range line.Discounts {
-		ac[i+len(line.Charges)] = makeLineDiscount(discount)
+		ac[i+len(line.Charges)] = makeLineDiscount(discount, ccy)
 	}
 	return ac
 }
 
-func newCharge(c *bill.Charge) *AllowanceCharge {
+func newCharge(c *bill.Charge, ccy string) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
-		Amount:          c.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(c.Amount, ccy),
 	}
 
 	if c.Base != nil {
-		ac.Base = c.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*c.Base, ccy)
 	}
 
 	if c.Reason != "" {
@@ -77,14 +78,14 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 	return ac
 }
 
-func newDiscount(d *bill.Discount) *AllowanceCharge {
+func newDiscount(d *bill.Discount, ccy string) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
-		Amount:          d.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(d.Amount, ccy),
 	}
 
 	if d.Base != nil {
-		ac.Base = d.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*d.Base, ccy)
 	}
 
 	if d.Reason != "" {
@@ -102,10 +103,10 @@ func newDiscount(d *bill.Discount) *AllowanceCharge {
 	return ac
 }
 
-func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
+func makeLineCharge(c *bill.LineCharge, ccy string) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
-		Amount:          c.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(c.Amount, ccy),
 	}
 	if c.Reason != "" {
 		ac.Reason = c.Reason
@@ -114,15 +115,15 @@ func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
 	if c.Percent != nil && c.Base != nil {
 		p := c.Percent.StringWithoutSymbol()
 		ac.Percent = p
-		ac.Base = c.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*c.Base, ccy)
 	}
 	return ac
 }
 
-func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
+func makeLineDiscount(d *bill.LineDiscount, ccy string) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
-		Amount:          d.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(d.Amount, ccy),
 	}
 	if d.Reason != "" {
 		ac.Reason = d.Reason
@@ -131,7 +132,7 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 	if d.Percent != nil && d.Base != nil {
 		p := d.Percent.StringWithoutSymbol()
 		ac.Percent = p
-		ac.Base = d.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*d.Base, ccy)
 	}
 	return ac
 }
