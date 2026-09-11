@@ -113,7 +113,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 				if err != nil {
 					return nil, err
 				}
-				dd.Amount = amt
+				dd.Amount = &amt
 			} else if term.Percent != "" {
 				p, err := num.PercentageFromString(term.Percent)
 				if err != nil {
@@ -127,9 +127,10 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	terms.DueDates = dates
 
-	// If there's only one due date, set its percent to 100.
+	// If there's only one due date, set its percent to 100. Since GOBL v0.505
+	// a due date need not carry an amount, so the absent case is a nil one.
 	if len(terms.DueDates) == 1 &&
-		terms.DueDates[0].Amount.IsZero() &&
+		(terms.DueDates[0].Amount == nil || terms.DueDates[0].Amount.IsZero()) &&
 		terms.DueDates[0].Percent == nil {
 		percent, err := num.PercentageFromString("100%")
 		if err != nil {

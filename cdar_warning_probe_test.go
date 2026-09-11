@@ -1,58 +1,40 @@
 package cii_test
 
 import (
-	"context"
 	"testing"
 
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/phive"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
-// TestCDARWarningProbe deliberately violates the warning-flagged
-// BR-FR-04/MDT-91 rule (invalid referenced-document type code) and
-// asserts Phive surfaces it, proving the zero-warning assertion in
-// TestCDARSchematron actually exercises the warning channel.
+// TestCDARWarningProbe deliberately violates the BR-FR-04/MDT-91 rule (invalid
+// referenced-document type code) and asserts the validator surfaces it, proving
+// the zero-finding assertion in TestCDARSchematron actually exercises the
+// schematron rather than passing because nothing was checked.
+//
+// The invalid code has to go in the untdid-document-type extension: MDT-91 is
+// read from there, and the converter deliberately keeps no fallback to the
+// legacy Doc.Type key. Setting Doc.Type instead leaves the document valid, so
+// the probe proves nothing — which is what it did until this was corrected.
 func TestCDARWarningProbe(t *testing.T) {
-	if !*validate {
-		t.Skip("requires -validate flag and a running Phive gRPC service")
-	}
-
-	conn, err := grpc.NewClient("localhost:9091",
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
-	require.NoError(t, err)
-	defer conn.Close() //nolint:errcheck
-	pc := phive.NewValidationServiceClient(conn)
+	pc := phormClient(t)
 
 	st := buildSyntheticStatus(t, "205")
-	st.Lines[0].Doc.Type = "999" // not a UNTDID 1001 invoice type
+	st.Lines[0].Doc.Ext = st.Lines[0].Doc.Ext.
+		Set(untdid.ExtKeyDocumentType, cbc.Code("999")) // not a UNTDID 1001 invoice type
 
 	cdar, err := cii.NewCDARFromStatus(st, cii.ContextCDARFlow6)
 	require.NoError(t, err)
 	data, err := cdar.Bytes()
 	require.NoError(t, err)
 
-	resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-		Vesid:      cii.ContextCDARFlow6.VESID,
-		XmlContent: data,
-	})
-	require.NoError(t, err)
+	findings := phormValidate(t, pc, cii.ContextCDARFlow6.VESID, data)
+	require.NotEmpty(t, findings,
+		"expected the invalid type code to surface — the schematron channel may be silently broken")
 
-	var total int
-	for _, layer := range resp.Results {
-		total += len(layer.Warnings) + len(layer.Errors)
-	}
-	require.NotZero(t, total,
-		"expected the invalid type code to surface as a warning or error — the warning channel may be silently broken")
-	t.Logf("probe surfaced %d finding(s); success=%v", total, resp.Success)
-	for _, layer := range resp.Results {
-		for _, w := range layer.Warnings {
-			t.Logf("WARNING [%s] %s", w.TestId, w.Message)
-		}
-		for _, e := range layer.Errors {
-			t.Logf("ERROR [%s] %s", e.TestId, e.Message)
-		}
+	for _, f := range findings {
+		t.Log(f)
 	}
 }

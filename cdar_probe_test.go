@@ -1,7 +1,6 @@
 package cii_test
 
 import (
-	"context"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -17,9 +16,7 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
-	"github.com/invopop/phive"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"github.com/invopop/phorm"
 )
 
 // probeCase defines one minimal-status fixture to drive through Convert
@@ -77,7 +74,7 @@ func minDepositedStatus(t *testing.T) *bill.Status {
 // validateAndProbe envelopes the document, runs GOBL Calculate +
 // Validate, converts it with the given context and pushes the XML
 // through phive, returning any errors AND warnings as problems.
-func validateAndProbe(t *testing.T, pc phive.ValidationServiceClient, doc any, ctx cii.Context, opts ...cii.Option) []string {
+func validateAndProbe(t *testing.T, pc *phorm.Client, doc any, ctx cii.Context, opts ...cii.Option) []string {
 	t.Helper()
 	env, err := gobl.Envelop(doc)
 	if err != nil {
@@ -102,34 +99,11 @@ func validateAndProbe(t *testing.T, pc phive.ValidationServiceClient, doc any, c
 	if err != nil {
 		t.Fatalf("Bytes: %v", err)
 	}
-	resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-		Vesid:      ctx.VESID,
-		XmlContent: data,
-	})
-	if err != nil {
-		t.Fatalf("phive: %v", err)
-	}
 	var problems []string
-	for _, r := range resp.Results {
-		for _, e := range r.Errors {
-			problems = append(problems, "ERROR: "+e.Message)
-		}
-		for _, w := range r.Warnings {
-			problems = append(problems, "WARN:  "+w.Message)
-		}
+	for _, f := range phormValidate(t, pc, ctx.VESID, data) {
+		problems = append(problems, f.String())
 	}
 	return problems
-}
-
-func phiveClient(t *testing.T) phive.ValidationServiceClient {
-	t.Helper()
-	conn, err := grpc.NewClient("localhost:9091",
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = conn.Close() })
-	return phive.NewValidationServiceClient(conn)
 }
 
 // TestProbeAllProcessCodes pushes every supported Flow 6 process code
@@ -138,10 +112,7 @@ func phiveClient(t *testing.T) phive.ValidationServiceClient {
 // surface schematron constraints that flow6 should enforce upstream.
 // Status codes ride bill.Status; 211 / 212 ride bill.Payment.
 func TestProbeAllProcessCodes(t *testing.T) {
-	if !*validate {
-		t.Skip("requires -validate")
-	}
-	pc := phiveClient(t)
+	pc := phormClient(t)
 
 	type combo struct {
 		ctxName string
@@ -192,10 +163,7 @@ func TestProbeAllProcessCodes(t *testing.T) {
 }
 
 func TestProbeMinimumStatuses(t *testing.T) {
-	if !*validate {
-		t.Skip("requires -validate and a running Phive gRPC service")
-	}
-	pc := phiveClient(t)
+	pc := phormClient(t)
 
 	cases := []probeCase{
 		{"205-Approved", cii.ContextCDARFlow6, func() any {
