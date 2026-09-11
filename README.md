@@ -148,13 +148,69 @@ To update test fixtures:
 go test ./... -update
 ```
 
-To validate XML output using [Phive](https://github.com/invopop/phoss):
+### Schematron validation
+
+Beyond the golden-file comparisons, the generated XML can be pushed through the
+real EN 16931 / Factur-X / XRechnung / ZUGFeRD / French CTC schematron rule
+sets. Validation runs against [phorm](https://github.com/phax/phorm), the
+standalone validation service that replaced the now-archived `invopop/phive`
+gRPC wrapper, using the [`invopop/phorm`](https://github.com/invopop/phorm)
+HTTP client.
+
+Start a service locally:
+
+```bash
+docker run -d --name phorm -p 8080:8080 phelger/phorm
+```
+
+Use `phelger/phorm-arm64` on Apple Silicon. Note the image is `phelger/phorm`,
+**not** `phax/phorm` — the latter does not exist.
+
+It takes a few seconds to boot. It is ready once this returns HTTP 200:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H 'X-Token: phorm-dev-token' \
+  'http://localhost:8080/api/get/vesids?include-deprecated=true'
+```
+
+Then run the suite with `-validate`:
 
 ```bash
 go test ./... -validate
 ```
 
-Validation requires a running Phive service on `127.0.0.1:9091`
+Without `-validate` the validating tests are skipped, so the plain `go test
+./...` never needs a service and CI stays offline.
+
+`PHORM_URL` and `PHORM_TOKEN` default to `http://localhost:8080` and phorm's
+stock development token. Override them for a shared instance, or when port 8080
+is already taken locally:
+
+```bash
+docker run -d --name phorm -p 8085:8080 phelger/phorm
+PHORM_URL=http://localhost:8085 go test ./... -validate
+```
+
+All fixtures currently pass schematron across every context.
+
+#### Notes
+
+- **A failed validation is not an error.** phorm answers a document that breaks
+  a rule with an HTTP 400 carrying the report, which it also uses for a request
+  it rejects outright, so `invopop/phorm` separates the two by whether the body
+  is a validation report. An error from `ValidateXml` therefore means the
+  validation never ran — unreachable service, rejected token, unresolvable
+  VESID, or a body that is not XML — and the tests treat it as fatal, since
+  nothing was checked.
+- **phorm normalises VESID versions**, so the `fr.ctc:cii:1.4.0-03` spelling in
+  `context.go` resolves to its published `fr.ctc:cii:1.4-03` rule set. The
+  resolved id comes back as `ves.vesid`, worth checking when a rule set behaves
+  unexpectedly. The French `1.4-03` sets are already deprecated in favour of
+  `1.4-04`.
+- **phive-rules keeps only a rolling window of releases**, so `context.go` needs
+  periodic updating; `GET /api/get/vesids?include-deprecated=true` lists what a
+  given phorm build carries, along with a `deprecated` flag.
 
 ## Considerations
 
