@@ -203,9 +203,7 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		}
 	}
 
-	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
-		stlm.AllowanceCharges = newAllowanceCharges(inv)
-	}
+	stlm.AllowanceCharges = newAllowanceCharges(inv)
 
 	return stlm, nil
 }

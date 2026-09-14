@@ -25,7 +25,7 @@ type Indicator struct {
 
 func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
 	ccy := inv.Currency.String()
-	if inv.Charges == nil && inv.Discounts == nil {
+	if len(inv.Charges) == 0 && len(inv.Discounts) == 0 {
 		return nil
 	}
 	ac := make([]*AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
@@ -39,7 +39,7 @@ func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
 }
 
 func newLineAllowanceCharges(line *bill.Line, ccy string) []*AllowanceCharge {
-	if line.Charges == nil && line.Discounts == nil {
+	if len(line.Charges) == 0 && len(line.Discounts) == 0 {
 		return nil
 	}
 	ac := make([]*AllowanceCharge, len(line.Charges)+len(line.Discounts))

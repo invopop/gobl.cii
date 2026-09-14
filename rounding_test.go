@@ -219,3 +219,69 @@ func assertTotalsAddUp(t *testing.T, out *cii.Invoice) {
 		Add(amount(s.RoundingAmount))
 	assert.Equal(t, due.String(), s.DuePayableAmount, "BR-CO-16")
 }
+
+// TestAllowanceChargeBaseRounding covers BR-DEC-01/02/05/06, which cap the
+// document level allowance and charge base amounts (BT-93, BT-100) at the
+// currency's precision. GOBL holds a base exactly as it was provided, so a
+// base with more decimals than the currency has to be brought into line
+// before the document is written out.
+func TestAllowanceChargeBaseRounding(t *testing.T) {
+	env := loadEnvelope(t, filepath.Join("en16931", "invoice-complete.json"))
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	base := num.MakeAmount(101234, 4)
+	inv.Discounts = []*bill.Discount{
+		{
+			Base:    &base,
+			Percent: num.NewPercentage(10, 2),
+			Reason:  "testing",
+		},
+	}
+	inv.Charges = []*bill.Charge{
+		{
+			Base:    &base,
+			Percent: num.NewPercentage(10, 2),
+			Reason:  "testing",
+		},
+	}
+	require.NoError(t, env.Calculate())
+	require.Equal(t, "10.1234", inv.Discounts[0].Base.String())
+
+	out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+	require.NoError(t, err)
+
+	acs := out.Transaction.Settlement.AllowanceCharges
+	require.Len(t, acs, 2)
+	for _, ac := range acs {
+		assert.Equal(t, "10.12", ac.Base, "BT-93 / BT-100 must fit the currency")
+	}
+	assertAmountsFitCurrency(t, out)
+	assertTotalsAddUp(t, out)
+}
+
+// TestAllowanceChargesAbsent covers documents and lines that carry neither
+// allowances nor charges, which have no BG-20 or BG-21 groups to write out.
+func TestAllowanceChargesAbsent(t *testing.T) {
+	env := loadEnvelope(t, filepath.Join("en16931", "invoice-complete.json"))
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	inv.Discounts = nil
+	inv.Charges = nil
+	for _, l := range inv.Lines {
+		l.Discounts = nil
+		l.Charges = nil
+	}
+	require.NoError(t, env.Calculate())
+
+	out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+	require.NoError(t, err)
+
+	assert.Nil(t, out.Transaction.Settlement.AllowanceCharges)
+	require.NotEmpty(t, out.Transaction.Lines)
+	for _, li := range out.Transaction.Lines {
+		assert.Nil(t, li.TradeSettlement.AllowanceCharge)
+	}
+	assertTotalsAddUp(t, out)
+}

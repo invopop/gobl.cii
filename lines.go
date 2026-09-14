@@ -244,9 +244,7 @@ func newTradeSettlement(l *bill.Line, ccy string) *TradeSettlement {
 		}
 	}
 
-	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-		stlm.AllowanceCharge = newLineAllowanceCharges(l, ccy)
-	}
+	stlm.AllowanceCharge = newLineAllowanceCharges(l, ccy)
 
 	// BT-133: Line buyer accounting reference
 	if l.Cost != "" {
