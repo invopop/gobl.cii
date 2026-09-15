@@ -23,13 +23,14 @@ func (out *Invoice) Bytes() ([]byte, error) {
 	return append([]byte(xml.Header), bytes...), nil
 }
 
-// untdidUnit returns the UN/ECE code for a unit and its extensions, preferring
-// the code preserved in the extensions over the mapping from the GOBL unit key.
+// untdidUnit returns the UN/ECE code for a unit and its extensions. The unit
+// takes priority, as it does in GOBL, and the extension answers for the codes
+// it has no key for.
 func untdidUnit(ext tax.Extensions, unit cbc.Key) cbc.Code {
-	if code := ext.Get(untdid.ExtKeyUnit); code != cbc.CodeEmpty {
+	if code := untdid.UnitCode(unit); code != cbc.CodeEmpty {
 		return code
 	}
-	return untdid.UnitCode(unit)
+	return ext.Get(untdid.ExtKeyUnit)
 }
 
 // unitLabel describes a unit for presentation, falling back to the UN/ECE code

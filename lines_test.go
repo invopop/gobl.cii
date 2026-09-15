@@ -142,7 +142,7 @@ func TestItemAttributeMeasureParse(t *testing.T) {
 	require.NotNil(t, attrs[0].Amount)
 	assert.Equal(t, "2.5", attrs[0].Amount.String())
 	assert.Equal(t, org.UnitKilogram, attrs[0].Unit)
-	assert.Empty(t, attrs[0].Ext.Get(untdid.ExtKeyUnit), "the unit says it already")
+	assert.Equal(t, cbc.Code("KGM"), attrs[0].Ext.Get(untdid.ExtKeyUnit), "the document stated the code")
 }
 
 // TestItemAttributeUnmappedUnit covers a UN/ECE unit code that GOBL has no key

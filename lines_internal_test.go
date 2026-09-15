@@ -28,6 +28,10 @@ func TestUntdidUnit(t *testing.T) {
 		{"Code GOBL has no unit for", &org.Item{
 			Ext: tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyUnit: testUnitUnmapped}),
 		}, testUnitUnmapped},
+		{"Unit takes priority", &org.Item{
+			Unit: org.UnitHour,
+			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyUnit: testUnitUnmapped}),
+		}, "HUR"},
 	}
 
 	for _, tt := range tests {
