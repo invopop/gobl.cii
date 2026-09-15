@@ -3,6 +3,7 @@ package cii
 import (
 	"encoding/xml"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -11,23 +12,20 @@ import (
 	"github.com/invopop/gobl/cbc"
 )
 
-// cleanString strips the traces of a sender mishandling its own character
-// encoding, neither of which is recoverable here — the original characters are
-// gone before the document reaches us:
+// replacementCharRef matches the XML character references that decode to
+// U+FFFD. They are plain ASCII in the document, so they survive a byte-level
+// clean and only become the replacement character once the XML is decoded.
+var replacementCharRef = regexp.MustCompile(`&#(?:[xX]0*[fF][fF][fF][dD]|0*65533);`)
+
+// cleanString drops what a sender's broken encoding leaves behind: bytes that
+// are not valid UTF-8, which the XML decoder rejects, and U+FFFD, which gobl's
+// canonical JSON rejects, written literally or as a character reference.
+// Neither is recoverable. Applied to the whole document before decoding, and
+// idempotent.
 //
-//   - byte sequences that are not valid UTF-8, which the XML decoder rejects
-//     outright with "invalid UTF-8";
-//   - the Unicode replacement character (U+FFFD), which a sender emits when its
-//     own conversion has already given up. It is valid UTF-8, so it reaches
-//     gobl, where canonical JSON refuses it and the document fails to digest.
-//
-// The parse entry points apply this to the whole document before decoding, so a
-// field nobody thought to wrap cannot reintroduce the problem. It stays safe to
-// call on individual values too, and is idempotent.
-//
-// The U+FFFD half is a stopgap: gobl/c14n rejects a valid code point, fixed
-// upstream in invopop/gobl#975. Drop it once the gobl dependency carries that.
+// The U+FFFD half is a stopgap for invopop/gobl#975.
 func cleanString(s string) string {
+	s = replacementCharRef.ReplaceAllString(s, "")
 	if utf8.ValidString(s) && !strings.ContainsRune(s, utf8.RuneError) {
 		return s
 	}

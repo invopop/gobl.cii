@@ -100,6 +100,19 @@ func TestCleanString(t *testing.T) {
 		assert.Equal(t, "<a>n et Premire</a>", cleanString("<a>n\xe9 et Premi�re</a>"))
 	})
 
+	t.Run("drops replacement character references", func(t *testing.T) {
+		// Plain ASCII in the document; only the XML decoder turns these into
+		// U+FFFD, so a byte-level clean alone would miss them.
+		for _, ref := range []string{"&#xFFFD;", "&#xfffd;", "&#XFFFD;", "&#x0FFFD;", "&#65533;", "&#065533;"} {
+			assert.Equal(t, "<a>bad  char</a>", cleanString("<a>bad "+ref+" char</a>"), ref)
+		}
+	})
+
+	t.Run("keeps an escaped reference, which is literal text", func(t *testing.T) {
+		in := "<a>bad &amp;#xFFFD; char</a>"
+		assert.Equal(t, in, cleanString(in))
+	})
+
 	t.Run("is idempotent", func(t *testing.T) {
 		in := "<a>Premi�re</a>"
 		assert.Equal(t, cleanString(in), cleanString(cleanString(in)))
