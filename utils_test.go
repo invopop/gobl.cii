@@ -3,6 +3,7 @@ package cii
 import (
 	"testing"
 
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
@@ -58,26 +59,23 @@ func TestTypeCodeParse(t *testing.T) {
 	}
 }
 
-// Define tests for the UnitFromUNECE function
-func TestUnitFromUNECE(t *testing.T) {
-	const knownUNECECode = "Known UNECE code"
-	tests := []struct {
-		name     string
-		input    string
-		expected org.Unit
-	}{
-		{knownUNECECode, "HUR", org.Unit("h")},
-		{knownUNECECode, "SEC", org.Unit("s")},
-		{knownUNECECode, "MTR", org.Unit("m")},
-		{knownUNECECode, "GRM", org.Unit("g")},
-		{"Unknown UNECE code", "XYZ", org.Unit("XYZ")},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			code := cbc.Code(tt.input)
-			result := goblUnitFromUNECE(code)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
+func TestGoblItemUnit(t *testing.T) {
+	t.Run("known code", func(t *testing.T) {
+		item := new(org.Item)
+		goblItemUnit(item, "HUR")
+		assert.Equal(t, org.UnitHour, item.Unit)
+		assert.Equal(t, cbc.Code("HUR"), item.Ext.Get(untdid.ExtKeyUnit))
+	})
+	t.Run("unknown code is kept in the extension", func(t *testing.T) {
+		item := new(org.Item)
+		goblItemUnit(item, "XYZ")
+		assert.Empty(t, item.Unit)
+		assert.Equal(t, cbc.Code("XYZ"), item.Ext.Get(untdid.ExtKeyUnit))
+	})
+	t.Run("empty code is ignored", func(t *testing.T) {
+		item := new(org.Item)
+		goblItemUnit(item, "")
+		assert.Empty(t, item.Unit)
+		assert.False(t, item.Ext.Has(untdid.ExtKeyUnit))
+	})
 }

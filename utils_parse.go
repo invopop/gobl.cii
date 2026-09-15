@@ -4,23 +4,22 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/invopop/gobl/addons/eu/en16931"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
 
-// unitFromUNECE maps a UN/ECE code to a GOBL unit
-func goblUnitFromUNECE(unece cbc.Code) org.Unit {
-	if unece == cbc.CodeEmpty {
-		return org.UnitEmpty
+// goblItemUnit records a UN/ECE unit code on the item. The raw code is kept
+// in the untdid-unit extension and mapped to a GOBL unit key when one exists.
+func goblItemUnit(item *org.Item, code cbc.Code) {
+	if code == cbc.CodeEmpty {
+		return
 	}
-	for _, def := range org.UnitDefinitions {
-		if def.UNECE == unece {
-			return def.Unit
-		}
+	item.Ext = item.Ext.Set(untdid.ExtKeyUnit, code)
+	if unit := en16931.UnitFromUNTDID(code); unit != cbc.KeyEmpty {
+		item.Unit = unit
 	}
-	// If no match is found, return the original UN/ECE code as a Unit
-	unit := org.Unit(unece)
-	return unit
 }
 
 func formatKey(key string) cbc.Key {

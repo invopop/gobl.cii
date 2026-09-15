@@ -62,8 +62,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	}
 
 	if it.Quantity != nil && it.Quantity.Quantity != nil && it.Quantity.Quantity.UnitCode != "" {
-		u := cbc.Code(it.Quantity.Quantity.UnitCode)
-		l.Item.Unit = goblUnitFromUNECE(u)
+		goblItemUnit(l.Item, cbc.Code(it.Quantity.Quantity.UnitCode))
 	}
 
 	goblLineProduct(it.Product, l.Item)

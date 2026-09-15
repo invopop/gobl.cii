@@ -3,9 +3,12 @@ package cii
 import (
 	"strconv"
 
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 )
 
 // Line defines the structure of the IncludedSupplyChainTradeLineItem in the CII standard
@@ -146,7 +149,7 @@ func newLine(l *bill.Line) *Line {
 		Quantity: &LineDelivery{
 			Quantity: &Quantity{
 				Amount:   l.Quantity.String(),
-				UnitCode: string(it.Unit.UNECE()),
+				UnitCode: unitCodeUNTDID(it),
 			},
 		},
 		TradeSettlement: newTradeSettlement(l),
@@ -245,4 +248,14 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	}
 
 	return stlm
+}
+
+// unitCodeUNTDID returns the UN/ECE unit code for an item, preferring the
+// untdid-unit extension set by the EN 16931 addon.
+func unitCodeUNTDID(item *org.Item) string {
+	code := item.Ext.Get(untdid.ExtKeyUnit)
+	if code == cbc.CodeEmpty {
+		code = en16931.UnitToUNTDID(item.Unit)
+	}
+	return code.String()
 }
