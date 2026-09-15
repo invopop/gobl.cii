@@ -77,7 +77,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			if err != nil {
 				return nil, err
 			}
-			per.Start = start
+			per.Start = &start
 		}
 
 		if tr.Settlement.Period.End != nil && tr.Settlement.Period.End.DateFormat != nil {
@@ -85,7 +85,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			if err != nil {
 				return nil, err
 			}
-			per.End = end
+			per.End = &end
 		}
 		if tr.Settlement.Period.Description != nil {
 			per.Label = *tr.Settlement.Period.Description
