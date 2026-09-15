@@ -3,7 +3,7 @@ module github.com/invopop/gobl.cii
 go 1.25.0
 
 require (
-	github.com/invopop/gobl v0.505.1-0.20260914095237-36083ecc2efe
+	github.com/invopop/gobl v0.506.1-0.20260915133908-f0ea1ebe7e41
 	github.com/invopop/phorm v0.1.5
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0

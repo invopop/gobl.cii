@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a75726dbfc8068002abbf3f3724cf85359386592fc8fb02912b7295530ae1673"
+			"val": "0a8edebd503c9746ced3ac3e138aff8567ee6c6c00ee437693a244050286e415"
 		}
 	},
 	"doc": {
@@ -117,7 +117,10 @@
 						}
 					],
 					"price": "90.00",
-					"unit": "h"
+					"unit": "h",
+					"ext": {
+						"untdid-unit": "HUR"
+					}
 				},
 				"sum": "1800.00",
 				"taxes": [

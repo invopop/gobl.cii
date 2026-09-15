@@ -1,35 +1,14 @@
 package cii
 
 import (
-	"regexp"
-	"strings"
-
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
-// unitFromUNECE maps a UN/ECE code to a GOBL unit
-func goblUnitFromUNECE(unece cbc.Code) org.Unit {
-	if unece == cbc.CodeEmpty {
-		return org.UnitEmpty
-	}
-	for _, def := range org.UnitDefinitions {
-		if def.UNECE == unece {
-			return def.Unit
-		}
-	}
-	// If no match is found, return the original UN/ECE code as a Unit
-	unit := org.Unit(unece)
-	return unit
-}
-
-func formatKey(key string) cbc.Key {
-	key = strings.ToLower(key)
-	key = strings.ReplaceAll(key, " ", "-")
-	re := regexp.MustCompile(`[^a-z0-9-+]`)
-	key = re.ReplaceAllString(key, "")
-	key = strings.Trim(key, "-+")
-	re = regexp.MustCompile(`[-+]{2,}`)
-	key = re.ReplaceAllString(key, "-")
-	return cbc.Key(key)
+// goblUnit preserves the UN/ECE unit code in the given extensions and returns
+// them alongside the matching GOBL unit key, which is empty when the code has
+// no GOBL equivalent.
+func goblUnit(ext tax.Extensions, code cbc.Code) (tax.Extensions, cbc.Key) {
+	return ext.Set(untdid.ExtKeyUnit, code), untdid.UnitKey(code)
 }

@@ -16,6 +16,10 @@ const (
 	testAmountSmall = "2.50"
 	testAmountHalf  = "50.00"
 
+	// Item attribute label and UN/ECE code with no GOBL unit behind it.
+	testAttrWeight   = "Weight"
+	testUnitUnmapped = "XYZ"
+
 	// Values that must fail to parse as a number and a percentage.
 	testNotANumber  = "n/a"
 	testNotAPercent = "lots"

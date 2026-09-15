@@ -6,7 +6,9 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/org"
 )
 
 // Line defines the structure of the IncludedSupplyChainTradeLineItem in the CII standard
@@ -83,10 +85,14 @@ type ListID struct {
 	ListID string `xml:"listID,attr,omitempty"`
 }
 
-// Characteristic defines the structure of the ApplicableProductCharacteristic of the CII standard
+// Characteristic defines the structure of the ApplicableProductCharacteristic
+// of the CII standard. ValueMeasure is only ever read: documents from senders
+// using the CII extended profile may carry one, but the EN 16931 profiles do
+// not accept it on output.
 type Characteristic struct {
-	Description string `xml:"ram:Description,omitempty"`
-	Value       string `xml:"ram:Value,omitempty"`
+	Description  string    `xml:"ram:Description,omitempty"`
+	ValueMeasure *Quantity `xml:"ram:ValueMeasure,omitempty"`
+	Value        string    `xml:"ram:Value,omitempty"`
 }
 
 // Quantity defines the structure of the quantity with its attributes for the CII standard
@@ -125,6 +131,52 @@ func (out *Invoice) addLines(inv *bill.Invoice) error {
 	return nil
 }
 
+// newCharacteristics builds the BG-32 item attributes from the item's
+// attributes: the label names the attribute (BT-160) and the value (BT-161)
+// presents whichever value the attribute holds. Amounts carry their unit in
+// the value text, as ram:ValueMeasure is rejected by the Factur-X and ZUGFeRD
+// EN 16931 schemas and warned against by CII-SR-070 everywhere else.
+func newCharacteristics(attrs []*org.Attribute) []*Characteristic {
+	chars := make([]*Characteristic, 0, len(attrs))
+	for _, attr := range attrs {
+		c := &Characteristic{Description: characteristicName(attr)}
+		switch {
+		case attr.Amount != nil:
+			c.Value = attr.Amount.String()
+			if label := unitLabel(attr.Unit, untdidUnit(attr.Ext, attr.Unit)); label != "" {
+				c.Value += " " + label
+			}
+		case attr.Text != "":
+			c.Value = attr.Text
+		case attr.Code != "":
+			c.Value = attr.Code.String()
+		case attr.Date != nil:
+			c.Value = attr.Date.String()
+		}
+		if c.Description == "" || c.Value == "" {
+			continue
+		}
+		chars = append(chars, c)
+	}
+	if len(chars) == 0 {
+		return nil
+	}
+	return chars
+}
+
+// characteristicName names an attribute for BT-160, falling back to the key or
+// type when it carries no label.
+func characteristicName(attr *org.Attribute) string {
+	switch {
+	case attr.Label != "":
+		return attr.Label
+	case attr.Key != cbc.KeyEmpty:
+		return attr.Key.String()
+	default:
+		return attr.Type.String()
+	}
+}
+
 func newLine(l *bill.Line, ccy string) *Line {
 	if l.Item == nil {
 		return nil
@@ -147,7 +199,7 @@ func newLine(l *bill.Line, ccy string) *Line {
 		Quantity: &LineDelivery{
 			Quantity: &Quantity{
 				Amount:   l.Quantity.String(),
-				UnitCode: string(it.Unit.UNECE()),
+				UnitCode: untdidUnit(it.Ext, it.Unit).String(),
 			},
 		},
 		TradeSettlement: newTradeSettlement(l, ccy),
@@ -156,6 +208,9 @@ func newLine(l *bill.Line, ccy string) *Line {
 	if it.Description != "" {
 		lineItem.Product.Description = &it.Description
 	}
+
+	// BG-32: item attributes
+	lineItem.Product.Characteristics = newCharacteristics(it.Attributes)
 
 	if len(l.Notes) > 0 {
 		notes := make([]*Note, 0, len(l.Notes))

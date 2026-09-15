@@ -3,8 +3,6 @@ package cii
 import (
 	"testing"
 
-	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,30 +52,6 @@ func TestTypeCodeParse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := typeCodeParse(tt.input)
 			assert.Equal(t, tt.expected, string(result))
-		})
-	}
-}
-
-// Define tests for the UnitFromUNECE function
-func TestUnitFromUNECE(t *testing.T) {
-	const knownUNECECode = "Known UNECE code"
-	tests := []struct {
-		name     string
-		input    string
-		expected org.Unit
-	}{
-		{knownUNECECode, "HUR", org.Unit("h")},
-		{knownUNECECode, "SEC", org.Unit("s")},
-		{knownUNECECode, "MTR", org.Unit("m")},
-		{knownUNECECode, "GRM", org.Unit("g")},
-		{"Unknown UNECE code", "XYZ", org.Unit("XYZ")},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			code := cbc.Code(tt.input)
-			result := goblUnitFromUNECE(code)
-			assert.Equal(t, tt.expected, result)
 		})
 	}
 }

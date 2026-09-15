@@ -34,6 +34,19 @@ const (
 	dirFRCIUS     = "peppol-france-cius"
 	dirFRExtended = "peppol-france-extended"
 
+	// Context names shared by the conversion, parse and probe tables.
+	ctxEN16931   = "EN16931"
+	ctxPeppol    = "Peppol"
+	ctxFacturX   = "FacturX"
+	ctxXRechnung = "XRechnung"
+	ctxChorusPro = "ChorusPro"
+	ctxZUGFeRD   = "ZUGFeRD"
+
+	// Item attribute labels and values shared by the attribute tests.
+	attrLabelColor  = "Color"
+	attrValueBlack  = "Black"
+	attrLabelWeight = "Weight"
+
 	// Flow 2 invoice fixture names shared by every French convert directory.
 	fixtureInvoiceStandard = "invoice-standard.json"
 	fixtureCreditNote      = "credit-note.json"
@@ -61,15 +74,15 @@ func TestConvertToInvoice(t *testing.T) {
 		context cii.Context
 		dir     string
 	}{
-		{"EN16931", cii.ContextEN16931V2017, "en16931"},
-		{"Peppol", cii.ContextPeppolV3, "peppol"},
-		{"FacturX", cii.ContextFacturXV1, "facturx"},
-		{"XRechnung", cii.ContextXRechnungV3, "xrechnung"},
-		{"ChorusPro", cii.ContextChorusProV1, "choruspro"},
+		{ctxEN16931, cii.ContextEN16931V2017, "en16931"},
+		{ctxPeppol, cii.ContextPeppolV3, "peppol"},
+		{ctxFacturX, cii.ContextFacturXV1, "facturx"},
+		{ctxXRechnung, cii.ContextXRechnungV3, "xrechnung"},
+		{ctxChorusPro, cii.ContextChorusProV1, "choruspro"},
 		{"PeppolFranceFacturX", cii.ContextPeppolFranceFacturXV1, dirFRFacturX},
 		{"PeppolFranceCIUS", cii.ContextPeppolFranceCIUSV1, dirFRCIUS},
 		{"PeppolFranceExtended", cii.ContextPeppolFranceExtendedV1, dirFRExtended},
-		{"ZUGFeRD", cii.ContextZUGFeRDV2, "zugferd"},
+		{ctxZUGFeRD, cii.ContextZUGFeRDV2, "zugferd"},
 	}
 
 	for _, ctx := range contexts {
@@ -125,11 +138,11 @@ func TestParseInvoice(t *testing.T) {
 		name string
 		dir  string
 	}{
-		{"EN16931", "en16931"},
-		{"Peppol", "peppol"},
-		{"FacturX", "facturx"},
-		{"XRechnung", "xrechnung"},
-		{"ChorusPro", "choruspro"},
+		{ctxEN16931, "en16931"},
+		{ctxPeppol, "peppol"},
+		{ctxFacturX, "facturx"},
+		{ctxXRechnung, "xrechnung"},
+		{ctxChorusPro, "choruspro"},
 		{"PeppolFranceFacturX", dirFRFacturX},
 		{"PeppolFranceCIUS", dirFRCIUS},
 		{"PeppolFranceExtended", dirFRExtended},
