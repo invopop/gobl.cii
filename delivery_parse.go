@@ -49,7 +49,7 @@ func goblNewDeliveryDetails(del *Delivery) (*bill.DeliveryDetails, error) {
 // for the delivery party (BT-70 name, BG-15 address).
 func goblNewDeliveryParty(party *Party) *org.Party {
 	p := &org.Party{
-		Name: party.Name,
+		Name: cleanString(party.Name),
 	}
 	if party.PostalTradeAddress != nil {
 		p.Addresses = []*org.Address{

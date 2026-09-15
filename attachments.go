@@ -67,7 +67,7 @@ func goblAttachments(docs []*AdditionalDocument) []*org.Attachment {
 			att.Code = cbc.Code(doc.ID)
 		}
 		if doc.Name != "" {
-			att.Description = doc.Name
+			att.Description = cleanString(doc.Name)
 		}
 		if doc.URIID != "" {
 			att.URL = doc.URIID

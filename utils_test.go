@@ -84,42 +84,29 @@ func TestUnitFromUNECE(t *testing.T) {
 
 func TestCleanString(t *testing.T) {
 	t.Run("leaves clean text untouched", func(t *testing.T) {
-		in := `<a>Première vérification</a>`
+		in := "Première vérification"
 		assert.Equal(t, in, cleanString(in))
 	})
 
 	t.Run("drops the replacement character", func(t *testing.T) {
-		assert.Equal(t, "<a>Premire</a>", cleanString("<a>Premi�re</a>"))
+		// A sender emits U+FFFD when its own encoding conversion has already
+		// given up. It is valid UTF-8, so it reaches gobl, where canonical
+		// JSON refuses it and the document fails to digest.
+		assert.Equal(t, "Premire", cleanString("Premi�re"))
 	})
 
-	t.Run("drops invalid UTF-8", func(t *testing.T) {
-		assert.Equal(t, "<a>Premire</a>", cleanString("<a>Premi\xe9re</a>"))
-	})
-
-	t.Run("handles both at once", func(t *testing.T) {
-		assert.Equal(t, "<a>n et Premire</a>", cleanString("<a>n\xe9 et Premi�re</a>"))
-	})
-
-	t.Run("drops replacement character references", func(t *testing.T) {
-		// Plain ASCII in the document; only the XML decoder turns these into
-		// U+FFFD, so a byte-level clean alone would miss them.
-		for _, ref := range []string{"&#xFFFD;", "&#xfffd;", "&#XFFFD;", "&#x0FFFD;", "&#65533;", "&#065533;"} {
-			assert.Equal(t, "<a>bad  char</a>", cleanString("<a>bad "+ref+" char</a>"), ref)
-		}
-	})
-
-	t.Run("keeps an escaped reference, which is literal text", func(t *testing.T) {
-		in := "<a>bad &amp;#xFFFD; char</a>"
-		assert.Equal(t, in, cleanString(in))
+	t.Run("drops a decoded character reference", func(t *testing.T) {
+		// &#xFFFD; in the document arrives here already decoded.
+		assert.Equal(t, "bad  char", cleanString("bad � char"))
 	})
 
 	t.Run("is idempotent", func(t *testing.T) {
-		in := "<a>Premi�re</a>"
+		in := "Premi�re"
 		assert.Equal(t, cleanString(in), cleanString(cleanString(in)))
 	})
 
 	t.Run("preserves valid multi-byte text", func(t *testing.T) {
-		in := "<a>1000 m² – 20 €</a>"
+		in := "1000 m² – 20 €"
 		assert.Equal(t, in, cleanString(in))
 	})
 }

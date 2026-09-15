@@ -27,7 +27,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 	pymt := &bill.PaymentDetails{}
 
 	if stlm.Payee != nil {
-		payee := &org.Party{Name: stlm.Payee.Name}
+		payee := &org.Party{Name: cleanString(stlm.Payee.Name)}
 		if stlm.Payee.PostalTradeAddress != nil {
 			payee.Addresses = []*org.Address{
 				goblNewAddress(stlm.Payee.PostalTradeAddress),
@@ -163,7 +163,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 	}
 
 	if pm.Information != "" {
-		inst.Detail = pm.Information
+		inst.Detail = cleanString(pm.Information)
 	}
 
 	if pm.Card != nil {
@@ -186,7 +186,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 			ct.IBAN = cbc.Code(ac.IBAN)
 		}
 		if ac.Name != "" {
-			ct.Name = ac.Name
+			ct.Name = cleanString(ac.Name)
 		}
 		if ac.Number != "" {
 			ct.Number = cbc.Code(ac.Number)

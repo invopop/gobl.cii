@@ -43,8 +43,6 @@ func NewCDAR() *CDAR {
 
 // UnmarshalCDAR unmarshals a raw XML CDAR document into a CDAR struct
 func UnmarshalCDAR(data []byte) (*CDAR, error) {
-	data = []byte(cleanString(string(data)))
-
 	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err

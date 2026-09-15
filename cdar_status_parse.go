@@ -187,7 +187,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 				Ext: tax.MakeExtensions().Set(flow6.ExtKeyAction, cbc.Code(ds.RequestedActionCode)),
 			}
 			if ds.RequestedAction != "" {
-				a.Description = ds.RequestedAction
+				a.Description = cleanString(ds.RequestedAction)
 			}
 			line.Actions = append(line.Actions, a)
 		}
@@ -371,7 +371,7 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 	if tp == nil {
 		return nil
 	}
-	p := &org.Party{Name: tp.Name}
+	p := &org.Party{Name: cleanString(tp.Name)}
 	if tp.RoleCode != "" {
 		p.Ext = tax.MakeExtensions().Set(flow6.ExtKeyRole, cbc.Code(tp.RoleCode))
 	}

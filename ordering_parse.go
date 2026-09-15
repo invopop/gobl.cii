@@ -88,7 +88,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			per.End = end
 		}
 		if tr.Settlement.Period.Description != nil {
-			per.Label = *tr.Settlement.Period.Description
+			per.Label = cleanString(*tr.Settlement.Period.Description)
 		}
 		ord.Period = per
 	}

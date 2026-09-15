@@ -10,13 +10,13 @@ import (
 
 func goblNewParty(party *Party) *org.Party {
 	p := &org.Party{
-		Name: party.Name,
+		Name: cleanString(party.Name),
 	}
 
 	// BT-28/BT-45: Trading name (alias)
 	if party.LegalOrganization != nil && party.LegalOrganization.Name != "" {
 		if party.LegalOrganization.Name != p.Name {
-			p.Alias = party.LegalOrganization.Name
+			p.Alias = cleanString(party.LegalOrganization.Name)
 		}
 	}
 
@@ -81,7 +81,7 @@ func goblPartyContact(party *Party, p *org.Party) {
 			p.People = []*org.Person{
 				{
 					Name: &org.Name{
-						Given: party.Contact.PersonName,
+						Given: cleanString(party.Contact.PersonName),
 					},
 				},
 			}
@@ -161,15 +161,15 @@ func goblNewAddress(address *PostalTradeAddress) *org.Address {
 	}
 
 	if address.LineOne != "" {
-		addr.Street = address.LineOne
+		addr.Street = cleanString(address.LineOne)
 	}
 
 	if address.LineTwo != "" {
-		addr.StreetExtra = address.LineTwo
+		addr.StreetExtra = cleanString(address.LineTwo)
 	}
 
 	if address.City != "" {
-		addr.Locality = address.City
+		addr.Locality = cleanString(address.City)
 	}
 
 	if address.Postcode != "" {
@@ -177,7 +177,7 @@ func goblNewAddress(address *PostalTradeAddress) *org.Address {
 	}
 
 	if address.Region != "" {
-		addr.Region = address.Region
+		addr.Region = cleanString(address.Region)
 	}
 
 	return addr
