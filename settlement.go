@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -88,11 +89,23 @@ type ReferencedDocument struct {
 	IssueDate        *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
 }
 
-// Period defines the structure of the ExpectedDeliveryPeriod of the CII standard
+// Period defines the structure of the BillingSpecifiedPeriod of the CII standard
 type Period struct {
 	Description *string    `xml:"ram:Description,omitempty"`
-	Start       *IssueDate `xml:"ram:StartDateTime"`
-	End         *IssueDate `xml:"ram:EndDateTime"`
+	Start       *IssueDate `xml:"ram:StartDateTime,omitempty"`
+	End         *IssueDate `xml:"ram:EndDateTime,omitempty"`
+}
+
+// newPeriod omits whichever bound is not set (EN 16931 BR-CO-19 / BR-CO-20).
+func newPeriod(p *cal.Period) *Period {
+	per := new(Period)
+	if p.Start != nil {
+		per.Start = &IssueDate{DateFormat: documentDate(p.Start)}
+	}
+	if p.End != nil {
+		per.End = &IssueDate{DateFormat: documentDate(p.End)}
+	}
+	return per
 }
 
 // Summary defines the structure of SpecifiedTradeSettlementHeaderMonetarySummation of the CII standard
@@ -188,14 +201,7 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	// BG-14 is the period the invoice refers to, which GOBL keeps in
 	// Ordering.Period; Delivery.Period is when to expect delivery.
 	if inv.Ordering != nil && inv.Ordering.Period != nil {
-		stlm.Period = &Period{
-			Start: &IssueDate{
-				DateFormat: documentDate(&inv.Ordering.Period.Start),
-			},
-			End: &IssueDate{
-				DateFormat: documentDate(&inv.Ordering.Period.End),
-			},
-		}
+		stlm.Period = newPeriod(inv.Ordering.Period)
 	}
 
 	if inv.Payment != nil && inv.Payment.Instructions != nil {
