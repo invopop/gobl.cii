@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "30a5a3835f3d0e3fb38dd387141d87925037c87438119e34c95f053f9b4a840d"
+			"val": "140396e7847249c7120fe1e0fcaee064a6a22a06c3f1d439a93fca37e2375052"
 		}
 	},
 	"doc": {
@@ -61,10 +61,7 @@
 				"item": {
 					"name": "Consulting services outside scope of VAT",
 					"price": "500.00",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "500.00",
 				"taxes": [

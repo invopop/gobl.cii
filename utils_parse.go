@@ -6,9 +6,9 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// goblUnit preserves the UN/ECE unit code in the given extensions and returns
-// them alongside the matching GOBL unit key, which is empty when the code has
-// no GOBL equivalent.
-func goblUnit(ext tax.Extensions, code cbc.Code) (tax.Extensions, cbc.Key) {
-	return ext.Set(untdid.ExtKeyUnit, code), untdid.UnitKey(code)
+// goblUnit resolves a UN/ECE unit code into the GOBL unit key it stands for,
+// or, when GOBL cannot express it, keeps the code in the extensions with no
+// unit alongside it.
+func goblUnit(ext tax.Extensions, code cbc.Code) (cbc.Key, tax.Extensions) {
+	return untdid.NormalizeUnit(cbc.KeyEmpty, ext.Set(untdid.ExtKeyUnit, code))
 }

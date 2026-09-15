@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9ab91c152f28d8eed5c845bdd7b6d4d85d69d8bac4c53d340cee9ccaae946c72"
+			"val": "0ead68a3f74bbcfad8b223823540a53458b3d86eeb496ba32f8387728d2d32f8"
 		}
 	},
 	"doc": {
@@ -113,10 +113,7 @@
 					"name": "Random Product",
 					"description": "Random Description",
 					"price": "234.00",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "1638.00",
 				"taxes": [

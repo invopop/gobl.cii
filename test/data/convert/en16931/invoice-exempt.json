@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5f4eeabb6e4d2a6c580bdf1b66b082c881e542462ec9320f2d621e624e10805e"
+			"val": "2b9f9cc1cc490ee792287135a851a02542187103bc77c91474691f4bbfec9056"
 		}
 	},
 	"doc": {
@@ -77,9 +77,6 @@
 					"name": "Quick charge",
 					"price": "200.00",
 					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					},
 					"meta": {
 						"chargebee-date-from": "2025-04-10",
 						"chargebee-date-to": "2025-04-10"

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7a03bed62cad338948a9490ea1e20b0d3575dcc7749fb0774b167875834a0335"
+			"val": "94ae7afa4e37e8fe9d9c60afbad226ca45ad7434e6af2ab448f40510edf0a508"
 		}
 	},
 	"doc": {
@@ -93,10 +93,7 @@
 					"name": "Development services",
 					"description": "Development services for project 123",
 					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"untdid-unit": "HUR"
-					}
+					"unit": "h"
 				},
 				"sum": "1800.00",
 				"discounts": [

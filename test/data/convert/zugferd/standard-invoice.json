@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "82234e492d156029b2971eeb3aeced28830d166a3996f8fa60180d93a228d749"
+			"val": "a9bb1274ce9e082598dfeb4e0d03b123cb458b19868a509e36efb0dd85b9bd83"
 		}
 	},
 	"doc": {
@@ -86,10 +86,7 @@
 				"item": {
 					"name": "Monthly platform  license  fee",
 					"price": "4500.00",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "4500.00",
 				"taxes": [

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "908b944ca5d0787fc97e658e4a3f725564064444575dae9bc749e9f7d09dc93f"
+			"val": "b1fbff165c5d47b8d8e036201395d30f729a29fab64c6bcdae328de15202c78d"
 		},
 		"from": "iso6523-actorid-upis::0225:356000000",
 		"to": "iso6523-actorid-upis::0225:732829320"
@@ -113,10 +113,7 @@
 				"item": {
 					"name": "Service",
 					"price": "100.00",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "1000.00",
 				"taxes": [

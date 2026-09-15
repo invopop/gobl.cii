@@ -25,9 +25,8 @@ func TestUntdidUnit(t *testing.T) {
 		{knownUNECECode, &org.Item{Unit: org.UnitMetre}, "MTR"},
 		{knownUNECECode, &org.Item{Unit: org.UnitGram}, "GRM"},
 		{"Unit without a UNECE code", &org.Item{Unit: cbc.Key("foo")}, ""},
-		{"Extension takes precedence", &org.Item{
-			Unit: org.UnitHour,
-			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyUnit: testUnitUnmapped}),
+		{"Code GOBL has no unit for", &org.Item{
+			Ext: tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyUnit: testUnitUnmapped}),
 		}, testUnitUnmapped},
 	}
 

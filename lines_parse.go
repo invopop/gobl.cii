@@ -62,10 +62,10 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	}
 
 	if it.Quantity != nil && it.Quantity.Quantity != nil && it.Quantity.Quantity.UnitCode != "" {
-		// BT-130: keep the UN/ECE code in the extension and set the GOBL unit
-		// it maps to, if any.
+		// BT-130: the code becomes a GOBL unit, or stays in the extension
+		// when GOBL has no unit for it.
 		u := cbc.Code(it.Quantity.Quantity.UnitCode)
-		l.Item.Ext, l.Item.Unit = goblUnit(l.Item.Ext, u)
+		l.Item.Unit, l.Item.Ext = goblUnit(l.Item.Ext, u)
 	}
 
 	goblLineProduct(it.Product, l.Item)
@@ -122,7 +122,7 @@ func goblItemAttribute(char *Characteristic) (*org.Attribute, error) {
 		}
 		attr.Amount = &amount
 		if char.ValueMeasure.UnitCode != "" {
-			attr.Ext, attr.Unit = goblUnit(attr.Ext, cbc.Code(char.ValueMeasure.UnitCode))
+			attr.Unit, attr.Ext = goblUnit(attr.Ext, cbc.Code(char.ValueMeasure.UnitCode))
 		}
 	case char.Value != "":
 		attr.Text = strings.TrimSpace(char.Value)
