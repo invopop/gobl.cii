@@ -334,6 +334,8 @@ func isFrenchBillingMode(businessID string) bool {
 // supplied, the transport addresses are recorded on the envelope's Head.From /
 // Head.To (see WithRouting).
 func Parse(data []byte, opts ...ParseOption) (*gobl.Envelope, error) {
+	data = cleanXML(data)
+
 	var r routing
 	for _, opt := range opts {
 		if opt != nil {
