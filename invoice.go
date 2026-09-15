@@ -75,7 +75,7 @@ func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 // UnmarshalInvoice unmarshals CII invoice XML into an Invoice struct
 // without converting to GOBL.
 func UnmarshalInvoice(data []byte) (*Invoice, error) {
-	data = cleanXML(data)
+	data = []byte(cleanString(string(data)))
 
 	inv := new(Invoice)
 	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
