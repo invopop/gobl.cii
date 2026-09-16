@@ -59,23 +59,11 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
 		})
 	}
-	if ac.Base != "" {
-		b, err := num.AmountFromString(ac.Base)
-		if err != nil {
-			return nil, err
-		}
-		c.Base = &b
+	base, percent, err := goblACBasis(ac, c.Amount)
+	if err != nil {
+		return nil, err
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		c.Percent = &p
-	}
+	c.Base, c.Percent = base, percent
 	if ac.Tax != nil && ac.Tax.TypeCode != "" {
 		c.Taxes = tax.Set{
 			{
@@ -121,23 +109,11 @@ func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*
 			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
 		})
 	}
-	if ac.Base != "" {
-		b, err := num.AmountFromString(ac.Base)
-		if err != nil {
-			return nil, err
-		}
-		d.Base = &b
+	base, percent, err := goblACBasis(ac, d.Amount)
+	if err != nil {
+		return nil, err
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
-	}
+	d.Base, d.Percent = base, percent
 	if ac.Tax != nil && ac.Tax.TypeCode != "" {
 		d.Taxes = tax.Set{
 			{
@@ -187,16 +163,11 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	if ac.Reason != "" {
 		c.Reason = ac.Reason
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		c.Percent = &p
+	base, percent, err := goblACBasis(ac, c.Amount)
+	if err != nil {
+		return nil, err
 	}
+	c.Base, c.Percent = base, percent
 	return c, nil
 }
 
@@ -216,15 +187,38 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 	if ac.Reason != "" {
 		d.Reason = ac.Reason
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
+	base, percent, err := goblACBasis(ac, d.Amount)
+	if err != nil {
+		return nil, err
 	}
+	d.Base, d.Percent = base, percent
 	return d, nil
+}
+
+// goblACBasis parses the basis amount (BT-137 at line level, BT-142 at document
+// level) and decides if percentage can be used alongside the declared amount.
+func goblACBasis(ac *AllowanceCharge, amount num.Amount) (*num.Amount, *num.Percentage, error) {
+	var base *num.Amount
+	if ac.Base != "" {
+		b, err := num.AmountFromString(ac.Base)
+		if err != nil {
+			return nil, nil, err
+		}
+		base = &b
+	}
+	if ac.Percent == "" {
+		return base, nil, nil
+	}
+	p, err := num.PercentageFromString(strings.TrimSuffix(ac.Percent, "%") + "%")
+	if err != nil {
+		return nil, nil, err
+	}
+	if ac.Amount == "" {
+		// Without a declared amount the percentage is the only way to derive one.
+		return base, &p, nil
+	}
+	if base == nil || !p.Of(*base).Rescale(amount.Exp()).Equals(amount) {
+		return base, nil, nil
+	}
+	return base, &p, nil
 }
