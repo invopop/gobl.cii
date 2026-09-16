@@ -87,3 +87,39 @@ func TestParseCtoGCharges(t *testing.T) {
 
 	})
 }
+
+// TestParseCtoGLineAllowanceAmount covers BT-136/BT-141, the actual amount of a
+// line allowance or charge. EN 16931 makes it the authoritative value, so a
+// calculation percentage (BT-138) must never be allowed to overwrite it.
+func TestParseCtoGLineAllowanceAmount(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "CII_line_allowance_amount.xml")
+	require.NoError(t, err)
+	require.NoError(t, e.Calculate())
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, inv.Lines, 2)
+
+	// The first line declares a percentage with no basis amount. Applying it to
+	// the line sum would give 95.90, so the percentage has to go.
+	line := inv.Lines[0]
+	require.Len(t, line.Discounts, 1)
+	assert.Equal(t, num.MakeAmount(53227, 2), line.Discounts[0].Amount)
+	assert.Nil(t, line.Discounts[0].Percent)
+	require.Len(t, line.Charges, 1)
+	assert.Equal(t, num.MakeAmount(2187, 2), line.Charges[0].Amount)
+	// 1620.00 - 532.27 + 21.87
+	assert.Equal(t, "1109.60", line.Total.String())
+
+	// The second line backs its percentage with a basis amount that reproduces
+	// the actual amount, so both survive and GOBL recalculates the same value.
+	line = inv.Lines[1]
+	require.Len(t, line.Discounts, 1)
+	assert.Equal(t, num.MakeAmount(48694, 2), line.Discounts[0].Amount)
+	require.NotNil(t, line.Discounts[0].Percent)
+	assert.Equal(t, "5.92%", line.Discounts[0].Percent.String())
+	require.NotNil(t, line.Discounts[0].Base)
+	assert.Equal(t, num.MakeAmount(822528, 2), *line.Discounts[0].Base)
+	// 8225.28 - 486.94 + 107.71
+	assert.Equal(t, "7846.05", line.Total.String())
+}
