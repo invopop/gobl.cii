@@ -104,6 +104,13 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 
 	goblAddTaxNotes(ahts.Tax, out)
 
+	if err := goblAddRounding(ahts, out); err != nil {
+		return nil, err
+	}
+	if err := goblReconcileLines(in.Transaction, out); err != nil {
+		return nil, err
+	}
+
 	return out, nil
 }
 

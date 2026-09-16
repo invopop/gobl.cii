@@ -56,6 +56,10 @@ func (out *Invoice) addHeader(inv *bill.Invoice) error {
 	if len(inv.Notes) > 0 {
 		notes := make([]*Note, 0, len(inv.Notes))
 		for _, n := range inv.Notes {
+			// Ours, not the issuer's text; other Src values still apply.
+			if n.Src == NoteSrcReconciliation {
+				continue
+			}
 			note := &Note{Content: n.Text}
 			if code := n.Ext.Get(untdid.ExtKeyTextSubject); code != "" {
 				note.SubjectCode = code.String()

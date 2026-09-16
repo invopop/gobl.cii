@@ -1,6 +1,7 @@
 package cii
 
 import (
+	"fmt"
 	"math"
 	"strings"
 
@@ -311,4 +312,89 @@ func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
 	}
 
 	return priceExp + additionalDecimals
+}
+
+// NoteSrcReconciliation marks notes generated during conversion rather than
+// sent by the issuer. Shared with gobl.ubl; stripped again on re-export.
+const NoteSrcReconciliation cbc.Key = "reconciliation"
+
+// lineTotalTolerance matches the slack PEPPOL-EN16931-R120 allows on BT-131.
+var lineTotalTolerance = num.MakeAmount(2, 2)
+
+// goblReconcileLines rebuilds any line whose price and quantity disagree with
+// the total the issuer stated. BR-CO-10 ties the document totals to BT-131, but
+// nothing in EN 16931 checks BT-131 against the line's own components, so the
+// stated total is the figure to trust.
+func goblReconcileLines(in *Transaction, out *bill.Invoice) error {
+	if err := out.Calculate(); err != nil {
+		return err
+	}
+	var rebuilt bool
+	for i, it := range in.Lines {
+		if i >= len(out.Lines) {
+			break
+		}
+		ok, err := goblTrustStatedLineTotal(it, out.Lines[i])
+		if err != nil {
+			return fmt.Errorf("line %d: %w", i, err)
+		}
+		rebuilt = rebuilt || ok
+	}
+	if !rebuilt {
+		return nil
+	}
+	return out.Calculate()
+}
+
+func goblTrustStatedLineTotal(it *Line, l *bill.Line) (bool, error) {
+	if it.TradeSettlement == nil || it.TradeSettlement.Sum == nil || l.Total == nil || l.Item == nil {
+		return false, nil
+	}
+	stated, err := num.AmountFromString(it.TradeSettlement.Sum.Amount)
+	if err != nil {
+		return false, fmt.Errorf("parsing BT-131: %w", err)
+	}
+	if withinTolerance(*l.Total, stated) || l.Quantity.IsZero() {
+		return false, nil
+	}
+
+	// Deriving the price from BT-131 means the line's own allowances and charges
+	// are already in it, so record them before dropping them.
+	note := fmt.Sprintf("Line net amount as received: %s. Price and quantity as sent gave %s%s.",
+		stated.String(), l.Total.String(), goblAbsorbedAmounts(l))
+	price := stated.RescaleUp(stated.Exp() + 4).Divide(l.Quantity)
+	l.Item.Price = &price
+	l.Discounts = nil
+	l.Charges = nil
+	l.Notes = append(l.Notes, &org.Note{
+		Key:  org.NoteKeyGeneral,
+		Src:  NoteSrcReconciliation,
+		Text: note,
+	})
+	return true, nil
+}
+
+func goblAbsorbedAmounts(l *bill.Line) string {
+	var alw, chg num.Amount
+	for _, d := range l.Discounts {
+		alw = alw.MatchPrecision(d.Amount).Add(d.Amount)
+	}
+	for _, c := range l.Charges {
+		chg = chg.MatchPrecision(c.Amount).Add(c.Amount)
+	}
+	switch {
+	case !alw.IsZero() && !chg.IsZero():
+		return fmt.Sprintf(", absorbing an allowance of %s and a charge of %s", alw, chg)
+	case !alw.IsZero():
+		return fmt.Sprintf(", absorbing an allowance of %s", alw)
+	case !chg.IsZero():
+		return fmt.Sprintf(", absorbing a charge of %s", chg)
+	}
+	return ""
+}
+
+func withinTolerance(a, b num.Amount) bool {
+	a = a.MatchPrecision(b)
+	b = b.MatchPrecision(a)
+	return a.Subtract(b).Abs().Compare(lineTotalTolerance.MatchPrecision(a)) <= 0
 }
