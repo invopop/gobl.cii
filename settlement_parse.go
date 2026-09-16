@@ -1,6 +1,7 @@
 package cii
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -244,4 +245,24 @@ func goblPaymentMeansCode(code string) cbc.Key {
 		return val
 	}
 	return pay.MeansKeyAny
+}
+
+// goblAddRounding maps BT-114. Totals.Rounding is the one total GOBL does not
+// reset when recalculating.
+func goblAddRounding(stlm *Settlement, out *bill.Invoice) error {
+	if stlm.Summary == nil || stlm.Summary.RoundingAmount == "" {
+		return nil
+	}
+	r, err := num.AmountFromString(stlm.Summary.RoundingAmount)
+	if err != nil {
+		return fmt.Errorf("parsing BT-114: %w", err)
+	}
+	if r.IsZero() {
+		return nil
+	}
+	if out.Totals == nil {
+		out.Totals = new(bill.Totals)
+	}
+	out.Totals.Rounding = &r
+	return nil
 }

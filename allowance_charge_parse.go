@@ -187,7 +187,9 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	if ac.Reason != "" {
 		c.Reason = ac.Reason
 	}
-	if ac.Percent != "" {
+	// BT-137: a bare percent would mean "percent of the line sum", a different
+	// base, so only carry it with the one stated (PEPPOL-EN16931-R041).
+	if ac.Percent != "" && ac.Base != "" {
 		if !strings.HasSuffix(ac.Percent, "%") {
 			ac.Percent += "%"
 		}
@@ -196,6 +198,11 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 			return nil, err
 		}
 		c.Percent = &p
+		b, err := num.AmountFromString(ac.Base)
+		if err != nil {
+			return nil, err
+		}
+		c.Base = &b
 	}
 	return c, nil
 }
@@ -216,7 +223,9 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 	if ac.Reason != "" {
 		d.Reason = ac.Reason
 	}
-	if ac.Percent != "" {
+	// BT-137: a bare percent would mean "percent of the line sum", a different
+	// base, so only carry it with the one stated (PEPPOL-EN16931-R041).
+	if ac.Percent != "" && ac.Base != "" {
 		if !strings.HasSuffix(ac.Percent, "%") {
 			ac.Percent += "%"
 		}
@@ -225,6 +234,11 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 			return nil, err
 		}
 		d.Percent = &p
+		b, err := num.AmountFromString(ac.Base)
+		if err != nil {
+			return nil, err
+		}
+		d.Base = &b
 	}
 	return d, nil
 }

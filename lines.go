@@ -159,6 +159,10 @@ func newLine(l *bill.Line) *Line {
 	if len(l.Notes) > 0 {
 		notes := make([]*Note, 0, len(l.Notes))
 		for _, n := range l.Notes {
+			// Ours, not the issuer's text; other Src values still apply.
+			if n.Src == NoteSrcReconciliation {
+				continue
+			}
 			note := &Note{Content: n.Text}
 			if code := n.Ext.Get(untdid.ExtKeyTextSubject); code != "" {
 				note.SubjectCode = code.String()

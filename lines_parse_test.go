@@ -132,7 +132,9 @@ func TestParseCtoGLines(t *testing.T) {
 		lines := inv.Lines
 		require.NotEmpty(t, lines)
 
-		// BT-148: Price 0.00880 / BasisQuantity 0.00880 = 1.00000
-		assert.Equal(t, "1.00000", lines[0].Item.Price.String())
+		// BasisQuantity repeats the price, so price / base gives 1.00000 and the
+		// line no longer matches its stated BT-131. Rebuilt from that instead.
+		assert.Equal(t, "0.008800", lines[0].Item.Price.String())
+		assert.Equal(t, "140.80", lines[0].Total.String())
 	})
 }
