@@ -19,7 +19,7 @@ func goblNewDeliveryDetails(del *Delivery) (*bill.DeliveryDetails, error) {
 			d.Identities = []*org.Identity{
 				{
 					Code:  cbc.Code(gid.Value),
-					Label: gid.SchemeID,
+					Label: cleanString(gid.SchemeID),
 				},
 			}
 		} else if pid := firstPartyID(del.Receiver.ID); pid != nil {
@@ -49,7 +49,7 @@ func goblNewDeliveryDetails(del *Delivery) (*bill.DeliveryDetails, error) {
 // for the delivery party (BT-70 name, BG-15 address).
 func goblNewDeliveryParty(party *Party) *org.Party {
 	p := &org.Party{
-		Name: party.Name,
+		Name: cleanString(party.Name),
 	}
 	if party.PostalTradeAddress != nil {
 		p.Addresses = []*org.Address{

@@ -41,7 +41,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	l := &bill.Line{
 		Quantity: num.MakeAmount(1, 0),
 		Item: &org.Item{
-			Name:  strings.TrimSpace(it.Product.Name),
+			Name:  cleanString(strings.TrimSpace(it.Product.Name)),
 			Price: &price,
 		},
 	}
@@ -142,7 +142,7 @@ func goblLineProduct(prod *Product, item *org.Item) {
 	}
 
 	if prod.Description != nil {
-		item.Description = strings.TrimSpace(*prod.Description)
+		item.Description = cleanString(strings.TrimSpace(*prod.Description))
 	}
 
 	if prod.Origin != nil {
@@ -157,7 +157,7 @@ func goblLineProduct(prod *Product, item *org.Item) {
 			Code: cbc.Code(prod.Classification.Code.Value),
 		}
 		if prod.Classification.Code.ListID != "" {
-			id.Label = prod.Classification.Code.ListID
+			id.Label = cleanString(prod.Classification.Code.ListID)
 		}
 		item.Identities = append(item.Identities, id)
 	}
@@ -172,7 +172,7 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 	for _, note := range lineDoc.Note {
 		n := &org.Note{}
 		if note.Content != "" {
-			n.Text = strings.TrimSpace(note.Content)
+			n.Text = cleanString(strings.TrimSpace(note.Content))
 		}
 		if note.SubjectCode != "" {
 			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})

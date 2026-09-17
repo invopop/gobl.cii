@@ -81,3 +81,32 @@ func TestUnitFromUNECE(t *testing.T) {
 		})
 	}
 }
+
+func TestCleanString(t *testing.T) {
+	t.Run("leaves clean text untouched", func(t *testing.T) {
+		in := "Première vérification"
+		assert.Equal(t, in, cleanString(in))
+	})
+
+	t.Run("drops the replacement character", func(t *testing.T) {
+		// A sender emits U+FFFD when its own encoding conversion has already
+		// given up. It is valid UTF-8, so it reaches gobl, where canonical
+		// JSON refuses it and the document fails to digest.
+		assert.Equal(t, "Premire", cleanString("Premi�re"))
+	})
+
+	t.Run("drops a decoded character reference", func(t *testing.T) {
+		// &#xFFFD; in the document arrives here already decoded.
+		assert.Equal(t, "bad  char", cleanString("bad � char"))
+	})
+
+	t.Run("is idempotent", func(t *testing.T) {
+		in := "Premi�re"
+		assert.Equal(t, cleanString(in), cleanString(cleanString(in)))
+	})
+
+	t.Run("preserves valid multi-byte text", func(t *testing.T) {
+		in := "1000 m² – 20 €"
+		assert.Equal(t, in, cleanString(in))
+	})
+}
