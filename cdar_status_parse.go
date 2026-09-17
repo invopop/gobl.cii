@@ -158,7 +158,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 			// prepareReasonKey at normalize-time.
 			r = &bill.Reason{
 				Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(ds.ReasonCode)),
-				Description: strings.Join(ds.Reason, "\n"),
+				Description: cleanString(strings.Join(ds.Reason, "\n")),
 			}
 		}
 		// Field-level corrections and amount markers

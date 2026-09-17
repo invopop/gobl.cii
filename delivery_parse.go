@@ -19,7 +19,7 @@ func goblNewDeliveryDetails(del *Delivery) (*bill.DeliveryDetails, error) {
 			d.Identities = []*org.Identity{
 				{
 					Code:  cbc.Code(gid.Value),
-					Label: gid.SchemeID,
+					Label: cleanString(gid.SchemeID),
 				},
 			}
 		} else if pid := firstPartyID(del.Receiver.ID); pid != nil {
