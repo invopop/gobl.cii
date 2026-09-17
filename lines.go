@@ -6,6 +6,9 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/org"
 )
 
 // Line defines the structure of the IncludedSupplyChainTradeLineItem in the CII standard
@@ -82,10 +85,14 @@ type ListID struct {
 	ListID string `xml:"listID,attr,omitempty"`
 }
 
-// Characteristic defines the structure of the ApplicableProductCharacteristic of the CII standard
+// Characteristic defines the structure of the ApplicableProductCharacteristic
+// of the CII standard. ValueMeasure is only ever read: documents from senders
+// using the CII extended profile may carry one, but the EN 16931 profiles do
+// not accept it on output.
 type Characteristic struct {
-	Description string `xml:"ram:Description,omitempty"`
-	Value       string `xml:"ram:Value,omitempty"`
+	Description  string    `xml:"ram:Description,omitempty"`
+	ValueMeasure *Quantity `xml:"ram:ValueMeasure,omitempty"`
+	Value        string    `xml:"ram:Value,omitempty"`
 }
 
 // Quantity defines the structure of the quantity with its attributes for the CII standard
@@ -113,18 +120,64 @@ type Summation struct {
 	Amount string `xml:"ram:LineTotalAmount"`
 }
 
-func (out *Invoice) addLines(lines []*bill.Line) error {
+func (out *Invoice) addLines(inv *bill.Invoice) error {
 	var Lines []*Line
 
-	for _, l := range lines {
-		Lines = append(Lines, newLine(l))
+	for _, l := range inv.Lines {
+		Lines = append(Lines, newLine(l, lineCurrency(inv, l)))
 	}
 
 	out.Transaction.Lines = Lines
 	return nil
 }
 
-func newLine(l *bill.Line) *Line {
+// newCharacteristics builds the BG-32 item attributes from the item's
+// attributes: the label names the attribute (BT-160) and the value (BT-161)
+// presents whichever value the attribute holds. Amounts carry their unit in
+// the value text, as ram:ValueMeasure is rejected by the Factur-X and ZUGFeRD
+// EN 16931 schemas and warned against by CII-SR-070 everywhere else.
+func newCharacteristics(attrs []*org.Attribute) []*Characteristic {
+	chars := make([]*Characteristic, 0, len(attrs))
+	for _, attr := range attrs {
+		c := &Characteristic{Description: characteristicName(attr)}
+		switch {
+		case attr.Amount != nil:
+			c.Value = attr.Amount.String()
+			if label := unitLabel(attr.Unit, untdidUnit(attr.Ext, attr.Unit)); label != "" {
+				c.Value += " " + label
+			}
+		case attr.Text != "":
+			c.Value = attr.Text
+		case attr.Code != "":
+			c.Value = attr.Code.String()
+		case attr.Date != nil:
+			c.Value = attr.Date.String()
+		}
+		if c.Description == "" || c.Value == "" {
+			continue
+		}
+		chars = append(chars, c)
+	}
+	if len(chars) == 0 {
+		return nil
+	}
+	return chars
+}
+
+// characteristicName names an attribute for BT-160, falling back to the key or
+// type when it carries no label.
+func characteristicName(attr *org.Attribute) string {
+	switch {
+	case attr.Label != "":
+		return attr.Label
+	case attr.Key != cbc.KeyEmpty:
+		return attr.Key.String()
+	default:
+		return attr.Type.String()
+	}
+}
+
+func newLine(l *bill.Line, ccy string) *Line {
 	if l.Item == nil {
 		return nil
 	}
@@ -146,15 +199,18 @@ func newLine(l *bill.Line) *Line {
 		Quantity: &LineDelivery{
 			Quantity: &Quantity{
 				Amount:   l.Quantity.String(),
-				UnitCode: string(it.Unit.UNECE()),
+				UnitCode: untdidUnit(it.Ext, it.Unit).String(),
 			},
 		},
-		TradeSettlement: newTradeSettlement(l),
+		TradeSettlement: newTradeSettlement(l, ccy),
 	}
 
 	if it.Description != "" {
 		lineItem.Product.Description = &it.Description
 	}
+
+	// BG-32: item attributes
+	lineItem.Product.Characteristics = newCharacteristics(it.Attributes)
 
 	if len(l.Notes) > 0 {
 		notes := make([]*Note, 0, len(l.Notes))
@@ -215,7 +271,7 @@ func newLine(l *bill.Line) *Line {
 	return lineItem
 }
 
-func newTradeSettlement(l *bill.Line) *TradeSettlement {
+func newTradeSettlement(l *bill.Line, ccy string) *TradeSettlement {
 	var taxes []*Tax
 	for _, tax := range l.Taxes {
 		t := makeTaxCategory(tax)
@@ -225,30 +281,25 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	stlm := &TradeSettlement{
 		ApplicableTradeTax: taxes,
 		Sum: &Summation{
-			Amount: l.Total.Rescale(2).String(),
+			// BT-131: the line net amount, capped at the currency's
+			// precision by BR-DEC-23.
+			Amount: rescaleToCurrency(*l.Total, ccy),
 		},
 	}
 
 	if l.Period != nil {
-		stlm.Period = &Period{
-			Start: &IssueDate{
-				DateFormat: &Date{
-					Value:  formatIssueDate(l.Period.Start),
-					Format: issueDateFormat,
-				},
-			},
-			End: &IssueDate{
-				DateFormat: &Date{
-					Value:  formatIssueDate(l.Period.End),
-					Format: issueDateFormat,
-				},
-			},
+		// Period start and end are both optional, so only the ends the
+		// period actually carries are written out.
+		stlm.Period = &Period{}
+		if d := documentDate(l.Period.Start); d != nil {
+			stlm.Period.Start = &IssueDate{DateFormat: d}
+		}
+		if d := documentDate(l.Period.End); d != nil {
+			stlm.Period.End = &IssueDate{DateFormat: d}
 		}
 	}
 
-	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-		stlm.AllowanceCharge = newLineAllowanceCharges(l)
-	}
+	stlm.AllowanceCharge = newLineAllowanceCharges(l, ccy)
 
 	// BT-133: Line buyer accounting reference
 	if l.Cost != "" {
@@ -258,4 +309,13 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	}
 
 	return stlm
+}
+
+// lineCurrency resolves the currency a line's amounts are expressed in: its
+// item may override the document's.
+func lineCurrency(inv *bill.Invoice, l *bill.Line) string {
+	if l.Item != nil && l.Item.Currency != currency.CodeEmpty {
+		return l.Item.Currency.String()
+	}
+	return inv.Currency.String()
 }

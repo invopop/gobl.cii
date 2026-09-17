@@ -1,8 +1,6 @@
 package cii_test
 
 import (
-	"context"
-	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -19,11 +17,9 @@ import (
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
-	"github.com/invopop/phive"
+	"github.com/invopop/phorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // statusProcessCodes lists the CDAR ProcessConditionCodes carried by
@@ -653,40 +649,28 @@ func TestCDARPaymentPPFEncaissement(t *testing.T) {
 // `-validate` and a Phive gRPC service reachable on localhost:9091.
 // requireValidCDAR runs the CDAR bytes through Phive and fails on any
 // error OR WARNING. The BR-FR-CDV rule set is flagged `warning` in
-// cdar 1.3.1 — Phive's overall Success therefore proves only XSD
+// cdar 1.3.1 — the validator's overall success therefore proves only XSD
 // validity, and the warnings become fatal in the September 2026
 // schematron update, so they are treated as failures already.
-func requireValidCDAR(t *testing.T, pc phive.ValidationServiceClient, data []byte, label string) {
+func requireValidCDAR(t *testing.T, pc *phorm.Client, data []byte, label string) {
 	t.Helper()
-	resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-		Vesid:      cii.ContextCDARFlow6.VESID,
-		XmlContent: data,
-	})
-	require.NoError(t, err)
-	out, _ := json.MarshalIndent(resp.Results, "", "  ")
-	require.True(t, resp.Success,
-		"CDAR for %s failed Phive validation: %s", label, string(out))
-	var warnings []*phive.ValidationError
-	for _, layer := range resp.Results {
-		warnings = append(warnings, layer.Warnings...)
+	var errs, warnings []string
+	for _, f := range phormValidate(t, pc, cii.ContextCDARFlow6.VESID, data) {
+		if f.Level == levelWarn {
+			warnings = append(warnings, f.String())
+			continue
+		}
+		errs = append(errs, f.String())
 	}
+	require.Empty(t, errs, "CDAR for %s failed schematron validation: %s", label, strings.Join(errs, "\n"))
 	if len(warnings) > 0 {
-		wout, _ := json.MarshalIndent(warnings, "", "  ")
-		t.Fatalf("CDAR for %s has %d schematron warning(s) — fatal from September 2026: %s",
-			label, len(warnings), string(wout))
+		t.Fatalf("CDAR for %s has %d schematron warning(s) — fatal from September 2026:\n%s",
+			label, len(warnings), strings.Join(warnings, "\n"))
 	}
 }
 
 func TestCDARSchematron(t *testing.T) {
-	if !*validate {
-		t.Skip("requires -validate flag and a running Phive gRPC service")
-	}
-
-	conn, err := grpc.NewClient("localhost:9091",
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
-	require.NoError(t, err)
-	defer conn.Close() //nolint:errcheck
-	pc := phive.NewValidationServiceClient(conn)
+	pc := phormClient(t)
 
 	contexts := []struct {
 		name string

@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 )
 
 // issueDateFormat is the issue date format in the form YYYYMMDD
@@ -19,6 +21,25 @@ func (out *Invoice) Bytes() ([]byte, error) {
 		return nil, err
 	}
 	return append([]byte(xml.Header), bytes...), nil
+}
+
+// untdidUnit returns the UN/ECE code for a unit and its extensions. The unit
+// takes priority, as it does in GOBL, and the extension answers for the codes
+// it has no key for.
+func untdidUnit(ext tax.Extensions, unit cbc.Key) cbc.Code {
+	if code := untdid.UnitCode(unit); code != cbc.CodeEmpty {
+		return code
+	}
+	return ext.Get(untdid.ExtKeyUnit)
+}
+
+// unitLabel describes a unit for presentation, falling back to the UN/ECE code
+// when the unit has no GOBL key.
+func unitLabel(unit cbc.Key, code cbc.Code) string {
+	if unit != cbc.KeyEmpty {
+		return unit.String()
+	}
+	return code.String()
 }
 
 func documentDate(date *cal.Date) *Date {
