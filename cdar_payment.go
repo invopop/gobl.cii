@@ -340,6 +340,7 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 	}
 
 	hydratePartyInboxes(pmt.Supplier, pmt.Customer, r)
+	cleanDocument(pmt)
 	return pmt, nil
 }
 

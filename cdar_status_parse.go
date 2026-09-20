@@ -129,6 +129,7 @@ func goblStatusFromCDAR(cdar *CDAR, r routing) (*bill.Status, error) {
 	}
 
 	hydratePartyInboxes(st.Supplier, st.Customer, r)
+	cleanDocument(st)
 	return st, nil
 }
 
