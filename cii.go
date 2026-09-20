@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
@@ -271,6 +272,8 @@ var contexts = []Context{
 //     OutputGuidelineID and then on GuidelineID
 //  2. Tries to match on the full GuidelineID (for external identification)
 //  3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
+//  4. As a last resort, falls back to a French context when the BusinessID is a
+//     billing mode and the GuidelineID still looks French
 func FindContext(guidelineID string, businessID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// GuidelineID as EN16931 but can be identified by their BusinessID
@@ -280,7 +283,7 @@ func FindContext(guidelineID string, businessID string) *Context {
 		// plain EN16931 guideline that CIUS documents carry.
 		for i := range contexts {
 			ctx := &contexts[i]
-			if ctx.OutputGuidelineID == guidelineID {
+			if ctx.OutputGuidelineID != "" && ctx.OutputGuidelineID == guidelineID {
 				return ctx
 			}
 		}
@@ -311,7 +314,32 @@ func FindContext(guidelineID string, businessID string) *Context {
 		}
 	}
 
+	// Nothing matched, but the billing mode says the document is French. The
+	// CTC schematron never checks BT-24, so mangled GuidelineIDs (a missing
+	// ":extended-ctc-fr" suffix, "urn.eu:" for "urn:cen.eu:") validate cleanly
+	// downstream; without this the document would lose every French rule.
+	if isFrenchBillingMode(businessID) && looksFrench(guidelineID) {
+		ctx := ContextPeppolFranceCIUSV1
+		if strings.Contains(guidelineID, "conformant") {
+			ctx = ContextPeppolFranceExtendedV1
+		}
+		return &ctx
+	}
+
 	return nil
+}
+
+// looksFrench reports whether a GuidelineID that matched no known context
+// leaves the French billing mode as the best available signal: either it is
+// recognisably an EN 16931 / French CTC identifier, or it is absent entirely.
+// It keeps the fallback away from documents of another standard that happen to
+// carry a two-character BusinessProcessParameter.
+func looksFrench(guidelineID string) bool {
+	if guidelineID == "" {
+		return true
+	}
+	id := strings.ToLower(guidelineID)
+	return strings.Contains(id, "en16931") || strings.Contains(id, "cpro.gouv.fr")
 }
 
 // isFrenchBillingMode checks if the given businessID matches a known French

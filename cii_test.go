@@ -189,6 +189,64 @@ func TestFindContext(t *testing.T) {
 	})
 }
 
+// The French CTC schematron never validates BT-24, so a sender can ship a
+// mangled GuidelineID and still pass every downstream rule set. The billing
+// mode in BT-23 is then the only trustworthy French signal.
+func TestFrenchBillingModeFallback(t *testing.T) {
+	for _, tt := range []struct {
+		name        string
+		guidelineID string
+		want        *cii.Context
+	}{
+		{
+			// Seen in the wild: "urn.eu:" for "urn:cen.eu:", and no
+			// ":extended-ctc-fr" suffix.
+			"mangled extended URN",
+			"urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
+			&cii.ContextPeppolFranceExtendedV1,
+		},
+		{
+			"unsuffixed cpro URN",
+			"urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
+			&cii.ContextPeppolFranceExtendedV1,
+		},
+		{
+			"mangled EN16931 URN falls back to CIUS",
+			"urn.eu:en16931:2017",
+			&cii.ContextPeppolFranceCIUSV1,
+		},
+		{
+			// BT-24 absent: the billing mode is all that is left to go on.
+			"absent guideline",
+			"",
+			&cii.ContextPeppolFranceCIUSV1,
+		},
+		{
+			// Another standard's guideline must not be dragged into a French
+			// context by a two-character BusinessProcessParameter.
+			"foreign guideline stays unmatched",
+			"urn:peppol:pint:billing-1@sg-1",
+			nil,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := cii.FindContext(tt.guidelineID, "B2")
+			if tt.want == nil {
+				assert.Nil(t, ctx)
+				return
+			}
+			require.NotNil(t, ctx)
+			assert.Equal(t, tt.want.GuidelineID, ctx.GuidelineID)
+			assert.Equal(t, tt.want.Addons, ctx.Addons)
+		})
+	}
+
+	t.Run("no billing mode means no fallback", func(t *testing.T) {
+		ctx := cii.FindContext("urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0", "")
+		assert.Nil(t, ctx)
+	})
+}
+
 // TestHybridProfileGuidelines pins each hybrid context to the BT-24 value its
 // profile's codelist admits; a wrong value invalidates every document.
 func TestHybridProfileGuidelines(t *testing.T) {
