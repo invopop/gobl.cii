@@ -71,7 +71,7 @@ func goblStatusFromCDAR(cdar *CDAR, r routing) (*bill.Status, error) {
 	st.SetAddons(flow6.V1)
 
 	if cdar.ExchangedDocument.ID != "" {
-		st.Code = cbc.Code(cdar.ExchangedDocument.ID)
+		st.Code = cbc.Code(cleanString(cdar.ExchangedDocument.ID))
 	}
 	if cdar.ExchangedDocument.IssueDateTime != nil && cdar.ExchangedDocument.IssueDateTime.DateTimeString != nil {
 		d, t, err := parseCDARDateTime(cdar.ExchangedDocument.IssueDateTime.DateTimeString.Value)
@@ -157,7 +157,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 			// Reason.Key is recovered from the ext by flow6's
 			// prepareReasonKey at normalize-time.
 			r = &bill.Reason{
-				Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(ds.ReasonCode)),
+				Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(cleanString(ds.ReasonCode))),
 				Description: cleanString(strings.Join(ds.Reason, "\n")),
 			}
 		}
@@ -184,7 +184,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 			// Action.Key is recovered from the ext by flow6's
 			// prepareActionKey at normalize-time.
 			a := &bill.Action{
-				Ext: tax.MakeExtensions().Set(flow6.ExtKeyAction, cbc.Code(ds.RequestedActionCode)),
+				Ext: tax.MakeExtensions().Set(flow6.ExtKeyAction, cbc.Code(cleanString(ds.RequestedActionCode))),
 			}
 			if ds.RequestedAction != "" {
 				a.Description = cleanString(ds.RequestedAction)
@@ -205,21 +205,21 @@ func goblFaultFromCDAR(dc *CDARDocumentCharacteristic) *bill.Fault {
 	if dc == nil {
 		return nil
 	}
-	code := dc.TypeCode
+	code := cleanString(dc.TypeCode)
 	if code == "" {
-		code = dc.ID
+		code = cleanString(dc.ID)
 	}
 	if code == "" {
 		return nil
 	}
 	f := &bill.Fault{Code: cbc.Code(code)}
 
-	msg := dc.Name
+	msg := cleanString(dc.Name)
 	if dc.ID != "" && dc.TypeCode != "" {
 		if msg != "" {
-			msg += " (" + dc.ID + ")"
+			msg += " (" + cleanString(dc.ID) + ")"
 		} else {
-			msg = dc.ID
+			msg = cleanString(dc.ID)
 		}
 	}
 	var value string
@@ -246,7 +246,7 @@ func goblFaultFromCDAR(dc *CDARDocumentCharacteristic) *bill.Fault {
 	f.Message = msg
 
 	if dc.Location != "" {
-		f.Paths = []string{dc.Location}
+		f.Paths = []string{cleanString(dc.Location)}
 	}
 	return f
 }
@@ -264,12 +264,12 @@ func goblDocRefFromCDAR(ref *CDARReferencedDocument) *org.DocumentRef {
 	if ref.IssuerAssignedID == "" {
 		return nil
 	}
-	dr := &org.DocumentRef{Code: cbc.Code(ref.IssuerAssignedID)}
+	dr := &org.DocumentRef{Code: cbc.Code(cleanString(ref.IssuerAssignedID))}
 	if ref.TypeCode != "" {
 		// MDT-91 → the canonical untdid-document-type extension (not the Type
 		// key), so the referenced type is represented the same way inbound and
 		// outbound and downstream can always rely on the extension.
-		dr.Ext = dr.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.TypeCode))
+		dr.Ext = dr.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(cleanString(ref.TypeCode)))
 	}
 	if ref.FormattedIssueDateTime != nil && ref.FormattedIssueDateTime.DateTimeString != nil {
 		d, _, err := parseCDARDateTime(ref.FormattedIssueDateTime.DateTimeString.Value)
@@ -373,7 +373,7 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 	}
 	p := &org.Party{Name: cleanString(tp.Name)}
 	if tp.RoleCode != "" {
-		p.Ext = tax.MakeExtensions().Set(flow6.ExtKeyRole, cbc.Code(tp.RoleCode))
+		p.Ext = tax.MakeExtensions().Set(flow6.ExtKeyRole, cbc.Code(cleanString(tp.RoleCode)))
 	}
 	for _, gid := range tp.GlobalIDs {
 		if gid == nil || gid.Value == "" {
@@ -389,8 +389,8 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 	}
 	if tp.URIUniversalCommunication != nil && tp.URIUniversalCommunication.URIID != nil {
 		ib := &org.Inbox{
-			Scheme: cbc.Code(tp.URIUniversalCommunication.URIID.SchemeID),
-			Code:   cbc.Code(tp.URIUniversalCommunication.URIID.Value),
+			Scheme: cbc.Code(cleanString(tp.URIUniversalCommunication.URIID.SchemeID)),
+			Code:   cbc.Code(cleanString(tp.URIUniversalCommunication.URIID.Value)),
 		}
 		p.Inboxes = []*org.Inbox{ib}
 	}

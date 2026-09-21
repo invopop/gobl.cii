@@ -64,13 +64,13 @@ func goblAttachments(docs []*AdditionalDocument) []*org.Attachment {
 		}
 		att := &org.Attachment{}
 		if doc.ID != "" {
-			att.Code = cbc.Code(doc.ID)
+			att.Code = cbc.Code(cleanString(doc.ID))
 		}
 		if doc.Name != "" {
 			att.Description = cleanString(doc.Name)
 		}
 		if doc.URIID != "" {
-			att.URL = doc.URIID
+			att.URL = cleanString(doc.URIID)
 		}
 		attachments = append(attachments, att)
 	}

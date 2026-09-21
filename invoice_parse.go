@@ -35,15 +35,15 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	ahts := in.Transaction.Settlement
 
 	out := &bill.Invoice{
-		Code:     cbc.Code(in.ExchangedDocument.ID),
-		Type:     typeCodeParse(in.ExchangedDocument.TypeCode),
+		Code:     cbc.Code(cleanString(in.ExchangedDocument.ID)),
+		Type:     typeCodeParse(cleanString(in.ExchangedDocument.TypeCode)),
 		Currency: currency.Code(ahts.Currency),
 		Supplier: goblNewParty(in.Transaction.Agreement.Seller),
 		Customer: goblNewParty(in.Transaction.Agreement.Buyer),
 		Tax: &bill.Tax{
 			Rounding: tax.RoundingRuleCurrency,
 			Ext: tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyDocumentType: cbc.Code(in.ExchangedDocument.TypeCode),
+				untdid.ExtKeyDocumentType: cbc.Code(cleanString(in.ExchangedDocument.TypeCode)),
 			}),
 		},
 	}
@@ -52,7 +52,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		out.Addons = tax.Addons{List: ctx.Addons}
 		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) || ctx.Is(ContextPeppolFranceExtendedV1) {
 			if in.ExchangedContext.BusinessContext != nil {
-				out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
+				out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(cleanString(in.ExchangedContext.BusinessContext.ID)))
 			}
 		}
 	}
@@ -156,7 +156,7 @@ func goblParseNotes(notes []*Note) []*org.Note {
 	for _, note := range notes {
 		n := &org.Note{Text: cleanString(note.Content)}
 		if note.SubjectCode != "" {
-			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
+			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(cleanString(note.SubjectCode))})
 		}
 		out = append(out, n)
 	}
@@ -171,7 +171,7 @@ func goblParsePreceding(refs []*ReferencedDocument) ([]*org.DocumentRef, error) 
 	out := make([]*org.DocumentRef, 0, len(refs))
 	for _, ref := range refs {
 		docRef := &org.DocumentRef{
-			Code: cbc.Code(ref.IssuerAssignedID),
+			Code: cbc.Code(cleanString(ref.IssuerAssignedID)),
 		}
 		if ref.IssueDate != nil && ref.IssueDate.DateFormat != nil {
 			refDate, err := parseDate(ref.IssueDate.DateFormat.Value)
@@ -211,10 +211,10 @@ func buildTaxCategoryMap(taxes []*Tax) map[string]*taxCategoryInfo {
 		if t.CategoryCode == "" {
 			continue
 		}
-		key := buildTaxCategoryKey(t.TypeCode, t.CategoryCode, t.RateApplicablePercent)
+		key := buildTaxCategoryKey(cleanString(t.TypeCode), cleanString(t.CategoryCode), t.RateApplicablePercent)
 		info := &taxCategoryInfo{}
 		if t.ExemptionReasonCode != "" {
-			info.exemptionReasonCode = t.ExemptionReasonCode
+			info.exemptionReasonCode = cleanString(t.ExemptionReasonCode)
 		}
 		categoryMap[key] = info
 	}

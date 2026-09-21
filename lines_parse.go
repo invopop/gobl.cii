@@ -49,7 +49,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	if len(it.TradeSettlement.ApplicableTradeTax) > 0 {
 		l.Taxes = tax.Set{
 			{
-				Category: cbc.Code(it.TradeSettlement.ApplicableTradeTax[0].TypeCode),
+				Category: cbc.Code(cleanString(it.TradeSettlement.ApplicableTradeTax[0].TypeCode)),
 			},
 		}
 	}
@@ -84,7 +84,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		l.Item.Meta = make(cbc.Meta)
 		for _, char := range it.Product.Characteristics {
 			key := formatKey(char.Description)
-			l.Item.Meta[key] = char.Value
+			l.Item.Meta[key] = cleanString(char.Value)
 		}
 	}
 
@@ -123,7 +123,7 @@ func goblLinePrice(np *NetPrice) (num.Amount, error) {
 // goblLineProduct populates item identities and metadata from the CII product.
 func goblLineProduct(prod *Product, item *org.Item) {
 	if prod.SellerAssignedID != nil {
-		item.Ref = cbc.Code(*prod.SellerAssignedID)
+		item.Ref = cbc.Code(cleanString(*prod.SellerAssignedID))
 	}
 
 	if prod.BuyerAssignedID != nil {
@@ -146,7 +146,7 @@ func goblLineProduct(prod *Product, item *org.Item) {
 	}
 
 	if prod.Origin != nil {
-		item.Origin = l10n.ISOCountryCode(*prod.Origin)
+		item.Origin = l10n.ISOCountryCode(cleanString(*prod.Origin))
 	}
 
 	// BT-158: Item classification
@@ -175,7 +175,7 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 			n.Text = cleanString(strings.TrimSpace(note.Content))
 		}
 		if note.SubjectCode != "" {
-			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
+			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(cleanString(note.SubjectCode))})
 		}
 		l.Notes = append(l.Notes, n)
 	}
@@ -186,7 +186,7 @@ func goblLineAgreement(ag *LineAgreement, l *bill.Line) {
 	// BT-128: Invoice line object identifier (TypeCode 130 indicates object identifier)
 	if ag.AdditionalReference != nil && ag.AdditionalReference.TypeCode == "130" && ag.AdditionalReference.ID != "" {
 		l.Identifier = &org.Identity{
-			Code: cbc.Code(ag.AdditionalReference.ID),
+			Code: cbc.Code(cleanString(ag.AdditionalReference.ID)),
 		}
 		if ag.AdditionalReference.RefCode != nil {
 			l.Identifier.Ext = tax.ExtensionsOf(cbc.CodeMap{
@@ -205,7 +205,7 @@ func goblLineAgreement(ag *LineAgreement, l *bill.Line) {
 func goblLineSettlement(ts *TradeSettlement, l *bill.Line) {
 	// BT-133: Line buyer accounting reference
 	if ts.AccountingAccount != nil && ts.AccountingAccount.ID != "" {
-		l.Cost = cbc.Code(ts.AccountingAccount.ID)
+		l.Cost = cbc.Code(cleanString(ts.AccountingAccount.ID))
 	}
 }
 
@@ -241,14 +241,14 @@ func goblLineTaxes(taxes []*Tax, l *bill.Line, taxMap map[string]*taxCategoryInf
 		// Ensure the Taxes slice has enough capacity
 		for len(l.Taxes) <= i {
 			l.Taxes = append(l.Taxes, &tax.Combo{
-				Category: cbc.Code(tt.TypeCode),
+				Category: cbc.Code(cleanString(tt.TypeCode)),
 			})
 		}
 		if tt.CategoryCode != "" {
 			l.Taxes[i].Ext = tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyTaxCategory: cbc.Code(tt.CategoryCode),
+				untdid.ExtKeyTaxCategory: cbc.Code(cleanString(tt.CategoryCode)),
 			})
-			key := buildTaxCategoryKey(tt.TypeCode, tt.CategoryCode, tt.RateApplicablePercent)
+			key := buildTaxCategoryKey(cleanString(tt.TypeCode), cleanString(tt.CategoryCode), tt.RateApplicablePercent)
 			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
 				l.Taxes[i].Ext = l.Taxes[i].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
