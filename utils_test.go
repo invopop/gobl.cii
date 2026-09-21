@@ -1,16 +1,16 @@
 package cii
 
 import (
-	"testing"
-
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
 	"sort"
 	"strings"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Define tests for the ParseDate function
