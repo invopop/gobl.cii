@@ -271,8 +271,7 @@ var contexts = []Context{
 //     OutputGuidelineID and then on GuidelineID
 //  2. Tries to match on the full GuidelineID (for external identification)
 //  3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
-//  4. As a last resort, falls back to a French context whenever the BusinessID is
-//     a French billing mode
+//  4. Falls back to a French context when the BusinessID is a French billing mode
 func FindContext(guidelineID string, businessID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// GuidelineID as EN16931 but can be identified by their BusinessID
@@ -313,14 +312,10 @@ func FindContext(guidelineID string, businessID string) *Context {
 		}
 	}
 
-	// Nothing matched, but the billing mode says the document is French, and
-	// it is the only field worth trusting here: the CTC schematron never
-	// checks BT-24, so mangled GuidelineIDs (a missing ":extended-ctc-fr"
-	// suffix, "urn.eu:" for "urn:cen.eu:") validate cleanly downstream.
-	//
-	// Extended rather than the CIUS because parsing only ever reads more
-	// under it -- the payer, the agent and the addressee are gated on it --
-	// and a CIUS document simply does not carry those elements.
+	// The CTC schematron never checks BT-24, so a mangled GuidelineID
+	// arrives validated and the billing mode is all that is left to trust.
+	// Extended because its extra mappings are additive: a CIUS document
+	// carries none of them.
 	if isFrenchBillingMode(businessID) {
 		ctx := ContextPeppolFranceExtendedV1
 		return &ctx

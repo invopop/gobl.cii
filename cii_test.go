@@ -189,9 +189,8 @@ func TestFindContext(t *testing.T) {
 	})
 }
 
-// The French CTC schematron never validates BT-24, so a sender can ship a
-// mangled GuidelineID and still pass every downstream rule set. The billing
-// mode in BT-23 is then the only trustworthy French signal.
+// BT-24 is never validated by the CTC schematron, so a mangled GuidelineID
+// leaves the BT-23 billing mode as the only French signal.
 func TestFrenchBillingModeFallback(t *testing.T) {
 	for _, tt := range []struct {
 		name        string
@@ -199,8 +198,7 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 		want        *cii.Context
 	}{
 		{
-			// Seen in the wild: "urn.eu:" for "urn:cen.eu:", and no
-			// ":extended-ctc-fr" suffix.
+			// Seen in the wild: "urn.eu:" for "urn:cen.eu:", no suffix.
 			"mangled extended URN",
 			"urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
 			&cii.ContextPeppolFranceExtendedV1,
@@ -216,16 +214,13 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			&cii.ContextPeppolFranceExtendedV1,
 		},
 		{
-			// BT-24 absent: the billing mode is all that is left to go on.
+			// BT-24 absent: the billing mode is all there is.
 			"absent guideline",
 			"",
 			&cii.ContextPeppolFranceExtendedV1,
 		},
 		{
-			// The billing mode is trusted outright, so even an unrelated
-			// guideline resolves French. A two-character
-			// BusinessProcessParameter is vanishingly unlikely outside the
-			// French profiles, which all use long URNs.
+			// Every other profile's BusinessProcessParameter is a long URN.
 			"unrelated guideline still follows the billing mode",
 			"urn:peppol:pint:billing-1@sg-1",
 			&cii.ContextPeppolFranceExtendedV1,
