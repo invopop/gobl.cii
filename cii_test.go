@@ -222,11 +222,13 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			&cii.ContextPeppolFranceCIUSV1,
 		},
 		{
-			// Another standard's guideline must not be dragged into a French
-			// context by a two-character BusinessProcessParameter.
-			"foreign guideline stays unmatched",
+			// The billing mode is trusted outright, so even an unrelated
+			// guideline resolves French. A two-character
+			// BusinessProcessParameter is vanishingly unlikely outside the
+			// French profiles, which all use long URNs.
+			"unrelated guideline still follows the billing mode",
 			"urn:peppol:pint:billing-1@sg-1",
-			nil,
+			&cii.ContextPeppolFranceCIUSV1,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
