@@ -83,6 +83,7 @@ func goblNewPaymentDetails(stlm *Settlement, ctx *Context) (*bill.PaymentDetails
 	}
 
 	if pymt.Payee == nil &&
+		pymt.Payer == nil &&
 		pymt.Terms == nil &&
 		pymt.Instructions == nil &&
 		len(pymt.Advances) == 0 {

@@ -176,8 +176,7 @@ func TestExtendedParties(t *testing.T) {
 	t.Run("french extended maps the seller and buyer agents", func(t *testing.T) {
 		agmt := convert(t, cii.ContextPeppolFranceExtendedV1).Transaction.Agreement
 
-		// GOBL nests the agents in the party they act for; CII keeps them as
-		// siblings in the trade agreement.
+		// CII keeps the agents beside the parties, not nested in them.
 		require.NotNil(t, agmt.SalesAgent)
 		assert.Equal(t, "Agent de Vendeur SAS", agmt.SalesAgent.Name)
 		assert.Equal(t, "443061841", agmt.SalesAgent.LegalOrganization.ID.Value)

@@ -22,6 +22,28 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		assert.Nil(t, pymt)
 	})
 
+	t.Run("a payer on its own is enough to carry payment details", func(t *testing.T) {
+		ctx := ContextPeppolFranceExtendedV1
+		pymt, err := goblNewPaymentDetails(&Settlement{
+			Summary: &Summary{},
+			Payer:   &Party{Name: "Payeur SA"},
+		}, &ctx)
+		require.NoError(t, err)
+		require.NotNil(t, pymt)
+		require.NotNil(t, pymt.Payer)
+		assert.Equal(t, "Payeur SA", pymt.Payer.Name)
+	})
+
+	t.Run("a payer outside the french extended profile carries nothing", func(t *testing.T) {
+		ctx := ContextEN16931V2017
+		pymt, err := goblNewPaymentDetails(&Settlement{
+			Summary: &Summary{},
+			Payer:   &Party{Name: "Payeur SA"},
+		}, &ctx)
+		require.NoError(t, err)
+		assert.Nil(t, pymt)
+	})
+
 	t.Run("the payee and its address", func(t *testing.T) {
 		pymt, err := goblNewPaymentDetails(&Settlement{
 			Summary: &Summary{},
