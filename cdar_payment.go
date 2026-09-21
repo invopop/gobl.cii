@@ -279,7 +279,7 @@ func goblPaymentFromCDAR(cdar *CDAR, r routing) (*bill.Payment, error) {
 	pmt.Ext = pmt.Ext.Set(flow6.ExtKeyStatus, code)
 
 	if cdar.ExchangedDocument.ID != "" {
-		pmt.Code = cbc.Code(cleanString(cdar.ExchangedDocument.ID))
+		pmt.Code = cbc.Code(cdar.ExchangedDocument.ID)
 	}
 	if cdar.ExchangedDocument.IssueDateTime != nil && cdar.ExchangedDocument.IssueDateTime.DateTimeString != nil {
 		d, t, err := parseCDARDateTime(cdar.ExchangedDocument.IssueDateTime.DateTimeString.Value)

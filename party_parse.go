@@ -23,12 +23,12 @@ func goblNewParty(party *Party) *org.Party {
 	// BT-30/BT-47: Legal registration identifier
 	if party.LegalOrganization != nil && party.LegalOrganization.ID != nil && party.LegalOrganization.ID.Value != "" {
 		identity := &org.Identity{
-			Code:  cbc.Code(cleanString(party.LegalOrganization.ID.Value)),
+			Code:  cbc.Code(party.LegalOrganization.ID.Value),
 			Scope: org.IdentityScopeLegal,
 		}
 		if party.LegalOrganization.ID.SchemeID != "" {
 			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(cleanString(party.LegalOrganization.ID.SchemeID)),
+				iso.ExtKeySchemeID: cbc.Code(party.LegalOrganization.ID.SchemeID),
 			})
 		}
 		p.Identities = append(p.Identities, identity)
@@ -40,11 +40,11 @@ func goblNewParty(party *Party) *org.Party {
 			continue
 		}
 		identity := &org.Identity{
-			Code: cbc.Code(cleanString(partyID.Value)),
+			Code: cbc.Code(partyID.Value),
 		}
 		if partyID.SchemeID != "" {
 			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(cleanString(partyID.SchemeID)),
+				iso.ExtKeySchemeID: cbc.Code(partyID.SchemeID),
 			})
 		}
 		p.Identities = append(p.Identities, identity)
@@ -66,7 +66,7 @@ func goblNewParty(party *Party) *org.Party {
 		}
 		p.Identities = append(p.Identities, &org.Identity{
 			Ext: tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(cleanString(gid.SchemeID)),
+				iso.ExtKeySchemeID: cbc.Code(gid.SchemeID),
 			}),
 			Code: cbc.Code(gid.Value),
 		})
@@ -105,7 +105,7 @@ func goblPartyContact(party *Party, p *org.Party) {
 		if uc.ID.SchemeID == SchemeIDEmail {
 			p.Inboxes = []*org.Inbox{{Email: uc.ID.Value}}
 		} else {
-			p.Inboxes = []*org.Inbox{{Scheme: cbc.Code(cleanString(uc.ID.SchemeID)), Code: cbc.Code(cleanString(uc.ID.Value))}}
+			p.Inboxes = []*org.Inbox{{Scheme: cbc.Code(uc.ID.SchemeID), Code: cbc.Code(uc.ID.Value)}}
 		}
 	}
 }
@@ -119,7 +119,7 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 		}
 		switch taxReg.ID.SchemeID {
 		case SchemeIDVAT:
-			if identity, err := tax.ParseIdentity(cleanString(taxReg.ID.Value)); err == nil {
+			if identity, err := tax.ParseIdentity(taxReg.ID.Value); err == nil {
 				if identity.Code != "" {
 					p.TaxID = identity
 				}
@@ -127,7 +127,7 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 				// Fallback to preserve the tax id
 				p.TaxID = &tax.Identity{
 					Country: l10n.TaxCountryCode(country),
-					Code:    cbc.Code(cleanString(taxReg.ID.Value)),
+					Code:    cbc.Code(taxReg.ID.Value),
 				}
 			}
 		case SchemeIDTaxRegistration:
@@ -135,7 +135,7 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 			p.Identities = append(p.Identities, &org.Identity{
 				Scope:   org.IdentityScopeTax,
 				Country: l10n.ISOCountryCode(country),
-				Code:    cbc.Code(cleanString(taxReg.ID.Value)),
+				Code:    cbc.Code(taxReg.ID.Value),
 			})
 		}
 	}
@@ -148,7 +148,7 @@ func partyCountryID(party *Party) string {
 	if party.PostalTradeAddress == nil {
 		return ""
 	}
-	return cleanString(party.PostalTradeAddress.CountryID)
+	return party.PostalTradeAddress.CountryID
 }
 
 func goblNewAddress(address *PostalTradeAddress) *org.Address {
@@ -157,7 +157,7 @@ func goblNewAddress(address *PostalTradeAddress) *org.Address {
 	}
 
 	addr := &org.Address{
-		Country: l10n.ISOCountryCode(cleanString(address.CountryID)),
+		Country: l10n.ISOCountryCode(address.CountryID),
 	}
 
 	if address.LineOne != "" {
@@ -173,7 +173,7 @@ func goblNewAddress(address *PostalTradeAddress) *org.Address {
 	}
 
 	if address.Postcode != "" {
-		addr.Code = cbc.Code(cleanString(address.Postcode))
+		addr.Code = cbc.Code(address.Postcode)
 	}
 
 	if address.Region != "" {

@@ -56,7 +56,7 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 	}
 	if ac.ReasonCode != "" {
 		c.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyCharge: cbc.Code(cleanString(ac.ReasonCode)),
+			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
 		})
 	}
 	if ac.Base != "" {
@@ -79,14 +79,14 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 	if ac.Tax != nil && ac.Tax.TypeCode != "" {
 		c.Taxes = tax.Set{
 			{
-				Category: cbc.Code(cleanString(ac.Tax.TypeCode)),
+				Category: cbc.Code(ac.Tax.TypeCode),
 			},
 		}
 		if ac.Tax.CategoryCode != "" {
 			c.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyTaxCategory: cbc.Code(cleanString(ac.Tax.CategoryCode)),
+				untdid.ExtKeyTaxCategory: cbc.Code(ac.Tax.CategoryCode),
 			})
-			key := buildTaxCategoryKey(cleanString(ac.Tax.TypeCode), cleanString(ac.Tax.CategoryCode), ac.Tax.RateApplicablePercent)
+			key := buildTaxCategoryKey(ac.Tax.TypeCode, ac.Tax.CategoryCode, ac.Tax.RateApplicablePercent)
 			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
 				c.Taxes[0].Ext = c.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
@@ -118,7 +118,7 @@ func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*
 	}
 	if ac.ReasonCode != "" {
 		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyAllowance: cbc.Code(cleanString(ac.ReasonCode)),
+			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
 		})
 	}
 	if ac.Base != "" {
@@ -141,14 +141,14 @@ func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*
 	if ac.Tax != nil && ac.Tax.TypeCode != "" {
 		d.Taxes = tax.Set{
 			{
-				Category: cbc.Code(cleanString(ac.Tax.TypeCode)),
+				Category: cbc.Code(ac.Tax.TypeCode),
 			},
 		}
 		if ac.Tax.CategoryCode != "" {
 			d.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyTaxCategory: cbc.Code(cleanString(ac.Tax.CategoryCode)),
+				untdid.ExtKeyTaxCategory: cbc.Code(ac.Tax.CategoryCode),
 			})
-			key := buildTaxCategoryKey(cleanString(ac.Tax.TypeCode), cleanString(ac.Tax.CategoryCode), ac.Tax.RateApplicablePercent)
+			key := buildTaxCategoryKey(ac.Tax.TypeCode, ac.Tax.CategoryCode, ac.Tax.RateApplicablePercent)
 			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
 				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
@@ -181,7 +181,7 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	}
 	if ac.ReasonCode != "" {
 		c.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyCharge: cbc.Code(cleanString(ac.ReasonCode)),
+			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
 		})
 	}
 	if ac.Reason != "" {
@@ -210,7 +210,7 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 	}
 	if ac.ReasonCode != "" {
 		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyAllowance: cbc.Code(cleanString(ac.ReasonCode)),
+			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
 		})
 	}
 	if ac.Reason != "" {

@@ -6,8 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/invopop/phorm"
+
 	cii "github.com/invopop/gobl.cii"
-	"github.com/invopop/phive"
 )
 
 // franceInvoiceProbe pins one Flow 2 invoice fixture to the CII context it
@@ -36,10 +37,7 @@ var franceInvoiceProbes = []franceInvoiceProbe{
 // pushes the generated CII XML through phive, failing on any error OR
 // warning against the dedicated French schematron pinned on the context.
 func TestProbeFranceInvoices(t *testing.T) {
-	if !*validate {
-		t.Skip("requires -validate and a running Phive gRPC service")
-	}
-	pc := phiveClient(t)
+	pc := phormClient(t)
 
 	for _, p := range franceInvoiceProbes {
 		t.Run(p.name, func(t *testing.T) {
@@ -52,12 +50,12 @@ func TestProbeFranceInvoices(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Bytes: %v", err)
 			}
-			resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+			resp, err := pc.ValidateXml(context.Background(), &phorm.ValidateXmlRequest{
 				Vesid:      p.context.VESID,
 				XmlContent: data,
 			})
 			if err != nil {
-				t.Fatalf("phive: %v", err)
+				t.Fatalf("phorm: %v", err)
 			}
 			var problems []string
 			for _, r := range resp.Results {

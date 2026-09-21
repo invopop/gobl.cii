@@ -17,12 +17,32 @@ import (
 // name so the injection can be done one element name at a time.
 var elementText = regexp.MustCompile(`<([a-zA-Z]+:)?([A-Za-z]+)>([^<>]*[A-Za-z][^<>]*)</`)
 
+// freeText names the CII elements that carry text a human typed, which is
+// where a sender's broken encoding shows up. Codes, identifiers and other
+// controlled vocabularies are deliberately excluded: they cannot carry an
+// accent, so they cannot arrive mangled, and wrapping them would be noise.
+var freeText = map[string]bool{
+	"Content":                true, // ram:IncludedNote
+	"Name":                   true, // party, item, account holder, project
+	"Description":            true, // item, period, payment terms
+	"Reason":                 true, // allowance / charge
+	"ExemptionReason":        true, // tax exemption text (not the code)
+	"Information":            true, // payment instruction detail
+	"LineOne":                true, // address
+	"LineTwo":                true,
+	"CityName":               true,
+	"CountrySubDivisionName": true,
+	"PersonName":             true,
+	"RequestedAction":        true, // CDAR free text
+	"Location":               true,
+}
+
 // TestReplacementCharCoverage guards the cleanString calls. It injects U+FFFD
-// into one element name at a time across every fixture and fails if the marker
-// reaches GOBL, either surviving into a field or failing the envelope digest.
+// into one free-text element at a time across every fixture and fails if the
+// marker reaches GOBL, either surviving into a field or failing the digest.
 //
-// A new free-text or identifier field that nobody remembered to wrap shows up
-// here rather than on a customer invoice.
+// A new free-text field that nobody remembered to wrap shows up here rather
+// than on a customer invoice.
 func TestReplacementCharCoverage(t *testing.T) {
 	files := fixtures(t)
 	if len(files) == 0 {
@@ -42,6 +62,9 @@ func TestReplacementCharCoverage(t *testing.T) {
 			continue // fixture is not a clean baseline; it proves nothing
 		}
 		for _, elem := range textElements(raw) {
+			if !freeText[elem] {
+				continue
+			}
 			one := regexp.MustCompile(`(<([a-zA-Z]+:)?` + elem + `>)([^<>]*[A-Za-z][^<>]*)(</)`)
 			dirty := one.ReplaceAllString(string(raw), "${1}${3}�${4}")
 			if dirty == string(raw) {

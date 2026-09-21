@@ -23,7 +23,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	tr := in.Transaction
 
 	if tr.Agreement.BuyerReference != "" {
-		ord.Code = cbc.Code(cleanString(tr.Agreement.BuyerReference))
+		ord.Code = cbc.Code(tr.Agreement.BuyerReference)
 	}
 
 	if tr.Settlement.Invoicer != nil {
@@ -32,13 +32,13 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 
 	// BT-19: Buyer accounting reference
 	if tr.Settlement.AccountingAccount != nil && tr.Settlement.AccountingAccount.ID != "" {
-		ord.Cost = cbc.Code(cleanString(tr.Settlement.AccountingAccount.ID))
+		ord.Cost = cbc.Code(tr.Settlement.AccountingAccount.ID)
 	}
 
 	if tr.Agreement.Sales != nil {
 		ord.Sales = []*org.DocumentRef{
 			{
-				Code: cbc.Code(cleanString(tr.Agreement.Sales.ID)),
+				Code: cbc.Code(tr.Agreement.Sales.ID),
 			},
 		}
 	}
@@ -46,7 +46,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	if tr.Agreement.Purchase != nil {
 		ord.Purchases = []*org.DocumentRef{
 			{
-				Code: cbc.Code(cleanString(tr.Agreement.Purchase.ID)),
+				Code: cbc.Code(tr.Agreement.Purchase.ID),
 			},
 		}
 	}
@@ -54,7 +54,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	if tr.Agreement.Project != nil {
 		ord.Projects = []*org.DocumentRef{
 			{
-				Code:        cbc.Code(cleanString(tr.Agreement.Project.ID)),
+				Code:        cbc.Code(tr.Agreement.Project.ID),
 				Description: cleanString(tr.Agreement.Project.Name),
 			},
 		}
@@ -63,7 +63,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	if tr.Agreement.Contract != nil {
 		ord.Contracts = []*org.DocumentRef{
 			{
-				Code: cbc.Code(cleanString(tr.Agreement.Contract.ID)),
+				Code: cbc.Code(tr.Agreement.Contract.ID),
 			},
 		}
 	}
@@ -77,7 +77,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			if err != nil {
 				return nil, err
 			}
-			per.Start = start
+			per.Start = &start
 		}
 
 		if tr.Settlement.Period.End != nil && tr.Settlement.Period.End.DateFormat != nil {
@@ -85,7 +85,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			if err != nil {
 				return nil, err
 			}
-			per.End = end
+			per.End = &end
 		}
 		if tr.Settlement.Period.Description != nil {
 			per.Label = cleanString(*tr.Settlement.Period.Description)
@@ -97,7 +97,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	if tr.Delivery.Despatch != nil {
 		ord.Despatch = []*org.DocumentRef{
 			{
-				Code: cbc.Code(cleanString(tr.Delivery.Despatch.ID)),
+				Code: cbc.Code(tr.Delivery.Despatch.ID),
 			},
 		}
 	}
@@ -105,7 +105,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	if tr.Delivery.Receiving != nil {
 		ord.Receiving = []*org.DocumentRef{
 			{
-				Code: cbc.Code(cleanString(tr.Delivery.Receiving.ID)),
+				Code: cbc.Code(tr.Delivery.Receiving.ID),
 			},
 		}
 	}
@@ -118,7 +118,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 					ord.Tender = make([]*org.DocumentRef, 0)
 				}
 				docRef := &org.DocumentRef{
-					Code: cbc.Code(cleanString(ref.ID)),
+					Code: cbc.Code(ref.ID),
 				}
 				if ref.IssueDate != nil && ref.IssueDate.DateFormat != nil {
 					refDate, err := parseDate(ref.IssueDate.DateFormat.Value)
@@ -134,12 +134,12 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 				}
 				ord.Identities = append(ord.Identities, &org.Identity{
 					Key:  keyAdditionalDocumentTypeInvoiceDataSheet,
-					Code: cbc.Code(cleanString(ref.ID)),
+					Code: cbc.Code(ref.ID),
 				})
 			default:
 				ord.Identities = append(ord.Identities, &org.Identity{
 					Key:  keyAdditionalDocumentTypeRefPaper,
-					Code: cbc.Code(cleanString(ref.ID)),
+					Code: cbc.Code(ref.ID),
 				})
 			}
 		}

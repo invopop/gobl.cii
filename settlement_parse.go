@@ -113,7 +113,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 				if err != nil {
 					return nil, err
 				}
-				dd.Amount = amt
+				dd.Amount = &amt
 			} else if term.Percent != "" {
 				p, err := num.PercentageFromString(term.Percent)
 				if err != nil {
@@ -127,9 +127,10 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	terms.DueDates = dates
 
-	// If there's only one due date, set its percent to 100.
+	// If there's only one due date, set its percent to 100. Since GOBL v0.505
+	// a due date need not carry an amount, so the absent case is a nil one.
 	if len(terms.DueDates) == 1 &&
-		terms.DueDates[0].Amount.IsZero() &&
+		(terms.DueDates[0].Amount == nil || terms.DueDates[0].Amount.IsZero()) &&
 		terms.DueDates[0].Percent == nil {
 		percent, err := num.PercentageFromString("100%")
 		if err != nil {
@@ -151,15 +152,15 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 	pm := stlm.PaymentMeans[0]
 	inst := &pay.Instructions{
-		Key: goblPaymentMeansCode(cleanString(pm.TypeCode)),
+		Key: goblPaymentMeansCode(pm.TypeCode),
 		Ext: tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyPaymentMeans: cbc.Code(cleanString(pm.TypeCode)),
+			untdid.ExtKeyPaymentMeans: cbc.Code(pm.TypeCode),
 		}),
 	}
 
 	// BT-83: Payment reference
 	if stlm.PaymentReference != "" {
-		inst.Ref = cbc.Code(cleanString(stlm.PaymentReference))
+		inst.Ref = cbc.Code(stlm.PaymentReference)
 	}
 
 	if pm.Information != "" {
@@ -170,9 +171,9 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		card := pm.Card
 		inst.Card = &pay.Card{}
 		if len(card.ID) >= 4 {
-			inst.Card.Last4 = cleanString(card.ID)[len(cleanString(card.ID))-4:]
+			inst.Card.Last4 = card.ID[len(card.ID)-4:]
 		} else {
-			inst.Card.Last4 = cleanString(card.ID)
+			inst.Card.Last4 = card.ID
 		}
 		if card.Name != "" {
 			inst.Card.Holder = cleanString(card.Name)
@@ -183,16 +184,16 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		ac := pm.Creditor
 		ct := new(pay.CreditTransfer)
 		if ac.IBAN != "" {
-			ct.IBAN = cbc.Code(cleanString(ac.IBAN))
+			ct.IBAN = cbc.Code(ac.IBAN)
 		}
 		if ac.Name != "" {
 			ct.Name = cleanString(ac.Name)
 		}
 		if ac.Number != "" {
-			ct.Number = cbc.Code(cleanString(ac.Number))
+			ct.Number = cbc.Code(ac.Number)
 		}
 		if pm.CreditorInstitution != nil && pm.CreditorInstitution.BIC != "" {
-			ct.BIC = cbc.Code(cleanString(pm.CreditorInstitution.BIC))
+			ct.BIC = cbc.Code(pm.CreditorInstitution.BIC)
 		}
 		inst.CreditTransfer = append(inst.CreditTransfer, ct)
 	}
