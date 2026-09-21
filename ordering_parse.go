@@ -57,7 +57,7 @@ func goblNewOrdering(in *Invoice, ctx *Context) (*bill.Ordering, error) {
 		ord.Projects = []*org.DocumentRef{
 			{
 				Code:        cbc.Code(tr.Agreement.Project.ID),
-				Description: tr.Agreement.Project.Name,
+				Description: cleanString(tr.Agreement.Project.Name),
 			},
 		}
 	}
@@ -90,7 +90,7 @@ func goblNewOrdering(in *Invoice, ctx *Context) (*bill.Ordering, error) {
 			per.End = &end
 		}
 		if tr.Settlement.Period.Description != nil {
-			per.Label = *tr.Settlement.Period.Description
+			per.Label = cleanString(*tr.Settlement.Period.Description)
 		}
 		ord.Period = per
 	}

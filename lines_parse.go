@@ -41,7 +41,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	l := &bill.Line{
 		Quantity: num.MakeAmount(1, 0),
 		Item: &org.Item{
-			Name:  strings.TrimSpace(it.Product.Name),
+			Name:  cleanString(strings.TrimSpace(it.Product.Name)),
 			Price: &price,
 		},
 	}
@@ -109,7 +109,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 // into a GOBL attribute, preferring the measure over the plain value when both
 // are present, as the measure also carries the unit.
 func goblItemAttribute(char *Characteristic) (*org.Attribute, error) {
-	description := strings.TrimSpace(char.Description)
+	description := cleanString(strings.TrimSpace(char.Description))
 	if description == "" {
 		return nil, nil
 	}
@@ -125,7 +125,7 @@ func goblItemAttribute(char *Characteristic) (*org.Attribute, error) {
 			attr.Unit, attr.Ext = goblUnit(attr.Ext, cbc.Code(char.ValueMeasure.UnitCode))
 		}
 	case char.Value != "":
-		attr.Text = strings.TrimSpace(char.Value)
+		attr.Text = cleanString(strings.TrimSpace(char.Value))
 	default:
 		return nil, nil
 	}
@@ -174,7 +174,7 @@ func goblLineProduct(prod *Product, item *org.Item) {
 	}
 
 	if prod.Description != nil {
-		item.Description = strings.TrimSpace(*prod.Description)
+		item.Description = cleanString(strings.TrimSpace(*prod.Description))
 	}
 
 	if prod.Origin != nil {
@@ -204,7 +204,7 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 	for _, note := range lineDoc.Note {
 		n := &org.Note{}
 		if note.Content != "" {
-			n.Text = strings.TrimSpace(note.Content)
+			n.Text = cleanString(strings.TrimSpace(note.Content))
 		}
 		if note.SubjectCode != "" {
 			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})

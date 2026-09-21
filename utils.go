@@ -3,6 +3,7 @@ package cii
 import (
 	"encoding/xml"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/invopop/gobl/cal"
@@ -10,6 +11,13 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 )
+
+// cleanString strips the Unicode replacement character (U+FFFD) which can
+// appear in badly-encoded XML documents and causes canonical JSON
+// serialization to fail.
+func cleanString(s string) string {
+	return strings.ReplaceAll(s, "\uFFFD", "")
+}
 
 // issueDateFormat is the issue date format in the form YYYYMMDD
 const issueDateFormat = "102"
