@@ -6,7 +6,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
@@ -318,12 +317,12 @@ func FindContext(guidelineID string, businessID string) *Context {
 	// it is the only field worth trusting here: the CTC schematron never
 	// checks BT-24, so mangled GuidelineIDs (a missing ":extended-ctc-fr"
 	// suffix, "urn.eu:" for "urn:cen.eu:") validate cleanly downstream.
-	// "conformant" is all that separates the Extended flavour from the CIUS.
+	//
+	// Extended rather than the CIUS because parsing only ever reads more
+	// under it -- the payer, the agent and the addressee are gated on it --
+	// and a CIUS document simply does not carry those elements.
 	if isFrenchBillingMode(businessID) {
-		ctx := ContextPeppolFranceCIUSV1
-		if strings.Contains(guidelineID, "conformant") {
-			ctx = ContextPeppolFranceExtendedV1
-		}
+		ctx := ContextPeppolFranceExtendedV1
 		return &ctx
 	}
 

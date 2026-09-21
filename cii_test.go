@@ -211,15 +211,15 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			&cii.ContextPeppolFranceExtendedV1,
 		},
 		{
-			"mangled EN16931 URN falls back to CIUS",
+			"mangled EN16931 URN",
 			"urn.eu:en16931:2017",
-			&cii.ContextPeppolFranceCIUSV1,
+			&cii.ContextPeppolFranceExtendedV1,
 		},
 		{
 			// BT-24 absent: the billing mode is all that is left to go on.
 			"absent guideline",
 			"",
-			&cii.ContextPeppolFranceCIUSV1,
+			&cii.ContextPeppolFranceExtendedV1,
 		},
 		{
 			// The billing mode is trusted outright, so even an unrelated
@@ -228,7 +228,7 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			// French profiles, which all use long URNs.
 			"unrelated guideline still follows the billing mode",
 			"urn:peppol:pint:billing-1@sg-1",
-			&cii.ContextPeppolFranceCIUSV1,
+			&cii.ContextPeppolFranceExtendedV1,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
