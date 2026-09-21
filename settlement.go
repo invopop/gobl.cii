@@ -20,7 +20,9 @@ type Settlement struct {
 	PaymentReference   string                `xml:"ram:PaymentReference,omitempty"`
 	Currency           string                `xml:"ram:InvoiceCurrencyCode"`
 	Invoicer           *Party                `xml:"ram:InvoicerTradeParty,omitempty"`
+	Invoicee           *Party                `xml:"ram:InvoiceeTradeParty,omitempty"`
 	Payee              *Party                `xml:"ram:PayeeTradeParty,omitempty"`
+	Payer              *Party                `xml:"ram:PayerTradeParty,omitempty"`
 	PaymentMeans       []*PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
 	Tax                []*Tax                `xml:"ram:ApplicableTradeTax"`
 	Period             *Period               `xml:"ram:BillingSpecifiedPeriod,omitempty"`
@@ -114,6 +116,27 @@ type TaxTotalAmount struct {
 	Currency string `xml:"currencyID,attr"`
 }
 
+// addFrenchExtendedParties fills the settlement parties only the French
+// extended profile defines: the party the invoice is addressed to
+// (EXT-FR-FE-BG-04) and the payer (EXT-FR-FE-BG-02). It also pins the UNCL
+// 3035 role codes the profile fixes for the facturant (EXT-FR-FE-113) and the
+// addressee (EXT-FR-FE-90).
+func (stlm *Settlement) addFrenchExtendedParties(inv *bill.Invoice, ctx Context) {
+	if !isFranceExtended(&ctx) {
+		return
+	}
+	if stlm.Invoicer != nil {
+		stlm.Invoicer.RoleCode = partyRoleInvoicer
+	}
+	if inv.Ordering != nil && inv.Ordering.Buyer != nil {
+		stlm.Invoicee = newParty(inv.Ordering.Buyer, ctx)
+		stlm.Invoicee.RoleCode = partyRoleInvoicee
+	}
+	if inv.Payment != nil && inv.Payment.Payer != nil {
+		stlm.Payer = newParty(inv.Payment.Payer, ctx)
+	}
+}
+
 // taxPointCIICodeMap maps GOBL tax point keys to UNTDID 2475 codes for CII.
 var taxPointCIICodeMap = map[cbc.Key]string{
 	tax.PointIssue:    "5",
@@ -172,6 +195,8 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		}
 		stlm.ReferencedDocument = []*ReferencedDocument{rd}
 	}
+	// EXT-FR-FE-BG-05: the facturant, the service facturier raising the
+	// invoice on the seller's behalf.
 	if inv.Ordering != nil && inv.Ordering.Issuer != nil {
 		stlm.Invoicer = newParty(inv.Ordering.Issuer, ctx)
 	}
@@ -184,6 +209,8 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 	if inv.Payment != nil && inv.Payment.Payee != nil {
 		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
 	}
+
+	stlm.addFrenchExtendedParties(inv, ctx)
 
 	// BG-14 is the period the invoice refers to, which GOBL keeps in
 	// Ordering.Period; Delivery.Period is when to expect delivery.

@@ -178,6 +178,18 @@ var ContextPeppolFranceExtendedV1 = Context{
 	VESID:             "fr.ctc:extended-cii:1.4.0-03",
 }
 
+// isFranceExtended reports whether the context is checked against
+// EXTENDED-CTC-FR, the only profile that defines the extra parties. Both
+// French extended contexts share that rule set: ContextPeppolFranceFacturXV1
+// declares the Factur-X EXTENDED guideline in BT-24, which the CTC rules do
+// not look at. A nil context means the document declared no profile we know.
+func isFranceExtended(ctx *Context) bool {
+	if ctx == nil {
+		return false
+	}
+	return ctx.Is(ContextPeppolFranceExtendedV1) || ctx.Is(ContextPeppolFranceFacturXV1)
+}
+
 // ContextZUGFeRDV2 is the ZUGFeRD EN 16931 (COMFORT) profile.
 var ContextZUGFeRDV2 = Context{
 	GuidelineID: guidelineIDEN16931V2017,

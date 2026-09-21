@@ -16,6 +16,7 @@ type Party struct {
 	ID                        []*PartyID                  `xml:"ram:ID,omitempty"`
 	GlobalID                  []*PartyID                  `xml:"ram:GlobalID,omitempty"`
 	Name                      string                      `xml:"ram:Name,omitempty"`
+	RoleCode                  string                      `xml:"ram:RoleCode,omitempty"`
 	Description               string                      `xml:"ram:Description,omitempty"`
 	LegalOrganization         *LegalOrganization          `xml:"ram:SpecifiedLegalOrganization,omitempty"`
 	Contact                   *Contact                    `xml:"ram:DefinedTradeContact,omitempty"`
@@ -81,6 +82,14 @@ const (
 	SchemeIDVAT = "VA"
 	// SchemeIDTaxRegistration represents a non-VAT tax registration (BT-32)
 	SchemeIDTaxRegistration = "FC"
+)
+
+// UNCL 3035 role codes the French extended profile pins on the parties it
+// adds: the facturant is the invoicer (EXT-FR-FE-113) and the party the
+// invoice is addressed to the invoicee (EXT-FR-FE-90).
+const (
+	partyRoleInvoicer = "II"
+	partyRoleInvoicee = "IV"
 )
 
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice

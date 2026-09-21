@@ -23,8 +23,13 @@ var paymentMeansMap = map[string]cbc.Key{
 	"59": pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA),
 }
 
-func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
+func goblNewPaymentDetails(stlm *Settlement, ctx *Context) (*bill.PaymentDetails, error) {
 	pymt := &bill.PaymentDetails{}
+
+	// EXT-FR-FE-BG-02: the payer, only defined in the French extended profile.
+	if stlm.Payer != nil && isFranceExtended(ctx) {
+		pymt.Payer = goblNewParty(stlm.Payer)
+	}
 
 	if stlm.Payee != nil {
 		payee := &org.Party{Name: stlm.Payee.Name}
@@ -78,6 +83,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 	}
 
 	if pymt.Payee == nil &&
+		pymt.Payer == nil &&
 		pymt.Terms == nil &&
 		pymt.Instructions == nil &&
 		len(pymt.Advances) == 0 {

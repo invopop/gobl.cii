@@ -26,7 +26,8 @@ func TestGoblNewOrdering(t *testing.T) {
 	t.Run("BT-10 buyer reference", func(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(ag *Agreement, _ *Settlement) {
 			ag.BuyerReference = testBuyerRef
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, ord)
 		assert.Equal(t, testBuyerRef, ord.Code.String())
@@ -36,7 +37,8 @@ func TestGoblNewOrdering(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(ag *Agreement, stlm *Settlement) {
 			ag.BuyerReference = testBuyerRef
 			stlm.AccountingAccount = &AccountingAccount{ID: testCostRef}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, ord)
 		assert.Equal(t, testCostRef, ord.Cost.String())
@@ -46,7 +48,8 @@ func TestGoblNewOrdering(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(ag *Agreement, stlm *Settlement) {
 			ag.BuyerReference = testBuyerRef
 			stlm.AccountingAccount = &AccountingAccount{}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, ord)
 		assert.Empty(t, ord.Cost.String())
@@ -58,7 +61,8 @@ func TestGoblNewOrdering(t *testing.T) {
 		// behaviour rather than endorsed.
 		ord, err := goblNewOrdering(ordering(t, func(_ *Agreement, stlm *Settlement) {
 			stlm.AccountingAccount = &AccountingAccount{ID: testCostRef}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		assert.Nil(t, ord)
 	})
@@ -66,7 +70,8 @@ func TestGoblNewOrdering(t *testing.T) {
 	t.Run("BT-14 sales order reference", func(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(ag *Agreement, _ *Settlement) {
 			ag.Sales = &IssuerID{ID: "SO-1"}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.Len(t, ord.Sales, 1)
 		assert.Equal(t, "SO-1", ord.Sales[0].Code.String())
@@ -75,7 +80,8 @@ func TestGoblNewOrdering(t *testing.T) {
 	t.Run("BT-13 purchase order reference", func(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(ag *Agreement, _ *Settlement) {
 			ag.Purchase = &IssuerID{ID: "PO-1"}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.Len(t, ord.Purchases, 1)
 		assert.Equal(t, "PO-1", ord.Purchases[0].Code.String())
@@ -84,7 +90,8 @@ func TestGoblNewOrdering(t *testing.T) {
 	t.Run("BT-11 project reference keeps its name", func(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(ag *Agreement, _ *Settlement) {
 			ag.Project = &Project{ID: "PRJ-1", Name: "Rollout"}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.Len(t, ord.Projects, 1)
 		assert.Equal(t, "PRJ-1", ord.Projects[0].Code.String())
@@ -94,7 +101,8 @@ func TestGoblNewOrdering(t *testing.T) {
 	t.Run("BT-12 contract reference", func(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(ag *Agreement, _ *Settlement) {
 			ag.Contract = &IssuerID{ID: "CON-1"}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.Len(t, ord.Contracts, 1)
 		assert.Equal(t, "CON-1", ord.Contracts[0].Code.String())
@@ -103,7 +111,8 @@ func TestGoblNewOrdering(t *testing.T) {
 	t.Run("BG-14 billing period", func(t *testing.T) {
 		ord, err := goblNewOrdering(ordering(t, func(_ *Agreement, stlm *Settlement) {
 			stlm.Period = &Period{Start: issueDate("20240101"), End: issueDate("20240131")}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, ord)
 		require.NotNil(t, ord.Period)
@@ -117,7 +126,8 @@ func TestGoblNewOrdering(t *testing.T) {
 		desc := "January"
 		ord, err := goblNewOrdering(ordering(t, func(_ *Agreement, stlm *Settlement) {
 			stlm.Period = &Period{Start: issueDate("20240101"), Description: &desc}
-		}))
+		}), nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, ord)
 		require.NotNil(t, ord.Period)
@@ -127,19 +137,21 @@ func TestGoblNewOrdering(t *testing.T) {
 	t.Run("a malformed period start is an error", func(t *testing.T) {
 		_, err := goblNewOrdering(ordering(t, func(_ *Agreement, stlm *Settlement) {
 			stlm.Period = &Period{Start: issueDate("01/01/2024")}
-		}))
+		}), nil)
+
 		assert.Error(t, err)
 	})
 
 	t.Run("a malformed period end is an error", func(t *testing.T) {
 		_, err := goblNewOrdering(ordering(t, func(_ *Agreement, stlm *Settlement) {
 			stlm.Period = &Period{End: issueDate("31/01/2024")}
-		}))
+		}), nil)
+
 		assert.Error(t, err)
 	})
 
 	t.Run("an invoice with no ordering details carries none", func(t *testing.T) {
-		ord, err := goblNewOrdering(ordering(t, nil))
+		ord, err := goblNewOrdering(ordering(t, nil), nil)
 		require.NoError(t, err)
 		assert.Nil(t, ord)
 	})

@@ -17,7 +17,29 @@ func formattedDate(v string) *FormattedIssueDate {
 
 func TestGoblNewPaymentDetails(t *testing.T) {
 	t.Run("a settlement with nothing to say carries no payment details", func(t *testing.T) {
-		pymt, err := goblNewPaymentDetails(&Settlement{Summary: &Summary{}})
+		pymt, err := goblNewPaymentDetails(&Settlement{Summary: &Summary{}}, nil)
+		require.NoError(t, err)
+		assert.Nil(t, pymt)
+	})
+
+	t.Run("a payer on its own is enough to carry payment details", func(t *testing.T) {
+		ctx := ContextPeppolFranceExtendedV1
+		pymt, err := goblNewPaymentDetails(&Settlement{
+			Summary: &Summary{},
+			Payer:   &Party{Name: "Payeur SA"},
+		}, &ctx)
+		require.NoError(t, err)
+		require.NotNil(t, pymt)
+		require.NotNil(t, pymt.Payer)
+		assert.Equal(t, "Payeur SA", pymt.Payer.Name)
+	})
+
+	t.Run("a payer outside the french extended profile carries nothing", func(t *testing.T) {
+		ctx := ContextEN16931V2017
+		pymt, err := goblNewPaymentDetails(&Settlement{
+			Summary: &Summary{},
+			Payer:   &Party{Name: "Payeur SA"},
+		}, &ctx)
 		require.NoError(t, err)
 		assert.Nil(t, pymt)
 	})
@@ -29,7 +51,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 				Name:               "Factoring Co",
 				PostalTradeAddress: &PostalTradeAddress{City: "Berlin", CountryID: "DE"},
 			},
-		})
+		}, nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, pymt)
 		require.NotNil(t, pymt.Payee)
@@ -42,7 +65,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		pymt, err := goblNewPaymentDetails(&Settlement{
 			Summary: &Summary{},
 			Payee:   &Party{Name: "Factoring Co"},
-		})
+		}, nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, pymt.Payee)
 		assert.Empty(t, pymt.Payee.Addresses)
@@ -55,7 +79,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 				{Amount: "100.00", Date: formattedDate("20240115")},
 				{Amount: testAmountHalf},
 			},
-		})
+		}, nil)
+
 		require.NoError(t, err)
 		require.Len(t, pymt.Advances, 2)
 		assert.Equal(t, "100.00", pymt.Advances[0].Amount.String())
@@ -69,7 +94,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		_, err := goblNewPaymentDetails(&Settlement{
 			Summary: &Summary{},
 			Advance: []*Advance{{Amount: testNotANumber}},
-		})
+		}, nil)
+
 		assert.Error(t, err)
 	})
 
@@ -77,7 +103,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		_, err := goblNewPaymentDetails(&Settlement{
 			Summary: &Summary{},
 			Advance: []*Advance{{Amount: "10.00", Date: formattedDate("15/01/2024")}},
-		})
+		}, nil)
+
 		assert.Error(t, err)
 	})
 
@@ -86,14 +113,15 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		// the prepaid total becomes a single synthetic advance.
 		pymt, err := goblNewPaymentDetails(&Settlement{
 			Summary: &Summary{TotalPrepaidAmount: "196.02"},
-		})
+		}, nil)
+
 		require.NoError(t, err)
 		require.Len(t, pymt.Advances, 1)
 		assert.Equal(t, "196.02", pymt.Advances[0].Amount.String())
 	})
 
 	t.Run("a prepaid total that is not a number is an error", func(t *testing.T) {
-		_, err := goblNewPaymentDetails(&Settlement{Summary: &Summary{TotalPrepaidAmount: testNotANumber}})
+		_, err := goblNewPaymentDetails(&Settlement{Summary: &Summary{TotalPrepaidAmount: testNotANumber}}, nil)
 		assert.Error(t, err)
 	})
 
@@ -101,7 +129,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		pymt, err := goblNewPaymentDetails(&Settlement{
 			Summary: &Summary{TotalPrepaidAmount: "150.00"},
 			Advance: []*Advance{{Amount: "100.00"}, {Amount: testAmountHalf}},
-		})
+		}, nil)
+
 		require.NoError(t, err)
 		assert.Len(t, pymt.Advances, 2, "the summary must not be added on top")
 	})
@@ -112,7 +141,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		pymt, err := goblNewPaymentDetails(&Settlement{
 			Summary:      &Summary{},
 			PaymentMeans: []*PaymentMeans{{TypeCode: "1"}},
-		})
+		}, nil)
+
 		require.NoError(t, err)
 		assert.Nil(t, pymt)
 	})
@@ -121,7 +151,8 @@ func TestGoblNewPaymentDetails(t *testing.T) {
 		pymt, err := goblNewPaymentDetails(&Settlement{
 			Summary:      &Summary{},
 			PaymentMeans: []*PaymentMeans{{TypeCode: "30"}},
-		})
+		}, nil)
+
 		require.NoError(t, err)
 		require.NotNil(t, pymt)
 		require.NotNil(t, pymt.Instructions)
