@@ -187,16 +187,30 @@ func TestExtendedParties(t *testing.T) {
 		assert.Equal(t, "FR96552100554", agmt.BuyerAgent.SpecifiedTaxRegistration[0].ID.Value)
 	})
 
-	t.Run("extended-only parties are ignored outside the french extended context", func(t *testing.T) {
-		tr := convert(t, cii.ContextEN16931V2017).Transaction
+	t.Run("the factur-x flavour of the profile maps them too", func(t *testing.T) {
+		// ContextPeppolFranceFacturXV1 declares the Factur-X EXTENDED
+		// guideline in BT-24 but is checked by the same EXTENDED-CTC-FR
+		// rule set, so it carries the same parties.
+		tr := convert(t, cii.ContextPeppolFranceFacturXV1).Transaction
 
-		assert.Nil(t, tr.Settlement.Invoicee)
-		assert.Nil(t, tr.Settlement.Payer)
-		assert.Nil(t, tr.Agreement.SalesAgent)
-		assert.Nil(t, tr.Agreement.BuyerAgent)
-		// The facturant is not extended-only, but its role code is.
-		require.NotNil(t, tr.Settlement.Invoicer)
-		assert.Empty(t, tr.Settlement.Invoicer.RoleCode)
+		require.NotNil(t, tr.Settlement.Invoicee)
+		require.NotNil(t, tr.Settlement.Payer)
+		require.NotNil(t, tr.Agreement.SalesAgent)
+		require.NotNil(t, tr.Agreement.BuyerAgent)
+		assert.Equal(t, "II", tr.Settlement.Invoicer.RoleCode)
+	})
+
+	t.Run("extended-only parties are ignored outside the french extended contexts", func(t *testing.T) {
+		// The CIUS profile is the closest neighbour that must not carry them.
+		for _, ctx := range []cii.Context{cii.ContextEN16931V2017, cii.ContextPeppolFranceCIUSV1} {
+			tr := convert(t, ctx).Transaction
+			assert.Nil(t, tr.Settlement.Invoicee)
+			assert.Nil(t, tr.Settlement.Payer)
+			assert.Nil(t, tr.Agreement.SalesAgent)
+			assert.Nil(t, tr.Agreement.BuyerAgent)
+			require.NotNil(t, tr.Settlement.Invoicer)
+			assert.Empty(t, tr.Settlement.Invoicer.RoleCode)
+		}
 	})
 
 	t.Run("parse restores every extended party", func(t *testing.T) {

@@ -122,7 +122,7 @@ type TaxTotalAmount struct {
 // 3035 role codes the profile fixes for the facturant (EXT-FR-FE-113) and the
 // addressee (EXT-FR-FE-90).
 func (stlm *Settlement) addFrenchExtendedParties(inv *bill.Invoice, ctx Context) {
-	if !ctx.Is(ContextPeppolFranceExtendedV1) {
+	if !isFranceExtended(&ctx) {
 		return
 	}
 	if stlm.Invoicer != nil {

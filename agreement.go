@@ -126,7 +126,7 @@ func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 // the party they act for; CII keeps them as siblings in the trade agreement.
 // Only the French extended profile defines them.
 func (agmt *Agreement) addFrenchExtendedAgents(inv *bill.Invoice, ctx Context) {
-	if !ctx.Is(ContextPeppolFranceExtendedV1) {
+	if !isFranceExtended(&ctx) {
 		return
 	}
 	if inv.Supplier != nil && inv.Supplier.Agent != nil {

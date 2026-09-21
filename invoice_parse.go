@@ -125,12 +125,6 @@ func goblAddFrenchExtendedAgents(out *bill.Invoice, agmt *Agreement, ctx *Contex
 	}
 }
 
-// isFranceExtended reports whether the document was recognised as the French
-// extended profile, the only one that defines the extra parties.
-func isFranceExtended(ctx *Context) bool {
-	return ctx != nil && ctx.Is(ContextPeppolFranceExtendedV1)
-}
-
 // goblDetectContext determines the conversion context from guideline and business IDs.
 func goblDetectContext(in *Invoice) *Context {
 	if in.ExchangedContext == nil || in.ExchangedContext.GuidelineContext == nil {
