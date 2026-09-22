@@ -132,7 +132,12 @@ func TestParseCtoGLines(t *testing.T) {
 		lines := inv.Lines
 		require.NotEmpty(t, lines)
 
-		// BT-148: Price 0.00880 / BasisQuantity 0.00880 = 1.00000
-		assert.Equal(t, "1.00000", lines[0].Item.Price.String())
+		// The basis quantity (BT-149) repeats the price, which no reading of
+		// the standard supports: dividing by it gives a line of 16000.00
+		// against a declared amount (BT-131) of 140.80. The declared amount
+		// is the term EN 16931 makes binding, so the basis quantity is
+		// dropped and the price stands as sent.
+		assert.Equal(t, "0.00880", lines[0].Item.Price.String())
+		assert.Equal(t, "140.80", lines[0].Total.String())
 	})
 }

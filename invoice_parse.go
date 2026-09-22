@@ -104,6 +104,12 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 
 	goblAddTaxNotes(ahts.Tax, out)
 
+	// Everything the document declares is now mapped, so the calculated
+	// amounts can be checked against the ones the sender stated.
+	if err := goblReconcileTotals(in, out); err != nil {
+		return nil, err
+	}
+
 	return out, nil
 }
 

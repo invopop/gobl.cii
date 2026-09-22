@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -108,11 +109,9 @@ func TestParseCtoGLineAllowanceAmount(t *testing.T) {
 	assert.Nil(t, line.Discounts[0].Percent)
 	require.Len(t, line.Charges, 1)
 	assert.Equal(t, num.MakeAmount(2187, 2), line.Charges[0].Amount)
-	// 1620.00 - 532.27 + 21.87
-	assert.Equal(t, "1109.60", line.Total.String())
 
 	// The second line backs its percentage with a basis amount that reproduces
-	// the actual amount, so both survive and GOBL recalculates the same value.
+	// the actual amount, so both survive.
 	line = inv.Lines[1]
 	require.Len(t, line.Discounts, 1)
 	assert.Equal(t, num.MakeAmount(48694, 2), line.Discounts[0].Amount)
@@ -120,6 +119,13 @@ func TestParseCtoGLineAllowanceAmount(t *testing.T) {
 	assert.Equal(t, "5.92%", line.Discounts[0].Percent.String())
 	require.NotNil(t, line.Discounts[0].Base)
 	assert.Equal(t, num.MakeAmount(822528, 2), *line.Discounts[0].Base)
-	// 8225.28 - 486.94 + 107.71
-	assert.Equal(t, "7846.05", line.Total.String())
+
+	// Neither line reproduces its declared amount (BT-131) from the terms it
+	// carries, so the document keeps the sender's own figures untouched.
+	assert.True(t, inv.HasTags(tax.TagBypass))
+	assert.Equal(t, "1614.87", inv.Lines[0].Total.String())
+	assert.Equal(t, "8137.15", inv.Lines[1].Total.String())
+	assert.Equal(t, "9752.02", inv.Totals.Sum.String())
+	assert.Equal(t, "536.36", inv.Totals.Tax.String())
+	assert.Equal(t, "10288.38", inv.Totals.Payable.String())
 }
