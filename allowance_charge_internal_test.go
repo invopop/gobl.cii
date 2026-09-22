@@ -138,6 +138,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 			Amount:     testAmountSmall,
 			Reason:     "Handling",
 			ReasonCode: "FC",
+			Base:       testAmountBasis,
 			Percent:    "5",
 		})
 		require.NoError(t, err)
@@ -149,7 +150,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 	})
 
 	t.Run("a percentage already carrying its sign is not doubled", func(t *testing.T) {
-		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Percent: "5%"})
+		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Base: testAmountBasis, Percent: "5%"})
 		require.NoError(t, err)
 		require.NotNil(t, c.Percent)
 		assert.Equal(t, "5%", c.Percent.String())
@@ -160,6 +161,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 			Amount:     testAmountSmall,
 			Reason:     "Bulk",
 			ReasonCode: "95",
+			Base:       testAmountBasis,
 			Percent:    "5",
 		})
 		require.NoError(t, err)
@@ -183,6 +185,21 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 
 		_, err = goblNewLineDiscount(&AllowanceCharge{Amount: testAmountSmall, Percent: testNotAPercent})
 		assert.Error(t, err)
+	})
+
+	t.Run("a percentage with no basis is dropped", func(t *testing.T) {
+		// EN 16931 makes the actual amount authoritative, and GOBL recalculates
+		// from a percentage whenever one is present. Without a declared basis it
+		// would apply the percentage to the line sum, overwriting the amount.
+		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Percent: "5"})
+		require.NoError(t, err)
+		assert.Nil(t, c.Percent)
+		assert.Equal(t, testAmountSmall, c.Amount.String())
+
+		d, err := goblNewLineDiscount(&AllowanceCharge{Amount: testAmountSmall, Percent: "5"})
+		require.NoError(t, err)
+		assert.Nil(t, d.Percent)
+		assert.Equal(t, testAmountSmall, d.Amount.String())
 	})
 
 	t.Run("the amount alone is enough", func(t *testing.T) {
