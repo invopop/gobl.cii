@@ -14,8 +14,6 @@ const (
 	testSurname   = "Sample"
 
 	testAmountSmall = "2.50"
-	// testAmountBasis is the basis a 5% allowance of testAmountSmall applies to.
-	testAmountBasis = "50.00"
 	testAmountHalf  = "50.00"
 
 	// Item attribute label and UN/ECE code with no GOBL unit behind it.

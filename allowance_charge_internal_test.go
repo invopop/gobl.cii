@@ -138,7 +138,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 			Amount:     testAmountSmall,
 			Reason:     "Handling",
 			ReasonCode: "FC",
-			Base:       testAmountBasis,
+			Base:       testAmountHalf,
 			Percent:    "5",
 		})
 		require.NoError(t, err)
@@ -150,7 +150,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 	})
 
 	t.Run("a percentage already carrying its sign is not doubled", func(t *testing.T) {
-		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Base: testAmountBasis, Percent: "5%"})
+		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Base: testAmountHalf, Percent: "5%"})
 		require.NoError(t, err)
 		require.NotNil(t, c.Percent)
 		assert.Equal(t, "5%", c.Percent.String())
@@ -161,7 +161,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 			Amount:     testAmountSmall,
 			Reason:     "Bulk",
 			ReasonCode: "95",
-			Base:       testAmountBasis,
+			Base:       testAmountHalf,
 			Percent:    "5",
 		})
 		require.NoError(t, err)
