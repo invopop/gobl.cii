@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -309,10 +310,15 @@ func goblDeclaredTaxBreakdown(in *Invoice, exp uint32) *tax.Total {
 			Base:   base.RescaleUp(exp),
 			Amount: amount.RescaleUp(exp),
 		}
+		ext := make(cbc.CodeMap)
 		if tt.CategoryCode != "" {
-			rate.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyTaxCategory: cbc.Code(tt.CategoryCode),
-			})
+			ext[untdid.ExtKeyTaxCategory] = cbc.Code(tt.CategoryCode)
+		}
+		if tt.ExemptionReasonCode != "" {
+			ext[cef.ExtKeyVATEX] = cbc.Code(tt.ExemptionReasonCode)
+		}
+		if len(ext) > 0 {
+			rate.Ext = tax.ExtensionsOf(ext)
 		}
 		if tt.RateApplicablePercent != "" {
 			p, err := num.PercentageFromString(strings.TrimSuffix(tt.RateApplicablePercent, "%") + "%")
@@ -320,11 +326,9 @@ func goblDeclaredTaxBreakdown(in *Invoice, exp uint32) *tax.Total {
 				rate.Percent = &p
 			}
 		}
-		total.Categories = append(total.Categories, &tax.CategoryTotal{
-			Code:   cbc.Code(tt.TypeCode),
-			Rates:  []*tax.RateTotal{rate},
-			Amount: rate.Amount,
-		})
+		cat := goblCategoryTotal(total, cbc.Code(tt.TypeCode))
+		cat.Rates = append(cat.Rates, rate)
+		cat.Amount = cat.Amount.MatchPrecision(rate.Amount).Add(rate.Amount)
 		total.Sum = total.Sum.MatchPrecision(rate.Amount).Add(rate.Amount)
 	}
 	if len(total.Categories) == 0 {
@@ -360,4 +364,18 @@ func goblDeclaredAmount(s string) (num.Amount, bool) {
 		return num.AmountZero, false
 	}
 	return v, true
+}
+
+// goblCategoryTotal finds the running total for a tax category, adding one if
+// the category has not been seen yet. Each declared tax entry is a rate within
+// its category, not a category of its own.
+func goblCategoryTotal(total *tax.Total, code cbc.Code) *tax.CategoryTotal {
+	for _, c := range total.Categories {
+		if c.Code == code {
+			return c
+		}
+	}
+	cat := &tax.CategoryTotal{Code: code}
+	total.Categories = append(total.Categories, cat)
+	return cat
 }
