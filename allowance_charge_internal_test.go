@@ -12,6 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testCategoryVAT = "VAT"
+	testAmountSmall = "2.50"
+	testNotANumber  = "n/a"
+	testNotAPercent = "lots"
+)
+
 func pct(t *testing.T, s string) *num.Percentage {
 	t.Helper()
 	p, err := num.PercentageFromString(s)

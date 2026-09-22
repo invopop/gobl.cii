@@ -11,6 +11,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testGivenName = "Jane"
+	testSurname   = "Sample"
+)
+
 func TestFormatIssueDate(t *testing.T) {
 	t.Run("a date is written in the CII format", func(t *testing.T) {
 		assert.Equal(t, "20240115", formatIssueDate(cal.MakeDate(2024, 1, 15)))

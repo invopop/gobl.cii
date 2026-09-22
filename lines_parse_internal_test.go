@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testCostRef = "COST-1"
+
 func TestGoblLineAgreement(t *testing.T) {
 	ref := func(s string) *string { return &s }
 

@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testAmountHalf = "50.00"
+
 func issueDate(v string) *IssueDate {
 	return &IssueDate{DateFormat: &Date{Value: v, Format: issueDateFormat}}
 }

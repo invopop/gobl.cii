@@ -13,6 +13,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testAttrWeight   = "Weight"
+	testUnitUnmapped = "XYZ"
+)
+
 func TestUntdidUnit(t *testing.T) {
 	const knownUNECECode = "Known UNECE code"
 	tests := []struct {

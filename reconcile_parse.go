@@ -11,20 +11,11 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// goblReconcileTotals aligns the converted document with the figures the sender
-// declared, preferring the terms EN 16931 actually makes binding.
-//
-// The invoice line net amount (BT-131) is mandatory (BR-24) and is the only
-// line figure the document totals are summed from (BR-CO-10, BR-CO-13). The
-// item price base quantity (BT-149) is optional and appears in no rule at all,
-// and GOBL has nowhere to store it: it can only be folded into the unit price.
-// So when a line's declared amount and its base quantity disagree, the declared
-// amount decides and the base quantity is dropped.
-//
-// A document that still does not reconcile is one whose arithmetic we cannot
-// reproduce from the terms it carries. Rather than store our own figures in
-// place of the sender's, it is tagged for bypass and the declared amounts are
-// recorded verbatim.
+// goblReconcileTotals aligns the document with the amounts the sender declared.
+// BT-131 is mandatory (BR-24) and the totals are summed from it (BR-CO-10,
+// BR-CO-13), while BT-149 is optional and in no rule, so BT-131 decides between
+// them. What reconciles under no reading is tagged for bypass and recorded as
+// sent.
 func goblReconcileTotals(in *Invoice, out *bill.Invoice) error {
 	goblApplyRounding(in, out)
 
@@ -58,10 +49,9 @@ type priceSwap struct {
 	price num.Amount
 }
 
-// goblDropConflictingBaseQuantities removes the base quantity from any line
-// whose total only matches the declared amount (BT-131) without it. Lines that
-// match either way keep it, since dividing is the reading the standard
-// describes.
+// goblDropConflictingBaseQuantities removes the base quantity from any line that
+// only matches its declared amount (BT-131) without it. Lines matching either
+// way keep it, dividing being the reading the standard describes.
 func goblDropConflictingBaseQuantities(in *Invoice, out *bill.Invoice) []priceSwap {
 	var swaps []priceSwap
 	for i, docLine := range in.Transaction.Lines {
@@ -80,9 +70,7 @@ func goblDropConflictingBaseQuantities(in *Invoice, out *bill.Invoice) []priceSw
 		if !ok || declared.Equals(*line.Total) {
 			continue
 		}
-		// The line disagrees with its declared amount. Retry it with the base
-		// quantity left out, which is the only other reading of the price the
-		// document supports.
+		// Retry without the base quantity, the only other reading available.
 		price, err := num.AmountFromString(np.Amount)
 		if err != nil {
 			continue
@@ -93,8 +81,8 @@ func goblDropConflictingBaseQuantities(in *Invoice, out *bill.Invoice) []priceSw
 	return swaps
 }
 
-// goblRestoreBaseQuantities puts back the standard reading of the price on any
-// swapped line that still does not match its declared amount.
+// goblRestoreBaseQuantities restores the standard price reading on swapped lines
+// that still do not match.
 func goblRestoreBaseQuantities(in *Invoice, out *bill.Invoice, swaps []priceSwap) bool {
 	lines := in.Transaction.Lines
 	restored := false
@@ -117,10 +105,8 @@ func goblRestoreBaseQuantities(in *Invoice, out *bill.Invoice, swaps []priceSwap
 	return restored
 }
 
-// goblDeclaredTotalsAgree reports whether every declared amount in the document
-// is reproduced by the calculated one: the line amounts (BT-131), the sum of
-// them (BT-106), the total without VAT (BT-109), the VAT total (BT-110), the
-// total with VAT (BT-112) and the amount due for payment (BT-115).
+// goblDeclaredTotalsAgree reports whether the calculated amounts reproduce every
+// declared one: BT-131 per line, then BT-106, BT-109, BT-110, BT-112 and BT-115.
 func goblDeclaredTotalsAgree(in *Invoice, out *bill.Invoice) bool {
 	for i, docLine := range in.Transaction.Lines {
 		if i >= len(out.Lines) {
@@ -165,10 +151,8 @@ func goblDeclaredTotalsAgree(in *Invoice, out *bill.Invoice) bool {
 	return true
 }
 
-// goblPayableAmount returns the total the amount due for payment (BT-115) is
-// built from. GOBL keeps the amount still owed in Due once advances are
-// deducted, and only falls back to Payable when there are none — the same
-// choice the outbound mapping makes.
+// goblPayableAmount returns what BT-115 is built from: Due once advances are
+// deducted, Payable otherwise, matching the outbound mapping.
 func goblPayableAmount(t *bill.Totals) num.Amount {
 	if t.Due != nil {
 		return *t.Due
@@ -176,12 +160,11 @@ func goblPayableAmount(t *bill.Totals) num.Amount {
 	return t.Payable
 }
 
-// goblApplyDeclaredTotals records the sender's own figures and tags the document
-// so GOBL leaves them alone. Under the bypass tag calculation stops before any
-// total is derived, so every amount has to be supplied here.
+// goblApplyDeclaredTotals records the sender's figures and tags the document so
+// GOBL leaves them alone. Calculation stops under the tag, so every amount the
+// document would otherwise derive is supplied here.
 func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice) error {
-	// Declared amounts carry whatever precision the sender wrote them with, so
-	// align them with the currency before they become the document's own.
+	// Align the sender's precision with the currency's.
 	exp := out.Currency.Def().Zero().Exp()
 	declared := func(s string) (num.Amount, bool) {
 		v, ok := goblDeclaredAmount(s)
@@ -203,9 +186,8 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice) error {
 		if !ok {
 			continue
 		}
-		// The sum stays as calculated: no business term carries the line amount
-		// before allowances and charges, so the sender's own total is all we can
-		// state with authority.
+		// The sum stays calculated: no term carries the amount before
+		// allowances and charges.
 		v = v.RescaleUp(exp)
 		line.Total = &v
 	}
@@ -235,8 +217,7 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice) error {
 	if v, ok := declared(s.RoundingAmount); ok {
 		t.Rounding = &v
 	}
-	// BT-115 is what remains to be paid, which GOBL keeps in Due whenever
-	// advances have been deducted.
+	// BT-115 is what remains to pay, which GOBL keeps in Due after advances.
 	if v, ok := declared(s.DuePayableAmount); ok {
 		if t.Advances != nil {
 			t.Due = &v
@@ -247,8 +228,8 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice) error {
 	if s.TaxTotalAmount != nil {
 		if v, ok := declared(s.TaxTotalAmount.Amount); ok {
 			t.Tax = v
-			// The breakdown has to come from the document too. Leaving the
-			// calculated one in place would contradict the total just set.
+			// The breakdown must come from the document too, or it
+			// contradicts the total just set.
 			t.Taxes = goblDeclaredTaxBreakdown(in, exp)
 		}
 	}
@@ -259,9 +240,8 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice) error {
 		t.Charge = &v
 	}
 
-	// Anything GOBL derives from the totals is frozen once the tag is set, so
-	// the payment dues have to be re-derived against the declared payable
-	// rather than the one calculated before it was replaced.
+	// Derived values freeze once the tag is set, so re-derive the dues against
+	// the declared payable.
 	if out.Payment != nil {
 		out.Payment.Terms.CalculateDues(out.Currency.Def().Zero(), t.Payable)
 	}
@@ -270,10 +250,8 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice) error {
 	return out.Calculate()
 }
 
-// goblApplyRounding carries the rounding amount the sender applied to the amount
-// due (BT-114) into the calculation. GOBL keeps a rounding amount that was
-// supplied rather than deriving one, so setting it before calculating lets the
-// amount due come out as the sender stated it.
+// goblApplyRounding carries BT-114 into the calculation. GOBL keeps a supplied
+// rounding amount rather than deriving one.
 func goblApplyRounding(in *Invoice, out *bill.Invoice) {
 	s := goblSummary(in)
 	if s == nil {
@@ -289,9 +267,8 @@ func goblApplyRounding(in *Invoice, out *bill.Invoice) {
 	out.Totals.Rounding = &v
 }
 
-// goblDeclaredTaxBreakdown rebuilds the VAT breakdown (BG-23) from the
-// document's own trade tax entries, so the categories agree with the tax total
-// recorded alongside them.
+// goblDeclaredTaxBreakdown rebuilds BG-23 from the document's own trade tax
+// entries, so it agrees with the tax total recorded alongside it.
 func goblDeclaredTaxBreakdown(in *Invoice, exp uint32) *tax.Total {
 	if in.Transaction.Settlement == nil {
 		return nil
@@ -353,8 +330,7 @@ func goblDeclaredLineAmount(l *Line) (num.Amount, bool) {
 	return goblDeclaredAmount(l.TradeSettlement.Sum.Amount)
 }
 
-// goblDeclaredAmount parses a declared monetary amount, reporting whether one
-// was present at all.
+// goblDeclaredAmount parses a declared amount, reporting whether one was there.
 func goblDeclaredAmount(s string) (num.Amount, bool) {
 	if s == "" {
 		return num.AmountZero, false
@@ -366,9 +342,8 @@ func goblDeclaredAmount(s string) (num.Amount, bool) {
 	return v, true
 }
 
-// goblCategoryTotal finds the running total for a tax category, adding one if
-// the category has not been seen yet. Each declared tax entry is a rate within
-// its category, not a category of its own.
+// goblCategoryTotal finds or adds a category's running total. Each declared
+// entry is a rate within its category, not a category of its own.
 func goblCategoryTotal(total *tax.Total, code cbc.Code) *tax.CategoryTotal {
 	for _, c := range total.Categories {
 		if c.Code == code {
