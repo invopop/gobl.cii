@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,4 +64,52 @@ func TestParseCtoGDeclaredTotals(t *testing.T) {
 		assert.Equal(t, "0.00880", inv.Lines[0].Item.Price.String())
 		assert.Equal(t, "140.80", inv.Lines[0].Total.String())
 	})
+}
+
+// TestParseCtoGZeroPriceLines covers a line that states a net amount (BT-131)
+// but no unit price. Rebuilding such a line from price x quantity collapses it
+// to zero; the declared amount is the only figure the document offers, and the
+// standard makes it the binding one.
+//
+// Sanitised from a real Factur-X EXTENDED invoice issued by a bank: two lines
+// priced at zero with stated amounts, two that reconcile on their own, an
+// exempt VAT rate carrying a VATEX reason alongside a standard rate, and the
+// whole invoice prepaid.
+func TestParseCtoGZeroPriceLines(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "CII_zero_price_lines.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, inv.Lines, 4)
+
+	// Rebuilt from price x quantity these first two lines would be 0.00, which
+	// is what produced a 0.28 invoice against a stated 19.43.
+	assert.True(t, inv.HasTags(tax.TagBypass))
+	assert.Equal(t, "3.36", inv.Lines[0].Total.String())
+	assert.Equal(t, "15.50", inv.Lines[1].Total.String())
+	assert.Equal(t, "0.14", inv.Lines[2].Total.String())
+	assert.Equal(t, "0.14", inv.Lines[3].Total.String())
+
+	assert.Equal(t, "19.14", inv.Totals.Sum.String())
+	assert.Equal(t, "0.29", inv.Totals.Tax.String())
+	assert.Equal(t, "19.43", inv.Totals.TotalWithTax.String())
+
+	// BT-113 and BT-115: the invoice is settled in full.
+	require.NotNil(t, inv.Totals.Advances)
+	assert.Equal(t, "19.43", inv.Totals.Advances.String())
+	require.NotNil(t, inv.Totals.Due)
+	assert.Equal(t, "0.00", inv.Totals.Due.String())
+
+	// Both declared rates belong to one VAT category, and the exempt one keeps
+	// the reason code the document gave for it (BT-121).
+	require.NotNil(t, inv.Totals.Taxes)
+	require.Len(t, inv.Totals.Taxes.Categories, 1)
+	cat := inv.Totals.Taxes.Categories[0]
+	assert.Equal(t, cbc.Code("VAT"), cat.Code)
+	require.Len(t, cat.Rates, 2)
+	assert.Equal(t, "VATEX-FR-CGI261C-1", cat.Rates[0].Ext.Get(cef.ExtKeyVATEX).String())
+	assert.Equal(t, "15.78", cat.Rates[0].Base.String())
+	assert.Equal(t, "3.36", cat.Rates[1].Base.String())
+	assert.Equal(t, "0.29", cat.Rates[1].Amount.String())
 }
