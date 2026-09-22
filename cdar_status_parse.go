@@ -158,7 +158,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 			// prepareReasonKey at normalize-time.
 			r = &bill.Reason{
 				Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(ds.ReasonCode)),
-				Description: strings.Join(ds.Reason, "\n"),
+				Description: cleanString(strings.Join(ds.Reason, "\n")),
 			}
 		}
 		// Field-level corrections and amount markers
@@ -187,7 +187,7 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 				Ext: tax.MakeExtensions().Set(flow6.ExtKeyAction, cbc.Code(ds.RequestedActionCode)),
 			}
 			if ds.RequestedAction != "" {
-				a.Description = ds.RequestedAction
+				a.Description = cleanString(ds.RequestedAction)
 			}
 			line.Actions = append(line.Actions, a)
 		}
@@ -214,7 +214,7 @@ func goblFaultFromCDAR(dc *CDARDocumentCharacteristic) *bill.Fault {
 	}
 	f := &bill.Fault{Code: cbc.Code(code)}
 
-	msg := dc.Name
+	msg := cleanString(dc.Name)
 	if dc.ID != "" && dc.TypeCode != "" {
 		if msg != "" {
 			msg += " (" + dc.ID + ")"
@@ -246,7 +246,7 @@ func goblFaultFromCDAR(dc *CDARDocumentCharacteristic) *bill.Fault {
 	f.Message = msg
 
 	if dc.Location != "" {
-		f.Paths = []string{dc.Location}
+		f.Paths = []string{cleanString(dc.Location)}
 	}
 	return f
 }
@@ -371,7 +371,7 @@ func goblPartyFromCDAR(tp *CDARTradeParty) *org.Party {
 	if tp == nil {
 		return nil
 	}
-	p := &org.Party{Name: tp.Name}
+	p := &org.Party{Name: cleanString(tp.Name)}
 	if tp.RoleCode != "" {
 		p.Ext = tax.MakeExtensions().Set(flow6.ExtKeyRole, cbc.Code(tp.RoleCode))
 	}

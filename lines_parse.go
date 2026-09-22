@@ -41,7 +41,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	l := &bill.Line{
 		Quantity: num.MakeAmount(1, 0),
 		Item: &org.Item{
-			Name:  strings.TrimSpace(it.Product.Name),
+			Name:  cleanString(strings.TrimSpace(it.Product.Name)),
 			Price: &price,
 		},
 	}
@@ -62,8 +62,10 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	}
 
 	if it.Quantity != nil && it.Quantity.Quantity != nil && it.Quantity.Quantity.UnitCode != "" {
+		// BT-130: the code becomes a GOBL unit, or stays in the extension
+		// when GOBL has no unit for it.
 		u := cbc.Code(it.Quantity.Quantity.UnitCode)
-		l.Item.Unit = goblUnitFromUNECE(u)
+		l.Item.Unit, l.Item.Ext = goblUnit(l.Item.Ext, u)
 	}
 
 	goblLineProduct(it.Product, l.Item)
@@ -80,11 +82,14 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		}
 	}
 
-	if len(it.Product.Characteristics) > 0 {
-		l.Item.Meta = make(cbc.Meta)
-		for _, char := range it.Product.Characteristics {
-			key := formatKey(char.Description)
-			l.Item.Meta[key] = char.Value
+	// BG-32: item attributes
+	for _, char := range it.Product.Characteristics {
+		attr, err := goblItemAttribute(char)
+		if err != nil {
+			return nil, err
+		}
+		if attr != nil {
+			l.Item.Attributes = append(l.Item.Attributes, attr)
 		}
 	}
 
@@ -98,6 +103,33 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	l.Period = per
 
 	return l, nil
+}
+
+// goblItemAttribute converts a CII ApplicableProductCharacteristic (BG-32)
+// into a GOBL attribute, preferring the measure over the plain value when both
+// are present, as the measure also carries the unit.
+func goblItemAttribute(char *Characteristic) (*org.Attribute, error) {
+	description := cleanString(strings.TrimSpace(char.Description))
+	if description == "" {
+		return nil, nil
+	}
+	attr := &org.Attribute{Label: description}
+	switch {
+	case char.ValueMeasure != nil && char.ValueMeasure.Amount != "":
+		amount, err := num.AmountFromString(char.ValueMeasure.Amount)
+		if err != nil {
+			return nil, err
+		}
+		attr.Amount = &amount
+		if char.ValueMeasure.UnitCode != "" {
+			attr.Unit, attr.Ext = goblUnit(attr.Ext, cbc.Code(char.ValueMeasure.UnitCode))
+		}
+	case char.Value != "":
+		attr.Text = cleanString(strings.TrimSpace(char.Value))
+	default:
+		return nil, nil
+	}
+	return attr, nil
 }
 
 // goblLinePrice extracts and normalizes the net price, dividing by base quantity if present.
@@ -142,7 +174,7 @@ func goblLineProduct(prod *Product, item *org.Item) {
 	}
 
 	if prod.Description != nil {
-		item.Description = strings.TrimSpace(*prod.Description)
+		item.Description = cleanString(strings.TrimSpace(*prod.Description))
 	}
 
 	if prod.Origin != nil {
@@ -172,7 +204,7 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 	for _, note := range lineDoc.Note {
 		n := &org.Note{}
 		if note.Content != "" {
-			n.Text = strings.TrimSpace(note.Content)
+			n.Text = cleanString(strings.TrimSpace(note.Content))
 		}
 		if note.SubjectCode != "" {
 			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
@@ -220,16 +252,16 @@ func goblLinePeriod(p *Period) (*cal.Period, error) {
 		if err != nil {
 			return nil, err
 		}
-		per.Start = start
+		per.Start = &start
 	}
 	if p.End != nil && p.End.DateFormat != nil {
 		end, err := parseDate(p.End.DateFormat.Value)
 		if err != nil {
 			return nil, err
 		}
-		per.End = end
+		per.End = &end
 	}
-	if per.Start.IsZero() && per.End.IsZero() {
+	if per.Start == nil && per.End == nil {
 		return nil, nil
 	}
 	return per, nil

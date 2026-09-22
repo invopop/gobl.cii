@@ -10,11 +10,13 @@ type Agreement struct {
 	BuyerReference     string                `xml:"ram:BuyerReference,omitempty"`
 	Seller             *Party                `xml:"ram:SellerTradeParty,omitempty"`
 	Buyer              *Party                `xml:"ram:BuyerTradeParty,omitempty"`
+	SalesAgent         *Party                `xml:"ram:SalesAgentTradeParty,omitempty"`
 	TaxRepresentative  *Party                `xml:"ram:SellerTaxRepresentativeTradeParty,omitempty"`
 	Sales              *IssuerID             `xml:"ram:SellerOrderReferencedDocument,omitempty"`
 	Purchase           *IssuerID             `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	Contract           *IssuerID             `xml:"ram:ContractReferencedDocument,omitempty"`
 	AdditionalDocument []*AdditionalDocument `xml:"ram:AdditionalReferencedDocument,omitempty"`
+	BuyerAgent         *Party                `xml:"ram:BuyerAgentTradeParty,omitempty"`
 	Project            *Project              `xml:"ram:SpecifiedProcurringProject,omitempty"`
 }
 
@@ -59,6 +61,7 @@ func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 	if customer := inv.Customer; customer != nil {
 		agmt.Buyer = newParty(customer, ctx)
 	}
+	agmt.addFrenchExtendedAgents(inv, ctx)
 	if inv.Ordering != nil {
 		// The party liable for the tax, when not the supplier, is the
 		// BG-11 tax representative, which only carries the name (BT-62),
@@ -116,6 +119,22 @@ func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 		}
 	}
 	return nil
+}
+
+// addFrenchExtendedAgents fills the agents acting for the seller
+// (EXT-FR-FE-BG-03) and the buyer (EXT-FR-FE-BG-01). GOBL nests them inside
+// the party they act for; CII keeps them as siblings in the trade agreement.
+// Only the French extended profile defines them.
+func (agmt *Agreement) addFrenchExtendedAgents(inv *bill.Invoice, ctx Context) {
+	if !isFranceExtended(&ctx) {
+		return
+	}
+	if inv.Supplier != nil && inv.Supplier.Agent != nil {
+		agmt.SalesAgent = newParty(inv.Supplier.Agent, ctx)
+	}
+	if inv.Customer != nil && inv.Customer.Agent != nil {
+		agmt.BuyerAgent = newParty(inv.Customer.Agent, ctx)
+	}
 }
 
 func newPostalTradeAddress(addresses []*org.Address) *PostalTradeAddress {

@@ -48,6 +48,8 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		},
 	}
 
+	goblAddFrenchExtendedAgents(out, in.Transaction.Agreement, ctx)
+
 	if ctx != nil {
 		out.Addons = tax.Addons{List: ctx.Addons}
 		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) || ctx.Is(ContextPeppolFranceExtendedV1) {
@@ -73,13 +75,13 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		return nil, err
 	}
 
-	if out.Payment, err = goblNewPaymentDetails(ahts); err != nil {
+	if out.Payment, err = goblNewPaymentDetails(ahts, ctx); err != nil {
 		return nil, err
 	}
 
 	out.Notes = goblParseNotes(in.ExchangedDocument.IncludedNote)
 
-	if out.Ordering, err = goblNewOrdering(in); err != nil {
+	if out.Ordering, err = goblNewOrdering(in, ctx); err != nil {
 		return nil, err
 	}
 	if out.Delivery, err = goblNewDeliveryDetails(in.Transaction.Delivery); err != nil {
@@ -111,6 +113,22 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	}
 
 	return out, nil
+}
+
+// goblAddFrenchExtendedAgents reads the agents acting for the seller
+// (EXT-FR-FE-BG-03) and the buyer (EXT-FR-FE-BG-01) back onto the party they
+// act for, where GOBL keeps them. Only the French extended profile defines
+// them.
+func goblAddFrenchExtendedAgents(out *bill.Invoice, agmt *Agreement, ctx *Context) {
+	if agmt == nil || !isFranceExtended(ctx) {
+		return
+	}
+	if out.Supplier != nil && agmt.SalesAgent != nil {
+		out.Supplier.Agent = goblNewParty(agmt.SalesAgent)
+	}
+	if out.Customer != nil && agmt.BuyerAgent != nil {
+		out.Customer.Agent = goblNewParty(agmt.BuyerAgent)
+	}
 }
 
 // goblDetectContext determines the conversion context from guideline and business IDs.
@@ -160,7 +178,7 @@ func goblParseNotes(notes []*Note) []*org.Note {
 	}
 	out := make([]*org.Note, 0, len(notes))
 	for _, note := range notes {
-		n := &org.Note{Text: note.Content}
+		n := &org.Note{Text: cleanString(note.Content)}
 		if note.SubjectCode != "" {
 			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
 		}

@@ -59,7 +59,7 @@ func TestParseCtoGLines(t *testing.T) {
 
 		assert.Equal(t, "PATAT FRITES 10MM 10KG", lines[0].Item.Name)
 		assert.Equal(t, num.MakeAmount(995, 2), *lines[0].Item.Price)
-		assert.Equal(t, org.Unit("piece"), lines[0].Item.Unit)
+		assert.Equal(t, org.UnitPiece, lines[0].Item.Unit)
 		assert.Equal(t, num.MakeAmount(2, 0), lines[0].Quantity)
 		assert.Equal(t, "VAT", string(lines[0].Taxes[0].Category))
 		percent, err := num.PercentageFromString("6%")
@@ -68,7 +68,7 @@ func TestParseCtoGLines(t *testing.T) {
 
 		assert.Equal(t, "KAAS 50PL. JONG BEL. 1KG", lines[1].Item.Name)
 		assert.Equal(t, num.MakeAmount(985, 2), *lines[1].Item.Price)
-		assert.Equal(t, org.Unit("piece"), lines[1].Item.Unit)
+		assert.Equal(t, org.UnitPiece, lines[1].Item.Unit)
 		assert.Equal(t, num.MakeAmount(1, 0), lines[1].Quantity)
 		assert.Equal(t, "VAT", string(lines[1].Taxes[0].Category))
 		percent, err = num.PercentageFromString("6%")
@@ -77,7 +77,7 @@ func TestParseCtoGLines(t *testing.T) {
 
 		assert.Equal(t, "POT KETCHUP 3 LT", lines[2].Item.Name)
 		assert.Equal(t, num.MakeAmount(829, 2), *lines[2].Item.Price)
-		assert.Equal(t, org.Unit("piece"), lines[2].Item.Unit)
+		assert.Equal(t, org.UnitPiece, lines[2].Item.Unit)
 		assert.Equal(t, num.MakeAmount(1, 0), lines[2].Quantity)
 		assert.Equal(t, "VAT", string(lines[2].Taxes[0].Category))
 		percent, err = num.PercentageFromString("6%")
@@ -103,6 +103,11 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, cbc.Code("JB007"), lines[0].Item.Ref)
 		assert.Equal(t, "1234567890128", lines[0].Item.Identities[0].Code.String())
 		assert.Equal(t, "0088", lines[0].Item.Identities[0].Ext.Get(iso.ExtKeySchemeID).String())
+
+		// BG-32: Item attributes
+		require.Len(t, lines[0].Item.Attributes, 1)
+		assert.Equal(t, attrLabelColor, lines[0].Item.Attributes[0].Label)
+		assert.Equal(t, attrValueBlack, lines[0].Item.Attributes[0].Text)
 
 		// BT-158: Item classification
 		classID := lines[0].Item.Identities[1]

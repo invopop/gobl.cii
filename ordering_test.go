@@ -138,3 +138,101 @@ func TestOrderingCost(t *testing.T) {
 		assert.Equal(t, cbc.Code("1287:65464"), out.Ordering.Cost)
 	})
 }
+
+func TestExtendedParties(t *testing.T) {
+	const fixture = "peppol-france-extended/invoice-extended-parties.json"
+
+	convert := func(t *testing.T, ctx cii.Context) *cii.Invoice {
+		t.Helper()
+		doc, err := cii.ConvertInvoice(loadEnvelope(t, fixture), cii.WithContext(ctx))
+		require.NoError(t, err)
+		return doc
+	}
+
+	t.Run("french extended maps the facturant, the addressee and the payer", func(t *testing.T) {
+		stlm := convert(t, cii.ContextPeppolFranceExtendedV1).Transaction.Settlement
+
+		// EXT-FR-FE-BG-05, pinned to UNCL 3035 "II" by EXT-FR-FE-113.
+		require.NotNil(t, stlm.Invoicer)
+		assert.Equal(t, "Facturant SARL", stlm.Invoicer.Name)
+		assert.Equal(t, "II", stlm.Invoicer.RoleCode)
+		assert.Equal(t, "524802931", stlm.Invoicer.LegalOrganization.ID.Value)
+
+		// EXT-FR-FE-BG-04, pinned to UNCL 3035 "IV" by EXT-FR-FE-90.
+		require.NotNil(t, stlm.Invoicee)
+		assert.Equal(t, "Adressée SAS", stlm.Invoicee.Name)
+		assert.Equal(t, "IV", stlm.Invoicee.RoleCode)
+		require.NotEmpty(t, stlm.Invoicee.GlobalID)
+		assert.Equal(t, "31419443800017", stlm.Invoicee.GlobalID[0].Value)
+		assert.Equal(t, "0009", stlm.Invoicee.GlobalID[0].SchemeID)
+
+		// EXT-FR-FE-BG-02.
+		require.NotNil(t, stlm.Payer)
+		assert.Equal(t, "Payeur SA", stlm.Payer.Name)
+		require.NotEmpty(t, stlm.Payer.SpecifiedTaxRegistration)
+		assert.Equal(t, "FR44391838042", stlm.Payer.SpecifiedTaxRegistration[0].ID.Value)
+	})
+
+	t.Run("french extended maps the seller and buyer agents", func(t *testing.T) {
+		agmt := convert(t, cii.ContextPeppolFranceExtendedV1).Transaction.Agreement
+
+		// CII keeps the agents beside the parties, not nested in them.
+		require.NotNil(t, agmt.SalesAgent)
+		assert.Equal(t, "Agent de Vendeur SAS", agmt.SalesAgent.Name)
+		assert.Equal(t, "443061841", agmt.SalesAgent.LegalOrganization.ID.Value)
+
+		require.NotNil(t, agmt.BuyerAgent)
+		assert.Equal(t, "Agence Media SARL", agmt.BuyerAgent.Name)
+		assert.Equal(t, "FR96552100554", agmt.BuyerAgent.SpecifiedTaxRegistration[0].ID.Value)
+	})
+
+	t.Run("the factur-x flavour of the profile maps them too", func(t *testing.T) {
+		// ContextPeppolFranceFacturXV1 declares the Factur-X EXTENDED
+		// guideline in BT-24 but is checked by the same EXTENDED-CTC-FR
+		// rule set, so it carries the same parties.
+		tr := convert(t, cii.ContextPeppolFranceFacturXV1).Transaction
+
+		require.NotNil(t, tr.Settlement.Invoicee)
+		require.NotNil(t, tr.Settlement.Payer)
+		require.NotNil(t, tr.Agreement.SalesAgent)
+		require.NotNil(t, tr.Agreement.BuyerAgent)
+		assert.Equal(t, "II", tr.Settlement.Invoicer.RoleCode)
+	})
+
+	t.Run("extended-only parties are ignored outside the french extended contexts", func(t *testing.T) {
+		// The CIUS profile is the closest neighbour that must not carry them.
+		for _, ctx := range []cii.Context{cii.ContextEN16931V2017, cii.ContextPeppolFranceCIUSV1} {
+			tr := convert(t, ctx).Transaction
+			assert.Nil(t, tr.Settlement.Invoicee)
+			assert.Nil(t, tr.Settlement.Payer)
+			assert.Nil(t, tr.Agreement.SalesAgent)
+			assert.Nil(t, tr.Agreement.BuyerAgent)
+			require.NotNil(t, tr.Settlement.Invoicer)
+			assert.Empty(t, tr.Settlement.Invoicer.RoleCode)
+		}
+	})
+
+	t.Run("parse restores every extended party", func(t *testing.T) {
+		data, err := convert(t, cii.ContextPeppolFranceExtendedV1).Bytes()
+		require.NoError(t, err)
+
+		env, err := cii.Parse(data)
+		require.NoError(t, err)
+		out, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		require.NotNil(t, out.Ordering)
+		require.NotNil(t, out.Ordering.Issuer)
+		assert.Equal(t, "Facturant SARL", out.Ordering.Issuer.Name)
+		require.NotNil(t, out.Ordering.Buyer)
+		assert.Equal(t, "Adressée SAS", out.Ordering.Buyer.Name)
+		require.NotNil(t, out.Payment)
+		require.NotNil(t, out.Payment.Payer)
+		assert.Equal(t, "Payeur SA", out.Payment.Payer.Name)
+		require.NotNil(t, out.Supplier.Agent)
+		assert.Equal(t, "Agent de Vendeur SAS", out.Supplier.Agent.Name)
+		assert.Nil(t, out.Supplier.Agent.Agent)
+		require.NotNil(t, out.Customer.Agent)
+		assert.Equal(t, "Agence Media SARL", out.Customer.Agent.Name)
+	})
+}

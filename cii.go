@@ -178,6 +178,18 @@ var ContextPeppolFranceExtendedV1 = Context{
 	VESID:             "fr.ctc:extended-cii:1.4.0-03",
 }
 
+// isFranceExtended reports whether the context is checked against
+// EXTENDED-CTC-FR, the only profile that defines the extra parties. Both
+// French extended contexts share that rule set: ContextPeppolFranceFacturXV1
+// declares the Factur-X EXTENDED guideline in BT-24, which the CTC rules do
+// not look at. A nil context means the document declared no profile we know.
+func isFranceExtended(ctx *Context) bool {
+	if ctx == nil {
+		return false
+	}
+	return ctx.Is(ContextPeppolFranceExtendedV1) || ctx.Is(ContextPeppolFranceFacturXV1)
+}
+
 // ContextZUGFeRDV2 is the ZUGFeRD EN 16931 (COMFORT) profile.
 var ContextZUGFeRDV2 = Context{
 	GuidelineID: guidelineIDEN16931V2017,
@@ -271,6 +283,7 @@ var contexts = []Context{
 //     OutputGuidelineID and then on GuidelineID
 //  2. Tries to match on the full GuidelineID (for external identification)
 //  3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
+//  4. Falls back to a French context when the BusinessID is a French billing mode
 func FindContext(guidelineID string, businessID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// GuidelineID as EN16931 but can be identified by their BusinessID
@@ -280,7 +293,7 @@ func FindContext(guidelineID string, businessID string) *Context {
 		// plain EN16931 guideline that CIUS documents carry.
 		for i := range contexts {
 			ctx := &contexts[i]
-			if ctx.OutputGuidelineID == guidelineID {
+			if ctx.OutputGuidelineID != "" && ctx.OutputGuidelineID == guidelineID {
 				return ctx
 			}
 		}
@@ -309,6 +322,15 @@ func FindContext(guidelineID string, businessID string) *Context {
 		if ctx.OutputGuidelineID != "" && ctx.OutputGuidelineID == guidelineID {
 			return ctx
 		}
+	}
+
+	// The CTC schematron never checks BT-24, so a mangled GuidelineID
+	// arrives validated and the billing mode is all that is left to trust.
+	// Extended because its extra mappings are additive: a CIUS document
+	// carries none of them.
+	if isFrenchBillingMode(businessID) {
+		ctx := ContextPeppolFranceExtendedV1
+		return &ctx
 	}
 
 	return nil
@@ -454,6 +476,9 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		// Removes included taxes as they are not supported in CII
 		if err := doc.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
+		}
+		if err := doc.RoundToCurrency(); err != nil {
+			return nil, fmt.Errorf("cannot round invoice to currency precision: %w", err)
 		}
 
 		return newInvoice(doc, o.context)

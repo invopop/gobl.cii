@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "908b944ca5d0787fc97e658e4a3f725564064444575dae9bc749e9f7d09dc93f"
+			"val": "2649c984842e26ee3102afc74d203e9c8892d509bdef19e34013221c736a4cdb"
 		},
 		"from": "iso6523-actorid-upis::0225:356000000",
 		"to": "iso6523-actorid-upis::0225:732829320"
@@ -17,25 +17,44 @@
 			"fr-ctc-flow2-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "credit-note",
-		"code": "AVR-2024-001",
+		"type": "standard",
+		"code": "FAC-2024-001",
 		"issue_date": "2024-06-13",
 		"currency": "EUR",
-		"preceding": [
-			{
-				"issue_date": "2024-06-13",
-				"code": "FAC-2024-001"
-			}
-		],
 		"tax": {
 			"rounding": "currency",
 			"ext": {
 				"fr-ctc-billing-mode": "S1",
-				"untdid-document-type": "381"
+				"untdid-document-type": "380"
 			}
 		},
 		"supplier": {
 			"name": "Supplier SARL",
+			"agent": {
+				"name": "Agent de Vendeur SAS",
+				"tax_id": {
+					"country": "FR",
+					"code": "64443061841"
+				},
+				"identities": [
+					{
+						"scope": "legal",
+						"type": "SIREN",
+						"code": "443061841",
+						"ext": {
+							"iso-scheme-id": "0002"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "5 Rue du Mandataire",
+						"locality": "Lille",
+						"code": "59000",
+						"country": "FR"
+					}
+				]
+			},
 			"tax_id": {
 				"country": "FR",
 				"code": "39356000000"
@@ -43,6 +62,7 @@
 			"identities": [
 				{
 					"scope": "legal",
+					"type": "SIREN",
 					"code": "356000000",
 					"ext": {
 						"iso-scheme-id": "0002"
@@ -72,6 +92,31 @@
 		},
 		"customer": {
 			"name": "Customer SAS",
+			"agent": {
+				"name": "Agence Media SARL",
+				"tax_id": {
+					"country": "FR",
+					"code": "96552100554"
+				},
+				"identities": [
+					{
+						"scope": "legal",
+						"type": "SIREN",
+						"code": "552100554",
+						"ext": {
+							"iso-scheme-id": "0002"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "9 Boulevard de l'Agence",
+						"locality": "Bordeaux",
+						"code": "33000",
+						"country": "FR"
+					}
+				]
+			},
 			"tax_id": {
 				"country": "FR",
 				"code": "44732829320"
@@ -79,6 +124,7 @@
 			"identities": [
 				{
 					"scope": "legal",
+					"type": "SIREN",
 					"code": "732829320",
 					"ext": {
 						"iso-scheme-id": "0002"
@@ -113,16 +159,14 @@
 				"item": {
 					"name": "Service",
 					"price": "100.00",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "1000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
+						"rate": "general",
 						"percent": "20%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -132,13 +176,110 @@
 				"total": "1000.00"
 			}
 		],
+		"ordering": {
+			"buyer": {
+				"name": "Adressée SAS",
+				"tax_id": {
+					"country": "FR",
+					"code": "85314194438"
+				},
+				"identities": [
+					{
+						"scope": "legal",
+						"type": "SIREN",
+						"code": "314194438",
+						"ext": {
+							"iso-scheme-id": "0002"
+						}
+					},
+					{
+						"type": "SIRET",
+						"code": "31419443800017",
+						"ext": {
+							"iso-scheme-id": "0009"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "8 Rue de la Comptabilité",
+						"locality": "Nantes",
+						"code": "44000",
+						"country": "FR"
+					}
+				],
+				"emails": [
+					{
+						"addr": "factures@adressee.fr"
+					}
+				]
+			},
+			"issuer": {
+				"name": "Facturant SARL",
+				"tax_id": {
+					"country": "FR",
+					"code": "59524802931"
+				},
+				"identities": [
+					{
+						"scope": "legal",
+						"type": "SIREN",
+						"code": "524802931",
+						"ext": {
+							"iso-scheme-id": "0002"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "12 Avenue du Service Facturier",
+						"locality": "Rennes",
+						"code": "35000",
+						"country": "FR"
+					}
+				]
+			}
+		},
 		"payment": {
+			"payer": {
+				"name": "Payeur SA",
+				"tax_id": {
+					"country": "FR",
+					"code": "44391838042"
+				},
+				"identities": [
+					{
+						"scope": "legal",
+						"type": "SIREN",
+						"code": "391838042",
+						"ext": {
+							"iso-scheme-id": "0002"
+						}
+					},
+					{
+						"type": "SIRET",
+						"code": "39183804200003",
+						"ext": {
+							"iso-scheme-id": "0009"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "3 Rue du Payeur",
+						"locality": "Lyon",
+						"code": "69001",
+						"country": "FR"
+					}
+				]
+			},
 			"terms": {
+				"key": "due-date",
 				"due_dates": [
 					{
 						"date": "2024-07-13",
-						"amount": "1200.00",
-						"percent": "100%"
+						"amount": "120.00",
+						"percent": "10.0%"
 					}
 				]
 			},
@@ -146,7 +287,8 @@
 				"key": "credit-transfer",
 				"credit_transfer": [
 					{
-						"iban": "FR7630006000011234567890189"
+						"iban": "FR7630006000011234567890189",
+						"name": "Supplier SARL"
 					}
 				],
 				"ext": {
@@ -183,18 +325,21 @@
 		},
 		"notes": [
 			{
+				"key": "payment",
 				"text": "Conditions.",
 				"ext": {
 					"untdid-text-subject": "PMT"
 				}
 			},
 			{
+				"key": "payment-method",
 				"text": "Penalties.",
 				"ext": {
 					"untdid-text-subject": "PMD"
 				}
 			},
 			{
+				"key": "payment-term",
 				"text": "No early discount.",
 				"ext": {
 					"untdid-text-subject": "AAB"

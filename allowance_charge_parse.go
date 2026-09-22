@@ -49,7 +49,7 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 	// This is a charge
 	c := &bill.Charge{}
 	if ac.Reason != "" {
-		c.Reason = ac.Reason
+		c.Reason = cleanString(ac.Reason)
 	}
 	if ac.Amount != "" {
 		c.Amount, _ = num.AmountFromString(ac.Amount)
@@ -99,7 +99,7 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.Reason != "" {
-		d.Reason = ac.Reason
+		d.Reason = cleanString(ac.Reason)
 	}
 	if ac.Amount != "" {
 		d.Amount, _ = num.AmountFromString(ac.Amount)
@@ -161,7 +161,7 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		})
 	}
 	if ac.Reason != "" {
-		c.Reason = ac.Reason
+		c.Reason = cleanString(ac.Reason)
 	}
 	base, percent, err := goblACBasis(ac, c.Amount)
 	if err != nil {
@@ -185,7 +185,7 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		})
 	}
 	if ac.Reason != "" {
-		d.Reason = ac.Reason
+		d.Reason = cleanString(ac.Reason)
 	}
 	base, percent, err := goblACBasis(ac, d.Amount)
 	if err != nil {

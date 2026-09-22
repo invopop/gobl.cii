@@ -23,11 +23,16 @@ var paymentMeansMap = map[string]cbc.Key{
 	"59": pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA),
 }
 
-func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
+func goblNewPaymentDetails(stlm *Settlement, ctx *Context) (*bill.PaymentDetails, error) {
 	pymt := &bill.PaymentDetails{}
 
+	// EXT-FR-FE-BG-02: the payer, only defined in the French extended profile.
+	if stlm.Payer != nil && isFranceExtended(ctx) {
+		pymt.Payer = goblNewParty(stlm.Payer)
+	}
+
 	if stlm.Payee != nil {
-		payee := &org.Party{Name: stlm.Payee.Name}
+		payee := &org.Party{Name: cleanString(stlm.Payee.Name)}
 		if stlm.Payee.PostalTradeAddress != nil {
 			payee.Addresses = []*org.Address{
 				goblNewAddress(stlm.Payee.PostalTradeAddress),
@@ -78,6 +83,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 	}
 
 	if pymt.Payee == nil &&
+		pymt.Payer == nil &&
 		pymt.Terms == nil &&
 		pymt.Instructions == nil &&
 		len(pymt.Advances) == 0 {
@@ -96,7 +102,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 			if terms.Notes != "" {
 				terms.Notes = strings.Join([]string{terms.Notes, term.Description}, ". ")
 			} else {
-				terms.Notes = term.Description
+				terms.Notes = cleanString(term.Description)
 			}
 		}
 
@@ -113,7 +119,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 				if err != nil {
 					return nil, err
 				}
-				dd.Amount = amt
+				dd.Amount = &amt
 			} else if term.Percent != "" {
 				p, err := num.PercentageFromString(term.Percent)
 				if err != nil {
@@ -127,9 +133,10 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	terms.DueDates = dates
 
-	// If there's only one due date, set its percent to 100.
+	// If there's only one due date, set its percent to 100. Since GOBL v0.505
+	// a due date need not carry an amount, so the absent case is a nil one.
 	if len(terms.DueDates) == 1 &&
-		terms.DueDates[0].Amount.IsZero() &&
+		(terms.DueDates[0].Amount == nil || terms.DueDates[0].Amount.IsZero()) &&
 		terms.DueDates[0].Percent == nil {
 		percent, err := num.PercentageFromString("100%")
 		if err != nil {
@@ -163,7 +170,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 	}
 
 	if pm.Information != "" {
-		inst.Detail = pm.Information
+		inst.Detail = cleanString(pm.Information)
 	}
 
 	if pm.Card != nil {
@@ -175,7 +182,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 			inst.Card.Last4 = card.ID
 		}
 		if card.Name != "" {
-			inst.Card.Holder = card.Name
+			inst.Card.Holder = cleanString(card.Name)
 		}
 	}
 
@@ -186,7 +193,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 			ct.IBAN = cbc.Code(ac.IBAN)
 		}
 		if ac.Name != "" {
-			ct.Name = ac.Name
+			ct.Name = cleanString(ac.Name)
 		}
 		if ac.Number != "" {
 			ct.Number = cbc.Code(ac.Number)

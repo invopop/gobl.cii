@@ -18,7 +18,7 @@ const (
 	keyAdditionalDocumentTypeRefPaper         = "ref-paper"
 )
 
-func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
+func goblNewOrdering(in *Invoice, ctx *Context) (*bill.Ordering, error) {
 	ord := new(bill.Ordering)
 	tr := in.Transaction
 
@@ -29,6 +29,8 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	if tr.Settlement.Invoicer != nil {
 		ord.Issuer = goblNewParty(tr.Settlement.Invoicer)
 	}
+
+	ord.Buyer = goblOrderingAddressee(tr.Settlement, ctx)
 
 	// BT-19: Buyer accounting reference
 	if tr.Settlement.AccountingAccount != nil && tr.Settlement.AccountingAccount.ID != "" {
@@ -55,7 +57,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		ord.Projects = []*org.DocumentRef{
 			{
 				Code:        cbc.Code(tr.Agreement.Project.ID),
-				Description: tr.Agreement.Project.Name,
+				Description: cleanString(tr.Agreement.Project.Name),
 			},
 		}
 	}
@@ -77,7 +79,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			if err != nil {
 				return nil, err
 			}
-			per.Start = start
+			per.Start = &start
 		}
 
 		if tr.Settlement.Period.End != nil && tr.Settlement.Period.End.DateFormat != nil {
@@ -85,10 +87,10 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			if err != nil {
 				return nil, err
 			}
-			per.End = end
+			per.End = &end
 		}
 		if tr.Settlement.Period.Description != nil {
-			per.Label = *tr.Settlement.Period.Description
+			per.Label = cleanString(*tr.Settlement.Period.Description)
 		}
 		ord.Period = per
 	}
@@ -151,6 +153,15 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	return nil, nil
 }
 
+// goblOrderingAddressee reads EXT-FR-FE-BG-04, the party the invoice is
+// addressed to, which only the French extended profile defines.
+func goblOrderingAddressee(stlm *Settlement, ctx *Context) *org.Party {
+	if stlm.Invoicee == nil || !isFranceExtended(ctx) {
+		return nil
+	}
+	return goblNewParty(stlm.Invoicee)
+}
+
 func goblOrderingHasData(ord *bill.Ordering) bool {
 	return ord.Code != "" ||
 		ord.Period != nil ||
@@ -162,5 +173,6 @@ func goblOrderingHasData(ord *bill.Ordering) bool {
 		ord.Purchases != nil ||
 		ord.Projects != nil ||
 		ord.Contracts != nil ||
-		ord.Issuer != nil
+		ord.Issuer != nil ||
+		ord.Buyer != nil
 }
