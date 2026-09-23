@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testDocID = "DOC-1"
+
 // emptyInvoice builds the minimum structure the attachment helpers write into.
 func emptyInvoice() *Invoice {
 	return &Invoice{

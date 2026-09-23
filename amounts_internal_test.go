@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const testCurrencyEUR = "EUR"
+
 func TestRescaleToCurrency(t *testing.T) {
 	tests := []struct {
 		name     string

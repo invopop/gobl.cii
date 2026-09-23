@@ -12,6 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	testCategoryVAT = "VAT"
+	testAmountSmall = "2.50"
+	testNotANumber  = "n/a"
+	testNotAPercent = "lots"
+)
+
 func pct(t *testing.T, s string) *num.Percentage {
 	t.Helper()
 	p, err := num.PercentageFromString(s)
@@ -30,7 +37,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 			Reason:  "Freight",
 			Percent: pct(t, "10.5%"),
 			Ext:     tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyCharge: "FC"}),
-		}, testCurrencyEUR)
+		}, testCurrencyEUR, nil)
 
 		assert.True(t, ac.ChargeIndicator.Value)
 		assert.Equal(t, "10.50", ac.Amount)
@@ -45,7 +52,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 			Amount: amount,
 			Reason: "Loyalty",
 			Ext:    tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyAllowance: "95"}),
-		}, testCurrencyEUR)
+		}, testCurrencyEUR, nil)
 
 		assert.False(t, ac.ChargeIndicator.Value)
 		assert.Equal(t, "10.50", ac.Amount)
@@ -55,7 +62,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 	})
 
 	t.Run("amounts follow the currency, not a fixed two decimals", func(t *testing.T) {
-		ac := newCharge(&bill.Charge{Amount: num.MakeAmount(105000, 2)}, "JPY")
+		ac := newCharge(&bill.Charge{Amount: num.MakeAmount(105000, 2)}, "JPY", nil)
 		assert.Equal(t, "1050", ac.Amount)
 	})
 
@@ -63,17 +70,17 @@ func TestNewChargeAndDiscount(t *testing.T) {
 		ac := newCharge(&bill.Charge{
 			Amount: amount,
 			Taxes:  tax.Set{{Category: testCategoryVAT, Percent: pct(t, "21%")}},
-		}, testCurrencyEUR)
+		}, testCurrencyEUR, nil)
 		require.NotNil(t, ac.Tax)
 	})
 
 	t.Run("a bare charge and discount", func(t *testing.T) {
-		c := newCharge(&bill.Charge{Amount: amount}, testCurrencyEUR)
+		c := newCharge(&bill.Charge{Amount: amount}, testCurrencyEUR, nil)
 		assert.Empty(t, c.Reason)
 		assert.Empty(t, c.ReasonCode)
 		assert.Nil(t, c.Tax)
 
-		d := newDiscount(&bill.Discount{Amount: amount}, testCurrencyEUR)
+		d := newDiscount(&bill.Discount{Amount: amount}, testCurrencyEUR, nil)
 		assert.Empty(t, d.Reason)
 		assert.Nil(t, d.Tax)
 	})
@@ -138,6 +145,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 			Amount:     testAmountSmall,
 			Reason:     "Handling",
 			ReasonCode: "FC",
+			Base:       testAmountHalf,
 			Percent:    "5",
 		})
 		require.NoError(t, err)
@@ -149,7 +157,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 	})
 
 	t.Run("a percentage already carrying its sign is not doubled", func(t *testing.T) {
-		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Percent: "5%"})
+		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Base: testAmountHalf, Percent: "5%"})
 		require.NoError(t, err)
 		require.NotNil(t, c.Percent)
 		assert.Equal(t, "5%", c.Percent.String())
@@ -160,6 +168,7 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 			Amount:     testAmountSmall,
 			Reason:     "Bulk",
 			ReasonCode: "95",
+			Base:       testAmountHalf,
 			Percent:    "5",
 		})
 		require.NoError(t, err)
@@ -183,6 +192,21 @@ func TestGoblNewLineChargeAndDiscount(t *testing.T) {
 
 		_, err = goblNewLineDiscount(&AllowanceCharge{Amount: testAmountSmall, Percent: testNotAPercent})
 		assert.Error(t, err)
+	})
+
+	t.Run("a percentage with no basis is dropped", func(t *testing.T) {
+		// EN 16931 makes the actual amount authoritative, and GOBL recalculates
+		// from a percentage whenever one is present. Without a declared basis it
+		// would apply the percentage to the line sum, overwriting the amount.
+		c, err := goblNewLineCharge(&AllowanceCharge{Amount: testAmountSmall, Percent: "5"})
+		require.NoError(t, err)
+		assert.Nil(t, c.Percent)
+		assert.Equal(t, testAmountSmall, c.Amount.String())
+
+		d, err := goblNewLineDiscount(&AllowanceCharge{Amount: testAmountSmall, Percent: "5"})
+		require.NoError(t, err)
+		assert.Nil(t, d.Percent)
+		assert.Equal(t, testAmountSmall, d.Amount.String())
 	})
 
 	t.Run("the amount alone is enough", func(t *testing.T) {

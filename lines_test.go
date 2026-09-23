@@ -5,6 +5,7 @@ import (
 
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -211,4 +212,40 @@ func TestItemAttributeKeyName(t *testing.T) {
 	require.Len(t, chars, 1)
 	assert.Equal(t, "color", chars[0].Description)
 	assert.Equal(t, attrValueBlack, chars[0].Value)
+}
+func TestLineSellerRoundTrip(t *testing.T) {
+	env := loadEnvelope(t, "en16931/invoice-de-de.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	inv.Lines[0].Seller = &org.Party{
+		Identities: []*org.Identity{
+			{
+				Ext:  tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0088"}),
+				Code: "1234567890128",
+			},
+		},
+	}
+
+	doc, err := cii.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	seller := doc.Transaction.Lines[0].Agreement.ItemSellerParty
+	require.NotNil(t, seller)
+	require.Len(t, seller.GlobalID, 1)
+	assert.Equal(t, "0088", seller.GlobalID[0].SchemeID)
+	assert.Equal(t, "1234567890128", seller.GlobalID[0].Value)
+
+	data, err := doc.Bytes()
+	require.NoError(t, err)
+
+	parsed, err := cii.Parse(data)
+	require.NoError(t, err)
+	parsedInv, ok := parsed.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotNil(t, parsedInv.Lines[0].Seller)
+	require.Len(t, parsedInv.Lines[0].Seller.Identities, 1)
+	assert.Equal(t, cbc.Code("1234567890128"), parsedInv.Lines[0].Seller.Identities[0].Code)
+	assert.Equal(t, cbc.Code("0088"), parsedInv.Lines[0].Seller.Identities[0].Ext.Get(iso.ExtKeySchemeID))
 }

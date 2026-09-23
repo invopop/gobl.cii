@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testBuyerRef = "PO4711"
+
 // ordering builds the smallest invoice goblNewOrdering reads from.
 func ordering(t *testing.T, f func(ag *Agreement, stlm *Settlement)) *Invoice {
 	t.Helper()

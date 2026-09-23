@@ -17,6 +17,8 @@ import (
 	"github.com/invopop/xmlctx"
 )
 
+const testPartyName = "Acme"
+
 // TestNewPartyTaxRegistrations pins the scheme IDs on SpecifiedTaxRegistration,
 // which BR-E-02, BR-Z-02 and BR-AE-02 test for.
 func TestNewPartyTaxRegistrations(t *testing.T) {

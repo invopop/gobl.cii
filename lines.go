@@ -31,6 +31,9 @@ type LineAgreement struct {
 	OrderReference      *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	AdditionalReference *LineDocReference   `xml:"ram:AdditionalReferencedDocument,omitempty"`
 	NetPrice            *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
+	// The XSD sequence places the item seller after the prices, before
+	// ItemBuyerTradeParty.
+	ItemSellerParty *Party `xml:"ram:ItemSellerTradeParty,omitempty"`
 }
 
 // LineDocReference defines the structure of AdditionalReferencedDocument at line level
@@ -120,11 +123,11 @@ type Summation struct {
 	Amount string `xml:"ram:LineTotalAmount"`
 }
 
-func (out *Invoice) addLines(inv *bill.Invoice) error {
+func (out *Invoice) addLines(inv *bill.Invoice, ctx Context) error {
 	var Lines []*Line
 
 	for _, l := range inv.Lines {
-		Lines = append(Lines, newLine(l, lineCurrency(inv, l)))
+		Lines = append(Lines, newLine(l, lineCurrency(inv, l), ctx))
 	}
 
 	out.Transaction.Lines = Lines
@@ -177,7 +180,7 @@ func characteristicName(attr *org.Attribute) string {
 	}
 }
 
-func newLine(l *bill.Line, ccy string) *Line {
+func newLine(l *bill.Line, ccy string, ctx Context) *Line {
 	if l.Item == nil {
 		return nil
 	}
@@ -203,6 +206,10 @@ func newLine(l *bill.Line, ccy string) *Line {
 			},
 		},
 		TradeSettlement: newTradeSettlement(l, ccy),
+	}
+
+	if l.Seller != nil {
+		lineItem.Agreement.ItemSellerParty = newParty(l.Seller, ctx)
 	}
 
 	if it.Description != "" {

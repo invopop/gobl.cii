@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -86,4 +87,45 @@ func TestParseCtoGCharges(t *testing.T) {
 		assert.Equal(t, &percent, charge.Taxes[0].Percent)
 
 	})
+}
+
+// TestParseCtoGLineAllowanceAmount covers BT-136/BT-141, the actual amount of a
+// line allowance or charge. EN 16931 makes it the authoritative value, so a
+// calculation percentage (BT-138) must never be allowed to overwrite it.
+func TestParseCtoGLineAllowanceAmount(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "CII_line_allowance_amount.xml")
+	require.NoError(t, err)
+	require.NoError(t, e.Calculate())
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, inv.Lines, 2)
+
+	// The first line declares a percentage with no basis amount. Applying it to
+	// the line sum would give 95.90, so the percentage has to go.
+	line := inv.Lines[0]
+	require.Len(t, line.Discounts, 1)
+	assert.Equal(t, num.MakeAmount(53227, 2), line.Discounts[0].Amount)
+	assert.Nil(t, line.Discounts[0].Percent)
+	require.Len(t, line.Charges, 1)
+	assert.Equal(t, num.MakeAmount(2187, 2), line.Charges[0].Amount)
+
+	// The second line backs its percentage with a basis amount that reproduces
+	// the actual amount, so both survive.
+	line = inv.Lines[1]
+	require.Len(t, line.Discounts, 1)
+	assert.Equal(t, num.MakeAmount(48694, 2), line.Discounts[0].Amount)
+	require.NotNil(t, line.Discounts[0].Percent)
+	assert.Equal(t, "5.92%", line.Discounts[0].Percent.String())
+	require.NotNil(t, line.Discounts[0].Base)
+	assert.Equal(t, num.MakeAmount(822528, 2), *line.Discounts[0].Base)
+
+	// Neither line reproduces its declared amount (BT-131) from the terms it
+	// carries, so the document keeps the sender's own figures untouched.
+	assert.True(t, inv.HasTags(tax.TagBypass))
+	assert.Equal(t, "1614.87", inv.Lines[0].Total.String())
+	assert.Equal(t, "8137.15", inv.Lines[1].Total.String())
+	assert.Equal(t, "9752.02", inv.Totals.Sum.String())
+	assert.Equal(t, "536.36", inv.Totals.Tax.String())
+	assert.Equal(t, "10288.38", inv.Totals.Payable.String())
 }
