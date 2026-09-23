@@ -231,6 +231,10 @@ func goblLineAgreement(ag *LineAgreement, l *bill.Line) {
 	if ag.OrderReference != nil && ag.OrderReference.LineID != "" {
 		l.Order = cbc.Code(ag.OrderReference.LineID)
 	}
+
+	if ag.ItemSellerParty != nil {
+		l.Seller = goblNewParty(ag.ItemSellerParty)
+	}
 }
 
 // goblLineSettlement populates line-level settlement fields from the CII trade settlement.

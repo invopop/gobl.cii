@@ -269,3 +269,28 @@ func TestParseTaxNotes(t *testing.T) {
 		}
 	})
 }
+func TestPrecedingDocumentTypeRoundTrip(t *testing.T) {
+	env := loadEnvelope(t, "en16931/correction-invoice.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.NotEmpty(t, inv.Preceding)
+	inv.Preceding[0].Ext = inv.Preceding[0].Ext.Merge(tax.ExtensionsOf(cbc.CodeMap{
+		untdid.ExtKeyDocumentType: "380",
+	}))
+
+	doc, err := cii.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	assert.Equal(t, "380", doc.Transaction.Settlement.ReferencedDocument[0].TypeCode)
+
+	data, err := doc.Bytes()
+	require.NoError(t, err)
+
+	parsed, err := cii.Parse(data)
+	require.NoError(t, err)
+	parsedInv, ok := parsed.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotEmpty(t, parsedInv.Preceding)
+	assert.Equal(t, cbc.Code("380"), parsedInv.Preceding[0].Ext.Get(untdid.ExtKeyDocumentType))
+}

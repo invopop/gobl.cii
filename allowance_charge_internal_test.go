@@ -37,7 +37,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 			Reason:  "Freight",
 			Percent: pct(t, "10.5%"),
 			Ext:     tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyCharge: "FC"}),
-		}, testCurrencyEUR)
+		}, testCurrencyEUR, nil)
 
 		assert.True(t, ac.ChargeIndicator.Value)
 		assert.Equal(t, "10.50", ac.Amount)
@@ -52,7 +52,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 			Amount: amount,
 			Reason: "Loyalty",
 			Ext:    tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyAllowance: "95"}),
-		}, testCurrencyEUR)
+		}, testCurrencyEUR, nil)
 
 		assert.False(t, ac.ChargeIndicator.Value)
 		assert.Equal(t, "10.50", ac.Amount)
@@ -62,7 +62,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 	})
 
 	t.Run("amounts follow the currency, not a fixed two decimals", func(t *testing.T) {
-		ac := newCharge(&bill.Charge{Amount: num.MakeAmount(105000, 2)}, "JPY")
+		ac := newCharge(&bill.Charge{Amount: num.MakeAmount(105000, 2)}, "JPY", nil)
 		assert.Equal(t, "1050", ac.Amount)
 	})
 
@@ -70,17 +70,17 @@ func TestNewChargeAndDiscount(t *testing.T) {
 		ac := newCharge(&bill.Charge{
 			Amount: amount,
 			Taxes:  tax.Set{{Category: testCategoryVAT, Percent: pct(t, "21%")}},
-		}, testCurrencyEUR)
+		}, testCurrencyEUR, nil)
 		require.NotNil(t, ac.Tax)
 	})
 
 	t.Run("a bare charge and discount", func(t *testing.T) {
-		c := newCharge(&bill.Charge{Amount: amount}, testCurrencyEUR)
+		c := newCharge(&bill.Charge{Amount: amount}, testCurrencyEUR, nil)
 		assert.Empty(t, c.Reason)
 		assert.Empty(t, c.ReasonCode)
 		assert.Nil(t, c.Tax)
 
-		d := newDiscount(&bill.Discount{Amount: amount}, testCurrencyEUR)
+		d := newDiscount(&bill.Discount{Amount: amount}, testCurrencyEUR, nil)
 		assert.Empty(t, d.Reason)
 		assert.Nil(t, d.Tax)
 	})
