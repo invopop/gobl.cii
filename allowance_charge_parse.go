@@ -206,8 +206,10 @@ func goblACBasis(ac *AllowanceCharge, amount num.Amount) (*num.Amount, *num.Perc
 		}
 		base = &b
 	}
+	// GOBL requires a percentage wherever a basis is set, and without one the
+	// basis has nothing to apply to, so they are only ever returned together.
 	if ac.Percent == "" {
-		return base, nil, nil
+		return nil, nil, nil
 	}
 	p, err := num.PercentageFromString(strings.TrimSuffix(ac.Percent, "%") + "%")
 	if err != nil {
@@ -218,7 +220,7 @@ func goblACBasis(ac *AllowanceCharge, amount num.Amount) (*num.Amount, *num.Perc
 		return base, &p, nil
 	}
 	if base == nil || !p.Of(*base).Rescale(amount.Exp()).Equals(amount) {
-		return base, nil, nil
+		return nil, nil, nil
 	}
 	return base, &p, nil
 }
