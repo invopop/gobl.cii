@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2b9f9cc1cc490ee792287135a851a02542187103bc77c91474691f4bbfec9056"
+			"val": "70ac07ff1e8883138d329cd1aff5e3eef237f33512886a6d34dda76eef830b8e"
 		}
 	},
 	"doc": {
@@ -96,6 +96,23 @@
 				"total": "200.00"
 			}
 		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Loyalty discount",
+				"amount": "5.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "exempt",
+						"ext": {
+							"cef-vatex": "VATEX-EU-132",
+							"untdid-tax-category": "E"
+						}
+					}
+				]
+			}
+		],
 		"ordering": {
 			"period": {
 				"start": "2025-04-10",
@@ -107,7 +124,7 @@
 				"due_dates": [
 					{
 						"date": "2025-05-10",
-						"amount": "200.00",
+						"amount": "195.00",
 						"percent": "100%"
 					}
 				]
@@ -126,7 +143,8 @@
 		},
 		"totals": {
 			"sum": "200.00",
-			"total": "200.00",
+			"discount": "5.00",
+			"total": "195.00",
 			"taxes": {
 				"categories": [
 					{
@@ -138,7 +156,7 @@
 									"cef-vatex": "VATEX-EU-132",
 									"untdid-tax-category": "E"
 								},
-								"base": "200.00",
+								"base": "195.00",
 								"amount": "0.00"
 							}
 						],
@@ -148,10 +166,10 @@
 				"sum": "0.00"
 			},
 			"tax": "0.00",
-			"total_with_tax": "200.00",
-			"payable": "200.00",
+			"total_with_tax": "195.00",
+			"payable": "195.00",
 			"advance": "200.00",
-			"due": "0.00"
+			"due": "-5.00"
 		}
 	},
 	"sigs": [

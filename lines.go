@@ -28,10 +28,12 @@ type LineDoc struct {
 
 // LineAgreement defines the structure of the SpecifiedLineTradeAgreement in the CII standard
 type LineAgreement struct {
-	ItemSellerParty     *Party              `xml:"ram:ItemSellerTradeParty,omitempty"`
 	OrderReference      *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	AdditionalReference *LineDocReference   `xml:"ram:AdditionalReferencedDocument,omitempty"`
 	NetPrice            *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
+	// The XSD sequence places the item seller after the prices, before
+	// ItemBuyerTradeParty.
+	ItemSellerParty *Party `xml:"ram:ItemSellerTradeParty,omitempty"`
 }
 
 // LineDocReference defines the structure of AdditionalReferencedDocument at line level

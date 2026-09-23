@@ -87,7 +87,6 @@ type Advance struct {
 // ReferencedDocument defines the structure of InvoiceReferencedDocument of the CII standard
 type ReferencedDocument struct {
 	IssuerAssignedID string              `xml:"ram:IssuerAssignedID,omitempty"`
-	TypeCode         string              `xml:"ram:TypeCode,omitempty"`
 	IssueDate        *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
 }
 
@@ -187,9 +186,6 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		pre := inv.Preceding[0]
 		rd := &ReferencedDocument{
 			IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
-		}
-		if dt := pre.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
-			rd.TypeCode = dt.String()
 		}
 		// IssueDate (BT-26) is optional; only emit FormattedIssueDateTime when the
 		// preceding reference actually has a date, otherwise it renders as an empty
