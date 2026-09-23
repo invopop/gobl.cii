@@ -11,6 +11,14 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
 
+    services:
+      # Schematron validation service. The image bundles every rule set, so it
+      # is large and slow to boot - hence the readiness loop below.
+      phorm:
+        image: phelger/phorm:2.2.4
+        ports:
+          - 8080:8080
+
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -36,6 +44,20 @@ jobs:
 
       - name: Test
         run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Wait for phorm
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/ >/dev/null && exit 0
+            sleep 2
+          done
+          echo "phorm did not become ready" >&2
+          exit 1
+
+      - name: Schematron
+        env:
+          PHORM_URL: http://localhost:8080
+        run: go test . -validate
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
