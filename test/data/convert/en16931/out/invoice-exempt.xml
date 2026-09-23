@@ -80,7 +80,7 @@
       <ram:ApplicableTradeTax>
         <ram:CalculatedAmount>0.00</ram:CalculatedAmount>
         <ram:TypeCode>VAT</ram:TypeCode>
-        <ram:BasisAmount>200.00</ram:BasisAmount>
+        <ram:BasisAmount>195.00</ram:BasisAmount>
         <ram:CategoryCode>E</ram:CategoryCode>
         <ram:ExemptionReasonCode>VATEX-EU-132</ram:ExemptionReasonCode>
         <ram:RateApplicablePercent>0</ram:RateApplicablePercent>
@@ -93,6 +93,19 @@
           <udt:DateTimeString format="102">20250410</udt:DateTimeString>
         </ram:EndDateTime>
       </ram:BillingSpecifiedPeriod>
+      <ram:SpecifiedTradeAllowanceCharge>
+        <ram:ChargeIndicator>
+          <udt:Indicator>false</udt:Indicator>
+        </ram:ChargeIndicator>
+        <ram:ActualAmount>5.00</ram:ActualAmount>
+        <ram:Reason>Loyalty discount</ram:Reason>
+        <ram:CategoryTradeTax>
+          <ram:TypeCode>VAT</ram:TypeCode>
+          <ram:CategoryCode>E</ram:CategoryCode>
+          <ram:ExemptionReasonCode>VATEX-EU-132</ram:ExemptionReasonCode>
+          <ram:RateApplicablePercent>0</ram:RateApplicablePercent>
+        </ram:CategoryTradeTax>
+      </ram:SpecifiedTradeAllowanceCharge>
       <ram:SpecifiedTradePaymentTerms>
         <ram:DueDateDateTime>
           <udt:DateTimeString format="102">20250510</udt:DateTimeString>
@@ -100,11 +113,12 @@
       </ram:SpecifiedTradePaymentTerms>
       <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
         <ram:LineTotalAmount>200.00</ram:LineTotalAmount>
-        <ram:TaxBasisTotalAmount>200.00</ram:TaxBasisTotalAmount>
+        <ram:AllowanceTotalAmount>5.00</ram:AllowanceTotalAmount>
+        <ram:TaxBasisTotalAmount>195.00</ram:TaxBasisTotalAmount>
         <ram:TaxTotalAmount currencyID="EUR">0.00</ram:TaxTotalAmount>
-        <ram:GrandTotalAmount>200.00</ram:GrandTotalAmount>
+        <ram:GrandTotalAmount>195.00</ram:GrandTotalAmount>
         <ram:TotalPrepaidAmount>200.00</ram:TotalPrepaidAmount>
-        <ram:DuePayableAmount>0.00</ram:DuePayableAmount>
+        <ram:DuePayableAmount>-5.00</ram:DuePayableAmount>
       </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
