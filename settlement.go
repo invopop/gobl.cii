@@ -87,6 +87,7 @@ type Advance struct {
 // ReferencedDocument defines the structure of InvoiceReferencedDocument of the CII standard
 type ReferencedDocument struct {
 	IssuerAssignedID string              `xml:"ram:IssuerAssignedID,omitempty"`
+	TypeCode         string              `xml:"ram:TypeCode,omitempty"`
 	IssueDate        *FormattedIssueDate `xml:"ram:FormattedIssueDateTime,omitempty"`
 }
 
@@ -186,6 +187,9 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		pre := inv.Preceding[0]
 		rd := &ReferencedDocument{
 			IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
+		}
+		if dt := pre.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
+			rd.TypeCode = dt.String()
 		}
 		// IssueDate (BT-26) is optional; only emit FormattedIssueDateTime when the
 		// preceding reference actually has a date, otherwise it renders as an empty
@@ -405,7 +409,7 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	}
 	// BT-120: Set exemption reason from tax notes
 	if inv.Tax != nil {
-		if note := findTaxNote(inv.Tax.Notes, category.Code, rate); note != nil {
+		if note := findTaxNote(inv.Tax.Notes, category.Code, rate.Ext); note != nil {
 			t.ExemptionReason = note.Text
 		}
 	}
@@ -461,14 +465,14 @@ func goblAddTaxNotes(taxes []*Tax, inv *bill.Invoice) {
 	}
 }
 
-// findTaxNote finds a tax note that matches the given category code and rate total
+// findTaxNote finds a tax note matching the given category code and extensions
 // by comparing category and the UNTDID tax category extension.
-func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
+func findTaxNote(notes []*tax.Note, catCode cbc.Code, ext tax.Extensions) *tax.Note {
 	for _, n := range notes {
 		if n.Category != catCode {
 			continue
 		}
-		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == ext.Get(untdid.ExtKeyTaxCategory) {
 			return n
 		}
 	}

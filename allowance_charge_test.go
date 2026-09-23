@@ -3,6 +3,11 @@ package cii_test
 import (
 	"testing"
 
+	cii "github.com/invopop/gobl.cii"
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/tax"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,4 +44,33 @@ func TestNewAllowanceCharges(t *testing.T) {
 		assert.Equal(t, "12.00", doc.Transaction.Lines[0].TradeSettlement.AllowanceCharge[1].Amount)
 
 	})
+}
+
+func TestAllowanceChargeExemptionReason(t *testing.T) {
+	env := loadEnvelope(t, "en16931/invoice-exempt.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	inv.Discounts = append(inv.Discounts, &bill.Discount{
+		Reason: "Loyalty discount",
+		Amount: num.MakeAmount(500, 2),
+		Taxes:  tax.Set{inv.Lines[0].Taxes[0]},
+	})
+	require.NoError(t, env.Calculate())
+
+	doc, err := cii.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	require.NotEmpty(t, doc.Transaction.Settlement.AllowanceCharges)
+	ac := doc.Transaction.Settlement.AllowanceCharges[len(doc.Transaction.Settlement.AllowanceCharges)-1]
+	require.NotNil(t, ac.Tax)
+	assert.Equal(t, "VATEX-EU-132", ac.Tax.ExemptionReasonCode)
+
+	// The line-level ApplicableTradeTax must never carry it: the Factur-X
+	// profile marks it as unused in that context.
+	for _, line := range doc.Transaction.Lines {
+		for _, lineTax := range line.TradeSettlement.ApplicableTradeTax {
+			assert.Empty(t, lineTax.ExemptionReasonCode)
+		}
+	}
 }
