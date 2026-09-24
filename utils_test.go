@@ -1,6 +1,7 @@
 package cii
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,7 +11,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Define tests for the ParseDate function
@@ -100,28 +103,17 @@ var elementText = regexp.MustCompile(`<([a-zA-Z]+:)?([A-Za-z]+)>([^<>]*[A-Za-z][
 // where a sender's broken encoding shows up. Codes, identifiers and other
 // controlled vocabularies are deliberately excluded: they cannot carry an
 // accent, so they cannot arrive mangled, and wrapping them would be noise.
-var freeText = map[string]bool{
-	"Content":                true, // ram:IncludedNote
-	"Name":                   true, // party, item, account holder, project
-	"Description":            true, // item, period, payment terms
-	"Reason":                 true, // allowance / charge
-	"ExemptionReason":        true, // tax exemption text (not the code)
-	"Information":            true, // payment instruction detail
-	"LineOne":                true, // address
-	"LineTwo":                true,
-	"CityName":               true,
-	"CountrySubDivisionName": true,
-	"PersonName":             true,
-	"RequestedAction":        true, // CDAR free text
-	"Location":               true,
-}
-
 // TestReplacementCharCoverage guards the cleanString calls. It injects U+FFFD
 // into one free-text element at a time across every fixture and fails if the
 // marker reaches GOBL, either surviving into a field or failing the digest.
 //
 // A new free-text field that nobody remembered to wrap shows up here rather
 // than on a customer invoice.
+// A sender whose encoding broke upstream ships U+FFFD, and GOBL's canonical
+// JSON refuses a document holding one. This injects the character into every
+// text element of every fixture: none of them may reach GOBL. It once checked
+// only elements thought to be free text, which is how a replacement character
+// in an identifier (BT-13, a hand-typed order reference) went unnoticed.
 func TestReplacementCharCoverage(t *testing.T) {
 	files := fixtures(t)
 	if len(files) == 0 {
@@ -141,9 +133,6 @@ func TestReplacementCharCoverage(t *testing.T) {
 			continue // fixture is not a clean baseline; it proves nothing
 		}
 		for _, elem := range textElements(raw) {
-			if !freeText[elem] {
-				continue
-			}
 			one := regexp.MustCompile(`(<([a-zA-Z]+:)?` + elem + `>)([^<>]*[A-Za-z][^<>]*)(</)`)
 			dirty := one.ReplaceAllString(string(raw), "${1}${3}�${4}")
 			if dirty == string(raw) {
@@ -169,7 +158,7 @@ func TestReplacementCharCoverage(t *testing.T) {
 	}
 	sort.Slice(gaps, func(i, j int) bool { return gaps[i].elem < gaps[j].elem })
 	var b strings.Builder
-	fmt.Fprintf(&b, "%d element(s) carry U+FFFD into GOBL; each needs a cleanString call:\n", len(gaps))
+	fmt.Fprintf(&b, "%d element(s) carry U+FFFD into GOBL; cleanDocument should have caught them:\n", len(gaps))
 	for _, g := range gaps {
 		fmt.Fprintf(&b, "  %-28s %-46s [%s]\n", g.elem, g.value, g.src)
 	}
@@ -266,4 +255,62 @@ func parseFixture(raw []byte) (any, error) {
 		return nil, err
 	}
 	return env.Document, nil
+}
+
+// A sender whose own encoding broke upstream ships U+FFFD in place of the
+// character it lost. GOBL's canonical JSON refuses any document holding one, so
+// a single field would otherwise cost us the whole invoice.
+func TestCleanDocumentStripsReplacementCharacters(t *testing.T) {
+	t.Run("reaches a field no cleanString call covers", func(t *testing.T) {
+		// BT-13, the buyer's order reference, is mapped straight to a code.
+		in := &Invoice{Transaction: &Transaction{Agreement: &Agreement{
+			Purchase: &IssuerID{ID: "Offre n� 0797247"},
+		}}}
+		cleanDocument(in)
+		assert.Equal(t, "Offre n 0797247", in.Transaction.Agreement.Purchase.ID)
+	})
+
+	t.Run("reaches text nested in slices", func(t *testing.T) {
+		in := &Invoice{Transaction: &Transaction{Lines: []*Line{
+			{Product: &Product{Name: "Caf�"}},
+		}}}
+		cleanDocument(in)
+		assert.Equal(t, "Caf", in.Transaction.Lines[0].Product.Name)
+	})
+
+	t.Run("leaves a document without one untouched", func(t *testing.T) {
+		in := &Invoice{Transaction: &Transaction{Agreement: &Agreement{
+			Purchase: &IssuerID{ID: "Offre n° 0797247"},
+		}}}
+		cleanDocument(in)
+		assert.Equal(t, "Offre n° 0797247", in.Transaction.Agreement.Purchase.ID)
+	})
+
+	t.Run("survives nil branches", func(t *testing.T) {
+		require.NotPanics(t, func() { cleanDocument(&Invoice{}) })
+		require.NotPanics(t, func() { cleanDocument((*Invoice)(nil)) })
+	})
+}
+
+// The failure was not a mangled field but a lost document: GOBL's canonical
+// JSON refuses a replacement character, so building the envelope errored out
+// and nothing was converted at all.
+func TestParseAcceptsReplacementCharacters(t *testing.T) {
+	data, err := os.ReadFile("test/data/parse/invoice-test-01.xml")
+	require.NoError(t, err)
+
+	broken := bytes.Replace(data,
+		[]byte("<ram:BuyerReference>"),
+		[]byte("<ram:BuyerReference>Offre n� "), 1)
+	require.NotEqual(t, data, broken, "fixture should carry a buyer reference")
+
+	env, err := Parse(broken)
+	require.NoError(t, err, "a replacement character must not cost us the document")
+	require.NotNil(t, env)
+
+	// Calculate exercises the canonical JSON that rejected the document.
+	require.NoError(t, env.Calculate())
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.NotContains(t, inv.Ordering.Code.String(), "�")
 }
