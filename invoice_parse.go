@@ -33,10 +33,11 @@ func parseInvoice(data []byte) (*bill.Invoice, error) {
 func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	ctx := goblDetectContext(in)
 	ahts := in.Transaction.Settlement
+	invoiceType, tags := typeCodeParse(in.ExchangedDocument.TypeCode)
 
 	out := &bill.Invoice{
 		Code:     cbc.Code(in.ExchangedDocument.ID),
-		Type:     typeCodeParse(in.ExchangedDocument.TypeCode),
+		Type:     invoiceType,
 		Currency: currency.Code(ahts.Currency),
 		Supplier: goblNewParty(in.Transaction.Agreement.Seller),
 		Customer: goblNewParty(in.Transaction.Agreement.Buyer),
@@ -46,6 +47,10 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 				untdid.ExtKeyDocumentType: cbc.Code(in.ExchangedDocument.TypeCode),
 			}),
 		},
+	}
+
+	if len(tags) > 0 {
+		out.SetTags(tags...)
 	}
 
 	goblAddFrenchExtendedAgents(out, in.Transaction.Agreement, ctx)

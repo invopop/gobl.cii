@@ -26,8 +26,9 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
 		assert.Equal(t, "2142.01", doc.Transaction.Settlement.Summary.DuePayableAmount)
 		assert.Equal(t, "0.01", doc.Transaction.Settlement.Summary.RoundingAmount)
-		assert.Equal(t, "342.00", doc.Transaction.Settlement.Summary.TaxTotalAmount.Amount)
-		assert.Equal(t, "EUR", doc.Transaction.Settlement.Summary.TaxTotalAmount.Currency)
+		require.Len(t, doc.Transaction.Settlement.Summary.TaxTotalAmount, 1)
+		assert.Equal(t, "342.00", doc.Transaction.Settlement.Summary.TaxTotalAmount[0].Amount)
+		assert.Equal(t, "EUR", doc.Transaction.Settlement.Summary.TaxTotalAmount[0].Currency)
 	})
 
 	t.Run("correction-invoice.json", func(t *testing.T) {
