@@ -99,15 +99,15 @@ type Period struct {
 
 // Summary defines the structure of SpecifiedTradeSettlementHeaderMonetarySummation of the CII standard
 type Summary struct {
-	LineTotalAmount     string          `xml:"ram:LineTotalAmount"`
-	Charges             string          `xml:"ram:ChargeTotalAmount,omitempty"`
-	Discounts           string          `xml:"ram:AllowanceTotalAmount,omitempty"`
-	TaxBasisTotalAmount string          `xml:"ram:TaxBasisTotalAmount"`
-	TaxTotalAmount      *TaxTotalAmount `xml:"ram:TaxTotalAmount"`
-	RoundingAmount      string          `xml:"ram:RoundingAmount,omitempty"`
-	GrandTotalAmount    string          `xml:"ram:GrandTotalAmount"`
-	TotalPrepaidAmount  string          `xml:"ram:TotalPrepaidAmount,omitempty"`
-	DuePayableAmount    string          `xml:"ram:DuePayableAmount"`
+	LineTotalAmount     string            `xml:"ram:LineTotalAmount"`
+	Charges             string            `xml:"ram:ChargeTotalAmount,omitempty"`
+	Discounts           string            `xml:"ram:AllowanceTotalAmount,omitempty"`
+	TaxBasisTotalAmount string            `xml:"ram:TaxBasisTotalAmount"`
+	TaxTotalAmount      []*TaxTotalAmount `xml:"ram:TaxTotalAmount"`
+	RoundingAmount      string            `xml:"ram:RoundingAmount,omitempty"`
+	GrandTotalAmount    string            `xml:"ram:GrandTotalAmount"`
+	TotalPrepaidAmount  string            `xml:"ram:TotalPrepaidAmount,omitempty"`
+	DuePayableAmount    string            `xml:"ram:DuePayableAmount"`
 }
 
 // TaxTotalAmount defines the structure of the TaxTotalAmount of the CII standard
@@ -340,10 +340,10 @@ func newSummary(totals *bill.Totals, currency string) *Summary {
 		TaxBasisTotalAmount: rescaleToCurrency(totals.Total, currency),
 		GrandTotalAmount:    rescaleToCurrency(totals.TotalWithTax, currency),
 		DuePayableAmount:    rescaleToCurrency(totals.Payable, currency),
-		TaxTotalAmount: &TaxTotalAmount{
+		TaxTotalAmount: []*TaxTotalAmount{{
 			Amount:   rescaleToCurrency(totals.Tax, currency),
 			Currency: currency,
-		},
+		}},
 	}
 	if totals.Due != nil {
 		s.DuePayableAmount = rescaleToCurrency(*totals.Due, currency)

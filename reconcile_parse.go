@@ -217,8 +217,8 @@ func goblDeclaredTotalsAgree(in *Invoice, out *bill.Invoice, srcs []lineSource) 
 		}
 	}
 
-	if s.TaxTotalAmount != nil {
-		if declared, ok := goblDeclaredAmount(s.TaxTotalAmount.Amount); ok && !declared.Equals(t.Tax) {
+	if tt := goblDeclaredTaxTotal(in); tt != nil {
+		if declared, ok := goblDeclaredAmount(tt.Amount); ok && !declared.Equals(t.Tax) {
 			return false
 		}
 	}
@@ -299,8 +299,8 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice, srcs []lineSource) 
 			t.Payable = v
 		}
 	}
-	if s.TaxTotalAmount != nil {
-		if v, ok := declared(s.TaxTotalAmount.Amount); ok {
+	if tt := goblDeclaredTaxTotal(in); tt != nil {
+		if v, ok := declared(tt.Amount); ok {
 			t.Tax = v
 			// The breakdown must come from the document too, or it
 			// contradicts the total just set.
@@ -320,7 +320,7 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice, srcs []lineSource) 
 		out.Payment.Terms.CalculateDues(out.Currency.Def().Zero(), t.Payable)
 	}
 
-	out.SetTags(tax.TagBypass)
+	out.SetTags(append(out.GetTags(), tax.TagBypass)...)
 	return out.Calculate()
 }
 
@@ -394,6 +394,26 @@ func goblSummary(in *Invoice) *Summary {
 		return nil
 	}
 	return in.Transaction.Settlement.Summary
+}
+
+// goblDeclaredTaxTotal returns BT-110, the VAT total in the invoice currency.
+// BT-111 states the same total in the tax currency (BT-6) with the same
+// element, so the two are told apart by their currency. A lone total is taken
+// as BT-110 whatever currency it names.
+func goblDeclaredTaxTotal(in *Invoice) *TaxTotalAmount {
+	s := goblSummary(in)
+	if s == nil {
+		return nil
+	}
+	for _, tt := range s.TaxTotalAmount {
+		if tt != nil && tt.Currency == in.Transaction.Settlement.Currency {
+			return tt
+		}
+	}
+	if len(s.TaxTotalAmount) == 1 {
+		return s.TaxTotalAmount[0]
+	}
+	return nil
 }
 
 // goblDeclaredLineAmount reads a line's declared net amount (BT-131).

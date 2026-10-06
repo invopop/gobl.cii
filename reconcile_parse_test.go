@@ -1,8 +1,11 @@
 package cii_test
 
 import (
+	"os"
+	"strings"
 	"testing"
 
+	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/cbc"
@@ -99,4 +102,47 @@ func TestParseCtoGZeroPriceLines(t *testing.T) {
 	assert.Equal(t, "15.78", cat.Rates[0].Base.String())
 	assert.Equal(t, "3.36", cat.Rates[1].Base.String())
 	assert.Equal(t, "0.29", cat.Rates[1].Amount.String())
+}
+
+// TestParseCtoGTaxCurrencyTotal covers BT-111, the VAT total in the tax
+// currency, which shares its element with BT-110: the invoice keeps the total
+// stated in its own currency, whichever comes last.
+func TestParseCtoGTaxCurrencyTotal(t *testing.T) {
+	data := readParseFixture(t, "CII_example4.xml")
+	data = strings.Replace(data,
+		`<ram:InvoiceCurrencyCode>DKK</ram:InvoiceCurrencyCode>`,
+		`<ram:InvoiceCurrencyCode>DKK</ram:InvoiceCurrencyCode><ram:TaxCurrencyCode>EUR</ram:TaxCurrencyCode>`, 1)
+	data = strings.Replace(data,
+		`<ram:TaxTotalAmount currencyID="DKK">675</ram:TaxTotalAmount>`,
+		`<ram:TaxTotalAmount currencyID="DKK">675</ram:TaxTotalAmount><ram:TaxTotalAmount currencyID="EUR">90.54</ram:TaxTotalAmount>`, 1)
+
+	e, err := cii.Parse([]byte(data))
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.False(t, inv.HasTags(tax.TagBypass))
+	assert.Equal(t, "675.00", inv.Totals.Tax.String())
+}
+
+// TestParseCtoGTypeCodeTags covers the tags a type code implies, which stay
+// next to the bypass tag when the declared totals are kept.
+func TestParseCtoGTypeCodeTags(t *testing.T) {
+	data := readParseFixture(t, "line-totals-mismatch.xml")
+	data = strings.Replace(data, `<ram:TypeCode>380</ram:TypeCode>`, `<ram:TypeCode>389</ram:TypeCode>`, 1)
+
+	e, err := cii.Parse([]byte(data))
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.Equal(t, bill.InvoiceTypeStandard, inv.Type)
+	assert.True(t, inv.HasTags(tax.TagSelfBilled, tax.TagBypass))
+}
+
+func readParseFixture(t *testing.T, name string) string {
+	t.Helper()
+	data, err := os.ReadFile(dataPath(pathParse, name))
+	require.NoError(t, err)
+	return string(data)
 }
