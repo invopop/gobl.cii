@@ -16,19 +16,13 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// lineSource ties a parsed line to the document line it was read from and,
-// for a line with a breakdown, the sub-invoice lines folded into it.
+// lineSource pairs a parsed line with the document line(s) it came from.
 type lineSource struct {
 	doc      *Line
 	children []*Line
 }
 
-// goblAddLines reads the document's lines, in document order. Sub-invoice
-// lines (EXT-FR-FE-162/163) under a GROUP line become the GROUP line's
-// breakdown when GOBL can express them that way, taking the GROUP line's
-// place. Otherwise, and for every group named in flat, they are read flat:
-// DETAIL lines become lines carrying the amounts, and GROUP and INFORMATION
-// lines are kept at a zero price.
+// Single-rate groups fold into breakdowns; anything else is read flat, in document order.
 func goblAddLines(in *Transaction, out *bill.Invoice, taxMap map[string]*taxCategoryInfo, flat map[string]bool) ([]lineSource, error) {
 	items := in.Lines
 	ids := make(map[string]bool)
@@ -44,8 +38,7 @@ func goblAddLines(in *Transaction, out *bill.Invoice, taxMap map[string]*taxCate
 		}
 	}
 
-	// Only a top-level line can take its sub-invoice lines as a breakdown,
-	// and each line is folded into one parent at most.
+	// Each child folds into one top-level parent at most.
 	groups := make(map[*Line][]*Line)
 	folded := make(map[*Line]bool)
 	for _, it := range items {
@@ -118,8 +111,7 @@ func goblLineStatus(it *Line) string {
 	return strings.ToUpper(strings.TrimSpace(it.LineDoc.LineStatusReasonCode))
 }
 
-// goblLineIsSummed reports whether a line's amount counts towards the
-// document totals. Only DETAIL lines and lines without a sub-line type do.
+// Only DETAIL and untyped lines count towards the totals.
 func goblLineIsSummed(it *Line) bool {
 	switch goblLineStatus(it) {
 	case lineStatusGroup, lineStatusInformation:
@@ -128,14 +120,7 @@ func goblLineIsSummed(it *Line) bool {
 	return true
 }
 
-// goblCanFold reports whether a parent and its sub-invoice lines fit in a
-// single GOBL line with a breakdown. Sub-lines have no taxes of their own, so
-// every DETAIL line must share one tax category and rate. They count per unit
-// of the parent, so each quantity, allowance and charge must divide evenly by
-// the parent's quantity, and their declared amounts must add up to the
-// parent's. Nested groups are read flat, as are a GROUP line's own allowances
-// and charges, which no total counts. A parent that is not a GROUP must count
-// itself and can only carry INFORMATION lines, which then describe it.
+// goblCanFold checks what a breakdown can express: one tax, per-unit quantities, matching amounts.
 func goblCanFold(parent *Line, kids []*Line, taxMap map[string]*taxCategoryInfo) bool {
 	group := goblLineStatus(parent) == lineStatusGroup
 	if group && parent.TradeSettlement != nil && len(parent.TradeSettlement.AllowanceCharge) > 0 {
@@ -198,13 +183,10 @@ func goblCanFold(parent *Line, kids []*Line, taxMap map[string]*taxCategoryInfo)
 	return true
 }
 
-// goblDividesBy reports whether an amount divides by a quantity without a
-// remainder at its own precision.
 func goblDividesBy(a, qty num.Amount) bool {
 	return a.Divide(qty).Multiply(qty).Equals(a)
 }
 
-// goblLineQuantity reads a line's billed quantity, 1 when it states none.
 func goblLineQuantity(it *Line) (num.Amount, bool) {
 	if it.Quantity == nil || it.Quantity.Quantity == nil || strings.TrimSpace(it.Quantity.Quantity.Amount) == "" {
 		return num.MakeAmount(1, 0), true
@@ -216,8 +198,6 @@ func goblLineQuantity(it *Line) (num.Amount, bool) {
 	return q, true
 }
 
-// goblLineTaxKey identifies the tax a line applies: its category, rate and
-// exemption.
 func goblLineTaxKey(it *Line, taxMap map[string]*taxCategoryInfo) string {
 	taxes := goblLineTradeTaxes(it.TradeSettlement.ApplicableTradeTax)
 	if len(taxes) != 1 {
@@ -232,9 +212,7 @@ func goblLineTaxKey(it *Line, taxMap map[string]*taxCategoryInfo) string {
 	return key + ":" + normalizeTaxPercent(t.RateApplicablePercent) + ":" + exemption
 }
 
-// goblNewGroupLine reads a parent line and its sub-invoice lines as one line
-// with a breakdown, the reverse of newGroupLines. A GROUP line's price and
-// amount follow from its DETAIL lines, and it takes their tax.
+// The inverse of newGroupLines.
 func goblNewGroupLine(parent *Line, kids []*Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, error) {
 	l, err := goblNewLine(parent, taxMap)
 	if err != nil {
@@ -295,9 +273,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		},
 	}
 
-	// GROUP and INFORMATION lines are kept for their details, but at a zero
-	// price: their DETAIL lines already carry the amounts, and GOBL requires
-	// every invoice line to have a price.
+	// GOBL requires a price; the DETAIL lines carry the amounts.
 	price := num.AmountZero
 	if it.Agreement != nil && it.Agreement.NetPrice != nil && summed {
 		price, err = goblLinePrice(it.Agreement.NetPrice)
@@ -341,8 +317,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		return nil, err
 	}
 
-	// What a line no total counts allows or charges is not part of the
-	// totals either.
+	// Allowances on an uncounted line count nowhere either.
 	if len(ts.AllowanceCharge) > 0 && summed {
 		l, err = getLineCharges(ts.AllowanceCharge, l)
 		if err != nil {
@@ -375,9 +350,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	return l, nil
 }
 
-// goblLineTradeTaxes drops the trade tax entries that name no tax, such as
-// the one a French GROUP line may carry only for its tax due date
-// (EXT-FR-FE-180): there is no category to apply.
+// A French GROUP line may carry a tax entry holding only its due date (EXT-FR-FE-180).
 func goblLineTradeTaxes(taxes []*Tax) []*Tax {
 	out := make([]*Tax, 0, len(taxes))
 	for _, t := range taxes {

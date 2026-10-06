@@ -15,8 +15,7 @@ import (
 // BT-131 is mandatory (BR-24) and the totals are summed from it (BR-CO-10,
 // BR-CO-13), while BT-149 is optional and in no rule, so BT-131 decides between
 // them. What reconciles under no reading is tagged for bypass and recorded as
-// sent. srcs pairs each of out's lines with the document line it was read
-// from.
+// sent.
 func goblReconcileTotals(in *Invoice, out *bill.Invoice, srcs []lineSource, taxMap map[string]*taxCategoryInfo) error {
 	goblApplyRounding(in, out)
 
@@ -24,8 +23,7 @@ func goblReconcileTotals(in *Invoice, out *bill.Invoice, srcs []lineSource, taxM
 		return err
 	}
 
-	// A group read as a breakdown that does not come to the amount its
-	// sub-invoice lines declare is read flat instead.
+	// A breakdown that misses its declared amount is re-read flat.
 	if flat := goblUnreconciledGroups(out, srcs); len(flat) > 0 {
 		var err error
 		if srcs, err = goblAddLines(in.Transaction, out, taxMap, flat); err != nil {
@@ -55,8 +53,6 @@ func goblReconcileTotals(in *Invoice, out *bill.Invoice, srcs []lineSource, taxM
 	return goblApplyDeclaredTotals(in, out, srcs)
 }
 
-// goblUnreconciledGroups names the groups read as a breakdown whose line total
-// differs from the sum their DETAIL lines declare.
 func goblUnreconciledGroups(out *bill.Invoice, srcs []lineSource) map[string]bool {
 	var flat map[string]bool
 	for i, src := range srcs {
@@ -164,8 +160,7 @@ func goblDeclaredTotalsAgree(in *Invoice, out *bill.Invoice, srcs []lineSource) 
 		}
 		docLine := src.doc
 		line := out.Lines[i]
-		// A GROUP or INFORMATION line restates amounts its DETAIL lines
-		// already carry, so what it declares is not part of the totals.
+		// GROUP and INFORMATION lines are not counted.
 		if line == nil || line.Total == nil || !goblLineIsSummed(docLine) {
 			continue
 		}

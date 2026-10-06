@@ -26,19 +26,14 @@ type Line struct {
 // LineDoc defines the structure of the AssociatedDocumentLineDocument in the CII standard
 type LineDoc struct {
 	ID string `xml:"ram:LineID"`
-	// Sub-invoice lines (CII extended profile, EXT-FR-FE-162/163): the line
-	// this one belongs to and whether it is a GROUP, DETAIL or INFORMATION
-	// line. LineStatusCode is only read.
+	// EXT-FR-FE-162/163. LineStatusCode is only read.
 	ParentLineID         string  `xml:"ram:ParentLineID,omitempty"`
 	LineStatusCode       string  `xml:"ram:LineStatusCode,omitempty"`
 	LineStatusReasonCode string  `xml:"ram:LineStatusReasonCode,omitempty"`
 	Note                 []*Note `xml:"ram:IncludedNote,omitempty"`
 }
 
-// Sub-invoice line types (EXT-FR-FE-163, ram:LineStatusReasonCode). Only
-// DETAIL lines and lines without a type count towards the totals: a GROUP
-// line restates the sum of its DETAIL lines, and an INFORMATION line is
-// purely descriptive.
+// Sub-invoice line types (EXT-FR-FE-163).
 const (
 	lineStatusGroup       = "GROUP"
 	lineStatusDetail      = "DETAIL"
@@ -159,10 +154,7 @@ func (out *Invoice) addLines(inv *bill.Invoice, ctx Context) error {
 	return nil
 }
 
-// writesSubLines reports whether a line's breakdown is written out as
-// sub-invoice lines. Only the extended profiles define them, and a line's own
-// allowances or charges would be lost on a GROUP line, which no total counts;
-// such a line is written as a single line, as every other profile does.
+// A GROUP line's own allowances would count nowhere, so such a line is written alone.
 func writesSubLines(ctx Context, l *bill.Line) bool {
 	if len(l.Breakdown) == 0 || len(l.Discounts) > 0 || len(l.Charges) > 0 {
 		return false
@@ -170,11 +162,7 @@ func writesSubLines(ctx Context, l *bill.Line) bool {
 	return ctx.Is(ContextFacturXExtendedV1) || ctx.Is(ContextZUGFeRDExtendedV2) || isFranceExtended(&ctx)
 }
 
-// newGroupLines writes a line with a breakdown as sub-invoice lines. When a
-// sub-line carries a price the line becomes a GROUP restating the sum of its
-// DETAIL lines, with no tax of its own. Otherwise its price stands and the
-// sub-lines only describe it. Sub-lines have no taxes, so each takes the
-// line's, and unpriced ones are INFORMATION lines that count towards nothing.
+// Without a priced sub-line the line keeps its own price and is not a GROUP.
 func newGroupLines(l *bill.Line, group *Line, ccy string) []*Line {
 	priced := false
 	for _, sl := range l.Breakdown {
@@ -198,10 +186,7 @@ func newGroupLines(l *bill.Line, group *Line, ccy string) []*Line {
 	}
 
 	if priced {
-		// BR-FREXT-08 makes a GROUP line's amount the sum of its DETAIL
-		// lines, and BR-CO-10 sums the DETAIL lines into BT-106. When their
-		// rounding no longer adds up to the line's own amount, both cannot
-		// hold, so the line is written alone.
+		// BR-FREXT-08 and BR-CO-10 cannot both hold once rounding diverges.
 		if rescaleToCurrency(sum, ccy) != group.TradeSettlement.Sum.Amount {
 			return []*Line{group}
 		}
@@ -213,9 +198,7 @@ func newGroupLines(l *bill.Line, group *Line, ccy string) []*Line {
 	return lines
 }
 
-// newSubLine writes a sub-line under its parent. A sub-line counts per unit of
-// its parent, while a sub-invoice line states its full quantity and amounts,
-// so they are multiplied by the parent's quantity.
+// Sub-lines count per parent unit; the XML states full quantities and amounts.
 func newSubLine(sl *bill.SubLine, parent *bill.Line, id, parentID, ccy string) *Line {
 	it := sl.Item
 	qty := parent.Quantity
@@ -240,8 +223,7 @@ func newSubLine(sl *bill.SubLine, parent *bill.Line, id, parentID, ccy string) *
 	}
 
 	if it.Price == nil || sl.Total == nil {
-		// The extended schemas still want a price and an amount, so an
-		// INFORMATION line states zero for both, as the official examples do.
+		// The extended schemas require both, even on INFORMATION lines.
 		line.LineDoc.LineStatusReasonCode = lineStatusInformation
 		line.Agreement.NetPrice = &NetPrice{Amount: rescaleToCurrency(num.AmountZero, ccy)}
 		line.TradeSettlement.Sum = &Summation{Amount: rescaleToCurrency(num.AmountZero, ccy)}
@@ -267,7 +249,6 @@ func newSubLine(sl *bill.SubLine, parent *bill.Line, id, parentID, ccy string) *
 	return line
 }
 
-// scaleLineCharges multiplies sub-line charges by the parent's quantity.
 func scaleLineCharges(charges []*bill.LineCharge, qty num.Amount) []*bill.LineCharge {
 	out := make([]*bill.LineCharge, 0, len(charges))
 	for _, c := range charges {
@@ -282,7 +263,6 @@ func scaleLineCharges(charges []*bill.LineCharge, qty num.Amount) []*bill.LineCh
 	return out
 }
 
-// scaleLineDiscounts multiplies sub-line discounts by the parent's quantity.
 func scaleLineDiscounts(discounts []*bill.LineDiscount, qty num.Amount) []*bill.LineDiscount {
 	out := make([]*bill.LineDiscount, 0, len(discounts))
 	for _, d := range discounts {
@@ -384,7 +364,6 @@ func newLine(l *bill.Line, ccy string, ctx Context) *Line {
 	return lineItem
 }
 
-// newProduct builds the line's item (BG-31).
 func newProduct(it *org.Item) *Product {
 	p := &Product{
 		Name: it.Name,
@@ -437,7 +416,7 @@ func newLineNotes(notes []*org.Note) []*Note {
 	return out
 }
 
-// newLineDocReference builds BT-128, the invoice line object identifier.
+// BT-128: invoice line object identifier.
 func newLineDocReference(id *org.Identity) *LineDocReference {
 	if id == nil {
 		return nil
@@ -481,8 +460,7 @@ func newTradeSettlement(l *bill.Line, ccy string) *TradeSettlement {
 	return stlm
 }
 
-// newLinePeriod writes BT-134/BT-135. Start and end are both optional, so only
-// the ends the period actually carries are written out.
+// BT-134/BT-135: either end may be absent.
 func newLinePeriod(p *cal.Period) *Period {
 	if p == nil {
 		return nil
