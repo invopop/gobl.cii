@@ -3,6 +3,7 @@ package cii
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -99,4 +100,27 @@ func TestGoblItemAttribute(t *testing.T) {
 	require.NotNil(t, attr)
 	assert.Equal(t, "2.5", attr.Amount.String())
 	assert.Equal(t, cbc.KeyEmpty, attr.Unit, "a measure without a unit code has no unit")
+}
+
+// TestWritesSubLinesOnlyExtended covers every context: sub-invoice lines only
+// exist in the extended profiles, so no other context may write them.
+func TestWritesSubLinesOnlyExtended(t *testing.T) {
+	extended := []Context{
+		ContextFacturXExtendedV1,
+		ContextZUGFeRDExtendedV2,
+		ContextPeppolFranceFacturXV1,
+		ContextPeppolFranceExtendedV1,
+	}
+	l := &bill.Line{
+		Breakdown: []*bill.SubLine{{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Part"}}},
+	}
+	for _, ctx := range contexts {
+		want := false
+		for _, e := range extended {
+			if ctx.Is(e) {
+				want = true
+			}
+		}
+		assert.Equal(t, want, writesSubLines(ctx, l), ctx.GuidelineID)
+	}
 }

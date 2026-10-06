@@ -1,14 +1,18 @@
 package cii_test
 
 import (
+	"os"
+	"strings"
 	"testing"
 
+	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -145,4 +149,140 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, "0.00880", lines[0].Item.Price.String())
 		assert.Equal(t, "140.80", lines[0].Total.String())
 	})
+}
+
+// TestParseSubInvoiceLines covers the sub-invoice lines of the extended
+// profile. Only DETAIL lines count towards the totals: a GROUP line restates
+// the sum of its DETAIL lines and an INFORMATION line carries no amount. A
+// GROUP line with no net price and an INFORMATION line with no trade agreement
+// used to panic.
+func TestParseSubInvoiceLines(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "sub-invoice-lines.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, inv.Lines, 5)
+
+	// The first group mixes tax rates, which a breakdown cannot, so it is read
+	// flat with the GROUP line at a zero price.
+	names := []string{"Kit", "Part A", "Part B", "Service bundle", "Assembly instructions"}
+	totals := []string{rateZero, "100.00", "50.00", "20.00", rateZero}
+	for i, l := range inv.Lines {
+		assert.Equal(t, names[i], l.Item.Name)
+		require.NotNil(t, l.Total)
+		assert.Equal(t, totals[i], l.Total.String(), "line %d", i+1)
+	}
+	// The group's tax entry only names a due date: there is no tax to apply.
+	assert.Empty(t, inv.Lines[0].Taxes)
+	assert.Empty(t, inv.Lines[0].Breakdown)
+
+	// The second shares one rate and becomes a breakdown.
+	bundle := inv.Lines[3]
+	require.Len(t, bundle.Breakdown, 1)
+	assert.Equal(t, "Installation", bundle.Breakdown[0].Item.Name)
+	require.Len(t, bundle.Taxes, 1)
+	assert.Equal(t, "20.00%", bundle.Taxes[0].Percent.String())
+
+	// The calculation reproduces the declared totals without being bypassed.
+	assert.False(t, inv.HasTags(tax.TagBypass))
+	assert.Equal(t, "170.00", inv.Totals.Sum.String())
+	assert.Equal(t, "170.00", inv.Totals.Total.String())
+	assert.Equal(t, "29.00", inv.Totals.Tax.String())
+	assert.Equal(t, "199.00", inv.Totals.Payable.String())
+
+	require.NoError(t, e.Validate())
+}
+
+// TestParseSubInvoiceLinesFlat covers the groups a breakdown cannot hold, which
+// are read flat, next to the ones it can.
+func TestParseSubInvoiceLinesFlat(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "sub-invoice-lines-flat.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	want := []struct {
+		name      string
+		total     string
+		breakdown int
+	}{
+		// Nested groups.
+		{"Display", rateZero, 0},
+		{"Roast", "30.00", 0},
+		{"Bundle", rateZero, 0},
+		{"Colombia", "90.00", 0},
+		// DETAIL lines ahead of their GROUP line still fold into it.
+		{"Hardware", "550.00", 2},
+		// A quantity that does not divide by the GROUP line's.
+		{"Odd lot", rateZero, 0},
+		{"Thing", "10.00", 0},
+		// A GROUP line declaring more than its DETAIL lines add up to.
+		{"Mismatch", rateZero, 0},
+		{"Part", "40.00", 0},
+		// INFORMATION lines describe a line that keeps its own price.
+		{"Safety kit", "450.00", 2},
+	}
+	require.Len(t, inv.Lines, len(want))
+	for i, w := range want {
+		l := inv.Lines[i]
+		assert.Equal(t, w.name, l.Item.Name, "line %d", i+1)
+		assert.Equal(t, w.total, l.Total.String(), "line %d", i+1)
+		assert.Len(t, l.Breakdown, w.breakdown, "line %d", i+1)
+	}
+
+	hardware := inv.Lines[4]
+	assert.Equal(t, "Laser printer", hardware.Breakdown[0].Item.Name)
+	assert.Equal(t, "-1", hardware.Breakdown[1].Quantity.String())
+
+	kit := inv.Lines[9]
+	assert.Equal(t, "45.00", kit.Item.Price.String())
+	for _, sl := range kit.Breakdown {
+		assert.Nil(t, sl.Item.Price)
+		assert.Equal(t, "1", sl.Quantity.String())
+	}
+
+	assert.False(t, inv.HasTags(tax.TagBypass))
+	assert.Equal(t, "1170.00", inv.Totals.Sum.String())
+	assert.Equal(t, "234.00", inv.Totals.Tax.String())
+	assert.Equal(t, "1404.00", inv.Totals.Payable.String())
+	require.NoError(t, e.Validate())
+}
+
+// TestParseSubInvoiceLinesUnreconciled covers a group whose DETAIL lines
+// declare amounts their prices do not produce: the breakdown would not come to
+// the declared amount, so the group is read flat.
+func TestParseSubInvoiceLinesUnreconciled(t *testing.T) {
+	data, err := os.ReadFile(dataPath(pathParse, "sub-invoice-lines.xml"))
+	require.NoError(t, err)
+	// The bundle's only DETAIL line declares 25.00 at a 20.00 price.
+	xml := strings.Replace(string(data), "<ram:LineTotalAmount>20.00</ram:LineTotalAmount>", "<ram:LineTotalAmount>25.00</ram:LineTotalAmount>", 2)
+
+	e, err := cii.Parse([]byte(xml))
+	require.NoError(t, err)
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.Len(t, inv.Lines, 6)
+	assert.Equal(t, "Service bundle", inv.Lines[3].Item.Name)
+	assert.Empty(t, inv.Lines[3].Breakdown)
+	assert.Equal(t, "Installation", inv.Lines[4].Item.Name)
+}
+
+// TestParseSubInvoiceLinesCycle covers lines naming each other as parents,
+// which never lead back to a top-level line: they are still read.
+func TestParseSubInvoiceLinesCycle(t *testing.T) {
+	data, err := os.ReadFile(dataPath(pathParse, "sub-invoice-lines.xml"))
+	require.NoError(t, err)
+	xml := strings.Replace(string(data),
+		"<ram:LineID>1</ram:LineID><ram:LineStatusReasonCode>GROUP",
+		"<ram:LineID>1</ram:LineID><ram:ParentLineID>2</ram:ParentLineID><ram:LineStatusReasonCode>GROUP", 1)
+
+	e, err := cii.Parse([]byte(xml))
+	require.NoError(t, err)
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.Len(t, inv.Lines, 5)
+	assert.Equal(t, "170.00", inv.Totals.Sum.String())
 }
