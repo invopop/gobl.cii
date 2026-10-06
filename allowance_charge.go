@@ -43,16 +43,16 @@ func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
 	return ac
 }
 
-func newLineAllowanceCharges(line *bill.Line, ccy string) []*AllowanceCharge {
-	if len(line.Charges) == 0 && len(line.Discounts) == 0 {
+func newLineAllowanceCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string) []*AllowanceCharge {
+	if len(charges) == 0 && len(discounts) == 0 {
 		return nil
 	}
-	ac := make([]*AllowanceCharge, len(line.Charges)+len(line.Discounts))
-	for i, charge := range line.Charges {
+	ac := make([]*AllowanceCharge, len(charges)+len(discounts))
+	for i, charge := range charges {
 		ac[i] = makeLineCharge(charge, ccy)
 	}
-	for i, discount := range line.Discounts {
-		ac[i+len(line.Charges)] = makeLineDiscount(discount, ccy)
+	for i, discount := range discounts {
+		ac[i+len(charges)] = makeLineDiscount(discount, ccy)
 	}
 	return ac
 }

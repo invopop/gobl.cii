@@ -3,6 +3,7 @@ package cii_test
 import (
 	"testing"
 
+	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -248,4 +249,215 @@ func TestLineSellerRoundTrip(t *testing.T) {
 	require.Len(t, parsedInv.Lines[0].Seller.Identities, 1)
 	assert.Equal(t, cbc.Code("1234567890128"), parsedInv.Lines[0].Seller.Identities[0].Code)
 	assert.Equal(t, cbc.Code("0088"), parsedInv.Lines[0].Seller.Identities[0].Ext.Get(iso.ExtKeySchemeID))
+}
+
+const (
+	lineStatusGroup       = "GROUP"
+	lineStatusDetail      = "DETAIL"
+	lineStatusInformation = "INFORMATION"
+)
+
+const fixtureFacturXDE = "facturx/invoice-de-de.json"
+
+// Item names shared by the sub-invoice line tests.
+const (
+	itemPartA     = "Part A"
+	itemPartB     = "Part B"
+	itemSafetyKit = "Safety kit"
+	itemHelmet    = "Helmet"
+	itemGoggles   = "Goggles"
+)
+
+// breakdownEnvelope loads a fixture and gives its first line a breakdown: two
+// priced sub-lines, one of them discounted, and one without a price.
+func breakdownEnvelope(t *testing.T, fixture string) *gobl.Envelope {
+	t.Helper()
+	env := loadEnvelope(t, fixture)
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	design := num.MakeAmount(3000, 2)
+	build := num.MakeAmount(6000, 2)
+	inv.Lines[0].Discounts, inv.Lines[0].Charges = nil, nil
+	inv.Lines[0].Breakdown = []*bill.SubLine{
+		{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Design", Price: &design}},
+		{
+			Quantity:  num.MakeAmount(2, 0),
+			Item:      &org.Item{Name: "Build", Price: &build},
+			Discounts: []*bill.LineDiscount{{Amount: num.MakeAmount(500, 2), Reason: "Promotion"}},
+		},
+		{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Sample, no charge"}},
+	}
+	require.NoError(t, env.Calculate())
+	return env
+}
+
+func TestSubLinesConvert(t *testing.T) {
+	t.Run("extended profile writes sub-invoice lines", func(t *testing.T) {
+		doc, err := cii.ConvertInvoice(breakdownEnvelope(t, fixtureFacturXDE), cii.WithContext(cii.ContextFacturXExtendedV1))
+		require.NoError(t, err)
+		lines := doc.Transaction.Lines
+		require.Len(t, lines, 4)
+
+		// The parent quantity is 20, and each sub-line counts per unit of it.
+		group := lines[0]
+		assert.Equal(t, "1", group.LineDoc.ID)
+		assert.Equal(t, lineStatusGroup, group.LineDoc.LineStatusReasonCode)
+		assert.Empty(t, group.LineDoc.ParentLineID)
+		assert.Empty(t, group.TradeSettlement.ApplicableTradeTax)
+		assert.Equal(t, "145.00", group.Agreement.NetPrice.Amount)
+		assert.Equal(t, "20", group.Quantity.Quantity.Amount)
+		assert.Equal(t, "2900.00", group.TradeSettlement.Sum.Amount)
+
+		design := lines[1]
+		assert.Equal(t, "1.1", design.LineDoc.ID)
+		assert.Equal(t, "1", design.LineDoc.ParentLineID)
+		assert.Equal(t, lineStatusDetail, design.LineDoc.LineStatusReasonCode)
+		assert.Equal(t, "Design", design.Product.Name)
+		assert.Equal(t, "20", design.Quantity.Quantity.Amount)
+		assert.Equal(t, "30.00", design.Agreement.NetPrice.Amount)
+		assert.Equal(t, "600.00", design.TradeSettlement.Sum.Amount)
+		require.Len(t, design.TradeSettlement.ApplicableTradeTax, 1)
+		assert.Equal(t, "S", design.TradeSettlement.ApplicableTradeTax[0].CategoryCode)
+
+		build := lines[2]
+		assert.Equal(t, "1.2", build.LineDoc.ID)
+		assert.Equal(t, "40", build.Quantity.Quantity.Amount)
+		require.Len(t, build.TradeSettlement.AllowanceCharge, 1)
+		assert.Equal(t, "100.00", build.TradeSettlement.AllowanceCharge[0].Amount)
+		assert.Equal(t, "2300.00", build.TradeSettlement.Sum.Amount)
+
+		info := lines[3]
+		assert.Equal(t, "1.3", info.LineDoc.ID)
+		assert.Equal(t, lineStatusInformation, info.LineDoc.LineStatusReasonCode)
+		assert.Equal(t, rateZero, info.Agreement.NetPrice.Amount)
+		assert.Equal(t, rateZero, info.TradeSettlement.Sum.Amount)
+	})
+
+	t.Run("other profiles write the line alone", func(t *testing.T) {
+		doc, err := cii.ConvertInvoice(breakdownEnvelope(t, "en16931/invoice-de-de.json"))
+		require.NoError(t, err)
+		require.Len(t, doc.Transaction.Lines, 1)
+		assert.Empty(t, doc.Transaction.Lines[0].LineDoc.LineStatusReasonCode)
+		assert.Equal(t, "2900.00", doc.Transaction.Lines[0].TradeSettlement.Sum.Amount)
+	})
+
+	t.Run("a line with its own discount is written alone", func(t *testing.T) {
+		env := breakdownEnvelope(t, fixtureFacturXDE)
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Lines[0].Discounts = []*bill.LineDiscount{{Amount: num.MakeAmount(1000, 2), Reason: "Loyalty"}}
+		require.NoError(t, env.Calculate())
+
+		doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXExtendedV1))
+		require.NoError(t, err)
+		require.Len(t, doc.Transaction.Lines, 1)
+	})
+
+	t.Run("a line whose sub-lines round apart is written alone", func(t *testing.T) {
+		env := loadEnvelope(t, fixtureFacturXDE)
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		// Each sub-line comes to 0.33 x 1.5 = 0.495, so 0.50 written, while
+		// the line is 0.66 x 1.5 = 0.99.
+		price := num.MakeAmount(33, 2)
+		inv.Lines[0].Quantity = num.MakeAmount(15, 1)
+		inv.Lines[0].Discounts, inv.Lines[0].Charges = nil, nil
+		inv.Lines[0].Breakdown = []*bill.SubLine{
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: itemPartA, Price: &price}},
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: itemPartB, Price: &price}},
+		}
+		require.NoError(t, env.Calculate())
+
+		doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXExtendedV1))
+		require.NoError(t, err)
+		require.Len(t, doc.Transaction.Lines, 1)
+		assert.Empty(t, doc.Transaction.Lines[0].LineDoc.LineStatusReasonCode)
+		assert.Equal(t, "0.99", doc.Transaction.Lines[0].TradeSettlement.Sum.Amount)
+	})
+
+	t.Run("unpriced sub-lines describe a line that keeps its price", func(t *testing.T) {
+		env := loadEnvelope(t, fixtureFacturXDE)
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Lines[0].Breakdown = []*bill.SubLine{
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: itemHelmet}},
+		}
+		require.NoError(t, env.Calculate())
+
+		doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXExtendedV1))
+		require.NoError(t, err)
+		lines := doc.Transaction.Lines
+		require.Len(t, lines, 2)
+		assert.Equal(t, lineStatusDetail, lines[0].LineDoc.LineStatusReasonCode)
+		assert.NotEmpty(t, lines[0].TradeSettlement.ApplicableTradeTax)
+		assert.Equal(t, "1800.00", lines[0].TradeSettlement.Sum.Amount)
+		assert.Equal(t, lineStatusInformation, lines[1].LineDoc.LineStatusReasonCode)
+	})
+}
+
+// TestSubLinesRoundTrip writes a breakdown out as sub-invoice lines and reads
+// it back: the breakdown and every total must survive.
+func TestSubLinesRoundTrip(t *testing.T) {
+	tests := []struct {
+		name    string
+		env     func(t *testing.T) *gobl.Envelope
+		context cii.Context
+	}{
+		{"invoice-hierarchy", func(t *testing.T) *gobl.Envelope {
+			return loadEnvelope(t, "peppol-france-facturx/invoice-hierarchy.json")
+		}, cii.ContextPeppolFranceFacturXV1},
+		{"invoice-sub-lines", func(t *testing.T) *gobl.Envelope {
+			return loadEnvelope(t, "peppol-france-extended/invoice-sub-lines.json")
+		}, cii.ContextPeppolFranceExtendedV1},
+		{"facturx-extended", func(t *testing.T) *gobl.Envelope {
+			return breakdownEnvelope(t, fixtureFacturXDE)
+		}, cii.ContextFacturXExtendedV1},
+		{"zugferd-extended", func(t *testing.T) *gobl.Envelope {
+			return breakdownEnvelope(t, "zugferd/standard-invoice.json")
+		}, cii.ContextZUGFeRDExtendedV2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			env := tt.env(t)
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			doc, err := cii.ConvertInvoice(env, cii.WithContext(tt.context))
+			require.NoError(t, err)
+			data, err := doc.Bytes()
+			require.NoError(t, err)
+
+			parsed, err := cii.Parse(data)
+			require.NoError(t, err)
+			out, ok := parsed.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			assert.False(t, out.HasTags(tax.TagBypass))
+			require.Len(t, out.Lines, len(inv.Lines))
+			for i, l := range inv.Lines {
+				got := out.Lines[i]
+				assert.Equal(t, l.Quantity.String(), got.Quantity.String(), "line %d quantity", i+1)
+				assert.Equal(t, l.Total.String(), got.Total.String(), "line %d total", i+1)
+				require.Len(t, got.Breakdown, len(l.Breakdown), "line %d breakdown", i+1)
+				for j, sl := range l.Breakdown {
+					gs := got.Breakdown[j]
+					assert.Equal(t, sl.Item.Name, gs.Item.Name)
+					assert.True(t, sl.Quantity.Equals(gs.Quantity), "sub-line %d.%d quantity", i+1, j+1)
+					if sl.Item.Price == nil {
+						assert.Nil(t, gs.Item.Price)
+						assert.Nil(t, gs.Total)
+						continue
+					}
+					require.NotNil(t, gs.Item.Price)
+					assert.True(t, sl.Item.Price.Equals(*gs.Item.Price), "sub-line %d.%d price", i+1, j+1)
+					assert.Equal(t, sl.Total.String(), gs.Total.String(), "sub-line %d.%d total", i+1, j+1)
+					assert.Len(t, gs.Discounts, len(sl.Discounts))
+				}
+			}
+			assert.Equal(t, inv.Totals.Sum.String(), out.Totals.Sum.String())
+			assert.Equal(t, inv.Totals.Tax.String(), out.Totals.Tax.String())
+			assert.Equal(t, inv.Totals.Payable.String(), out.Totals.Payable.String())
+		})
+	}
 }

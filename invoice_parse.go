@@ -71,7 +71,8 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		return nil, err
 	}
 
-	if err = goblAddLines(in.Transaction, out, taxMap); err != nil {
+	srcs, err := goblAddLines(in.Transaction, out, taxMap, nil)
+	if err != nil {
 		return nil, err
 	}
 
@@ -108,7 +109,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 
 	// Everything the document declares is now mapped, so the calculated
 	// amounts can be checked against the ones the sender stated.
-	if err := goblReconcileTotals(in, out); err != nil {
+	if err := goblReconcileTotals(in, out, srcs, taxMap); err != nil {
 		return nil, err
 	}
 
