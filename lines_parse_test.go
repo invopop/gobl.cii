@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -145,4 +146,45 @@ func TestParseCtoGLines(t *testing.T) {
 		assert.Equal(t, "0.00880", lines[0].Item.Price.String())
 		assert.Equal(t, "140.80", lines[0].Total.String())
 	})
+}
+
+// TestParseCtoGSubInvoiceLines covers the sub-invoice lines of the extended
+// profile: a GROUP line restates the sum of its DETAIL lines and an
+// INFORMATION line carries no amount, so only DETAIL lines are summed. A GROUP
+// line with no net price and an INFORMATION line with no trade agreement
+// used to panic.
+func TestParseCtoGSubInvoiceLines(t *testing.T) {
+	e, err := parseInvoiceFrom(t, "sub-invoice-lines.xml")
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, inv.Lines, 6)
+
+	// Every line is kept, with GROUP and INFORMATION lines at a zero price.
+	names := []string{"Kit", "Part A", "Part B", "Service bundle", "Installation", "Assembly instructions"}
+	totals := map[int]string{1: "100.00", 2: "50.00", 4: "20.00"}
+	for i, l := range inv.Lines {
+		assert.Equal(t, names[i], l.Item.Name)
+		require.NotNil(t, l.Item.Price)
+		require.NotNil(t, l.Total)
+		if want, ok := totals[i]; ok {
+			assert.Equal(t, want, l.Total.String(), "line %d", i+1)
+		} else {
+			assert.True(t, l.Item.Price.IsZero(), "line %d", i+1)
+			assert.True(t, l.Total.IsZero(), "line %d", i+1)
+		}
+	}
+
+	// The group's tax entry only names a due date: there is no tax to apply.
+	assert.Empty(t, inv.Lines[0].Taxes)
+
+	// The calculation reproduces the declared totals without being bypassed.
+	assert.False(t, inv.HasTags(tax.TagBypass))
+	assert.Equal(t, "170.00", inv.Totals.Sum.String())
+	assert.Equal(t, "170.00", inv.Totals.Total.String())
+	assert.Equal(t, "29.00", inv.Totals.Tax.String())
+	assert.Equal(t, "199.00", inv.Totals.Payable.String())
+
+	require.NoError(t, e.Validate())
 }

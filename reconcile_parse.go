@@ -62,6 +62,9 @@ func goblDropConflictingBaseQuantities(in *Invoice, out *bill.Invoice) []priceSw
 		if line == nil || line.Item == nil || line.Item.Price == nil || line.Total == nil {
 			continue
 		}
+		if docLine.Agreement == nil || !goblLineIsSummed(docLine) {
+			continue
+		}
 		np := docLine.Agreement.NetPrice
 		if np == nil || np.BaseQuantity == nil || np.BaseQuantity.Amount == "" {
 			continue
@@ -113,7 +116,9 @@ func goblDeclaredTotalsAgree(in *Invoice, out *bill.Invoice) bool {
 			return false
 		}
 		line := out.Lines[i]
-		if line == nil || line.Total == nil {
+		// A GROUP or INFORMATION line restates amounts its DETAIL lines
+		// already carry, so what it declares is not part of the totals.
+		if line == nil || line.Total == nil || !goblLineIsSummed(docLine) {
 			continue
 		}
 		declared, ok := goblDeclaredLineAmount(docLine)
@@ -205,7 +210,7 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice) error {
 			break
 		}
 		line := out.Lines[i]
-		if line == nil {
+		if line == nil || !goblLineIsSummed(docLine) {
 			continue
 		}
 		v, ok := goblDeclaredLineAmount(docLine)

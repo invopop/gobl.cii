@@ -32,24 +32,53 @@ func goblAddLines(in *Transaction, out *bill.Invoice, taxMap map[string]*taxCate
 	return nil
 }
 
-func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, error) {
-	price, err := goblLinePrice(it.Agreement.NetPrice)
-	if err != nil {
-		return nil, err
-	}
+// Sub-invoice line types (EXT-FR-FE-163, ram:LineStatusReasonCode) whose
+// amounts are not part of the invoice totals: a GROUP line restates the sum of
+// its DETAIL lines, and an INFORMATION line is purely descriptive.
+const (
+	lineStatusReasonGroup       = "GROUP"
+	lineStatusReasonInformation = "INFORMATION"
+)
 
+// goblLineIsSummed reports whether a line's amount counts towards the
+// document totals. Only DETAIL lines and lines without a sub-line type do.
+func goblLineIsSummed(it *Line) bool {
+	if it.LineDoc == nil {
+		return true
+	}
+	switch strings.ToUpper(strings.TrimSpace(it.LineDoc.LineStatusReasonCode)) {
+	case lineStatusReasonGroup, lineStatusReasonInformation:
+		return false
+	}
+	return true
+}
+
+func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, error) {
+	var err error
 	l := &bill.Line{
 		Quantity: num.MakeAmount(1, 0),
 		Item: &org.Item{
-			Name:  cleanString(strings.TrimSpace(it.Product.Name)),
-			Price: &price,
+			Name: cleanString(strings.TrimSpace(it.Product.Name)),
 		},
 	}
 
-	if len(it.TradeSettlement.ApplicableTradeTax) > 0 {
+	// GROUP and INFORMATION lines are kept for their details, but at a zero
+	// price: their DETAIL lines already carry the amounts, and GOBL requires
+	// every invoice line to have a price.
+	price := num.AmountZero
+	if it.Agreement != nil && it.Agreement.NetPrice != nil && goblLineIsSummed(it) {
+		price, err = goblLinePrice(it.Agreement.NetPrice)
+		if err != nil {
+			return nil, err
+		}
+	}
+	l.Item.Price = &price
+
+	taxes := goblLineTradeTaxes(it.TradeSettlement.ApplicableTradeTax)
+	if len(taxes) > 0 {
 		l.Taxes = tax.Set{
 			{
-				Category: cbc.Code(it.TradeSettlement.ApplicableTradeTax[0].TypeCode),
+				Category: cbc.Code(taxes[0].TypeCode),
 			},
 		}
 	}
@@ -71,7 +100,7 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	goblLineProduct(it.Product, l.Item)
 	goblLineNotes(it.LineDoc, l)
 
-	if err := goblLineTaxes(it.TradeSettlement.ApplicableTradeTax, l, taxMap); err != nil {
+	if err := goblLineTaxes(taxes, l, taxMap); err != nil {
 		return nil, err
 	}
 
@@ -93,7 +122,9 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		}
 	}
 
-	goblLineAgreement(it.Agreement, l)
+	if it.Agreement != nil {
+		goblLineAgreement(it.Agreement, l)
+	}
 	goblLineSettlement(it.TradeSettlement, l)
 
 	per, err := goblLinePeriod(it.TradeSettlement.Period)
@@ -103,6 +134,20 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 	l.Period = per
 
 	return l, nil
+}
+
+// goblLineTradeTaxes drops the trade tax entries that name no tax, such as
+// the one a French GROUP line may carry only for its tax due date
+// (EXT-FR-FE-180): there is no category to apply.
+func goblLineTradeTaxes(taxes []*Tax) []*Tax {
+	out := make([]*Tax, 0, len(taxes))
+	for _, t := range taxes {
+		if t == nil || (t.TypeCode == "" && t.CategoryCode == "" && t.RateApplicablePercent == "") {
+			continue
+		}
+		out = append(out, t)
+	}
+	return out
 }
 
 // goblItemAttribute converts a CII ApplicableProductCharacteristic (BG-32)

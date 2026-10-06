@@ -22,8 +22,13 @@ type Line struct {
 
 // LineDoc defines the structure of the AssociatedDocumentLineDocument in the CII standard
 type LineDoc struct {
-	ID   string  `xml:"ram:LineID"`
-	Note []*Note `xml:"ram:IncludedNote,omitempty"`
+	ID string `xml:"ram:LineID"`
+	// Sub-invoice lines (CII extended profile): the line this one belongs to
+	// and whether it is a GROUP, DETAIL or INFORMATION line. Only read.
+	ParentLineID         string  `xml:"ram:ParentLineID,omitempty"`
+	LineStatusCode       string  `xml:"ram:LineStatusCode,omitempty"`
+	LineStatusReasonCode string  `xml:"ram:LineStatusReasonCode,omitempty"`
+	Note                 []*Note `xml:"ram:IncludedNote,omitempty"`
 }
 
 // LineAgreement defines the structure of the SpecifiedLineTradeAgreement in the CII standard
