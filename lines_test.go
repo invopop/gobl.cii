@@ -259,6 +259,15 @@ const (
 
 const fixtureFacturXDE = "facturx/invoice-de-de.json"
 
+// Item names shared by the sub-invoice line tests.
+const (
+	itemPartA     = "Part A"
+	itemPartB     = "Part B"
+	itemSafetyKit = "Safety kit"
+	itemHelmet    = "Helmet"
+	itemGoggles   = "Goggles"
+)
+
 // breakdownEnvelope loads a fixture and gives its first line a breakdown: two
 // priced sub-lines, one of them discounted, and one without a price.
 func breakdownEnvelope(t *testing.T, fixture string) *gobl.Envelope {
@@ -345,12 +354,34 @@ func TestSubLinesConvert(t *testing.T) {
 		require.Len(t, doc.Transaction.Lines, 1)
 	})
 
+	t.Run("a line whose sub-lines round apart is written alone", func(t *testing.T) {
+		env := loadEnvelope(t, fixtureFacturXDE)
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		// Each sub-line comes to 0.33 x 1.5 = 0.495, so 0.50 written, while
+		// the line is 0.66 x 1.5 = 0.99.
+		price := num.MakeAmount(33, 2)
+		inv.Lines[0].Quantity = num.MakeAmount(15, 1)
+		inv.Lines[0].Discounts, inv.Lines[0].Charges = nil, nil
+		inv.Lines[0].Breakdown = []*bill.SubLine{
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: itemPartA, Price: &price}},
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: itemPartB, Price: &price}},
+		}
+		require.NoError(t, env.Calculate())
+
+		doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXExtendedV1))
+		require.NoError(t, err)
+		require.Len(t, doc.Transaction.Lines, 1)
+		assert.Empty(t, doc.Transaction.Lines[0].LineDoc.LineStatusReasonCode)
+		assert.Equal(t, "0.99", doc.Transaction.Lines[0].TradeSettlement.Sum.Amount)
+	})
+
 	t.Run("unpriced sub-lines describe a line that keeps its price", func(t *testing.T) {
 		env := loadEnvelope(t, fixtureFacturXDE)
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 		inv.Lines[0].Breakdown = []*bill.SubLine{
-			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Helmet"}},
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: itemHelmet}},
 		}
 		require.NoError(t, env.Calculate())
 

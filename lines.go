@@ -198,10 +198,15 @@ func newGroupLines(l *bill.Line, group *Line, ccy string) []*Line {
 	}
 
 	if priced {
+		// BR-FREXT-08 makes a GROUP line's amount the sum of its DETAIL
+		// lines, and BR-CO-10 sums the DETAIL lines into BT-106. When their
+		// rounding no longer adds up to the line's own amount, both cannot
+		// hold, so the line is written alone.
+		if rescaleToCurrency(sum, ccy) != group.TradeSettlement.Sum.Amount {
+			return []*Line{group}
+		}
 		group.LineDoc.LineStatusReasonCode = lineStatusGroup
 		group.TradeSettlement.ApplicableTradeTax = nil
-		// BR-FREXT-08: a GROUP line's amount is the sum of its DETAIL lines.
-		group.TradeSettlement.Sum.Amount = rescaleToCurrency(sum, ccy)
 	} else {
 		group.LineDoc.LineStatusReasonCode = lineStatusDetail
 	}

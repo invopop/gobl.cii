@@ -23,89 +23,74 @@ type lineSource struct {
 	children []*Line
 }
 
-// goblAddLines reads the document's lines. Sub-invoice lines (EXT-FR-FE-162/163)
-// under a GROUP line become the GROUP line's breakdown when GOBL can express
-// them that way. Otherwise, and for every group named in flat, the hierarchy
-// is read flat, in document order: DETAIL lines become lines carrying the
-// amounts, and GROUP and INFORMATION lines are kept at a zero price.
+// goblAddLines reads the document's lines, in document order. Sub-invoice
+// lines (EXT-FR-FE-162/163) under a GROUP line become the GROUP line's
+// breakdown when GOBL can express them that way, taking the GROUP line's
+// place. Otherwise, and for every group named in flat, they are read flat:
+// DETAIL lines become lines carrying the amounts, and GROUP and INFORMATION
+// lines are kept at a zero price.
 func goblAddLines(in *Transaction, out *bill.Invoice, taxMap map[string]*taxCategoryInfo, flat map[string]bool) ([]lineSource, error) {
 	items := in.Lines
-	children := make(map[string][]*Line)
 	ids := make(map[string]bool)
 	for _, it := range items {
 		if id := goblLineID(it); id != "" {
 			ids[id] = true
 		}
 	}
+	children := make(map[string][]*Line)
 	for _, it := range items {
 		if p := goblParentLineID(it); p != "" && ids[p] {
 			children[p] = append(children[p], it)
 		}
 	}
 
-	lines := make([]*bill.Line, 0, len(items))
-	srcs := make([]lineSource, 0, len(items))
-	seen := make(map[*Line]bool, len(items))
-	var addTree func(it *Line) error
-	addTree = func(it *Line) error {
-		if seen[it] {
-			return nil
-		}
-		seen[it] = true
-		l, err := goblNewLine(it, taxMap)
-		if err != nil {
-			return err
-		}
-		lines = append(lines, l)
-		srcs = append(srcs, lineSource{doc: it})
-		for _, c := range children[goblLineID(it)] {
-			if err := addTree(c); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
+	// Only a top-level line can take its sub-invoice lines as a breakdown,
+	// and each line is folded into one parent at most.
+	groups := make(map[*Line][]*Line)
+	folded := make(map[*Line]bool)
 	for _, it := range items {
 		if p := goblParentLineID(it); p != "" && ids[p] {
-			// Read along with its parent.
 			continue
 		}
 		id := goblLineID(it)
 		kids := children[id]
-		if len(kids) > 0 && !flat[id] && !seen[it] && !goblAnySeen(seen, kids) && goblCanFold(it, kids, taxMap) {
-			l, err := goblNewGroupLine(it, kids, taxMap)
-			if err != nil {
-				return nil, err
-			}
-			seen[it] = true
-			for _, k := range kids {
-				seen[k] = true
-			}
-			lines = append(lines, l)
-			srcs = append(srcs, lineSource{doc: it, children: kids})
+		if len(kids) == 0 || flat[id] || goblAnyFolded(folded, kids) || !goblCanFold(it, kids, taxMap) {
 			continue
 		}
-		if err := addTree(it); err != nil {
-			return nil, err
+		groups[it] = kids
+		for _, k := range kids {
+			folded[k] = true
 		}
 	}
 
-	// Lines whose parents never lead back to a top-level line, such as a
-	// cycle, are still read, flat.
+	lines := make([]*bill.Line, 0, len(items))
+	srcs := make([]lineSource, 0, len(items))
 	for _, it := range items {
-		if err := addTree(it); err != nil {
+		if folded[it] {
+			continue
+		}
+		var l *bill.Line
+		var err error
+		kids, ok := groups[it]
+		if ok {
+			l, err = goblNewGroupLine(it, kids, taxMap)
+		} else {
+			l, err = goblNewLine(it, taxMap)
+		}
+		if err != nil {
 			return nil, err
 		}
+		lines = append(lines, l)
+		srcs = append(srcs, lineSource{doc: it, children: kids})
 	}
 
 	out.Lines = lines
 	return srcs, nil
 }
 
-func goblAnySeen(seen map[*Line]bool, lines []*Line) bool {
+func goblAnyFolded(folded map[*Line]bool, lines []*Line) bool {
 	for _, l := range lines {
-		if seen[l] {
+		if folded[l] {
 			return true
 		}
 	}
@@ -149,11 +134,14 @@ func goblLineIsSummed(it *Line) bool {
 // of the parent, so each quantity, allowance and charge must divide evenly by
 // the parent's quantity, and their declared amounts must add up to the
 // parent's. Nested groups are read flat, as are a GROUP line's own allowances
-// and charges, which no total counts. A parent that counts itself can only
-// carry INFORMATION lines, which then describe it.
+// and charges, which no total counts. A parent that is not a GROUP must count
+// itself and can only carry INFORMATION lines, which then describe it.
 func goblCanFold(parent *Line, kids []*Line, taxMap map[string]*taxCategoryInfo) bool {
 	group := goblLineStatus(parent) == lineStatusGroup
 	if group && parent.TradeSettlement != nil && len(parent.TradeSettlement.AllowanceCharge) > 0 {
+		return false
+	}
+	if !group && !goblLineIsSummed(parent) {
 		return false
 	}
 	qty, ok := goblLineQuantity(parent)
@@ -166,6 +154,10 @@ func goblCanFold(parent *Line, kids []*Line, taxMap map[string]*taxCategoryInfo)
 	sum := num.AmountZero
 	for _, k := range kids {
 		if k.TradeSettlement == nil {
+			return false
+		}
+		q, ok := goblLineQuantity(k)
+		if !ok || !goblDividesBy(q, qty) {
 			return false
 		}
 		switch goblLineStatus(k) {
@@ -184,10 +176,6 @@ func goblCanFold(parent *Line, kids []*Line, taxMap map[string]*taxCategoryInfo)
 		}
 		taxKey = key
 
-		q, ok := goblLineQuantity(k)
-		if !ok || !goblDividesBy(q, qty) {
-			return false
-		}
 		for _, ac := range k.TradeSettlement.AllowanceCharge {
 			for _, v := range []string{ac.Amount, ac.Base} {
 				if a, ok := goblDeclaredAmount(v); ok && !goblDividesBy(a, qty) {

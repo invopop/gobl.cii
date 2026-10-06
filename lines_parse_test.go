@@ -166,7 +166,7 @@ func TestParseSubInvoiceLines(t *testing.T) {
 
 	// The first group mixes tax rates, which a breakdown cannot, so it is read
 	// flat with the GROUP line at a zero price.
-	names := []string{"Kit", "Part A", "Part B", "Service bundle", "Assembly instructions"}
+	names := []string{"Kit", itemPartA, itemPartB, "Service bundle", "Assembly instructions"}
 	totals := []string{rateZero, "100.00", "50.00", "20.00", rateZero}
 	for i, l := range inv.Lines {
 		assert.Equal(t, names[i], l.Item.Name)
@@ -222,7 +222,7 @@ func TestParseSubInvoiceLinesFlat(t *testing.T) {
 		{"Mismatch", rateZero, 0},
 		{"Part", "40.00", 0},
 		// INFORMATION lines describe a line that keeps its own price.
-		{"Safety kit", "450.00", 2},
+		{itemSafetyKit, "450.00", 2},
 	}
 	require.Len(t, inv.Lines, len(want))
 	for i, w := range want {
@@ -285,4 +285,70 @@ func TestParseSubInvoiceLinesCycle(t *testing.T) {
 	require.True(t, ok)
 	assert.Len(t, inv.Lines, 5)
 	assert.Equal(t, "170.00", inv.Totals.Sum.String())
+}
+
+// parseSubLinesXML parses a fixture after edit has changed its XML.
+func parseSubLinesXML(t *testing.T, name string, edit func(string) string) *bill.Invoice {
+	t.Helper()
+	data, err := os.ReadFile(dataPath(pathParse, name))
+	require.NoError(t, err)
+	e, err := cii.Parse([]byte(edit(string(data))))
+	require.NoError(t, err)
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	return inv
+}
+
+func lineNames(inv *bill.Invoice) []string {
+	names := make([]string, len(inv.Lines))
+	for i, l := range inv.Lines {
+		names[i] = l.Item.Name
+	}
+	return names
+}
+
+// TestParseSubInvoiceLinesOrder covers DETAIL lines ahead of a GROUP line that
+// cannot hold them as a breakdown: read flat, the lines keep their order.
+func TestParseSubInvoiceLinesOrder(t *testing.T) {
+	const item = "<ram:IncludedSupplyChainTradeLineItem>"
+	inv := parseSubLinesXML(t, "sub-invoice-lines.xml", func(xml string) string {
+		// Move the mixed-rate GROUP line after its two DETAIL lines.
+		parts := strings.Split(xml, item)
+		parts[1], parts[2], parts[3] = parts[2], parts[3], parts[1]
+		return strings.Join(parts, item)
+	})
+	assert.Equal(t, []string{itemPartA, itemPartB, "Kit", "Service bundle", "Assembly instructions"}, lineNames(inv))
+	assert.Equal(t, "170.00", inv.Totals.Sum.String())
+}
+
+// TestParseSubInvoiceLinesInformationParent covers INFORMATION lines under a
+// line that does not count itself: there is nothing for them to describe, so
+// they are read flat.
+func TestParseSubInvoiceLinesInformationParent(t *testing.T) {
+	inv := parseSubLinesXML(t, "sub-invoice-lines-flat.xml", func(xml string) string {
+		return strings.Replace(xml,
+			"<ram:LineID>5</ram:LineID><ram:LineStatusReasonCode>DETAIL",
+			"<ram:LineID>5</ram:LineID><ram:LineStatusReasonCode>INFORMATION", 1)
+	})
+	names := lineNames(inv)
+	require.Equal(t, []string{itemSafetyKit, itemHelmet, itemGoggles}, names[len(names)-3:])
+	assert.Empty(t, inv.Lines[len(inv.Lines)-3].Breakdown)
+}
+
+// TestParseSubInvoiceLinesInformationQuantity covers an INFORMATION line whose
+// quantity does not divide by its parent's: no breakdown can hold it.
+func TestParseSubInvoiceLinesInformationQuantity(t *testing.T) {
+	inv := parseSubLinesXML(t, "sub-invoice-lines-flat.xml", func(xml string) string {
+		return strings.Replace(xml,
+			`<ram:Name>Helmet</ram:Name></ram:SpecifiedTradeProduct>
+      <ram:SpecifiedLineTradeAgreement><ram:NetPriceProductTradePrice><ram:ChargeAmount>0.00</ram:ChargeAmount></ram:NetPriceProductTradePrice></ram:SpecifiedLineTradeAgreement>
+      <ram:SpecifiedLineTradeDelivery><ram:BilledQuantity unitCode="C62">10</ram:BilledQuantity>`,
+			`<ram:Name>Helmet</ram:Name></ram:SpecifiedTradeProduct>
+      <ram:SpecifiedLineTradeAgreement><ram:NetPriceProductTradePrice><ram:ChargeAmount>0.00</ram:ChargeAmount></ram:NetPriceProductTradePrice></ram:SpecifiedLineTradeAgreement>
+      <ram:SpecifiedLineTradeDelivery><ram:BilledQuantity unitCode="C62">3</ram:BilledQuantity>`, 1)
+	})
+	names := lineNames(inv)
+	require.Equal(t, []string{itemSafetyKit, itemHelmet, itemGoggles}, names[len(names)-3:])
+	assert.Empty(t, inv.Lines[len(inv.Lines)-3].Breakdown)
+	assert.Equal(t, "1170.00", inv.Totals.Sum.String())
 }
