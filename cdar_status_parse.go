@@ -148,18 +148,26 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 		}
 	}
 
+	var descriptions []string
 	for _, ds := range ref.SpecifiedDocumentStatuses {
 		if ds == nil {
 			continue
 		}
 		var r *bill.Reason
-		if ds.ReasonCode != "" {
+		desc := cdarReasonDescription(ds)
+		switch {
+		case ds.ReasonCode != "":
 			// Reason.Key is recovered from the ext by flow6's
 			// prepareReasonKey at normalize-time.
 			r = &bill.Reason{
 				Ext:         tax.MakeExtensions().Set(flow6.ExtKeyReason, cbc.Code(ds.ReasonCode)),
-				Description: cleanString(strings.Join(ds.Reason, "\n")),
+				Description: desc,
 			}
+		case desc != "":
+			// Free text with no code of its own cannot become a reason —
+			// BR-FR-CDV-CL-09 admits only the coded motives for the
+			// constrained statuses — so it explains the line instead.
+			descriptions = append(descriptions, desc)
 		}
 		// Field-level corrections and amount markers
 		// (SpecifiedDocumentCharacteristics: DIV/DVA/MAJ, MAP/MNA…)
@@ -192,7 +200,40 @@ func goblStatusLineFromCDAR(ref *CDARReferencedDocument) *bill.StatusLine {
 			line.Actions = append(line.Actions, a)
 		}
 	}
+	line.Description = strings.Join(descriptions, "\n")
 	return line
+}
+
+// cdarReasonDescription collects the free text a SpecifiedDocumentStatus
+// carries for its motive: the Reason labels (MDT-114) first, then any
+// IncludedNote content (MDT-126) that adds something the Reason did not
+// already say. PPF makes the note mandatory on a Refusée / Suspendue and
+// some platforms send the motive only there, so a rejection whose Reason
+// element is absent still arrives with its explanation.
+func cdarReasonDescription(ds *CDARDocumentStatus) string {
+	parts := make([]string, 0, len(ds.Reason)+len(ds.IncludedNotes))
+	seen := make(map[string]bool, cap(parts))
+	add := func(s string) {
+		s = cleanString(s)
+		key := strings.TrimSpace(s)
+		if key == "" || seen[key] {
+			return
+		}
+		seen[key] = true
+		parts = append(parts, s)
+	}
+	for _, reason := range ds.Reason {
+		add(reason)
+	}
+	for _, n := range ds.IncludedNotes {
+		if n == nil {
+			continue
+		}
+		for _, c := range n.Content {
+			add(c)
+		}
+	}
+	return strings.Join(parts, "\n")
 }
 
 // goblFaultFromCDAR maps a SpecifiedDocumentCharacteristic onto a

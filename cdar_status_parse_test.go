@@ -7,6 +7,7 @@ import (
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
+	"github.com/invopop/gobl.fr.ctc/addon/flow6"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
@@ -77,4 +78,28 @@ func TestParseCDARStatusReferencedSIREN(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "GOBL-FR-CTC-FLOW6-BILL-STATUS-06")
 	})
+}
+
+// MDT-126 carries the free-text motive as
+// SpecifiedDocumentStatus/IncludedNote/Content, which PPF makes mandatory on a
+// Refusée / Suspendue. A platform may send it instead of the ram:Reason label
+// (MDT-114), so the note has to reach the reason's description — with or
+// without a ReasonCode beside it.
+func TestParseCDARStatusIncludedNote(t *testing.T) {
+	st := parseStatusFixture(t, "cdv-210-note-only-reason.xml")
+
+	require.Len(t, st.Lines, 1)
+	reasons := st.Lines[0].Reasons
+	require.Len(t, reasons, 1)
+
+	assert.Equal(t, "DOUBLON", reasons[0].Ext.Get(flow6.ExtKeyReason).String())
+	assert.Equal(t, "Facture déjà reçue le 12/08/2026 sous la référence F202500001", reasons[0].Description)
+
+	// A note with no ReasonCode of its own explains the line: inventing a
+	// coded reason for it would break BR-FR-CDV-CL-09 on a 210.
+	assert.Equal(t, "Merci de ne pas réémettre cette facture", st.Lines[0].Description)
+
+	env, err := gobl.Envelop(st)
+	require.NoError(t, err)
+	require.NoError(t, env.Validate())
 }

@@ -151,6 +151,9 @@ flow6.StatusKeyFor("212")                     // → "paid", "response", true
 | `TypeCode` (MDT-91) | `Doc.Type` | UNTDID 1001 invoice type |
 | `ReceiptDateTime` | not currently mapped | |
 | `SpecifiedDocumentStatus[]` | one entry per `(Reason × Action)` pair, then characteristic-only entries | See §5 |
+| `SpecifiedDocumentStatus/ReasonCode` (MDT-113) | `Reasons[].ext[fr-ctc-flow6-reason]` | |
+| `SpecifiedDocumentStatus/Reason` (MDT-114) | `Reasons[].Description` | |
+| `SpecifiedDocumentStatus/IncludedNote/Content` (MDT-126) | `Reasons[].Description`, or `Description` when the entry has no `ReasonCode` | The free-text motive PPF makes mandatory on a Refusée / Suspendue. The writer emits it alongside MDT-114; the parser merges the two and drops the repetition. A note without a code cannot become a reason (BR-FR-CDV-CL-09 admits only the coded motives), so it explains the line. |
 
 ### Status-required Reasons (BR-FR-CDV-15)
 
