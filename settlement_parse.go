@@ -70,7 +70,7 @@ func goblNewPaymentDetails(stlm *Settlement, ctx *Context) (*bill.PaymentDetails
 			}
 			pymt.Advances = append(pymt.Advances, a)
 		}
-	} else if stlm.Summary.TotalPrepaidAmount != "" {
+	} else if stlm.Summary != nil && stlm.Summary.TotalPrepaidAmount != "" {
 		// Fake an advanced payment so the totals will be re-calculated correctly
 		amt, err := num.AmountFromString(stlm.Summary.TotalPrepaidAmount)
 		if err != nil {
