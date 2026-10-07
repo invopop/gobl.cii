@@ -29,18 +29,18 @@ func TestNewHeader(t *testing.T) {
 		env := loadEnvelope(t, "en16931/invoice-de-de.json")
 		inv := env.Extract().(*bill.Invoice)
 
-		out, err := cii.ConvertInvoice(env)
+		out, err := cii.ExportInvoice(env)
 		assert.NoError(t, err)
 		assert.Equal(t, "380", out.ExchangedDocument.TypeCode)
 
 		inv.Tax = nil
-		_, err = cii.ConvertInvoice(env)
+		_, err = cii.ExportInvoice(env)
 		assert.ErrorContains(t, err, "tax: (ext: (untdid-document-type: required.).).")
 
 		inv.Tax = &bill.Tax{
 			Ext: tax.ExtensionsOf(cbc.CodeMap{}),
 		}
-		_, err = cii.ConvertInvoice(env)
+		_, err = cii.ExportInvoice(env)
 		assert.ErrorContains(t, err, "ext: (untdid-document-type: required.).")
 	})
 
@@ -71,7 +71,7 @@ func TestNewHeader(t *testing.T) {
 			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code("AAI")}),
 		})
 
-		doc, err := cii.ConvertInvoice(env)
+		doc, err := cii.ExportInvoice(env)
 		require.NoError(t, err)
 
 		var found bool

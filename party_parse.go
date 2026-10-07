@@ -8,6 +8,12 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
+// ParseParty converts the CII trade party into a GOBL party, without any
+// format specific adjustments.
+func ParseParty(party *Party) *org.Party {
+	return goblNewParty(party)
+}
+
 func goblNewParty(party *Party) *org.Party {
 	p := &org.Party{
 		Name: cleanString(party.Name),

@@ -201,3 +201,32 @@ func TestGoblLineSettlement(t *testing.T) {
 		assert.Empty(t, l.Cost.String())
 	})
 }
+
+func TestLineParseDefensive(t *testing.T) {
+	bare := &Line{}
+	assert.Empty(t, goblLineID(bare))
+	assert.Empty(t, goblParentLineID(bare))
+	assert.Empty(t, goblLineStatus(bare))
+
+	qty := &LineDelivery{Quantity: &Quantity{Amount: "1"}}
+	group := func() *Line {
+		return &Line{
+			LineDoc:         &LineDoc{ID: "1", LineStatusReasonCode: lineStatusGroup},
+			Quantity:        qty,
+			TradeSettlement: &TradeSettlement{},
+		}
+	}
+
+	withAllowance := group()
+	withAllowance.TradeSettlement.AllowanceCharge = []*AllowanceCharge{{Amount: "1.00"}}
+	assert.False(t, goblCanFold(withAllowance, nil, nil), "group with allowances")
+
+	information := &Line{LineDoc: &LineDoc{ID: "1", LineStatusReasonCode: lineStatusInformation}}
+	assert.False(t, goblCanFold(information, nil, nil), "parent not summed")
+
+	noQuantity := group()
+	noQuantity.Quantity = nil
+	assert.False(t, goblCanFold(noQuantity, nil, nil), "parent without quantity")
+
+	assert.False(t, goblCanFold(group(), []*Line{{Quantity: qty}}, nil), "child without settlement")
+}

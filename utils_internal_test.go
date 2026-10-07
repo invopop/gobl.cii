@@ -146,39 +146,32 @@ func TestExtractRootNamespace(t *testing.T) {
 	})
 }
 
-func TestWithSenderTradeParty(t *testing.T) {
-	party := &org.Party{Name: "Platform"}
-	o := &options{}
-	WithSenderTradeParty(party)(o)
-	assert.Same(t, party, o.sender)
-}
-
-func TestUnmarshal(t *testing.T) {
+func TestDecode(t *testing.T) {
 	t.Run("an unknown namespace is not a document we handle", func(t *testing.T) {
-		_, err := Unmarshal([]byte(`<x:Root xmlns:x="urn:not:ours"/>`))
+		_, err := Decode([]byte(`<x:Root xmlns:x="urn:not:ours"/>`))
 		assert.ErrorIs(t, err, ErrUnknownDocumentType)
 	})
 
 	t.Run("a document with no root element", func(t *testing.T) {
-		_, err := Unmarshal([]byte(`<?xml version="1.0"?>`))
+		_, err := Decode([]byte(`<?xml version="1.0"?>`))
 		assert.ErrorIs(t, err, ErrUnknownDocumentType)
 	})
 
 	t.Run("malformed XML before the root element is an error", func(t *testing.T) {
-		_, err := Unmarshal([]byte(`<!-- unterminated`))
+		_, err := Decode([]byte(`<!-- unterminated`))
 		require.Error(t, err)
 		assert.NotErrorIs(t, err, ErrUnknownDocumentType)
 	})
 
 	t.Run("a CII invoice namespace yields an Invoice", func(t *testing.T) {
-		doc, err := Unmarshal([]byte(
+		doc, err := Decode([]byte(
 			`<rsm:CrossIndustryInvoice xmlns:rsm="` + NamespaceRSM + `"/>`))
 		require.NoError(t, err)
 		assert.IsType(t, &Invoice{}, doc)
 	})
 
 	t.Run("a CDAR namespace yields a CDAR", func(t *testing.T) {
-		doc, err := Unmarshal([]byte(
+		doc, err := Decode([]byte(
 			`<rsm:CrossIndustryDocumentAcknowledgement xmlns:rsm="` + NamespaceCDARRSM + `"/>`))
 		require.NoError(t, err)
 		assert.IsType(t, &CDAR{}, doc)
@@ -208,12 +201,12 @@ func TestNewDeliveryParty(t *testing.T) {
 	})
 }
 
-func TestUnmarshalInvoiceRejectsMalformedXML(t *testing.T) {
-	_, err := UnmarshalInvoice([]byte(`<rsm:CrossIndustryInvoice`))
+func TestDecodeInvoiceRejectsMalformedXML(t *testing.T) {
+	_, err := decodeInvoice([]byte(`<rsm:CrossIndustryInvoice`))
 	assert.Error(t, err)
 }
 
-func TestUnmarshalCDARRejectsMalformedXML(t *testing.T) {
-	_, err := UnmarshalCDAR([]byte(`<rsm:CrossIndustryDocumentAcknowledgement`))
+func TestDecodeCDARRejectsMalformedXML(t *testing.T) {
+	_, err := decodeCDAR([]byte(`<rsm:CrossIndustryDocumentAcknowledgement`))
 	assert.Error(t, err)
 }
