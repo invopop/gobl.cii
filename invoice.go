@@ -3,13 +3,8 @@ package cii
 import (
 	"encoding/xml"
 	"fmt"
-	"slices"
 
-	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
-	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/xmlctx"
 )
 
@@ -58,23 +53,8 @@ type Note struct {
 	SubjectCode string `xml:"ram:SubjectCode,omitempty"`
 }
 
-// ConvertInvoice is a convenience function that converts a GOBL envelope
-// containing an invoice into a CII Invoice.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
-	if err != nil {
-		return nil, err
-	}
-	inv, ok := doc.(*Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected invoice, got %T", doc)
-	}
-	return inv, nil
-}
-
-// UnmarshalInvoice unmarshals CII invoice XML into an Invoice struct
-// without converting to GOBL.
-func UnmarshalInvoice(data []byte) (*Invoice, error) {
+// decodeInvoice unmarshals CII invoice XML into an Invoice struct.
+func decodeInvoice(data []byte) (*Invoice, error) {
 	inv := new(Invoice)
 	if err := xmlctx.Unmarshal(data, inv, xmlctx.WithNamespaces(
 		map[string]string{
@@ -89,20 +69,28 @@ func UnmarshalInvoice(data []byte) (*Invoice, error) {
 	return inv, nil
 }
 
-func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
-	// Determine GuidelineID to use in output
-	guidelineID := extractGuidelineID(inv, context)
-	if context.OutputGuidelineID != "" {
-		guidelineID = context.OutputGuidelineID
-	}
-
-	// Determine BusinessID to use in output
-	businessID := context.BusinessID
-	if context.Is(ContextPeppolFranceCIUSV1) || context.Is(ContextPeppolFranceFacturXV1) || context.Is(ContextPeppolFranceExtendedV1) {
-		if profile := inv.Tax.GetExt(dgfip.ExtKeyBillingMode); profile != cbc.CodeEmpty {
-			businessID = profile.String()
+// contextIDs provides the guideline (BT-24) and business process (BT-23) IDs
+// the invoice declares.
+func (out *Invoice) contextIDs() (string, string) {
+	var guidelineID, businessID string
+	if ec := out.ExchangedContext; ec != nil {
+		if ec.GuidelineContext != nil {
+			guidelineID = ec.GuidelineContext.ID
+		}
+		if ec.BusinessContext != nil {
+			businessID = ec.BusinessContext.ID
 		}
 	}
+	return guidelineID, businessID
+}
+
+func newInvoice(inv *bill.Invoice, f Format) (*Invoice, error) {
+	// Determine GuidelineID to use in output
+	guidelineID := f.GuidelineID
+	if f.OutputGuidelineID != "" {
+		guidelineID = f.OutputGuidelineID
+	}
+	businessID := f.BusinessID
 
 	out := &Invoice{
 		RSMNamespace: NamespaceRSM,
@@ -121,7 +109,7 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 		return nil, err
 	}
 
-	if err := out.addTransaction(inv, context); err != nil {
+	if err := out.addTransaction(inv); err != nil {
 		return nil, err
 	}
 
@@ -129,34 +117,22 @@ func newInvoice(inv *bill.Invoice, context Context) (*Invoice, error) {
 }
 
 // addTransaction adds the transaction part of a EN 16931 compliant invoice
-func (out *Invoice) addTransaction(inv *bill.Invoice, ctx Context) error {
+func (out *Invoice) addTransaction(inv *bill.Invoice) error {
 	out.Transaction = new(Transaction)
 
-	if err := out.addLines(inv, ctx); err != nil {
+	if err := out.addLines(inv); err != nil {
 		return err
 	}
-	if err := out.addAgreement(inv, ctx); err != nil {
+	if err := out.addAgreement(inv); err != nil {
 		return err
 	}
 	if len(inv.Attachments) > 0 {
 		out.addAttachments(inv)
 	}
 	var err error
-	if out.Transaction.Settlement, err = newSettlement(inv, ctx); err != nil {
+	if out.Transaction.Settlement, err = newSettlement(inv); err != nil {
 		return err
 	}
 	out.Transaction.Delivery = newDelivery(inv)
 	return nil
-}
-
-func extractGuidelineID(inv *bill.Invoice, context Context) string {
-	guidelineID := context.GuidelineID
-
-	// For Chorus Pro, we need to extract the guideline ID from the tax extension
-	if slices.Contains(context.Addons, choruspro.V1) {
-		if inv != nil && inv.Tax != nil && inv.Tax.Ext.Has(choruspro.ExtKeyFramework) {
-			guidelineID = inv.Tax.Ext.Get(choruspro.ExtKeyFramework).String()
-		}
-	}
-	return guidelineID
 }

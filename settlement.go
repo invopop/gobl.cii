@@ -116,27 +116,6 @@ type TaxTotalAmount struct {
 	Currency string `xml:"currencyID,attr"`
 }
 
-// addFrenchExtendedParties fills the settlement parties only the French
-// extended profile defines: the party the invoice is addressed to
-// (EXT-FR-FE-BG-04) and the payer (EXT-FR-FE-BG-02). It also pins the UNCL
-// 3035 role codes the profile fixes for the facturant (EXT-FR-FE-113) and the
-// addressee (EXT-FR-FE-90).
-func (stlm *Settlement) addFrenchExtendedParties(inv *bill.Invoice, ctx Context) {
-	if !isFranceExtended(&ctx) {
-		return
-	}
-	if stlm.Invoicer != nil {
-		stlm.Invoicer.RoleCode = partyRoleInvoicer
-	}
-	if inv.Ordering != nil && inv.Ordering.Buyer != nil {
-		stlm.Invoicee = newParty(inv.Ordering.Buyer, ctx)
-		stlm.Invoicee.RoleCode = partyRoleInvoicee
-	}
-	if inv.Payment != nil && inv.Payment.Payer != nil {
-		stlm.Payer = newParty(inv.Payment.Payer, ctx)
-	}
-}
-
 // taxPointCIICodeMap maps GOBL tax point keys to UNTDID 2475 codes for CII.
 var taxPointCIICodeMap = map[cbc.Key]string{
 	tax.PointIssue:    "5",
@@ -152,7 +131,7 @@ var taxPointCIIKeyMap = map[string]cbc.Key{
 }
 
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
-func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
+func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	stlm := &Settlement{
 		Currency: string(inv.Currency),
 	}
@@ -195,10 +174,9 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		}
 		stlm.ReferencedDocument = []*ReferencedDocument{rd}
 	}
-	// EXT-FR-FE-BG-05: the facturant, the service facturier raising the
-	// invoice on the seller's behalf.
+	// The issuer raising the invoice on the seller's behalf.
 	if inv.Ordering != nil && inv.Ordering.Issuer != nil {
-		stlm.Invoicer = newParty(inv.Ordering.Issuer, ctx)
+		stlm.Invoicer = newParty(inv.Ordering.Issuer)
 	}
 	// BT-19: Buyer accounting reference
 	if inv.Ordering != nil && inv.Ordering.Cost != "" {
@@ -207,10 +185,8 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		}
 	}
 	if inv.Payment != nil && inv.Payment.Payee != nil {
-		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
+		stlm.Payee = newPayee(inv.Payment.Payee)
 	}
-
-	stlm.addFrenchExtendedParties(inv, ctx)
 
 	// BG-14 is the period the invoice refers to, which GOBL keeps in
 	// Ordering.Period; Delivery.Period is when to expect delivery.
@@ -412,10 +388,10 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	return t
 }
 
-func newPayee(party *org.Party, ctx Context) *Party {
+func newPayee(party *org.Party) *Party {
 	// Reflects rules from CII-SR-352 to 364 and CII-SR-364
 	// These rules are warnings but have been added as they produce cleaner invoices
-	p := newParty(party, ctx)
+	p := newParty(party)
 	payee := &Party{
 		Name: p.Name,
 	}

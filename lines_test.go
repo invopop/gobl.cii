@@ -50,17 +50,17 @@ func TestLineNoteSubjectCodeRoundTrip(t *testing.T) {
 		},
 	}
 
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotEmpty(t, doc.Transaction.Lines[0].LineDoc.Note)
 	assert.Equal(t, "Handle with care", doc.Transaction.Lines[0].LineDoc.Note[0].Content)
 	assert.Equal(t, "AAI", doc.Transaction.Lines[0].LineDoc.Note[0].SubjectCode)
 
-	data, err := doc.Bytes()
+	data, err := cii.Encode(doc)
 	require.NoError(t, err)
 
-	outEnv, err := cii.Parse(data)
+	outEnv, err := parseCII(data)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -83,7 +83,7 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	chars := doc.Transaction.Lines[0].Product.Characteristics
@@ -97,10 +97,10 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	assert.Equal(t, "2.5 kg", chars[1].Value)
 	assert.Nil(t, chars[1].ValueMeasure)
 
-	data, err := doc.Bytes()
+	data, err := cii.Encode(doc)
 	require.NoError(t, err)
 
-	outEnv, err := cii.Parse(data)
+	outEnv, err := parseCII(data)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -120,7 +120,7 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 // writes one.
 func TestItemAttributeMeasureParse(t *testing.T) {
 	env := loadEnvelope(t, "facturx/invoice-minimal.json")
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	doc.Transaction.Lines[0].Product.Characteristics = []*cii.Characteristic{
@@ -130,10 +130,10 @@ func TestItemAttributeMeasureParse(t *testing.T) {
 			Value:        "2.5 kg",
 		},
 	}
-	data, err := doc.Bytes()
+	data, err := cii.Encode(doc)
 	require.NoError(t, err)
 
-	outEnv, err := cii.Parse(data)
+	outEnv, err := parseCII(data)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -164,7 +164,7 @@ func TestItemAttributeUnmappedUnit(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	chars := doc.Transaction.Lines[0].Product.Characteristics
@@ -186,7 +186,7 @@ func TestItemAttributeUnitWithoutUNTDID(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	chars := doc.Transaction.Lines[0].Product.Characteristics
@@ -206,7 +206,7 @@ func TestItemAttributeKeyName(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	chars := doc.Transaction.Lines[0].Product.Characteristics
@@ -228,7 +228,7 @@ func TestLineSellerRoundTrip(t *testing.T) {
 		},
 	}
 
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	seller := doc.Transaction.Lines[0].Agreement.ItemSellerParty
@@ -237,10 +237,10 @@ func TestLineSellerRoundTrip(t *testing.T) {
 	assert.Equal(t, "0088", seller.GlobalID[0].SchemeID)
 	assert.Equal(t, "1234567890128", seller.GlobalID[0].Value)
 
-	data, err := doc.Bytes()
+	data, err := cii.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := cii.Parse(data)
+	parsed, err := parseCII(data)
 	require.NoError(t, err)
 	parsedInv, ok := parsed.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -292,9 +292,23 @@ func breakdownEnvelope(t *testing.T, fixture string) *gobl.Envelope {
 	return env
 }
 
+// formatSubLines is a test format that writes line breakdowns as
+// sub-lines, as the EXTENDED profiles do.
+var formatSubLines = func() cii.Format {
+	f := cii.FormatEN16931
+	f.Key = "cii+sub-lines-test"
+	f.ExportFuncs = []cii.ExportFunc{
+		func(_ *cii.Format, env *gobl.Envelope, doc cii.Document) error {
+			cii.ExpandGroupLines(env.Extract().(*bill.Invoice), doc.(*cii.Invoice))
+			return nil
+		},
+	}
+	return f
+}()
+
 func TestSubLinesConvert(t *testing.T) {
 	t.Run("extended profile writes sub-invoice lines", func(t *testing.T) {
-		doc, err := cii.ConvertInvoice(breakdownEnvelope(t, fixtureFacturXDE), cii.WithContext(cii.ContextFacturXExtendedV1))
+		doc, err := cii.ExportInvoice(breakdownEnvelope(t, fixtureFacturXDE), cii.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		lines := doc.Transaction.Lines
 		require.Len(t, lines, 4)
@@ -335,7 +349,7 @@ func TestSubLinesConvert(t *testing.T) {
 	})
 
 	t.Run("other profiles write the line alone", func(t *testing.T) {
-		doc, err := cii.ConvertInvoice(breakdownEnvelope(t, "en16931/invoice-de-de.json"))
+		doc, err := cii.ExportInvoice(breakdownEnvelope(t, "en16931/invoice-de-de.json"))
 		require.NoError(t, err)
 		require.Len(t, doc.Transaction.Lines, 1)
 		assert.Empty(t, doc.Transaction.Lines[0].LineDoc.LineStatusReasonCode)
@@ -349,7 +363,7 @@ func TestSubLinesConvert(t *testing.T) {
 		inv.Lines[0].Discounts = []*bill.LineDiscount{{Amount: num.MakeAmount(1000, 2), Reason: "Loyalty"}}
 		require.NoError(t, env.Calculate())
 
-		doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXExtendedV1))
+		doc, err := cii.ExportInvoice(env, cii.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		require.Len(t, doc.Transaction.Lines, 1)
 	})
@@ -369,7 +383,7 @@ func TestSubLinesConvert(t *testing.T) {
 		}
 		require.NoError(t, env.Calculate())
 
-		doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXExtendedV1))
+		doc, err := cii.ExportInvoice(env, cii.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		require.Len(t, doc.Transaction.Lines, 1)
 		assert.Empty(t, doc.Transaction.Lines[0].LineDoc.LineStatusReasonCode)
@@ -385,7 +399,7 @@ func TestSubLinesConvert(t *testing.T) {
 		}
 		require.NoError(t, env.Calculate())
 
-		doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextFacturXExtendedV1))
+		doc, err := cii.ExportInvoice(env, cii.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		lines := doc.Transaction.Lines
 		require.Len(t, lines, 2)
@@ -402,20 +416,14 @@ func TestSubLinesRoundTrip(t *testing.T) {
 	tests := []struct {
 		name    string
 		env     func(t *testing.T) *gobl.Envelope
-		context cii.Context
+		context cii.Format
 	}{
-		{"invoice-hierarchy", func(t *testing.T) *gobl.Envelope {
-			return loadEnvelope(t, "peppol-france-facturx/invoice-hierarchy.json")
-		}, cii.ContextPeppolFranceFacturXV1},
-		{"invoice-sub-lines", func(t *testing.T) *gobl.Envelope {
-			return loadEnvelope(t, "peppol-france-extended/invoice-sub-lines.json")
-		}, cii.ContextPeppolFranceExtendedV1},
 		{"facturx-extended", func(t *testing.T) *gobl.Envelope {
 			return breakdownEnvelope(t, fixtureFacturXDE)
-		}, cii.ContextFacturXExtendedV1},
+		}, formatSubLines},
 		{"zugferd-extended", func(t *testing.T) *gobl.Envelope {
 			return breakdownEnvelope(t, "zugferd/standard-invoice.json")
-		}, cii.ContextZUGFeRDExtendedV2},
+		}, formatSubLines},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -423,12 +431,12 @@ func TestSubLinesRoundTrip(t *testing.T) {
 			inv, ok := env.Extract().(*bill.Invoice)
 			require.True(t, ok)
 
-			doc, err := cii.ConvertInvoice(env, cii.WithContext(tt.context))
+			doc, err := cii.ExportInvoice(env, cii.WithFormat(tt.context))
 			require.NoError(t, err)
-			data, err := doc.Bytes()
+			data, err := cii.Encode(doc)
 			require.NoError(t, err)
 
-			parsed, err := cii.Parse(data)
+			parsed, err := parseCII(data)
 			require.NoError(t, err)
 			out, ok := parsed.Extract().(*bill.Invoice)
 			require.True(t, ok)

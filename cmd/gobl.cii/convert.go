@@ -7,12 +7,13 @@ import (
 
 	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
+	"github.com/invopop/gobl/cbc"
 	"github.com/spf13/cobra"
 )
 
 type convertOpts struct {
 	*rootOpts
-	context string
+	format string
 }
 
 func convert(o *rootOpts) *convertOpts {
@@ -26,7 +27,7 @@ func (c *convertOpts) cmd() *cobra.Command {
 		RunE:  c.runE,
 	}
 
-	cmd.Flags().StringVar(&c.context, "context", "en16931", "Output format (en16931, facturx, xrechnung, peppol, choruspro, zugferd)")
+	cmd.Flags().StringVar(&c.format, "format", cii.FormatEN16931.Key.String(), "Output format key, e.g. cii+en16931 or cii+peppol")
 
 	return cmd
 }
@@ -36,23 +37,9 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("expected one or two arguments, the command usage is `gobl.cii convert <infile> [outfile]`")
 	}
 
-	// Get the context based on the format
-	var ctx cii.Context
-	switch c.context {
-	case "facturx":
-		ctx = cii.ContextFacturXV1
-	case "zugferd":
-		ctx = cii.ContextZUGFeRDV2
-	case "xrechnung":
-		ctx = cii.ContextXRechnungV3
-	case "peppol":
-		ctx = cii.ContextPeppolV3
-	case "en16931":
-		ctx = cii.ContextEN16931V2017
-	case "choruspro":
-		ctx = cii.ContextChorusProV1
-	default:
-		return fmt.Errorf("unsupported context: %s", c.context)
+	f := cii.FormatFor(cbc.Key(c.format))
+	if f == nil {
+		return fmt.Errorf("unsupported format: %s", c.format)
 	}
 
 	input, err := openInput(cmd, args)
@@ -83,20 +70,23 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
 		}
 
-		// Convert using the selected format's context
-		doc, err := cii.ConvertInvoice(env, cii.WithContext(ctx))
+		doc, err := cii.Export(env, cii.WithFormat(*f))
 		if err != nil {
-			return fmt.Errorf("building %s document: %w", c.context, err)
+			return fmt.Errorf("building %s document: %w", c.format, err)
 		}
 
-		outputData, err = doc.Bytes()
+		outputData, err = cii.Encode(doc)
 		if err != nil {
-			return fmt.Errorf("generating %s xml: %w", c.context, err)
+			return fmt.Errorf("generating %s xml: %w", c.format, err)
 		}
 
 	} else {
 		// Assume XML if not JSON
-		env, err := cii.Parse(inData)
+		doc, err := cii.Decode(inData)
+		if err != nil {
+			return fmt.Errorf("converting CII to GOBL: %w", err)
+		}
+		env, err := cii.Import(doc)
 		if err != nil {
 			return fmt.Errorf("converting CII to GOBL: %w", err)
 		}
