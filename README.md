@@ -68,8 +68,8 @@ This package provides the base CII import and export, and the formats that apply
 
 | Key | Format |
 | --- | --- |
-| `cii+en16931` | `FormatEN16931` |
-| `cii+peppol` | `FormatPeppol` |
+| `cii+en16931-v2017` | `FormatEN16931` |
+| `cii+peppol+bis-v3` | `FormatPeppol` (Peppol BIS Billing 3.0) |
 
 CII invoices that declare no known specification are imported under the `cii` key, but cannot be exported.
 
@@ -143,7 +143,7 @@ gobl.cii convert <input> <output> [--format <key>]
 The tool automatically detects the input file type (JSON/XML) and performs the appropriate conversion. Optionally specify the key of the export format:
 
 ```bash
-gobl.cii convert invoice.json invoice.xml --format cii+peppol
+gobl.cii convert invoice.json invoice.xml --format cii+peppol+bis-v3
 ```
 
 ## Testing

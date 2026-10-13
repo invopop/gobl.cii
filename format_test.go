@@ -15,7 +15,7 @@ import (
 // document uses.
 var (
 	formatTestMatch = cii.Format{
-		Key:         "cii+en16931+test-match",
+		Key:         "cii+en16931-v2017+test-match",
 		Name:        i18n.NewString("CII Test Match"),
 		Schemas:     cii.FormatEN16931.Schemas,
 		GuidelineID: "urn:test:match",
@@ -25,7 +25,7 @@ var (
 		},
 	}
 	formatTestOutput = cii.Format{
-		Key:               "cii+en16931+test-output",
+		Key:               "cii+en16931-v2017+test-output",
 		Name:              i18n.NewString("CII Test Output"),
 		Schemas:           cii.FormatEN16931.Schemas,
 		GuidelineID:       "urn:test:output-in",
@@ -33,7 +33,7 @@ var (
 		Addons:            cii.FormatEN16931.Addons,
 	}
 	formatTestFallback = cii.Format{
-		Key:         "cii+en16931+test-fallback",
+		Key:         "cii+en16931-v2017+test-fallback",
 		Name:        i18n.NewString("CII Test Fallback"),
 		Schemas:     cii.FormatEN16931.Schemas,
 		GuidelineID: "urn:test:fallback",
@@ -78,7 +78,7 @@ func TestFindFormat(t *testing.T) {
 }
 
 func TestFormatFor(t *testing.T) {
-	f := cii.FormatFor("cii+peppol")
+	f := cii.FormatFor("cii+peppol+bis-v3")
 	require.NotNil(t, f)
 	assert.Equal(t, cii.FormatPeppol.GuidelineID, f.GuidelineID)
 	assert.Nil(t, cii.FormatFor("cii+unknown"))

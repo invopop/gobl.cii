@@ -27,7 +27,7 @@ func (c *convertOpts) cmd() *cobra.Command {
 		RunE:  c.runE,
 	}
 
-	cmd.Flags().StringVar(&c.format, "format", cii.FormatEN16931.Key.String(), "Output format key, e.g. cii+en16931 or cii+peppol")
+	cmd.Flags().StringVar(&c.format, "format", cii.FormatEN16931.Key.String(), "Output format key, e.g. cii+en16931-v2017 or cii+peppol+bis-v3")
 
 	return cmd
 }

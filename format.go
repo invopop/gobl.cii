@@ -31,7 +31,7 @@ const (
 // for the specification it represents.
 type Format struct {
 	// Key identifies the format in the GOBL convert register, with one layer
-	// for each specification it builds on, e.g. "cii+peppol".
+	// for each specification it builds on, e.g. "cii+peppol+bis-v3".
 	Key cbc.Key
 	// Name of the format.
 	Name i18n.String
@@ -74,8 +74,8 @@ func (f *Format) Is(f2 Format) bool {
 
 // FormatEN16931 is used for EN 16931 documents, and is the default.
 var FormatEN16931 = Format{
-	Key:         "cii+en16931",
-	Name:        i18n.NewString("CII EN 16931"),
+	Key:         "cii+en16931-v2017",
+	Name:        i18n.NewString("CII EN 16931:2017"),
 	Schemas:     []schema.ID{invoiceSchema},
 	GuidelineID: GuidelineIDEN16931,
 	Version:     VersionD16B,
@@ -85,7 +85,7 @@ var FormatEN16931 = Format{
 
 // FormatPeppol for Peppol Billing V3.0.
 var FormatPeppol = Format{
-	Key:         "cii+peppol",
+	Key:         "cii+peppol+bis-v3",
 	Name:        i18n.NewString("CII Peppol BIS Billing 3"),
 	Schemas:     []schema.ID{invoiceSchema},
 	GuidelineID: GuidelineIDEN16931 + "#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",

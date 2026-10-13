@@ -36,7 +36,7 @@ func TestConvertCommand(t *testing.T) {
 	})
 
 	t.Run("with format", func(t *testing.T) {
-		out := runConvert(t, testJSON, "--format", "cii+peppol")
+		out := runConvert(t, testJSON, "--format", "cii+peppol+bis-v3")
 		assert.Contains(t, out, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0")
 	})
 }
@@ -63,7 +63,7 @@ func TestConvertCommandErrors(t *testing.T) {
 		"unknown format":  {args: []string{cmdConvert, "-", "--format", "cii+unknown"}, err: "unsupported format"},
 		"missing file":    {args: []string{cmdConvert, "does-not-exist.xml"}, err: "no such file"},
 		"not an envelope": {args: []string{cmdConvert, "-"}, stdin: `{"head":1}`, err: "parsing input as GOBL Envelope"},
-		"no document":     {args: []string{cmdConvert, "-"}, stdin: `{}`, err: "building cii+en16931 document"},
+		"no document":     {args: []string{cmdConvert, "-"}, stdin: `{}`, err: "building cii+en16931-v2017 document"},
 		"not cii":         {args: []string{cmdConvert, "-"}, stdin: `<Foo/>`, err: "converting CII to GOBL"},
 		"CDAR": {
 			args:  []string{cmdConvert, "-"},

@@ -85,7 +85,7 @@ func TestExport(t *testing.T) {
 		out, err := cii.ExportInvoice(env, cii.WithFormat(f))
 		require.NoError(t, err)
 		assert.Equal(t, []string{"first", "second"}, calls)
-		assert.Equal(t, "cii+en16931", out.ExchangedContext.GuidelineContext.ID)
+		assert.Equal(t, "cii+en16931-v2017", out.ExchangedContext.GuidelineContext.ID)
 	})
 
 	t.Run("export function error", func(t *testing.T) {
