@@ -79,14 +79,14 @@ Regional formats live in their own modules, which register them with `cii.Regist
 
 | Key | Module |
 | --- | --- |
-| `cii+peppol+fr-cius-v1`, `cii+peppol+fr-extended-v1`, `cii+peppol+fr-facturx-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
+| `cii+fr-ctc-cius-v1`, `cii+fr-ctc-extended-v1`, `cii+fr-ctc-facturx-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
 | `cii+fr-facturx-v1`, `cii+fr-facturx-v1+basic`, `cii+fr-facturx-v1+extended` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
 | `cii+fr-choruspro-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
 | `cii+de-xrechnung-v3`, `cii+de-zugferd-v2`, `cii+de-zugferd-v2+basic`, `cii+de-zugferd-v2+extended` | [gobl.de.xinvoice](https://github.com/invopop/gobl.de.xinvoice) |
 
 #### CDAR
 
-`Decode` and `Encode` also handle UN/CEFACT Cross Domain Acknowledgement and Response (CDAR) documents, as a `*CDAR`. Their mapping to GOBL is specific to each specification, so it lives in the regional modules: the French CTC Flow 6 lifecycle statuses and payments are in [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cdar"`), under the `cdar+peppol+fr-cdv-v1` and `cdar+fr-ppf-cdv-v1` keys.
+`Decode` and `Encode` also handle UN/CEFACT Cross Domain Acknowledgement and Response (CDAR) documents, as a `*CDAR`. Their mapping to GOBL is specific to each specification, so it lives in the regional modules: the French CTC Flow 6 lifecycle statuses and payments are in [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cdar"`), under the `cdar+fr-ctc-cdv-v1` and `cdar+fr-ctc-cdv-v1+ppf` keys.
 
 #### Import CII to GOBL
 
