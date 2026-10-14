@@ -215,7 +215,7 @@ func goblNewDirectDebit(stlm *Settlement) *pay.DirectDebit {
 	// BT-89: Direct debit mandate ID (from payment terms)
 	for _, term := range stlm.PaymentTerms {
 		if term.Mandate != "" {
-			dd.Ref = term.Mandate
+			dd.Ref = cbc.Code(term.Mandate)
 			hasData = true
 			break
 		}
