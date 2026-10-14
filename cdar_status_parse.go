@@ -41,6 +41,7 @@ func parseCDAR(data []byte, r routing) (any, error) {
 	if err != nil {
 		return nil, err
 	}
+	cleanDocument(cdar)
 	if code := cdarProcessCode(cdar); code == "211" || code == "212" {
 		return goblPaymentFromCDAR(cdar, r)
 	}

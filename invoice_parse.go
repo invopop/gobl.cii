@@ -27,6 +27,7 @@ func parseInvoice(data []byte) (*bill.Invoice, error) {
 	)); err != nil {
 		return nil, err
 	}
+	cleanDocument(in)
 	return goblInvoice(in)
 }
 

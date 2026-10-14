@@ -3,6 +3,7 @@ package cii
 import (
 	"encoding/xml"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -17,6 +18,41 @@ import (
 // serialization to fail.
 func cleanString(s string) string {
 	return strings.ReplaceAll(s, "\uFFFD", "")
+}
+
+// cleanDocument strips replacement characters from every text field a parsed
+// document carries. Senders whose own encoding broke upstream ship U+FFFD in
+// place of the character they lost, and GOBL's canonical JSON refuses any
+// document holding one, so a single field is enough to lose the whole invoice.
+// Cleaning the parsed fields rather than the raw payload leaves the document's
+// own bytes alone, and reaches the fields no explicit cleanString call covers.
+func cleanDocument(doc any) {
+	cleanValue(reflect.ValueOf(doc))
+}
+
+func cleanValue(v reflect.Value) {
+	switch v.Kind() { //nolint:exhaustive // only the kinds a document can hold
+	case reflect.Pointer, reflect.Interface:
+		if !v.IsNil() {
+			cleanValue(v.Elem())
+		}
+	case reflect.Struct:
+		for i := range v.NumField() {
+			cleanValue(v.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := range v.Len() {
+			cleanValue(v.Index(i))
+		}
+	case reflect.String:
+		// Unexported fields cannot be set, and need no cleaning.
+		if !v.CanSet() {
+			return
+		}
+		if s := v.String(); strings.Contains(s, "\uFFFD") {
+			v.SetString(cleanString(s))
+		}
+	}
 }
 
 // issueDateFormat is the issue date format in the form YYYYMMDD
