@@ -3,7 +3,7 @@ module github.com/invopop/gobl.cii
 go 1.25.0
 
 require (
-	github.com/invopop/gobl v0.507.0
+	github.com/invopop/gobl v0.507.1-0.20261006132023-671e20bf8e92
 	github.com/invopop/phorm v0.1.5
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
@@ -15,6 +15,7 @@ require (
 
 require (
 	github.com/expr-lang/expr v1.17.8 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
@@ -30,7 +31,6 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/invopop/gobl.fr.ctc v0.0.7
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/magefile/mage v1.15.0 // indirect

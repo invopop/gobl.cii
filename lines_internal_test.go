@@ -102,25 +102,12 @@ func TestGoblItemAttribute(t *testing.T) {
 	assert.Equal(t, cbc.KeyEmpty, attr.Unit, "a measure without a unit code has no unit")
 }
 
-// TestWritesSubLinesOnlyExtended covers every context: sub-invoice lines only
-// exist in the extended profiles, so no other context may write them.
-func TestWritesSubLinesOnlyExtended(t *testing.T) {
-	extended := []Context{
-		ContextFacturXExtendedV1,
-		ContextZUGFeRDExtendedV2,
-		ContextPeppolFranceFacturXV1,
-		ContextPeppolFranceExtendedV1,
-	}
-	l := &bill.Line{
-		Breakdown: []*bill.SubLine{{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Part"}}},
-	}
-	for _, ctx := range contexts {
-		want := false
-		for _, e := range extended {
-			if ctx.Is(e) {
-				want = true
-			}
-		}
-		assert.Equal(t, want, writesSubLines(ctx, l), ctx.GuidelineID)
-	}
+// TestWritesSubLines covers when a line's breakdown can be written as
+// sub-lines: a GROUP line's own allowances would count nowhere.
+func TestWritesSubLines(t *testing.T) {
+	sub := []*bill.SubLine{{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Part"}}}
+	assert.True(t, writesSubLines(&bill.Line{Breakdown: sub}))
+	assert.False(t, writesSubLines(&bill.Line{}))
+	assert.False(t, writesSubLines(&bill.Line{Breakdown: sub, Discounts: []*bill.LineDiscount{{}}}))
+	assert.False(t, writesSubLines(&bill.Line{Breakdown: sub, Charges: []*bill.LineCharge{{}}}))
 }

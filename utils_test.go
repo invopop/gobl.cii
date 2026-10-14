@@ -261,7 +261,11 @@ func fixtures(t *testing.T) []string {
 }
 
 func parseFixture(raw []byte) (any, error) {
-	env, err := Parse(raw)
+	doc, err := Decode(raw)
+	if err != nil {
+		return nil, err
+	}
+	env, err := Import(doc)
 	if err != nil {
 		return nil, err
 	}

@@ -2,12 +2,9 @@ package cii
 
 import (
 	"fmt"
-	"slices"
 
-	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/fr"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -84,16 +81,14 @@ const (
 	SchemeIDTaxRegistration = "FC"
 )
 
-// UNCL 3035 role codes the French extended profile pins on the parties it
-// adds: the facturant is the invoicer (EXT-FR-FE-113) and the party the
-// invoice is addressed to the invoicee (EXT-FR-FE-90).
-const (
-	partyRoleInvoicer = "II"
-	partyRoleInvoicee = "IV"
-)
+// NewParty converts the GOBL party into a CII trade party, without any
+// format specific adjustments.
+func NewParty(party *org.Party) *Party {
+	return newParty(party)
+}
 
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
-func newParty(party *org.Party, ctx Context) *Party {
+func newParty(party *org.Party) *Party {
 	if party == nil {
 		return nil
 	}
@@ -168,10 +163,6 @@ func newParty(party *org.Party, ctx Context) *Party {
 		}
 	}
 
-	if slices.Contains(ctx.Addons, choruspro.V1) {
-		applyChorusPro(party, p)
-	}
-
 	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
 
 	if p.LegalOrganization != nil && p.LegalOrganization.ID != nil && p.LegalOrganization.ID.Value == "" {
@@ -179,59 +170,6 @@ func newParty(party *org.Party, ctx Context) *Party {
 	}
 
 	return p
-}
-
-// chorusProLegalOrgID returns the LegalOrganization ID for Chorus Pro based on the
-// scheme extension value, which determines the type of identifier to use.
-// applyChorusPro sets Chorus Pro-specific fields on the CII party. It suppresses
-// the GlobalID (which is not used in Chorus Pro) and sets the LegalOrganization ID
-// to the identifier required for the given scheme type.
-func applyChorusPro(party *org.Party, p *Party) {
-	p.GlobalID = nil
-	if p.LegalOrganization == nil {
-		p.LegalOrganization = &LegalOrganization{}
-	}
-	p.LegalOrganization.ID = chorusProLegalOrgID(party)
-}
-
-func chorusProLegalOrgID(party *org.Party) *PartyID {
-	scheme := party.Ext.Get(choruspro.ExtKeyScheme)
-	pid := &PartyID{
-		SchemeID: scheme.String(),
-	}
-	switch scheme {
-	case "1":
-		// SIRET: identity with type SIRET
-		for _, id := range party.Identities {
-			if id.Type == fr.IdentityTypeSIRET {
-				pid.Value = id.Code.String()
-				return pid
-			}
-		}
-	case "2":
-		// Intra-community VAT number
-		if party.TaxID != nil {
-			pid.Value = party.TaxID.String()
-		}
-	case "3", "6":
-		// Country code + first 16 characters of company name
-		if party.TaxID != nil && party.TaxID.Country != "" {
-			name := []rune(party.Name)
-			if len(name) > 16 {
-				name = name[:16]
-			}
-			pid.Value = party.TaxID.Country.String() + string(name)
-		}
-	case "4", "5":
-		// RIDET / Tahiti: identity with scope legal
-		for _, id := range party.Identities {
-			if id.Scope == org.IdentityScopeLegal {
-				pid.Value = id.Code.String()
-				return pid
-			}
-		}
-	}
-	return pid
 }
 
 func mapGOBLTaxIDScheme(id *tax.Identity) string {

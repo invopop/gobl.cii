@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
@@ -259,7 +258,7 @@ func TestParseSubInvoiceLinesUnreconciled(t *testing.T) {
 	// The bundle's only DETAIL line declares 25.00 at a 20.00 price.
 	xml := strings.Replace(string(data), "<ram:LineTotalAmount>20.00</ram:LineTotalAmount>", "<ram:LineTotalAmount>25.00</ram:LineTotalAmount>", 2)
 
-	e, err := cii.Parse([]byte(xml))
+	e, err := parseCII([]byte(xml))
 	require.NoError(t, err)
 	inv, ok := e.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -279,7 +278,7 @@ func TestParseSubInvoiceLinesCycle(t *testing.T) {
 		"<ram:LineID>1</ram:LineID><ram:LineStatusReasonCode>GROUP",
 		"<ram:LineID>1</ram:LineID><ram:ParentLineID>2</ram:ParentLineID><ram:LineStatusReasonCode>GROUP", 1)
 
-	e, err := cii.Parse([]byte(xml))
+	e, err := parseCII([]byte(xml))
 	require.NoError(t, err)
 	inv, ok := e.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -292,7 +291,7 @@ func parseSubLinesXML(t *testing.T, name string, edit func(string) string) *bill
 	t.Helper()
 	data, err := os.ReadFile(dataPath(pathParse, name))
 	require.NoError(t, err)
-	e, err := cii.Parse([]byte(edit(string(data))))
+	e, err := parseCII([]byte(edit(string(data))))
 	require.NoError(t, err)
 	inv, ok := e.Extract().(*bill.Invoice)
 	require.True(t, ok)

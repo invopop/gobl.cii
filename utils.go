@@ -22,8 +22,8 @@ func cleanString(s string) string {
 // issueDateFormat is the issue date format in the form YYYYMMDD
 const issueDateFormat = "102"
 
-// Bytes returns the XML representation of the document in bytes
-func (out *Invoice) Bytes() ([]byte, error) {
+// encode returns the XML representation of the invoice in bytes
+func (out *Invoice) encode() ([]byte, error) {
 	bytes, err := xml.MarshalIndent(out, "", "  ")
 	if err != nil {
 		return nil, err

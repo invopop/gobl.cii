@@ -3,7 +3,6 @@ package cii
 import (
 	"strings"
 
-	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -11,27 +10,9 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
-	"github.com/invopop/xmlctx"
 )
 
-func parseInvoice(data []byte) (*bill.Invoice, error) {
-
-	in := new(Invoice)
-	if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(
-		map[string]string{
-			nsPrefixRSM: NamespaceRSM,
-			nsPrefixRAM: NamespaceRAM,
-			nsPrefixQDT: NamespaceQDT,
-			nsPrefixUDT: NamespaceUDT,
-		},
-	)); err != nil {
-		return nil, err
-	}
-	return goblInvoice(in)
-}
-
-func goblInvoice(in *Invoice) (*bill.Invoice, error) {
-	ctx := goblDetectContext(in)
+func goblInvoice(in *Invoice, f *Format) (*bill.Invoice, error) {
 	ahts := in.Transaction.Settlement
 
 	out := &bill.Invoice{
@@ -48,16 +29,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		},
 	}
 
-	goblAddFrenchExtendedAgents(out, in.Transaction.Agreement, ctx)
-
-	if ctx != nil {
-		out.Addons = tax.Addons{List: ctx.Addons}
-		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) || ctx.Is(ContextPeppolFranceExtendedV1) {
-			if in.ExchangedContext.BusinessContext != nil {
-				out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
-			}
-		}
-	}
+	out.Addons = tax.Addons{List: f.Addons}
 
 	issueDate, err := parseDate(in.ExchangedDocument.IssueDate.DateFormat.Value)
 	if err != nil {
@@ -76,13 +48,13 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		return nil, err
 	}
 
-	if out.Payment, err = goblNewPaymentDetails(ahts, ctx); err != nil {
+	if out.Payment, err = goblNewPaymentDetails(ahts); err != nil {
 		return nil, err
 	}
 
 	out.Notes = goblParseNotes(in.ExchangedDocument.IncludedNote)
 
-	if out.Ordering, err = goblNewOrdering(in, ctx); err != nil {
+	if out.Ordering, err = goblNewOrdering(in); err != nil {
 		return nil, err
 	}
 	if out.Delivery, err = goblNewDeliveryDetails(in.Transaction.Delivery); err != nil {
@@ -114,35 +86,6 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	}
 
 	return out, nil
-}
-
-// goblAddFrenchExtendedAgents reads the agents acting for the seller
-// (EXT-FR-FE-BG-03) and the buyer (EXT-FR-FE-BG-01) back onto the party they
-// act for, where GOBL keeps them. Only the French extended profile defines
-// them.
-func goblAddFrenchExtendedAgents(out *bill.Invoice, agmt *Agreement, ctx *Context) {
-	if agmt == nil || !isFranceExtended(ctx) {
-		return
-	}
-	if out.Supplier != nil && agmt.SalesAgent != nil {
-		out.Supplier.Agent = goblNewParty(agmt.SalesAgent)
-	}
-	if out.Customer != nil && agmt.BuyerAgent != nil {
-		out.Customer.Agent = goblNewParty(agmt.BuyerAgent)
-	}
-}
-
-// goblDetectContext determines the conversion context from guideline and business IDs.
-func goblDetectContext(in *Invoice) *Context {
-	if in.ExchangedContext == nil || in.ExchangedContext.GuidelineContext == nil {
-		return nil
-	}
-	guidelineID := in.ExchangedContext.GuidelineContext.ID
-	var businessID string
-	if in.ExchangedContext.BusinessContext != nil {
-		businessID = in.ExchangedContext.BusinessContext.ID
-	}
-	return FindContext(guidelineID, businessID)
 }
 
 // goblAddTaxDates extracts BT-7 (VAT point date) and BT-8 (VAT point date code) from

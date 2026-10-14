@@ -21,7 +21,7 @@ import (
 func TestCurrencyRounding(t *testing.T) {
 	t.Run("prices include tax", func(t *testing.T) {
 		env := loadEnvelope(t, filepath.Join("en16931", "invoice-prices-include.json"))
-		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+		out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 		require.NoError(t, err)
 
 		s := out.Transaction.Settlement.Summary
@@ -54,7 +54,7 @@ func TestCurrencyRounding(t *testing.T) {
 		require.NoError(t, env.Calculate())
 		require.Equal(t, "31.665", inv.Lines[0].Total.String())
 
-		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+		out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 		require.NoError(t, err)
 
 		require.Len(t, out.Transaction.Lines, 1)
@@ -88,7 +88,7 @@ func TestCurrencyRounding(t *testing.T) {
 				require.NoError(t, env.Calculate())
 				payable := inv.Totals.Payable
 
-				out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+				out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 				require.NoError(t, err)
 
 				assertAmountsFitCurrency(t, out)
@@ -114,7 +114,7 @@ func TestCurrencyRounding(t *testing.T) {
 		inv.Lines[0].Item.Currency = ""
 		require.NoError(t, env.Calculate())
 
-		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+		out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 		require.NoError(t, err)
 
 		s := out.Transaction.Settlement.Summary
@@ -248,7 +248,7 @@ func TestAllowanceChargeBaseRounding(t *testing.T) {
 	require.NoError(t, env.Calculate())
 	require.Equal(t, "10.1234", inv.Discounts[0].Base.String())
 
-	out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+	out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 	require.NoError(t, err)
 
 	acs := out.Transaction.Settlement.AllowanceCharges
@@ -275,7 +275,7 @@ func TestAllowanceChargesAbsent(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+	out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 	require.NoError(t, err)
 
 	assert.Nil(t, out.Transaction.Settlement.AllowanceCharges)

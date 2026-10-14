@@ -137,29 +137,39 @@ type Summation struct {
 	Amount string `xml:"ram:LineTotalAmount"`
 }
 
-func (out *Invoice) addLines(inv *bill.Invoice, ctx Context) error {
+func (out *Invoice) addLines(inv *bill.Invoice) error {
 	var Lines []*Line
 
 	for _, l := range inv.Lines {
-		ccy := lineCurrency(inv, l)
-		line := newLine(l, ccy, ctx)
-		if line != nil && writesSubLines(ctx, l) {
-			Lines = append(Lines, newGroupLines(l, line, ccy)...)
-			continue
-		}
-		Lines = append(Lines, line)
+		Lines = append(Lines, newLine(l, lineCurrency(inv, l)))
 	}
 
 	out.Transaction.Lines = Lines
 	return nil
 }
 
-// A GROUP line's own allowances would count nowhere, so such a line is written alone.
-func writesSubLines(ctx Context, l *bill.Line) bool {
-	if len(l.Breakdown) == 0 || len(l.Discounts) > 0 || len(l.Charges) > 0 {
-		return false
+// ExpandGroupLines writes the breakdown of each invoice line as sub-lines
+// after it, turning the line into a GROUP line, as the EXTENDED profiles
+// allow. Formats that support sub-lines call it from their export functions.
+func ExpandGroupLines(inv *bill.Invoice, out *Invoice) {
+	if out.Transaction == nil || len(out.Transaction.Lines) != len(inv.Lines) {
+		return
 	}
-	return ctx.Is(ContextFacturXExtendedV1) || ctx.Is(ContextZUGFeRDExtendedV2) || isFranceExtended(&ctx)
+	var lines []*Line
+	for i, l := range inv.Lines {
+		line := out.Transaction.Lines[i]
+		if line != nil && writesSubLines(l) {
+			lines = append(lines, newGroupLines(l, line, lineCurrency(inv, l))...)
+			continue
+		}
+		lines = append(lines, line)
+	}
+	out.Transaction.Lines = lines
+}
+
+// A GROUP line's own allowances would count nowhere, so such a line is written alone.
+func writesSubLines(l *bill.Line) bool {
+	return len(l.Breakdown) > 0 && len(l.Discounts) == 0 && len(l.Charges) == 0
 }
 
 // Without a priced sub-line the line keeps its own price and is not a GROUP.
@@ -323,7 +333,7 @@ func characteristicName(attr *org.Attribute) string {
 	}
 }
 
-func newLine(l *bill.Line, ccy string, ctx Context) *Line {
+func newLine(l *bill.Line, ccy string) *Line {
 	if l.Item == nil {
 		return nil
 	}
@@ -351,7 +361,7 @@ func newLine(l *bill.Line, ccy string, ctx Context) *Line {
 	}
 
 	if l.Seller != nil {
-		lineItem.Agreement.ItemSellerParty = newParty(l.Seller, ctx)
+		lineItem.Agreement.ItemSellerParty = newParty(l.Seller)
 	}
 
 	// BT-132: Purchase order line reference

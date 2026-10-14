@@ -58,7 +58,7 @@ func TestAllowanceChargeExemptionReason(t *testing.T) {
 	})
 	require.NoError(t, env.Calculate())
 
-	doc, err := cii.ConvertInvoice(env)
+	doc, err := cii.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotEmpty(t, doc.Transaction.Settlement.AllowanceCharges)

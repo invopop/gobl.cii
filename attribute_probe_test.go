@@ -20,7 +20,7 @@ import (
 type attributeProbe struct {
 	name    string
 	file    string
-	context cii.Context
+	context cii.Format
 }
 
 // attributeProbes drives TestProbeItemAttributes over one fixture per context
@@ -28,11 +28,8 @@ type attributeProbe struct {
 // as a warning where the Factur-X and ZUGFeRD schemas reject it outright, so a
 // clean run must have zero of both (mirrors invoice_probe_test.go).
 var attributeProbes = []attributeProbe{
-	{ctxEN16931, "en16931/invoice-minimal.json", cii.ContextEN16931V2017},
-	{ctxPeppol, "peppol/invoice-minimal.json", cii.ContextPeppolV3},
-	{ctxFacturX, "facturx/invoice-minimal.json", cii.ContextFacturXV1},
-	{ctxXRechnung, "xrechnung/invoice-de-es-b2b.json", cii.ContextXRechnungV3},
-	{ctxZUGFeRD, "zugferd/standard-invoice.json", cii.ContextZUGFeRDV2},
+	{ctxEN16931, "en16931/invoice-minimal.json", cii.FormatEN16931},
+	{ctxPeppol, "peppol/invoice-minimal.json", cii.FormatPeppol},
 }
 
 // TestProbeItemAttributes converts an invoice carrying both a text and a
@@ -53,9 +50,9 @@ func TestProbeItemAttributes(t *testing.T) {
 			}
 			require.NoError(t, env.Calculate())
 
-			out, err := cii.ConvertInvoice(env, cii.WithContext(p.context))
+			out, err := cii.ExportInvoice(env, cii.WithFormat(p.context))
 			require.NoError(t, err)
-			data, err := out.Bytes()
+			data, err := cii.Encode(out)
 			require.NoError(t, err)
 
 			resp, err := pc.ValidateXml(context.Background(), &phorm.ValidateXmlRequest{
