@@ -1,0 +1,344 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "06901601907c986eaae3b555e5e1eb66c22995bace8b044e37070da370ddbed2"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"bypass"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "8079631618",
+		"issue_date": "2026-09-07",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"point": "issue",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "PepsiCo France S.A.S.",
+			"tax_id": {
+				"country": "FR",
+				"code": "59381511039"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "381511039",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "381511039"
+				}
+			],
+			"addresses": [
+				{
+					"street": "15 Bld Charles de Gaulle",
+					"locality": "Colombes Cedex",
+					"code": "92705",
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "TOO GOOD TO GO FRANCE",
+			"tax_id": {
+				"country": "FR",
+				"code": "65820731115"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "820731115",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"code": "82073111500037",
+					"ext": {
+						"iso-scheme-id": "0009"
+					}
+				},
+				{
+					"code": "820731115",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "820731115"
+				}
+			],
+			"addresses": [
+				{
+					"street": "12 RUE DUHESME",
+					"locality": "PARIS",
+					"region": "75",
+					"code": "75018",
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "2700.00",
+				"item": {
+					"ref": "000000000340056863",
+					"name": "LAYS CHIPS POULET 250G (12X15)",
+					"identities": [
+						{
+							"code": "3168930175216",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						}
+					],
+					"price": "0.60",
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
+				},
+				"sum": "1620.00",
+				"discounts": [
+					{
+						"reason": "REM CGV",
+						"amount": "532.27",
+						"ext": {
+							"untdid-allowance": "95"
+						}
+					}
+				],
+				"charges": [
+					{
+						"reason": "Eco E",
+						"amount": "21.87",
+						"ext": {
+							"untdid-charge": "ZZZ"
+						}
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "5.50%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1614.87"
+			},
+			{
+				"i": 2,
+				"quantity": "19584.00",
+				"item": {
+					"ref": "000000000340057274",
+					"name": "LAYS PAY VINAIGRE CIDRE SEL 120G (16X24)",
+					"identities": [
+						{
+							"code": "3168930176329",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						}
+					],
+					"price": "0.42",
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
+				},
+				"sum": "8225.28",
+				"discounts": [
+					{
+						"reason": "REM CGV",
+						"base": "8225.28",
+						"percent": "5.92%",
+						"amount": "486.94",
+						"ext": {
+							"untdid-allowance": "95"
+						}
+					}
+				],
+				"charges": [
+					{
+						"reason": "Eco E",
+						"amount": "107.71",
+						"ext": {
+							"untdid-charge": "ZZZ"
+						}
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "5.50%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "8137.15"
+			}
+		],
+		"ordering": {
+			"code": "0200883564",
+			"purchases": [
+				{
+					"code": "124068"
+				}
+			],
+			"sales": [
+				{
+					"code": "1133949063"
+				}
+			],
+			"despatch": [
+				{
+					"code": "4129790613"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-11-06",
+						"amount": "10288.38",
+						"percent": "100%"
+					}
+				],
+				"notes": "60 Jours Date de Facture"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "FR7630004013280001058949504",
+						"bic": "BNPAFRPPPTX",
+						"name": "PepsiCo France S.A.S."
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"name": "TOO GOOD TO GO FRANCE",
+				"addresses": [
+					{
+						"street": "12 RUE DUHESME",
+						"locality": "PARIS",
+						"code": "75018",
+						"country": "FR"
+					}
+				]
+			},
+			"identities": [
+				{
+					"label": "0088",
+					"code": "3015021124038"
+				}
+			],
+			"date": "2026-09-07"
+		},
+		"totals": {
+			"sum": "9752.02",
+			"total": "9752.02",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "9752.02",
+								"percent": "5.50%",
+								"amount": "536.36"
+							}
+						],
+						"amount": "536.36"
+					}
+				],
+				"sum": "536.36"
+			},
+			"tax": "536.36",
+			"total_with_tax": "10288.38",
+			"payable": "10288.38"
+		},
+		"notes": [
+			{
+				"text": "Aucun escompte n'est pratiqué par paiement anticipé.",
+				"ext": {
+					"untdid-text-subject": "AAB"
+				}
+			},
+			{
+				"text": "Le taux de pénalités en cas de retard de paiement correspond à trois fois le taux d'intérêt légal.",
+				"ext": {
+					"untdid-text-subject": "PMD"
+				}
+			},
+			{
+				"text": "Montant de l'indemnité forfaitaire pour frais de recouvrement: 40 EUR.",
+				"ext": {
+					"untdid-text-subject": "PMT"
+				}
+			},
+			{
+				"text": "Produits notes BIO, BIOLOGIQUE, suivis de (1) ou d un asterisque sontissus de l agriculture biologique et certifies par ECOCERT France SAS, FR-BIO-1",
+				"ext": {
+					"untdid-text-subject": "ZZZ"
+				}
+			},
+			{
+				"text": "TVA SUR LES DEBITS",
+				"ext": {
+					"untdid-text-subject": "ZZZ"
+				}
+			},
+			{
+				"text": "B2B",
+				"ext": {
+					"untdid-text-subject": "BAR"
+				}
+			},
+			{
+				"text": "Option pour le paiement de la taxe d'après les débits",
+				"ext": {
+					"untdid-text-subject": "AAI"
+				}
+			}
+		]
+	}
+}

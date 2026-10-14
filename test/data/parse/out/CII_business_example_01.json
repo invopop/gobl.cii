@@ -4,18 +4,22 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bba4cdc799d8974c87b34fc1081ecc27c29d2ef07d8e923377516cf515ff6350"
+			"val": "a3bc39eac2212d6381e134141ef299b1cf90e69f01c1de25d96c3527dfbfb92b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$tags": [
+			"bypass"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "2016166",
 		"issue_date": "2015-01-09",
 		"currency": "EUR",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -26,6 +30,12 @@
 				"country": "DE",
 				"code": "3730230168"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "57151520"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Storkower Straße 207",
@@ -37,6 +47,11 @@
 		},
 		"customer": {
 			"name": "XXX AG",
+			"identities": [
+				{
+					"code": "10202"
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -62,17 +77,23 @@
 					"name": "Festpreis",
 					"description": "Neues DSL Portfolio 2016",
 					"price": "12122.5900",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
-				"sum": "12122.5900",
+				"sum": "12122.59",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "12122.5900"
+				"total": "12122.59"
 			},
 			{
 				"i": 2,
@@ -81,17 +102,23 @@
 					"ref": "832",
 					"name": "Abzug",
 					"price": "606.1300",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
-				"sum": "-606.1300",
+				"sum": "-606.13",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "-606.1300"
+				"total": "-606.13"
 			},
 			{
 				"i": 3,
@@ -100,17 +127,23 @@
 					"ref": "870",
 					"name": "zzgl.",
 					"price": "1.5000",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
-				"sum": "1.5000",
+				"sum": "1.50",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "1.5000"
+				"total": "177.41"
 			}
 		],
 		"payment": {
@@ -118,12 +151,14 @@
 				"due_dates": [
 					{
 						"date": "2015-01-09",
-						"amount": "0.00"
+						"amount": "13915.71",
+						"percent": "100%"
 					}
 				]
 			},
 			"instructions": {
 				"key": "credit-transfer",
+				"ref": "2016166",
 				"credit_transfer": [
 					{
 						"iban": "DE12500105170648489890"
@@ -138,33 +173,37 @@
 			"date": "2016-09-06"
 		},
 		"totals": {
-			"sum": "11517.96",
-			"total": "11517.96",
+			"sum": "11693.87",
+			"total": "11693.87",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
-								"base": "11517.96",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "11693.87",
 								"percent": "19.00%",
-								"amount": "2188.41"
+								"amount": "2221.84"
 							}
 						],
-						"amount": "2188.41"
+						"amount": "2221.84"
 					}
 				],
-				"sum": "2188.41"
+				"sum": "2221.84"
 			},
-			"tax": "2188.41",
-			"total_with_tax": "13706.37",
-			"payable": "13706.37"
+			"tax": "2221.84",
+			"total_with_tax": "13915.71",
+			"payable": "13915.71"
 		},
 		"notes": [
 			{
-				"code": "AAR",
-				"text": "This is an example invoice based on data that is used in real business.Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich."
+				"text": "This is an example invoice based on data that is used in real business.Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich.",
+				"ext": {
+					"untdid-text-subject": "AAR"
+				}
 			},
 			{
 				"text": "Sehr geehrter Herr xxx,\n\n        für die Unterstützung im September stellen wir Ihnen gemäß Auftrag foldende Rechnung.\n\n        Für das in uns gesetzte Vertrauen bedanken wir uns auf diesem Wege herzlich."

@@ -4,35 +4,84 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6c2b275544067b2dd08419ee853178417538be5ebf0345af8c95ae4141880788"
+			"val": "397be0dbeee17e9e04769cfe0b07d6881d03cce77e06db84a2548865db42a63b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "NO",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-06-30",
 		"currency": "NOK",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "exempt",
+					"text": "Exempt New Means of Transport",
+					"ext": {
+						"untdid-tax-category": "E"
+					}
+				}
+			]
 		},
 		"supplier": {
-			"name": "Tax handling company AS",
+			"name": "Salescompany ltd.",
 			"tax_id": {
 				"country": "NO",
-				"code": "967611265MVA"
+				"code": "123456789MVA"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "123456789"
+				},
+				{
+					"code": "1238764941386",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Antonio Salesmacher"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"email": "inbox@example.com"
+				}
+			],
 			"addresses": [
 				{
-					"street": "Regent street",
-					"street_extra": "Front door",
-					"locality": "Newtown",
-					"region": "RegionC",
-					"code": "202",
+					"street": "Main street 34",
+					"street_extra": "Suite 123",
+					"locality": "Big city",
+					"region": "RegionA",
+					"code": "303",
 					"country": "NO"
+				}
+			],
+			"emails": [
+				{
+					"addr": "antonio@salescompany.no"
+				}
+			],
+			"telephones": [
+				{
+					"num": "46211230"
 				}
 			]
 		},
@@ -43,6 +92,10 @@
 				"code": "987654321MVA"
 			},
 			"identities": [
+				{
+					"scope": "legal",
+					"code": "987654321"
+				},
 				{
 					"code": "3456789012098",
 					"ext": {
@@ -82,6 +135,12 @@
 			{
 				"i": 1,
 				"quantity": "1",
+				"period": {
+					"start": "2013-06-01",
+					"end": "2013-06-01"
+				},
+				"order": "1",
+				"cost": "BookingCode001",
 				"item": {
 					"ref": "JB007",
 					"name": "Laptop computer",
@@ -91,14 +150,23 @@
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
+						},
+						{
+							"label": "STI",
+							"code": "65434568"
+						}
+					],
+					"attributes": [
+						{
+							"label": "Color",
+							"text": "Black"
 						}
 					],
 					"description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
 					"price": "1273.00",
-					"unit": "NAR",
 					"origin": "DE",
-					"meta": {
-						"color": "Black"
+					"ext": {
+						"untdid-unit": "NAR"
 					}
 				},
 				"sum": "1273.00",
@@ -118,7 +186,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "1273.00",
@@ -131,6 +202,8 @@
 			{
 				"i": 2,
 				"quantity": "-1",
+				"order": "5",
+				"cost": "BookingCode002",
 				"item": {
 					"ref": "JB008",
 					"name": "Returned \"Advanced computing\" book",
@@ -140,17 +213,26 @@
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
+						},
+						{
+							"label": "STI",
+							"code": "65434567"
 						}
 					],
 					"price": "3.96",
-					"unit": "NAR"
+					"ext": {
+						"untdid-unit": "NAR"
+					}
 				},
 				"sum": "-3.96",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "15%"
+						"percent": "15%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "-3.96",
@@ -163,6 +245,8 @@
 			{
 				"i": 3,
 				"quantity": "2",
+				"order": "3",
+				"cost": "BookingCode003",
 				"item": {
 					"ref": "JB009",
 					"name": "\"Computing for dummies\" book",
@@ -172,17 +256,26 @@
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
+						},
+						{
+							"label": "STI",
+							"code": "65434566"
 						}
 					],
 					"price": "2.48",
-					"unit": "NAR"
+					"ext": {
+						"untdid-unit": "NAR"
+					}
 				},
 				"sum": "4.96",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "15%"
+						"percent": "15%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "4.96"
@@ -190,6 +283,8 @@
 			{
 				"i": 4,
 				"quantity": "-1",
+				"order": "2",
+				"cost": "BookingCode004",
 				"item": {
 					"ref": "JB010",
 					"name": "Returned IBM 5150 desktop",
@@ -199,17 +294,25 @@
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
+						},
+						{
+							"label": "STI",
+							"code": "65434565"
 						}
 					],
 					"price": "25.00",
-					"unit": "NAR"
+					"ext": {
+						"untdid-unit": "NAR"
+					}
 				},
 				"sum": "-25.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "zero",
-						"percent": "0%"
+						"key": "exempt",
+						"ext": {
+							"untdid-tax-category": "E"
+						}
 					}
 				],
 				"total": "-25.00"
@@ -217,6 +320,8 @@
 			{
 				"i": 5,
 				"quantity": "250",
+				"order": "4",
+				"cost": "BookingCode005",
 				"item": {
 					"ref": "JB011",
 					"name": "Network cable",
@@ -226,12 +331,22 @@
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
+						},
+						{
+							"label": "STI",
+							"code": "12344325"
+						}
+					],
+					"attributes": [
+						{
+							"label": "Type",
+							"text": "Cat5"
 						}
 					],
 					"price": "0.75",
 					"unit": "m",
-					"meta": {
-						"type": "Cat5"
+					"ext": {
+						"untdid-unit": "MTR"
 					}
 				},
 				"sum": "187.50",
@@ -239,7 +354,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "187.50"
@@ -254,7 +372,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -271,7 +392,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -283,54 +407,25 @@
 					"code": "Doc1"
 				}
 			],
+			"cost": "Project cost code 123",
 			"period": {
 				"start": "2013-06-01",
 				"end": "2013-06-30"
 			},
 			"seller": {
-				"name": "Salescompany ltd.",
+				"name": "Tax handling company AS",
 				"tax_id": {
 					"country": "NO",
-					"code": "123456789MVA"
+					"code": "967611265MVA"
 				},
-				"identities": [
-					{
-						"code": "1238764941386",
-						"ext": {
-							"iso-scheme-id": "0088"
-						}
-					}
-				],
-				"people": [
-					{
-						"name": {
-							"given": "Antonio Salesmacher"
-						}
-					}
-				],
-				"inboxes": [
-					{
-						"email": "inbox@example.com"
-					}
-				],
 				"addresses": [
 					{
-						"street": "Main street 34",
-						"street_extra": "Suite 123",
-						"locality": "Big city",
-						"region": "RegionA",
-						"code": "303",
+						"street": "Regent street",
+						"street_extra": "Front door",
+						"locality": "Newtown",
+						"region": "RegionC",
+						"code": "202",
 						"country": "NO"
-					}
-				],
-				"emails": [
-					{
-						"addr": "antonio@salescompany.no"
-					}
-				],
-				"telephones": [
-					{
-						"num": "46211230"
 					}
 				]
 			},
@@ -353,19 +448,20 @@
 				"due_dates": [
 					{
 						"date": "2013-07-20",
-						"amount": "0.00"
+						"amount": "1801.78",
+						"percent": "100%"
 					}
 				],
 				"notes": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date"
 			},
 			"advances": [
 				{
-					"description": "",
 					"amount": "1000.00"
 				}
 			],
 			"instructions": {
 				"key": "credit-transfer",
+				"ref": "0003434323213231",
 				"credit_transfer": [
 					{
 						"iban": "NO9386011117947",
@@ -379,14 +475,6 @@
 		},
 		"delivery": {
 			"receiver": {
-				"identities": [
-					{
-						"code": "6754238987643",
-						"ext": {
-							"iso-scheme-id": "0088"
-						}
-					}
-				],
 				"addresses": [
 					{
 						"street": "Deliverystreet 2",
@@ -398,6 +486,12 @@
 					}
 				]
 			},
+			"identities": [
+				{
+					"label": "0088",
+					"code": "6754238987643"
+				}
+			],
 			"date": "2013-06-15"
 		},
 		"totals": {
@@ -412,20 +506,28 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "1460.50",
 								"percent": "25%",
 								"amount": "365.13"
 							},
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "1.00",
 								"percent": "15%",
 								"amount": "0.15"
 							},
 							{
-								"key": "zero",
+								"key": "exempt",
+								"ext": {
+									"untdid-tax-category": "E"
+								},
 								"base": "-25.00",
-								"percent": "0%",
 								"amount": "0.00"
 							}
 						],

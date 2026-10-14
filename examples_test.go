@@ -111,83 +111,65 @@ func TestConvertToInvoice(t *testing.T) {
 	}
 }
 
+// TestParseInvoice imports each CII example, detecting its format, and
+// compares the result with its expected output.
 func TestParseInvoice(t *testing.T) {
-	// Define contexts to test
-	contexts := []struct {
-		name string
-		dir  string
-	}{
-		{ctxEN16931, "en16931"},
-		{ctxPeppol, "peppol"},
-	}
+	examples, err := filepath.Glob(filepath.Join(getParsePath(), pathPatternXML))
+	require.NoError(t, err)
+	require.NotEmpty(t, examples)
 
-	for _, ctx := range contexts {
-		t.Run(ctx.name, func(t *testing.T) {
-			examples, err := filepath.Glob(filepath.Join(getParsePath(), ctx.dir, pathPatternXML))
+	for _, example := range examples {
+		inName := filepath.Base(example)
+		outName := strings.Replace(inName, ".xml", ".json", 1)
+
+		t.Run(inName, func(t *testing.T) {
+			// Load XML data
+			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			if len(examples) == 0 {
-				t.Skip("No examples found for context")
+			// Convert CII XML to GOBL
+			env, err := parseCII(xmlData)
+			require.NoError(t, err)
+
+			env.Head.UUID = staticUUID
+			if inv, ok := env.Extract().(*bill.Invoice); ok {
+				inv.UUID = staticUUID
+			}
+			require.NoError(t, env.Calculate())
+
+			outPath := filepath.Join(getParsePath(), pathOut, outName)
+			if *updateOut {
+				data, err := json.MarshalIndent(env, "", "\t")
+				require.NoError(t, err)
+				err = os.WriteFile(outPath, data, 0644)
+				require.NoError(t, err)
 			}
 
-			for _, example := range examples {
-				inName := filepath.Base(example)
-				outName := strings.Replace(inName, ".xml", ".json", 1)
+			// Extract the invoice from the envelope
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok, "Document should be an invoice")
 
-				t.Run(inName, func(t *testing.T) {
-					// Load XML data
-					xmlData, err := os.ReadFile(example)
-					require.NoError(t, err)
+			// Marshal only the invoice
+			data, err := json.MarshalIndent(inv, "", "\t")
+			require.NoError(t, err)
 
-					// Convert CII XML to GOBL
-					env, err := parseCII(xmlData)
-					require.NoError(t, err)
+			// Load the expected output
+			output, err := os.ReadFile(outPath)
+			require.NoError(t, err, "Missing expected output. Create it with --update flag.")
 
-					env.Head.UUID = staticUUID
-					if inv, ok := env.Extract().(*bill.Invoice); ok {
-						inv.UUID = staticUUID
-					}
-					require.NoError(t, env.Calculate())
+			// Parse the expected output to extract the invoice
+			var expectedEnv gobl.Envelope
+			err = json.Unmarshal(output, &expectedEnv)
+			require.NoError(t, err)
 
-					outPath := filepath.Join(getParsePath(), ctx.dir, pathOut, outName)
-					if *updateOut {
-						// Create the output directory if it doesn't exist
-						outDir := filepath.Join(getParsePath(), ctx.dir, pathOut)
-						require.NoError(t, os.MkdirAll(outDir, 0755))
+			expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
+			require.True(t, ok, "Expected document should be an invoice")
 
-						data, err := json.MarshalIndent(env, "", "\t")
-						require.NoError(t, err)
-						err = os.WriteFile(outPath, data, 0644)
-						require.NoError(t, err)
-					}
+			// Marshal the expected invoice
+			expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
+			require.NoError(t, err)
 
-					// Extract the invoice from the envelope
-					inv, ok := env.Extract().(*bill.Invoice)
-					require.True(t, ok, "Document should be an invoice")
-
-					// Marshal only the invoice
-					data, err := json.MarshalIndent(inv, "", "\t")
-					require.NoError(t, err)
-
-					// Load the expected output
-					output, err := os.ReadFile(outPath)
-					assert.NoError(t, err)
-
-					// Parse the expected output to extract the invoice
-					var expectedEnv gobl.Envelope
-					err = json.Unmarshal(output, &expectedEnv)
-					require.NoError(t, err)
-
-					expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
-					require.True(t, ok, "Expected document should be an invoice")
-
-					// Marshal the expected invoice
-					expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
-					require.NoError(t, err)
-
-					assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
-				})
-			}
+			assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
 		})
 	}
 }
