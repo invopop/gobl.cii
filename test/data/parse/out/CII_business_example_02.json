@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7132e02d4965b12a9cd885f97916a652d76278943ccef5e1117c0670fa9a7cea"
+			"val": "8b44ae24de83c0251b88f88d378b8a9c92ff4ec6127524aebd87b28083db689a"
 		}
 	},
 	"doc": {
@@ -16,6 +16,7 @@
 		"issue_date": "2013-08-25",
 		"currency": "EUR",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -26,6 +27,12 @@
 				"country": "DE",
 				"code": "1111111"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "111111111"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Storkower Straße 207",
@@ -61,17 +68,23 @@
 				"item": {
 					"name": "BPW21",
 					"price": "1.2605",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
-				"sum": "1.2605",
+				"sum": "1.26",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "1.2605"
+				"total": "1.26"
 			},
 			{
 				"i": 2,
@@ -79,17 +92,23 @@
 				"item": {
 					"name": "Poti 100k",
 					"price": "1.2605",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
-				"sum": "1.2605",
+				"sum": "1.26",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "1.2605"
+				"total": "1.26"
 			},
 			{
 				"i": 3,
@@ -97,17 +116,23 @@
 				"item": {
 					"name": "LCD Display 3.5",
 					"price": "7.4790",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
-				"sum": "7.4790",
+				"sum": "7.48",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
-				"total": "7.4790"
+				"total": "7.48"
 			}
 		],
 		"discounts": [
@@ -119,7 +144,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19.00%"
+						"percent": "19.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -140,12 +168,14 @@
 				"due_dates": [
 					{
 						"date": "2013-05-10",
-						"amount": "0.00"
+						"amount": "11.90",
+						"percent": "100%"
 					}
 				]
 			},
 			"instructions": {
 				"key": "credit-transfer",
+				"ref": "INV000013",
 				"credit_transfer": [
 					{
 						"iban": "DK1212341234123412"
@@ -167,6 +197,9 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "10.00",
 								"percent": "19.00%",
 								"amount": "1.90"
@@ -183,8 +216,10 @@
 		},
 		"notes": [
 			{
-				"code": "REG",
-				"text": "TEXT"
+				"text": "TEXT",
+				"ext": {
+					"untdid-text-subject": "REG"
+				}
 			}
 		]
 	}

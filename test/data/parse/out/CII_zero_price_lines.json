@@ -1,0 +1,385 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "ab12edb411a861012b5d96271c15c87cea6fc27325c21ffe6643fbfca1fc4dce"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$tags": [
+			"bypass"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "SAMPLE-0001",
+		"issue_date": "2026-09-02",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"point": "issue",
+			"ext": {
+				"untdid-document-type": "380"
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"text": "Prestations bancaires ou financières non soumises à TVA (Article 261 C 1° du CGI)",
+					"ext": {
+						"untdid-tax-category": "E"
+					}
+				}
+			]
+		},
+		"supplier": {
+			"name": "BANQUE EXEMPLE",
+			"tax_id": {
+				"country": "FR",
+				"code": "11123456782"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "123456782",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"code": "12345678200010",
+					"ext": {
+						"iso-scheme-id": "0009"
+					}
+				},
+				{
+					"code": "111222337",
+					"ext": {
+						"iso-scheme-id": "0231"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "123456782"
+				}
+			],
+			"addresses": [
+				{
+					"street": "1 RUE DE L'EXEMPLE",
+					"locality": "EXEMPLEVILLE",
+					"code": "75001",
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "ENTREPRISE EXEMPLE",
+			"tax_id": {
+				"country": "FR",
+				"code": "14987654324"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "987654324",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"code": "98765432400019",
+					"ext": {
+						"iso-scheme-id": "0009"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "987654324_98765432400019"
+				}
+			],
+			"addresses": [
+				{
+					"street": "2 AVENUE DE L'EXEMPLE",
+					"street_extra": "BATIMENT B",
+					"locality": "EXEMPLEBOURG",
+					"code": "75002",
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1.000",
+				"item": {
+					"ref": "EUP302",
+					"name": "Produits et services soumis à TVA",
+					"attributes": [
+						{
+							"label": "Quantité/Base de calcul",
+							"text": "1,0000"
+						},
+						{
+							"label": "Contrat générateur",
+							"text": "CONTRACT-0001"
+						}
+					],
+					"price": "0.000",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "8.50%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "3.36",
+				"notes": [
+					{
+						"text": "FORFAIT"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "1.000",
+				"item": {
+					"ref": "EUP401",
+					"name": "Produits et services non soumis à TVA",
+					"attributes": [
+						{
+							"label": "Quantité/Base de calcul",
+							"text": "1,0000"
+						},
+						{
+							"label": "Contrat générateur",
+							"text": "CONTRACT-0001"
+						}
+					],
+					"price": "0.000",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"ext": {
+							"cef-vatex": "VATEX-FR-CGI261C-1",
+							"untdid-tax-category": "E"
+						}
+					}
+				],
+				"total": "15.50",
+				"notes": [
+					{
+						"text": "FORFAIT"
+					}
+				]
+			},
+			{
+				"i": 3,
+				"quantity": "1.000",
+				"item": {
+					"ref": "OVP315",
+					"name": "Frais échéance VIR permanent",
+					"attributes": [
+						{
+							"label": "Quantité/Base de calcul",
+							"text": "1,0000"
+						},
+						{
+							"label": "Contrat générateur",
+							"text": "CONTRACT-0002"
+						}
+					],
+					"price": "0.140",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.14",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"ext": {
+							"cef-vatex": "VATEX-FR-CGI261C-1",
+							"untdid-tax-category": "E"
+						}
+					}
+				],
+				"total": "0.14"
+			},
+			{
+				"i": 4,
+				"quantity": "1.000",
+				"item": {
+					"ref": "OVP315",
+					"name": "Frais échéance VIR permanent",
+					"attributes": [
+						{
+							"label": "Quantité/Base de calcul",
+							"text": "1,0000"
+						},
+						{
+							"label": "Contrat générateur",
+							"text": "CONTRACT-0003"
+						}
+					],
+					"price": "0.140",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.14",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"ext": {
+							"cef-vatex": "VATEX-FR-CGI261C-1",
+							"untdid-tax-category": "E"
+						}
+					}
+				],
+				"total": "0.14"
+			}
+		],
+		"ordering": {
+			"seller": {
+				"name": "BANQUE EXEMPLE",
+				"tax_id": {
+					"country": "FR",
+					"code": "21111222337"
+				},
+				"addresses": [
+					{
+						"street": "1 RUE DE L'EXEMPLE",
+						"locality": "EXEMPLEVILLE",
+						"code": "75001",
+						"country": "FR"
+					}
+				]
+			},
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-09-02",
+						"amount": "19.43",
+						"percent": "100%"
+					}
+				]
+			},
+			"advances": [
+				{
+					"amount": "19.43"
+				}
+			],
+			"instructions": {
+				"key": "debit-transfer",
+				"detail": "Paiement sur compte bancaire",
+				"credit_transfer": [
+					{
+						"iban": "FR7630001007941234567890185",
+						"bic": "EXPLFRPPXXX"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "42"
+				}
+			}
+		},
+		"totals": {
+			"sum": "19.14",
+			"discount": "0.00",
+			"charge": "0.00",
+			"total": "19.14",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"cef-vatex": "VATEX-FR-CGI261C-1",
+									"untdid-tax-category": "E"
+								},
+								"base": "15.78",
+								"percent": "0.00%",
+								"amount": "0.00"
+							},
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "3.36",
+								"percent": "8.50%",
+								"amount": "0.29"
+							}
+						],
+						"amount": "0.29"
+					}
+				],
+				"sum": "0.29"
+			},
+			"tax": "0.29",
+			"total_with_tax": "19.43",
+			"payable": "19.43",
+			"advance": "19.43",
+			"due": "0.00"
+		},
+		"notes": [
+			{
+				"text": "Tout retard de paiement a pour effet, sans aucune formalité, le versement des intérêts moratoires et de l'indemnité forfaitaire pour frais de recouvrement. (Décret n° 2013-269 du 29 mars 2013 relatif à la lutte contre les retards de paiement dans les contrats de la commande publique).",
+				"ext": {
+					"untdid-text-subject": "PMD"
+				}
+			},
+			{
+				"text": "Selon les lois et règlements en vigueur, en cas de retard de paiement, seront dues au cr\u0026ancier (i) des pénalités de retard exigibles de plein droit au taux BCE appliqué à son opération de refinancement la plus récente majoré de 10 points, (ii) une indemnité forfaitaire de 40 euros pour frais de recouvrement, (iii) une indemnisation complémentaire pour frais de recouvrement engagés au-delà de l'indemnité forfaitaire.",
+				"ext": {
+					"untdid-text-subject": "PMT"
+				}
+			},
+			{
+				"text": "Pas d'escompte pour paiement anticipé",
+				"ext": {
+					"untdid-text-subject": "AAB"
+				}
+			},
+			{
+				"text": "MEMBRE_ASSUJETTI_UNIQUE",
+				"ext": {
+					"untdid-text-subject": "TXD"
+				}
+			}
+		]
+	}
+}

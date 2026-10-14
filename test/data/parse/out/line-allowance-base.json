@@ -1,0 +1,111 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "5d33aa68860efae504e966050da7dbec2a1f656dc4b3fd1ff9af0d254638d2fd"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "BASE-TEST-1",
+		"issue_date": "2026-01-01",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Seller SA",
+			"tax_id": {
+				"country": "FR",
+				"code": "59381511039"
+			},
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyer SA",
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "200",
+				"item": {
+					"name": "Widget",
+					"price": "10.00",
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
+				},
+				"sum": "2000.00",
+				"discounts": [
+					{
+						"base": "1000.00",
+						"percent": "10.00%",
+						"amount": "100.00",
+						"ext": {
+							"untdid-allowance": "95"
+						}
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1900.00"
+			}
+		],
+		"totals": {
+			"sum": "1900.00",
+			"total": "1900.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1900.00",
+								"percent": "20.00%",
+								"amount": "380.00"
+							}
+						],
+						"amount": "380.00"
+					}
+				],
+				"sum": "380.00"
+			},
+			"tax": "380.00",
+			"total_with_tax": "2280.00",
+			"payable": "2280.00"
+		}
+	}
+}

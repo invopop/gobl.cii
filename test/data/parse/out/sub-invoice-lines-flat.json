@@ -1,0 +1,336 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "dc2799938d39bfe8b63a0dbf6c2e6880832e62a0eaca79f9ff6bd75b4240f700"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "SUBLINES-2",
+		"issue_date": "2026-01-01",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Seller SA",
+			"tax_id": {
+				"country": "FR",
+				"code": "59381511039"
+			},
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyer SA",
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "2",
+				"item": {
+					"name": "Display",
+					"price": "0.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.00",
+				"total": "0.00"
+			},
+			{
+				"i": 2,
+				"quantity": "6",
+				"item": {
+					"name": "Roast",
+					"price": "5.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "30.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "30.00"
+			},
+			{
+				"i": 3,
+				"quantity": "6",
+				"item": {
+					"name": "Bundle",
+					"price": "0.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.00",
+				"total": "0.00"
+			},
+			{
+				"i": 4,
+				"quantity": "18",
+				"item": {
+					"name": "Colombia",
+					"price": "5.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "90.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "90.00"
+			},
+			{
+				"i": 5,
+				"quantity": "1",
+				"item": {
+					"name": "Hardware",
+					"currency": "EUR",
+					"price": "550.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"breakdown": [
+					{
+						"i": 1,
+						"quantity": "2",
+						"item": {
+							"name": "Laser printer",
+							"price": "300.00",
+							"unit": "one",
+							"ext": {
+								"untdid-unit": "C62"
+							}
+						},
+						"sum": "600.00",
+						"total": "600.00"
+					},
+					{
+						"i": 2,
+						"quantity": "-1",
+						"item": {
+							"name": "Allowance",
+							"price": "50.00",
+							"unit": "one",
+							"ext": {
+								"untdid-unit": "C62"
+							}
+						},
+						"sum": "-50.00",
+						"total": "-50.00"
+					}
+				],
+				"sum": "550.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "550.00"
+			},
+			{
+				"i": 6,
+				"quantity": "3",
+				"item": {
+					"name": "Odd lot",
+					"price": "0.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.00",
+				"total": "0.00"
+			},
+			{
+				"i": 7,
+				"quantity": "1",
+				"item": {
+					"name": "Thing",
+					"price": "10.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "10.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10.00"
+			},
+			{
+				"i": 8,
+				"quantity": "1",
+				"item": {
+					"name": "Mismatch",
+					"price": "0.00"
+				},
+				"sum": "0.00",
+				"total": "0.00"
+			},
+			{
+				"i": 9,
+				"quantity": "1",
+				"item": {
+					"name": "Part",
+					"price": "40.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "40.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "40.00"
+			},
+			{
+				"i": 10,
+				"quantity": "10",
+				"item": {
+					"name": "Safety kit",
+					"price": "45.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"breakdown": [
+					{
+						"i": 1,
+						"quantity": "1",
+						"item": {
+							"name": "Helmet",
+							"unit": "one",
+							"ext": {
+								"untdid-unit": "C62"
+							}
+						}
+					},
+					{
+						"i": 2,
+						"quantity": "1",
+						"item": {
+							"name": "Goggles",
+							"unit": "one",
+							"ext": {
+								"untdid-unit": "C62"
+							}
+						}
+					}
+				],
+				"sum": "450.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "450.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-01-31",
+						"amount": "1404.00",
+						"percent": "100%"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "1170.00",
+			"total": "1170.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1170.00",
+								"percent": "20.00%",
+								"amount": "234.00"
+							}
+						],
+						"amount": "234.00"
+					}
+				],
+				"sum": "234.00"
+			},
+			"tax": "234.00",
+			"total_with_tax": "1404.00",
+			"payable": "1404.00"
+		}
+	}
+}

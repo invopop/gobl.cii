@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7d50448cef70cfa84df0936059692ebbf270a199e0fdf322071de9d32ab9c931"
+			"val": "5f44eefdca02d294d4cbd99d22a3aa6b7592b629a0537b7a915a0a0540f14590"
 		}
 	},
 	"doc": {
@@ -32,6 +32,7 @@
 			},
 			"identities": [
 				{
+					"scope": "tax",
 					"country": "DE",
 					"code": "201/113/40209"
 				},
@@ -87,7 +88,10 @@
 					],
 					"description": "300cm x 100 cm",
 					"price": "3.3333",
-					"unit": "m2"
+					"unit": "m2",
+					"ext": {
+						"untdid-unit": "MTK"
+					}
 				},
 				"sum": "10.00",
 				"taxes": [
@@ -126,7 +130,10 @@
 					],
 					"description": "aus Deutschland",
 					"price": "5.5000",
-					"unit": "kg"
+					"unit": "kg",
+					"ext": {
+						"untdid-unit": "KGM"
+					}
 				},
 				"sum": "27.50",
 				"taxes": [
@@ -159,7 +166,10 @@
 						}
 					],
 					"price": "5.4900",
-					"unit": "piece"
+					"unit": "piece",
+					"ext": {
+						"untdid-unit": "H87"
+					}
 				},
 				"sum": "109.80",
 				"taxes": [
@@ -192,7 +202,10 @@
 						}
 					],
 					"price": "2.7700",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "55.40",
 				"taxes": [
@@ -212,7 +225,6 @@
 			{
 				"i": 1,
 				"reason": "Sondernachlass",
-				"base": "10.00",
 				"amount": "1.00",
 				"taxes": [
 					{
@@ -228,7 +240,6 @@
 			{
 				"i": 2,
 				"reason": "Sondernachlass",
-				"base": "137.30",
 				"amount": "13.73",
 				"taxes": [
 					{
@@ -246,7 +257,6 @@
 			{
 				"i": 1,
 				"reason": "Versandkosten",
-				"base": "137.30",
 				"amount": "5.80",
 				"taxes": [
 					{
@@ -273,7 +283,6 @@
 			},
 			"advances": [
 				{
-					"description": "",
 					"amount": "50.00"
 				}
 			]
