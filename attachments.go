@@ -58,8 +58,8 @@ func goblAttachments(docs []*AdditionalDocument) []*org.Attachment {
 		if doc.TypeCode != AdditionalDocumentTypeAttachment {
 			continue
 		}
-		// Skip binary attachments — handled by ExtractBinaryAttachments
-		if doc.AttachmentBinaryObject != nil {
+		// Skip usable binary attachments — handled by ExtractBinaryAttachments
+		if _, ok := doc.AttachmentBinaryObject.decode(); ok {
 			continue
 		}
 		att := &org.Attachment{}
@@ -105,15 +105,8 @@ func (out *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 	var result []BinaryAttachment
 
 	for _, doc := range out.Transaction.Agreement.AdditionalDocument {
-		if doc.AttachmentBinaryObject == nil || doc.AttachmentBinaryObject.Value == "" {
-			continue
-		}
-
-		// Remove whitespace that may have been added by XML formatting
-		v := whitespaceRegex.ReplaceAllString(doc.AttachmentBinaryObject.Value, "")
-
-		decoded, err := base64.StdEncoding.DecodeString(v)
-		if err != nil {
+		decoded, ok := doc.AttachmentBinaryObject.decode()
+		if !ok {
 			continue
 		}
 
@@ -127,4 +120,21 @@ func (out *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 	}
 
 	return result
+}
+
+// decode returns the binary data, or false if it is missing, empty or not valid base64.
+func (bo *BinaryObject) decode() ([]byte, bool) {
+	if bo == nil {
+		return nil, false
+	}
+	// Remove whitespace that may have been added by XML formatting
+	v := whitespaceRegex.ReplaceAllString(bo.Value, "")
+	if v == "" {
+		return nil, false
+	}
+	data, err := base64.StdEncoding.DecodeString(v)
+	if err != nil {
+		return nil, false
+	}
+	return data, true
 }

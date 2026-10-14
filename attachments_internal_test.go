@@ -178,3 +178,37 @@ func TestBinaryAttachments(t *testing.T) {
 		assert.Empty(t, out.ExtractBinaryAttachments())
 	})
 }
+
+func TestEmbeddedAndURIAttachment(t *testing.T) {
+	withBoth := func(value string) *Invoice {
+		out := emptyInvoice()
+		out.Transaction.Agreement.AdditionalDocument = []*AdditionalDocument{{
+			TypeCode:               AdditionalDocumentTypeAttachment,
+			ID:                     testDocID,
+			URIID:                  "https://example.com/ts.pdf",
+			AttachmentBinaryObject: &BinaryObject{Value: value},
+		}}
+		return out
+	}
+
+	t.Run("valid embedded is picked over the URI", func(t *testing.T) {
+		payload := []byte("%PDF-1.4 not really a pdf")
+		out := withBoth(base64.StdEncoding.EncodeToString(payload))
+
+		assert.Empty(t, goblAttachments(out.Transaction.Agreement.AdditionalDocument))
+		bins := out.ExtractBinaryAttachments()
+		require.Len(t, bins, 1)
+		assert.Equal(t, payload, bins[0].Data)
+	})
+
+	for name, value := range map[string]string{"empty": "", "corrupted": "!!not base64!!"} {
+		t.Run(name+" embedded falls back to the URI", func(t *testing.T) {
+			out := withBoth(value)
+
+			atts := goblAttachments(out.Transaction.Agreement.AdditionalDocument)
+			require.Len(t, atts, 1)
+			assert.Equal(t, "https://example.com/ts.pdf", atts[0].URL)
+			assert.Empty(t, out.ExtractBinaryAttachments())
+		})
+	}
+}
