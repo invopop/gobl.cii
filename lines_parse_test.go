@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
@@ -350,4 +351,63 @@ func TestParseSubInvoiceLinesInformationQuantity(t *testing.T) {
 	require.Equal(t, []string{itemSafetyKit, itemHelmet, itemGoggles}, names[len(names)-3:])
 	assert.Empty(t, inv.Lines[len(inv.Lines)-3].Breakdown)
 	assert.Equal(t, "1170.00", inv.Totals.Sum.String())
+}
+
+func TestParsePriceDetails(t *testing.T) {
+	t.Run("a gross price less a discount", func(t *testing.T) {
+		e, err := parseInvoiceFrom(t, "CII_example2.xml")
+		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		item := inv.Lines[0].Item
+		require.NotNil(t, item.List)
+		assert.Equal(t, "1498", item.List.String())
+		require.NotNil(t, item.Discount)
+		assert.Equal(t, "225", item.Discount.String())
+		assert.Equal(t, "1273.00", item.Price.String())
+		// The basis quantity only matches the line amount when left out.
+		assert.Nil(t, item.Per)
+		assert.Equal(t, "1273.00", inv.Lines[0].Total.String())
+	})
+
+	t.Run("a basis quantity the line amount does not apply", func(t *testing.T) {
+		e, err := parseInvoiceFrom(t, "CII_example8.xml")
+		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		item := inv.Lines[0].Item
+		assert.Equal(t, "0.00880", item.Price.String())
+		assert.Nil(t, item.Per)
+		assert.Equal(t, "140.80", inv.Lines[0].Total.String())
+	})
+}
+
+// TestPriceDetailsRoundTrip writes the item's list price, price discount and
+// per quantity out and reads them back.
+func TestPriceDetailsRoundTrip(t *testing.T) {
+	env := loadEnvelope(t, "en16931/invoice-price-details.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	doc, err := cii.Export(env)
+	require.NoError(t, err)
+	data, err := cii.Encode(doc)
+	require.NoError(t, err)
+	parsed, err := cii.Decode(data)
+	require.NoError(t, err)
+	penv, err := cii.Import(parsed)
+	require.NoError(t, err)
+	out, ok := penv.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	assert.False(t, out.HasTags(tax.TagBypass))
+	item := out.Lines[0].Item
+	assert.Equal(t, "120.00", item.List.String())
+	assert.Equal(t, "12.00", item.Discount.String())
+	assert.Equal(t, "108.00", item.Price.String())
+	assert.Equal(t, "100", item.Per.String())
+	assert.Equal(t, inv.Lines[0].Total.String(), out.Lines[0].Total.String())
+	assert.Equal(t, inv.Totals.Payable.String(), out.Totals.Payable.String())
 }

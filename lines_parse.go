@@ -1,7 +1,6 @@
 package cii
 
 import (
-	"math"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -127,6 +126,10 @@ func goblCanFold(parent *Line, kids []*Line, taxMap map[string]*taxCategoryInfo)
 		return false
 	}
 	if !group && !goblLineIsSummed(parent) {
+		return false
+	}
+	// GOBL keeps price details off a line with a breakdown.
+	if !group && goblHasPriceDetails(parent) {
 		return false
 	}
 	qty, ok := goblLineQuantity(parent)
@@ -282,6 +285,11 @@ func goblNewLine(it *Line, taxMap map[string]*taxCategoryInfo) (*bill.Line, erro
 		}
 	}
 	l.Item.Price = &price
+	if it.Agreement != nil && it.Agreement.NetPrice != nil && summed {
+		if err := goblLinePriceDetails(it.Agreement, l.Item); err != nil {
+			return nil, err
+		}
+	}
 
 	ts := it.TradeSettlement
 	if ts == nil {
@@ -389,24 +397,68 @@ func goblItemAttribute(char *Characteristic) (*org.Attribute, error) {
 	return attr, nil
 }
 
-// goblLinePrice extracts and normalizes the net price, dividing by base quantity if present.
+// goblLinePrice reads the net price (BT-146).
 func goblLinePrice(np *NetPrice) (num.Amount, error) {
-	price, err := num.AmountFromString(np.Amount)
-	if err != nil {
-		return price, err
+	return num.AmountFromString(np.Amount)
+}
+
+// goblLinePriceDetails reads the number of units the price applies to
+// (BT-149), and the list price and price discount (BT-148, BT-147) when they
+// come to the net price.
+func goblLinePriceDetails(agmt *LineAgreement, item *org.Item) error {
+	bq := agmt.NetPrice.BaseQuantity
+	if (bq == nil || bq.Amount == "") && agmt.GrossPrice != nil {
+		bq = agmt.GrossPrice.BaseQuantity
 	}
-	// BT-148: Price base quantity — normalize unit price
-	if bq := np.BaseQuantity; bq != nil && bq.Amount != "" {
-		baseQuantity, err := num.AmountFromString(bq.Amount)
+	if bq != nil && strings.TrimSpace(bq.Amount) != "" {
+		per, err := num.AmountFromString(strings.TrimSpace(bq.Amount))
 		if err != nil {
-			return price, err
+			return err
 		}
-		if !baseQuantity.IsZero() {
-			precision := calculateRequiredPrecision(price, baseQuantity)
-			price = price.RescaleUp(precision).Divide(baseQuantity)
+		if per.IsPositive() && !per.Equals(num.MakeAmount(1, 0)) {
+			item.Per = &per
 		}
 	}
-	return price, nil
+
+	gp := agmt.GrossPrice
+	if gp == nil || strings.TrimSpace(gp.Amount) == "" || item.Price == nil {
+		return nil
+	}
+	list, err := num.AmountFromString(strings.TrimSpace(gp.Amount))
+	if err != nil {
+		return err
+	}
+	discount := num.AmountZero
+	if ac := gp.AllowanceCharge; ac != nil && !ac.ChargeIndicator.Value && strings.TrimSpace(ac.Amount) != "" {
+		if discount, err = num.AmountFromString(strings.TrimSpace(ac.Amount)); err != nil {
+			return err
+		}
+	}
+	if !list.Subtract(discount).Equals(*item.Price) {
+		return nil
+	}
+	item.List = &list
+	if !discount.IsZero() {
+		item.Discount = &discount
+	}
+	return nil
+}
+
+// goblHasPriceDetails reports whether the line's price has details GOBL
+// would keep.
+func goblHasPriceDetails(it *Line) bool {
+	if it.Agreement == nil || it.Agreement.NetPrice == nil {
+		return false
+	}
+	price, err := goblLinePrice(it.Agreement.NetPrice)
+	if err != nil {
+		return false
+	}
+	item := &org.Item{Price: &price}
+	if err := goblLinePriceDetails(it.Agreement, item); err != nil {
+		return false
+	}
+	return item.Per != nil || item.List != nil
 }
 
 // goblLineProduct populates item identities and metadata from the CII product.
@@ -588,20 +640,4 @@ func getLineCharges(alwcs []*AllowanceCharge, l *bill.Line) (*bill.Line, error) 
 		}
 	}
 	return l, nil
-}
-
-// calculateRequiredPrecision determines the decimal precision needed when
-// dividing a price by a base quantity to avoid rounding errors.
-func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
-	priceExp := price.Exp()
-
-	baseQtyNormalized := baseQuantity.Rescale(0)
-	baseQtyFloat := math.Abs(float64(baseQtyNormalized.Value()))
-
-	additionalDecimals := uint32(0)
-	if baseQtyFloat > 1 {
-		additionalDecimals = uint32(math.Ceil(math.Log10(baseQtyFloat)))
-	}
-
-	return priceExp + additionalDecimals
 }
