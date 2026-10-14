@@ -44,6 +44,7 @@ const (
 type LineAgreement struct {
 	OrderReference      *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	AdditionalReference *LineDocReference   `xml:"ram:AdditionalReferencedDocument,omitempty"`
+	GrossPrice          *GrossPrice         `xml:"ram:GrossPriceProductTradePrice,omitempty"`
 	NetPrice            *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
 	// The XSD sequence places the item seller after the prices, before
 	// ItemBuyerTradeParty.
@@ -66,6 +67,14 @@ type LineOrderReference struct {
 type NetPrice struct {
 	Amount       string    `xml:"ram:ChargeAmount"`
 	BaseQuantity *Quantity `xml:"ram:BasisQuantity,omitempty"`
+}
+
+// GrossPrice defines the structure of the GrossPriceProductTradePrice in the
+// CII standard: the list price (BT-148) and the price discount (BT-147).
+type GrossPrice struct {
+	Amount          string           `xml:"ram:ChargeAmount"`
+	BaseQuantity    *Quantity        `xml:"ram:BasisQuantity,omitempty"`
+	AllowanceCharge *AllowanceCharge `xml:"ram:AppliedTradeAllowanceCharge,omitempty"`
 }
 
 // LineDelivery defines the structure of the SpecifiedLineTradeDelivery in the CII standard
@@ -238,7 +247,7 @@ func newSubLine(sl *bill.SubLine, parent *bill.Line, id, parentID, ccy string) *
 		line.Agreement.NetPrice = &NetPrice{Amount: rescaleToCurrency(num.AmountZero, ccy)}
 		line.TradeSettlement.Sum = &Summation{Amount: rescaleToCurrency(num.AmountZero, ccy)}
 	} else {
-		line.Agreement.NetPrice = &NetPrice{Amount: it.Price.String()}
+		line.Agreement.GrossPrice, line.Agreement.NetPrice = newLinePrices(it, line.Quantity.Quantity.UnitCode)
 		line.TradeSettlement.Sum = &Summation{
 			Amount: rescaleToCurrency(sl.Total.Multiply(qty), ccy),
 		}
@@ -346,9 +355,6 @@ func newLine(l *bill.Line, ccy string) *Line {
 		},
 		Product: newProduct(it),
 		Agreement: &LineAgreement{
-			NetPrice: &NetPrice{
-				Amount: it.Price.String(),
-			},
 			AdditionalReference: newLineDocReference(l.Identifier),
 		},
 		Quantity: &LineDelivery{
@@ -359,6 +365,8 @@ func newLine(l *bill.Line, ccy string) *Line {
 		},
 		TradeSettlement: newTradeSettlement(l, ccy),
 	}
+
+	lineItem.Agreement.GrossPrice, lineItem.Agreement.NetPrice = newLinePrices(it, lineItem.Quantity.Quantity.UnitCode)
 
 	if l.Seller != nil {
 		lineItem.Agreement.ItemSellerParty = newParty(l.Seller)
@@ -492,4 +500,25 @@ func lineCurrency(inv *bill.Invoice, l *bill.Line) string {
 		return l.Item.Currency.String()
 	}
 	return inv.Currency.String()
+}
+
+// newLinePrices writes the item's price details: the net price (BT-146), the
+// list price and price discount (BT-148, BT-147), and the number of units
+// the prices apply to (BT-149), in the line quantity's unit (BT-150).
+func newLinePrices(it *org.Item, unitCode string) (*GrossPrice, *NetPrice) {
+	np := &NetPrice{Amount: it.Price.String()}
+	if it.Per != nil {
+		np.BaseQuantity = &Quantity{Amount: it.Per.String(), UnitCode: unitCode}
+	}
+	if it.List == nil {
+		return nil, np
+	}
+	gp := &GrossPrice{Amount: it.List.String(), BaseQuantity: np.BaseQuantity}
+	if it.Discount != nil {
+		gp.AllowanceCharge = &AllowanceCharge{
+			ChargeIndicator: Indicator{Value: false},
+			Amount:          it.Discount.String(),
+		}
+	}
+	return gp, np
 }

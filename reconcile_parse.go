@@ -89,7 +89,7 @@ func goblUnreconciledGroups(out *bill.Invoice, srcs []lineSource) map[string]boo
 // be undone if it did not reconcile the line.
 type priceSwap struct {
 	index int
-	price num.Amount
+	per   num.Amount
 }
 
 // goblDropConflictingBaseQuantities removes the base quantity from any line that
@@ -101,29 +101,17 @@ func goblDropConflictingBaseQuantities(srcs []lineSource, out *bill.Invoice) []p
 		if i >= len(out.Lines) {
 			break
 		}
-		docLine := src.doc
 		line := out.Lines[i]
-		if line == nil || line.Item == nil || line.Item.Price == nil || line.Total == nil {
+		if line == nil || line.Item == nil || line.Item.Per == nil || line.Total == nil {
 			continue
 		}
-		if docLine.Agreement == nil || !goblLineIsSummed(docLine) || len(line.Breakdown) > 0 {
-			continue
-		}
-		np := docLine.Agreement.NetPrice
-		if np == nil || np.BaseQuantity == nil || np.BaseQuantity.Amount == "" {
-			continue
-		}
-		declared, ok := goblDeclaredLineAmount(docLine)
+		declared, ok := goblDeclaredLineAmount(src.doc)
 		if !ok || declared.Equals(*line.Total) {
 			continue
 		}
 		// Retry without the base quantity, the only other reading available.
-		price, err := num.AmountFromString(np.Amount)
-		if err != nil {
-			continue
-		}
-		swaps = append(swaps, priceSwap{index: i, price: *line.Item.Price})
-		line.Item.Price = &price
+		swaps = append(swaps, priceSwap{index: i, per: *line.Item.Per})
+		line.Item.Per = nil
 	}
 	return swaps
 }
@@ -144,8 +132,8 @@ func goblRestoreBaseQuantities(srcs []lineSource, out *bill.Invoice, swaps []pri
 		if ok && declared.Equals(*line.Total) {
 			continue
 		}
-		price := s.price
-		line.Item.Price = &price
+		per := s.per
+		line.Item.Per = &per
 		restored = true
 	}
 	return restored

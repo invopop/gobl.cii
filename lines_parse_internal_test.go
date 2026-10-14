@@ -5,12 +5,16 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const testCostRef = "COST-1"
+const (
+	testCostRef      = "COST-1"
+	testListMismatch = "100.00"
+)
 
 func TestGoblLineAgreement(t *testing.T) {
 	ref := func(s string) *string { return &s }
@@ -229,4 +233,69 @@ func TestLineParseDefensive(t *testing.T) {
 	assert.False(t, goblCanFold(noQuantity, nil, nil), "parent without quantity")
 
 	assert.False(t, goblCanFold(group(), []*Line{{Quantity: qty}}, nil), "child without settlement")
+}
+
+func TestGoblLinePriceDetails(t *testing.T) {
+	read := func(agmt *LineAgreement) (*org.Item, error) {
+		price, err := goblLinePrice(agmt.NetPrice)
+		if err != nil {
+			return nil, err
+		}
+		item := &org.Item{Price: &price}
+		return item, goblLinePriceDetails(agmt, item)
+	}
+	gross := func(list, discount string) *GrossPrice {
+		gp := &GrossPrice{Amount: list}
+		if discount != "" {
+			gp.AllowanceCharge = &AllowanceCharge{Amount: discount}
+		}
+		return gp
+	}
+
+	t.Run("a list price less the discount", func(t *testing.T) {
+		item, err := read(&LineAgreement{NetPrice: &NetPrice{Amount: "108.00"}, GrossPrice: gross("120.00", "12.00")})
+		require.NoError(t, err)
+		assert.Equal(t, "120.00", item.List.String())
+		assert.Equal(t, "12.00", item.Discount.String())
+	})
+	t.Run("a list price with no discount", func(t *testing.T) {
+		item, err := read(&LineAgreement{NetPrice: &NetPrice{Amount: "120.00"}, GrossPrice: gross("120.00", "")})
+		require.NoError(t, err)
+		assert.Equal(t, "120.00", item.List.String())
+		assert.Nil(t, item.Discount)
+	})
+	t.Run("a list price that does not come to the net price", func(t *testing.T) {
+		item, err := read(&LineAgreement{NetPrice: &NetPrice{Amount: testListMismatch}, GrossPrice: gross("120.00", "12.00")})
+		require.NoError(t, err)
+		assert.Nil(t, item.List)
+	})
+	t.Run("a basis quantity on the gross price only", func(t *testing.T) {
+		gp := gross("120.00", "")
+		gp.BaseQuantity = &Quantity{Amount: "100"}
+		item, err := read(&LineAgreement{NetPrice: &NetPrice{Amount: "120.00"}, GrossPrice: gp})
+		require.NoError(t, err)
+		assert.Equal(t, "100", item.Per.String())
+	})
+	t.Run("a basis quantity of one", func(t *testing.T) {
+		item, err := read(&LineAgreement{NetPrice: &NetPrice{Amount: testTenth, BaseQuantity: &Quantity{Amount: "1"}}})
+		require.NoError(t, err)
+		assert.Nil(t, item.Per)
+	})
+	t.Run("invalid amounts", func(t *testing.T) {
+		_, err := read(&LineAgreement{NetPrice: &NetPrice{Amount: testTenth, BaseQuantity: &Quantity{Amount: "x"}}})
+		assert.Error(t, err)
+		_, err = read(&LineAgreement{NetPrice: &NetPrice{Amount: testTenth}, GrossPrice: gross("x", "")})
+		assert.Error(t, err)
+		_, err = read(&LineAgreement{NetPrice: &NetPrice{Amount: testTenth}, GrossPrice: gross("11", "x")})
+		assert.Error(t, err)
+
+		assert.False(t, goblHasPriceDetails(&Line{}))
+		assert.False(t, goblHasPriceDetails(&Line{Agreement: &LineAgreement{NetPrice: &NetPrice{Amount: "x"}}}))
+		assert.False(t, goblHasPriceDetails(&Line{Agreement: &LineAgreement{NetPrice: &NetPrice{Amount: "1", BaseQuantity: &Quantity{Amount: "x"}}}}))
+	})
+	t.Run("a parent with price details does not fold", func(t *testing.T) {
+		parent := &Line{Agreement: &LineAgreement{NetPrice: &NetPrice{Amount: testTenth, BaseQuantity: &Quantity{Amount: "10"}}}}
+		assert.True(t, goblHasPriceDetails(parent))
+		assert.False(t, goblCanFold(parent, nil, map[string]*taxCategoryInfo{}))
+	})
 }

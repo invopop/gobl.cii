@@ -286,10 +286,10 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 		}
 		if instr.DirectDebit.Ref != "" {
 			if stlm.PaymentTerms == nil {
-				stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref}}
+				stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref.String()}}
 			} else {
 				for _, term := range stlm.PaymentTerms {
-					term.Mandate = instr.DirectDebit.Ref
+					term.Mandate = instr.DirectDebit.Ref.String()
 				}
 			}
 		}

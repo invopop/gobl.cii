@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "70ac07ff1e8883138d329cd1aff5e3eef237f33512886a6d34dda76eef830b8e"
+			"val": "338557bbe9af6063bb55443feb95d9bc11841dfefd0f767300b23d5c97f3f073"
 		}
 	},
 	"doc": {
@@ -120,15 +120,6 @@
 			}
 		},
 		"payment": {
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2025-05-10",
-						"amount": "195.00",
-						"percent": "100%"
-					}
-				]
-			},
 			"advances": [
 				{
 					"date": "2025-04-10",
@@ -139,7 +130,16 @@
 						"last4": "4444"
 					}
 				}
-			]
+			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-05-10",
+						"amount": "-5.00",
+						"percent": "100%"
+					}
+				]
+			}
 		},
 		"totals": {
 			"sum": "200.00",

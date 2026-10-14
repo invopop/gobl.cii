@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func summedLine(sum string) *Line {
@@ -31,28 +32,27 @@ func TestReconcileDefensive(t *testing.T) {
 	})
 
 	t.Run("base quantities", func(t *testing.T) {
-		withBase := func(amount string) *Line {
-			l := summedLine("20.00")
-			l.Agreement = &LineAgreement{NetPrice: &NetPrice{Amount: amount, BaseQuantity: &Quantity{Amount: "2"}}}
-			return l
-		}
 		srcs := []lineSource{
+			{doc: summedLine("20.00")},
 			{doc: summedLine("10.00")},
-			{doc: summedLine("10.00")},
-			{doc: &Line{TradeSettlement: &TradeSettlement{Sum: &Summation{Amount: "20.00"}}}},
-			{doc: withBase("bad")},
-			{doc: withBase("10.00")},
+			{doc: summedLine("99.00")},
+			{doc: &Line{}},
 		}
-		line := func() *bill.Line {
+		line := func(per *num.Amount) *bill.Line {
 			p := price
 			tt := total
-			return &bill.Line{Item: &org.Item{Price: &p}, Total: &tt}
+			return &bill.Line{Item: &org.Item{Price: &p, Per: per}, Total: &tt}
 		}
-		out := &bill.Invoice{Lines: []*bill.Line{nil, line(), line(), line()}}
-		assert.Empty(t, goblDropConflictingBaseQuantities(srcs, out))
+		two := num.MakeAmount(2, 0)
+		out := &bill.Invoice{Lines: []*bill.Line{nil, line(&two), line(&two), line(&two)}}
+		swaps := goblDropConflictingBaseQuantities(srcs, out)
+		require.Len(t, swaps, 1)
+		assert.Equal(t, 2, swaps[0].index)
+		assert.Nil(t, out.Lines[2].Item.Per)
 
-		swaps := []priceSwap{{index: 9}, {index: 0}, {index: 1, price: price}}
-		assert.False(t, goblRestoreBaseQuantities(srcs, out, swaps))
+		swaps = append(swaps, priceSwap{index: 9}, priceSwap{index: 0})
+		assert.True(t, goblRestoreBaseQuantities(srcs, out, swaps))
+		assert.Equal(t, "2", out.Lines[2].Item.Per.String())
 	})
 
 	t.Run("declared totals with missing lines", func(t *testing.T) {
