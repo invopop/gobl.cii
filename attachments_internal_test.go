@@ -10,7 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testDocID = "DOC-1"
+const (
+	testDocID  = "DOC-1"
+	testDocURL = "https://example.com/ts.pdf"
+)
 
 // emptyInvoice builds the minimum structure the attachment helpers write into.
 func emptyInvoice() *Invoice {
@@ -25,7 +28,7 @@ func TestAddAttachments(t *testing.T) {
 	t.Run("every field maps across", func(t *testing.T) {
 		out := emptyInvoice()
 		out.addAttachments(&bill.Invoice{Attachments: []*org.Attachment{
-			{Code: testDocID, Description: "Timesheet", URL: "https://example.com/ts.pdf"},
+			{Code: testDocID, Description: "Timesheet", URL: testDocURL},
 		}})
 
 		docs := out.Transaction.Agreement.AdditionalDocument
@@ -33,7 +36,7 @@ func TestAddAttachments(t *testing.T) {
 		assert.Equal(t, AdditionalDocumentTypeAttachment, docs[0].TypeCode)
 		assert.Equal(t, testDocID, docs[0].ID)
 		assert.Equal(t, "Timesheet", docs[0].Name)
-		assert.Equal(t, "https://example.com/ts.pdf", docs[0].URIID)
+		assert.Equal(t, testDocURL, docs[0].URIID)
 	})
 
 	t.Run("an attachment with nothing set still declares its type", func(t *testing.T) {
@@ -70,12 +73,12 @@ func TestGoblAttachments(t *testing.T) {
 			TypeCode: AdditionalDocumentTypeAttachment,
 			ID:       testDocID,
 			Name:     "Timesheet",
-			URIID:    "https://example.com/ts.pdf",
+			URIID:    testDocURL,
 		}})
 		require.Len(t, got, 1)
 		assert.Equal(t, testDocID, got[0].Code.String())
 		assert.Equal(t, "Timesheet", got[0].Description)
-		assert.Equal(t, "https://example.com/ts.pdf", got[0].URL)
+		assert.Equal(t, testDocURL, got[0].URL)
 	})
 
 	t.Run("documents of another type are not attachments", func(t *testing.T) {
@@ -185,7 +188,7 @@ func TestEmbeddedAndURIAttachment(t *testing.T) {
 		out.Transaction.Agreement.AdditionalDocument = []*AdditionalDocument{{
 			TypeCode:               AdditionalDocumentTypeAttachment,
 			ID:                     testDocID,
-			URIID:                  "https://example.com/ts.pdf",
+			URIID:                  testDocURL,
 			AttachmentBinaryObject: &BinaryObject{Value: value},
 		}}
 		return out
@@ -207,7 +210,7 @@ func TestEmbeddedAndURIAttachment(t *testing.T) {
 
 			atts := goblAttachments(out.Transaction.Agreement.AdditionalDocument)
 			require.Len(t, atts, 1)
-			assert.Equal(t, "https://example.com/ts.pdf", atts[0].URL)
+			assert.Equal(t, testDocURL, atts[0].URL)
 			assert.Empty(t, out.ExtractBinaryAttachments())
 		})
 	}
