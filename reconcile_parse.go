@@ -308,7 +308,7 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice, srcs []lineSource) 
 		out.Payment.Terms.CalculateDues(out.Currency.Def().Zero(), t.Payable)
 	}
 
-	out.SetTags(tax.TagBypass)
+	out.SetTags(append(out.GetTags(), tax.TagBypass)...)
 	return out.Calculate()
 }
 

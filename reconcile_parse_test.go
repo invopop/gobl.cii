@@ -1,6 +1,8 @@
 package cii_test
 
 import (
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/invopop/gobl/bill"
@@ -99,4 +101,20 @@ func TestParseCtoGZeroPriceLines(t *testing.T) {
 	assert.Equal(t, "15.78", cat.Rates[0].Base.String())
 	assert.Equal(t, "3.36", cat.Rates[1].Base.String())
 	assert.Equal(t, "0.29", cat.Rates[1].Amount.String())
+}
+
+// TestParseCtoGTypeCodeTags covers the tags a type code implies, which stay
+// next to the bypass tag when the declared totals are kept.
+func TestParseCtoGTypeCodeTags(t *testing.T) {
+	data, err := os.ReadFile(dataPath(pathParse, "line-totals-mismatch.xml"))
+	require.NoError(t, err)
+	doc := strings.Replace(string(data), `<ram:TypeCode>380</ram:TypeCode>`, `<ram:TypeCode>389</ram:TypeCode>`, 1)
+
+	e, err := parseCII([]byte(doc))
+	require.NoError(t, err)
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.Equal(t, bill.InvoiceTypeStandard, inv.Type)
+	assert.True(t, inv.HasTags(tax.TagSelfBilled, tax.TagBypass))
 }
