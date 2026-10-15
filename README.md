@@ -73,6 +73,8 @@ This package provides the base CII import and export, and the formats that apply
 
 CII invoices that declare no known specification are imported under the `cii` key, but cannot be exported.
 
+A format lists the GOBL schemas it imports into and exports from in `Import` and `Export`. Formats without `Import` schemas are export-only and never detected. This is the case for formats whose documents only differ from another format's by their container: Factur-X and ZUGFeRD EN 16931 documents declare exactly the EN 16931 guideline, as only their PDF tells them apart, so they are imported as `cii+en16931-v2017`.
+
 The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported CII document, and an import function the CII document and the imported envelope, before it is calculated.
 
 Regional formats live in their own modules, which register them with `cii.RegisterFormats` when imported, making them available to `FindFormat`, `Import`, and the GOBL `convert` register:

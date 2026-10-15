@@ -37,8 +37,13 @@ type Format struct {
 	Name i18n.String
 	// Countries where the format applies. Empty means no restriction.
 	Countries []l10n.Code
-	// Schemas of the GOBL documents the format converts, in both directions.
-	Schemas []schema.ID
+	// Import lists the schemas of the GOBL documents the format's documents
+	// are imported into. Formats without any are never detected, such as
+	// those whose documents only differ from another format's by their
+	// container.
+	Import []schema.ID
+	// Export lists the schemas of the GOBL documents the format exports.
+	Export []schema.ID
 	// GuidelineID identifies the specification (BT-24).
 	GuidelineID string
 	// BusinessID identifies the business process (BT-23).
@@ -76,7 +81,8 @@ func (f *Format) Is(f2 Format) bool {
 var FormatEN16931 = Format{
 	Key:         "cii+en16931-v2017",
 	Name:        i18n.NewString("CII EN 16931:2017"),
-	Schemas:     []schema.ID{invoiceSchema},
+	Import:      []schema.ID{invoiceSchema},
+	Export:      []schema.ID{invoiceSchema},
 	GuidelineID: GuidelineIDEN16931,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
@@ -87,7 +93,8 @@ var FormatEN16931 = Format{
 var FormatPeppol = Format{
 	Key:         "cii+peppol+bis-v3",
 	Name:        i18n.NewString("CII Peppol BIS Billing 3"),
-	Schemas:     []schema.ID{invoiceSchema},
+	Import:      []schema.ID{invoiceSchema},
+	Export:      []schema.ID{invoiceSchema},
 	GuidelineID: GuidelineIDEN16931 + "#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
@@ -125,7 +132,8 @@ func FormatFor(key cbc.Key) *Format {
 }
 
 // FindFormat looks up a registered format by GuidelineID and optionally
-// BusinessID. Returns nil if no matching format is found.
+// BusinessID, among those with Import schemas. Returns nil if no matching
+// format is found.
 //
 // The lookup logic works as follows:
 //  1. Formats whose Match function claims the document
@@ -133,16 +141,21 @@ func FormatFor(key cbc.Key) *Format {
 //  3. If not found, tries to match on OutputGuidelineID (for parsing incoming documents)
 //  4. Formats whose Fallback function claims the document
 func FindFormat(guidelineID string, businessID string) *Format {
+	list := make([]*Format, 0, len(formats))
 	for i := range formats {
-		f := &formats[i]
+		if len(formats[i].Import) > 0 {
+			list = append(list, &formats[i])
+		}
+	}
+
+	for _, f := range list {
 		if f.Match != nil && f.Match(guidelineID, businessID) {
 			return f
 		}
 	}
 
 	// First pass: try to match on full GuidelineID
-	for i := range formats {
-		f := &formats[i]
+	for _, f := range list {
 		if f.GuidelineID == guidelineID {
 			if f.BusinessID != "" && businessID != "" && f.BusinessID != businessID {
 				continue
@@ -152,15 +165,13 @@ func FindFormat(guidelineID string, businessID string) *Format {
 	}
 
 	// Second pass: try to match on OutputGuidelineID (for parsing incoming documents)
-	for i := range formats {
-		f := &formats[i]
+	for _, f := range list {
 		if f.OutputGuidelineID != "" && f.OutputGuidelineID == guidelineID {
 			return f
 		}
 	}
 
-	for i := range formats {
-		f := &formats[i]
+	for _, f := range list {
 		if f.Fallback != nil && f.Fallback(guidelineID, businessID) {
 			return f
 		}
