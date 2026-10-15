@@ -40,13 +40,14 @@ func (c *converter) Formats() []*convert.Format {
 	}
 	for _, f := range c.formats {
 		list = append(list, &convert.Format{
-			Key:       f.Key,
-			Name:      f.Name,
-			MIME:      mimeXML,
-			Syntax:    "cii",
-			Countries: f.Countries,
-			Import:    f.Import,
-			Export:    f.Export,
+			Key:         f.Key,
+			Name:        f.Name,
+			MIME:        mimeXML,
+			Syntax:      "cii",
+			Countries:   f.Countries,
+			Import:      f.Import,
+			Export:      f.Export,
+			Attachments: f.Attachments,
 		})
 	}
 	return list
@@ -70,13 +71,22 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 }
 
 // Import decodes the data and imports it, determining the format from the
-// document in the same way as Detect.
-func (c *converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
+// document in the same way as Detect, and provides the files embedded in
+// invoices as attachments.
+func (c *converter) Import(_ cbc.Key, data []byte) (*convert.ImportResult, error) {
 	doc, err := Decode(data)
 	if err != nil {
 		return nil, err
 	}
-	return Import(doc)
+	env, err := Import(doc)
+	if err != nil {
+		return nil, err
+	}
+	res := &convert.ImportResult{Envelope: env}
+	if inv, ok := doc.(*Invoice); ok {
+		res.Attachments = convertAttachments(inv.ExtractBinaryAttachments())
+	}
+	return res, nil
 }
 
 // Accepts checks the document includes the addons of the format.
@@ -96,16 +106,53 @@ func (c *converter) Accepts(key cbc.Key, env *gobl.Envelope) error {
 	return nil
 }
 
-func (c *converter) Export(key cbc.Key, env *gobl.Envelope) ([]byte, error) {
+// Export exports the envelope in the format, embedding the attachments.
+func (c *converter) Export(key cbc.Key, env *gobl.Envelope, opts *convert.ExportOptions) ([]byte, error) {
 	f := c.format(key)
 	if f == nil {
 		return nil, ErrUnsupportedDocumentType
 	}
-	doc, err := Export(env, WithFormat(*f))
+	doc, err := Export(env, WithFormat(*f), WithAttachments(binaryAttachments(opts.Attachments)...))
 	if err != nil {
 		return nil, err
 	}
 	return Encode(doc)
+}
+
+// binaryAttachments provides the register's attachments as CII binary
+// attachments, identified by their name when they have no ID.
+func binaryAttachments(atts []*convert.Attachment) []BinaryAttachment {
+	out := make([]BinaryAttachment, len(atts))
+	for i, a := range atts {
+		id := a.ID
+		if id == "" {
+			id = a.Name
+		}
+		out[i] = BinaryAttachment{
+			ID:          id,
+			Description: a.Description,
+			Data:        a.Data,
+			MimeCode:    a.MIME,
+			Filename:    a.Name,
+		}
+	}
+	return out
+}
+
+// convertAttachments provides CII binary attachments as the register's
+// attachments.
+func convertAttachments(atts []BinaryAttachment) []*convert.Attachment {
+	out := make([]*convert.Attachment, len(atts))
+	for i, a := range atts {
+		out[i] = &convert.Attachment{
+			ID:          a.ID,
+			Name:        a.Filename,
+			Description: a.Description,
+			MIME:        a.MimeCode,
+			Data:        a.Data,
+		}
+	}
+	return out
 }
 
 func (c *converter) format(key cbc.Key) *Format {
