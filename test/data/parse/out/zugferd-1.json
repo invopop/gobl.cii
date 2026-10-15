@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "23e5657ccf9887a00cf8b89ddaed40343fa064147438e5c1a32629520918efcc"
+			"val": "5de63f992daf8c305fe2aa620d3a6823a66dd5166b47f21a92002782584b98a8"
 		}
 	},
 	"doc": {
@@ -77,9 +77,6 @@
 					"name": "Kunstrasen grün 3m breit",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4012345001235",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -121,9 +118,6 @@
 					"name": "Schweinesteak",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000050986428",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -159,9 +153,6 @@
 					"name": "Mineralwasser Medium 12 x 1,0l PET",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000001234561",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -195,9 +186,6 @@
 					"ref": "PFA5",
 					"name": "Pfand",
 					"identities": [
-						{
-							"code": ""
-						},
 						{
 							"code": "4000001234578",
 							"ext": {

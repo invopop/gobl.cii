@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
-	"github.com/invopop/gobl/tax"
 )
 
 var paymentMeansMap = map[string]cbc.Key{
@@ -26,7 +25,7 @@ var paymentMeansMap = map[string]cbc.Key{
 func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 	pymt := &bill.PaymentDetails{}
 
-	if stlm.Payee != nil {
+	if stlm.Payee != nil && stlm.Payee.Name != "" {
 		payee := &org.Party{Name: cleanString(stlm.Payee.Name)}
 		if stlm.Payee.PostalTradeAddress != nil {
 			payee.Addresses = []*org.Address{
@@ -49,6 +48,9 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 
 	if len(stlm.Advance) > 0 {
 		for _, ap := range stlm.Advance {
+			if ap.Amount == "" {
+				continue
+			}
 			amt, err := num.AmountFromString(ap.Amount)
 			if err != nil {
 				return nil, err
@@ -154,10 +156,8 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 	pm := stlm.PaymentMeans[0]
 	inst := &pay.Instructions{
 		Key: goblPaymentMeansCode(pm.TypeCode),
-		Ext: tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyPaymentMeans: cbc.Code(pm.TypeCode),
-		}),
 	}
+	inst.Ext = inst.Ext.Set(untdid.ExtKeyPaymentMeans, cbc.Code(pm.TypeCode))
 
 	// BT-83: Payment reference
 	if stlm.PaymentReference != "" {
@@ -168,7 +168,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		inst.Detail = cleanString(pm.Information)
 	}
 
-	if pm.Card != nil {
+	if pm.Card != nil && (pm.Card.ID != "" || pm.Card.Name != "") {
 		card := pm.Card
 		inst.Card = &pay.Card{}
 		if len(card.ID) >= 4 {
@@ -196,7 +196,9 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		if pm.CreditorInstitution != nil && pm.CreditorInstitution.BIC != "" {
 			ct.BIC = cbc.Code(pm.CreditorInstitution.BIC)
 		}
-		inst.CreditTransfer = append(inst.CreditTransfer, ct)
+		if ct.IBAN != "" || ct.Name != "" || ct.Number != "" || ct.BIC != "" {
+			inst.CreditTransfer = append(inst.CreditTransfer, ct)
+		}
 	}
 
 	// BT-89, BT-90, BT-91: Direct debit details
