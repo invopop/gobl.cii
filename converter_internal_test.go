@@ -8,7 +8,7 @@ import (
 
 func TestConverterUnknownKey(t *testing.T) {
 	c := &converter{formats: []Format{FormatEN16931}}
-	assert.True(t, c.Accepts(FormatEN16931.Key, nil))
+	assert.ErrorIs(t, c.Accepts("cii+unknown", nil), ErrUnsupportedDocumentType)
 	_, err := c.Export("cii+unknown", nil)
 	assert.ErrorIs(t, err, ErrUnsupportedDocumentType)
 }

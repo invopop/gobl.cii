@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6db1605db8e3ab1dc1c977def711037149c6db32b0ea83ef42d817385453e5cb"
+			"val": "148f11014a11b9a2b17c26e571367ceb06602e510b91211e92d1e0ecfd14f51c"
 		}
 	},
 	"doc": {
@@ -163,6 +163,8 @@
 						}
 					],
 					"description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
+					"list": "1498",
+					"discount": "225",
 					"price": "1273.00",
 					"origin": "DE",
 					"ext": {
@@ -427,21 +429,21 @@
 			"payee": {
 				"name": "Ebeneser Scrooge AS"
 			},
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2013-07-20",
-						"amount": "1801.78",
-						"percent": "100%"
-					}
-				],
-				"notes": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date"
-			},
 			"advances": [
 				{
 					"amount": "1000.00"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-07-20",
+						"amount": "801.78",
+						"percent": "100%"
+					}
+				],
+				"notes": "2 % discount if paid within 2 days\nPenalty percentage 10% from due date"
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",
