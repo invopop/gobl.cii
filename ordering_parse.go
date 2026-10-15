@@ -35,7 +35,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		ord.Cost = cbc.Code(tr.Settlement.AccountingAccount.ID)
 	}
 
-	if tr.Agreement.Sales != nil {
+	if tr.Agreement.Sales != nil && tr.Agreement.Sales.ID != "" {
 		ord.Sales = []*org.DocumentRef{
 			{
 				Code: cbc.Code(tr.Agreement.Sales.ID),
@@ -43,7 +43,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		}
 	}
 
-	if tr.Agreement.Purchase != nil {
+	if tr.Agreement.Purchase != nil && tr.Agreement.Purchase.ID != "" {
 		ord.Purchases = []*org.DocumentRef{
 			{
 				Code: cbc.Code(tr.Agreement.Purchase.ID),
@@ -51,7 +51,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		}
 	}
 
-	if tr.Agreement.Project != nil {
+	if tr.Agreement.Project != nil && tr.Agreement.Project.ID != "" {
 		ord.Projects = []*org.DocumentRef{
 			{
 				Code:        cbc.Code(tr.Agreement.Project.ID),
@@ -60,7 +60,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		}
 	}
 
-	if tr.Agreement.Contract != nil {
+	if tr.Agreement.Contract != nil && tr.Agreement.Contract.ID != "" {
 		ord.Contracts = []*org.DocumentRef{
 			{
 				Code: cbc.Code(tr.Agreement.Contract.ID),
@@ -90,11 +90,13 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		if tr.Settlement.Period.Description != nil {
 			per.Label = cleanString(*tr.Settlement.Period.Description)
 		}
-		ord.Period = per
+		if per.Start != nil || per.End != nil || per.Label != "" {
+			ord.Period = per
+		}
 	}
 
 	// Despatch, Receiving and Tender parsing
-	if tr.Delivery.Despatch != nil {
+	if tr.Delivery.Despatch != nil && tr.Delivery.Despatch.ID != "" {
 		ord.Despatch = []*org.DocumentRef{
 			{
 				Code: cbc.Code(tr.Delivery.Despatch.ID),
@@ -102,7 +104,7 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		}
 	}
 
-	if tr.Delivery.Receiving != nil {
+	if tr.Delivery.Receiving != nil && tr.Delivery.Receiving.ID != "" {
 		ord.Receiving = []*org.DocumentRef{
 			{
 				Code: cbc.Code(tr.Delivery.Receiving.ID),
@@ -112,6 +114,9 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 
 	if len(tr.Agreement.AdditionalDocument) > 0 {
 		for _, ref := range tr.Agreement.AdditionalDocument {
+			if ref.ID == "" {
+				continue
+			}
 			switch ref.TypeCode {
 			case AdditionalDocumentTypeTender:
 				if ord.Tender == nil {

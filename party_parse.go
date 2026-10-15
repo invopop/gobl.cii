@@ -67,15 +67,14 @@ func goblNewParty(party *Party) *org.Party {
 
 	// Global ID is not yet mapped to the ISO 6523 ICD, its identifier is used as the label
 	for _, gid := range party.GlobalID {
-		if gid == nil {
+		if gid == nil || gid.Value == "" {
 			continue
 		}
-		p.Identities = append(p.Identities, &org.Identity{
-			Ext: tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(gid.SchemeID),
-			}),
+		identity := &org.Identity{
 			Code: cbc.Code(gid.Value),
-		})
+		}
+		identity.Ext = identity.Ext.Set(iso.ExtKeySchemeID, cbc.Code(gid.SchemeID))
+		p.Identities = append(p.Identities, identity)
 	}
 
 	return p
@@ -92,14 +91,14 @@ func goblPartyContact(party *Party, p *org.Party) {
 				},
 			}
 		}
-		if party.Contact.Phone != nil {
+		if party.Contact.Phone != nil && party.Contact.Phone.CompleteNumber != "" {
 			p.Telephones = []*org.Telephone{
 				{
 					Number: party.Contact.Phone.CompleteNumber,
 				},
 			}
 		}
-		if party.Contact.Email != nil {
+		if party.Contact.Email != nil && party.Contact.Email.URIID != "" {
 			p.Emails = []*org.Email{
 				{
 					Address: cleanString(party.Contact.Email.URIID),
@@ -107,7 +106,7 @@ func goblPartyContact(party *Party, p *org.Party) {
 			}
 		}
 	}
-	if uc := party.URIUniversalCommunication; uc != nil {
+	if uc := party.URIUniversalCommunication; uc != nil && uc.ID.Value != "" {
 		if uc.ID.SchemeID == SchemeIDEmail {
 			p.Inboxes = []*org.Inbox{{Email: uc.ID.Value}}
 		} else {

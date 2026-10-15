@@ -467,19 +467,18 @@ func goblLineProduct(prod *Product, item *org.Item) {
 		item.Ref = cbc.Code(*prod.SellerAssignedID)
 	}
 
-	if prod.BuyerAssignedID != nil {
+	if prod.BuyerAssignedID != nil && *prod.BuyerAssignedID != "" {
 		item.Identities = append(item.Identities, &org.Identity{
 			Code: cbc.Code(*prod.BuyerAssignedID),
 		})
 	}
 
-	if prod.GlobalID != nil {
-		item.Identities = append(item.Identities, &org.Identity{
-			Ext: tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(prod.GlobalID.SchemeID),
-			}),
+	if prod.GlobalID != nil && prod.GlobalID.Value != "" {
+		id := &org.Identity{
 			Code: cbc.Code(prod.GlobalID.Value),
-		})
+		}
+		id.Ext = id.Ext.Set(iso.ExtKeySchemeID, cbc.Code(prod.GlobalID.SchemeID))
+		item.Identities = append(item.Identities, id)
 	}
 
 	if prod.Description != nil {
@@ -493,7 +492,7 @@ func goblLineProduct(prod *Product, item *org.Item) {
 	// BT-158: Item classification
 	// Use Label for the scheme ID to avoid conflicting with GlobalID detection,
 	// which relies on Ext[iso.ExtKeySchemeID].
-	if prod.Classification != nil && prod.Classification.Code != nil {
+	if prod.Classification != nil && prod.Classification.Code != nil && prod.Classification.Code.Value != "" {
 		id := &org.Identity{
 			Code: cbc.Code(prod.Classification.Code.Value),
 		}
@@ -509,12 +508,12 @@ func goblLineNotes(lineDoc *LineDoc, l *bill.Line) {
 	if lineDoc == nil || len(lineDoc.Note) == 0 {
 		return
 	}
-	l.Notes = make([]*org.Note, 0, len(lineDoc.Note))
 	for _, note := range lineDoc.Note {
-		n := &org.Note{}
-		if note.Content != "" {
-			n.Text = cleanString(strings.TrimSpace(note.Content))
+		text := cleanString(strings.TrimSpace(note.Content))
+		if text == "" {
+			continue
 		}
+		n := &org.Note{Text: text}
 		if note.SubjectCode != "" {
 			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
 		}
@@ -530,9 +529,7 @@ func goblLineAgreement(ag *LineAgreement, l *bill.Line) {
 			Code: cbc.Code(ag.AdditionalReference.ID),
 		}
 		if ag.AdditionalReference.RefCode != nil {
-			l.Identifier.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyReference: cbc.Code(*ag.AdditionalReference.RefCode),
-			})
+			l.Identifier.Ext = l.Identifier.Ext.Set(untdid.ExtKeyReference, cbc.Code(*ag.AdditionalReference.RefCode))
 		}
 	}
 
