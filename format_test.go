@@ -17,7 +17,8 @@ var (
 	formatTestMatch = cii.Format{
 		Key:         "cii+en16931-v2017+test-match",
 		Name:        i18n.NewString("CII Test Match"),
-		Schemas:     cii.FormatEN16931.Schemas,
+		Import:      cii.FormatEN16931.Import,
+		Export:      cii.FormatEN16931.Export,
 		GuidelineID: "urn:test:match",
 		Addons:      cii.FormatEN16931.Addons,
 		Match: func(guidelineID, businessID string) bool {
@@ -27,7 +28,8 @@ var (
 	formatTestOutput = cii.Format{
 		Key:               "cii+en16931-v2017+test-output",
 		Name:              i18n.NewString("CII Test Output"),
-		Schemas:           cii.FormatEN16931.Schemas,
+		Import:            cii.FormatEN16931.Import,
+		Export:            cii.FormatEN16931.Export,
 		GuidelineID:       "urn:test:output-in",
 		OutputGuidelineID: "urn:test:output-out",
 		Addons:            cii.FormatEN16931.Addons,
@@ -35,17 +37,25 @@ var (
 	formatTestFallback = cii.Format{
 		Key:         "cii+en16931-v2017+test-fallback",
 		Name:        i18n.NewString("CII Test Fallback"),
-		Schemas:     cii.FormatEN16931.Schemas,
+		Import:      cii.FormatEN16931.Import,
+		Export:      cii.FormatEN16931.Export,
 		GuidelineID: "urn:test:fallback",
 		Addons:      cii.FormatEN16931.Addons,
 		Fallback: func(_, businessID string) bool {
 			return businessID == "test-fallback"
 		},
 	}
+	formatTestExportOnly = cii.Format{
+		Key:         "cii+en16931-v2017+test-export-only",
+		Name:        i18n.NewString("CII Test Export Only"),
+		Export:      cii.FormatEN16931.Export,
+		GuidelineID: "urn:test:export-only",
+		Addons:      cii.FormatEN16931.Addons,
+	}
 )
 
 func init() {
-	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback)
+	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback, formatTestExportOnly)
 }
 
 func TestFindFormat(t *testing.T) {
@@ -62,6 +72,7 @@ func TestFindFormat(t *testing.T) {
 		{"match function", cii.GuidelineIDEN16931, "test-match", formatTestMatch.Key},
 		{"output guideline", "urn:test:output-out", "", formatTestOutput.Key},
 		{"fallback function", "urn:test:unknown", "test-fallback", formatTestFallback.Key},
+		{"export only", "urn:test:export-only", "", cbc.KeyEmpty},
 		{"unknown", "urn:test:unknown", "", cbc.KeyEmpty},
 	}
 	for _, tt := range tests {
@@ -94,6 +105,13 @@ func TestRegisterFormats(t *testing.T) {
 	f := convert.FormatFor(formatTestOutput.Key)
 	require.NotNil(t, f)
 	assert.Equal(t, cbc.Key("cii"), f.Syntax)
-	assert.Equal(t, formatTestOutput.Schemas, f.Import)
-	assert.Equal(t, formatTestOutput.Schemas, f.Export)
+	assert.Equal(t, formatTestOutput.Import, f.Import)
+	assert.Equal(t, formatTestOutput.Export, f.Export)
+
+	t.Run("export only", func(t *testing.T) {
+		f := convert.FormatFor(formatTestExportOnly.Key)
+		require.NotNil(t, f)
+		assert.Empty(t, f.Import)
+		assert.Equal(t, formatTestExportOnly.Export, f.Export)
+	})
 }
