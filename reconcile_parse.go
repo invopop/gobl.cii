@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
 )
@@ -205,8 +206,8 @@ func goblDeclaredTotalsAgree(in *Invoice, out *bill.Invoice, srcs []lineSource) 
 		}
 	}
 
-	if s.TaxTotalAmount != nil {
-		if declared, ok := goblDeclaredAmount(s.TaxTotalAmount.Amount); ok && !declared.Equals(t.Tax) {
+	if tt, _ := goblTaxTotals(in, out.Currency); tt != nil {
+		if declared, ok := goblDeclaredAmount(tt.Amount); ok && !declared.Equals(t.Tax) {
 			return false
 		}
 	}
@@ -287,8 +288,8 @@ func goblApplyDeclaredTotals(in *Invoice, out *bill.Invoice, srcs []lineSource) 
 			t.Payable = v
 		}
 	}
-	if s.TaxTotalAmount != nil {
-		if v, ok := declared(s.TaxTotalAmount.Amount); ok {
+	if tt, _ := goblTaxTotals(in, out.Currency); tt != nil {
+		if v, ok := declared(tt.Amount); ok {
 			t.Tax = v
 			// The breakdown must come from the document too, or it
 			// contradicts the total just set.
@@ -382,6 +383,24 @@ func goblSummary(in *Invoice) *Summary {
 		return nil
 	}
 	return in.Transaction.Settlement.Summary
+}
+
+// goblTaxTotals splits the declared VAT totals by currency: BT-110 is the one
+// in the invoice currency (BT-5), and any other is BT-111, in the VAT
+// accounting currency.
+func goblTaxTotals(in *Invoice, cur currency.Code) (doc, acc *TaxTotalAmount) {
+	s := goblSummary(in)
+	if s == nil {
+		return nil, nil
+	}
+	for _, tt := range s.TaxTotalAmount {
+		if currency.Code(tt.Currency) == cur {
+			doc = tt
+		} else {
+			acc = tt
+		}
+	}
+	return doc, acc
 }
 
 // goblDeclaredLineAmount reads a line's declared net amount (BT-131).

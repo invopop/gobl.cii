@@ -48,6 +48,26 @@ func TestParseCtoGDeclaredTotals(t *testing.T) {
 		assert.Equal(t, "1703.69", inv.Totals.Payable.String())
 	})
 
+	// BT-110 is the total in the invoice currency (BT-5), whichever order the
+	// totals come in; BT-111 gives the rate into the accounting currency.
+	for _, name := range []string{"tax-currency-totals.xml", "tax-currency-totals-reversed.xml"} {
+		t.Run(name, func(t *testing.T) {
+			e, err := parseInvoiceFrom(t, name)
+			require.NoError(t, err)
+
+			inv, ok := e.Extract().(*bill.Invoice)
+			require.True(t, ok)
+			assert.False(t, inv.HasTags(tax.TagBypass))
+			assert.Equal(t, "1050.00", inv.Totals.Tax.String())
+			assert.Equal(t, "6050.00", inv.Totals.Payable.String())
+
+			require.Len(t, inv.ExchangeRates, 1)
+			assert.Equal(t, "EUR", inv.ExchangeRates[0].From.String())
+			assert.Equal(t, "RON", inv.ExchangeRates[0].To.String())
+			assert.Equal(t, "5.085000", inv.ExchangeRates[0].Amount.String())
+		})
+	}
+
 	// A basis quantity contradicting the declared amount is dropped.
 	t.Run("basis quantity conflicting with the declared amount", func(t *testing.T) {
 		e, err := parseInvoiceFrom(t, "CII_example8.xml")

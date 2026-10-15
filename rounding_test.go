@@ -148,8 +148,8 @@ func assertAmountsFitCurrency(t *testing.T, out *cii.Invoice) {
 		check("BT-113 TotalPrepaidAmount", s.TotalPrepaidAmount)
 		check("BT-114 RoundingAmount", s.RoundingAmount)
 		check("BT-115 DuePayableAmount", s.DuePayableAmount)
-		if s.TaxTotalAmount != nil {
-			check("BT-110 TaxTotalAmount", s.TaxTotalAmount.Amount)
+		for _, tt := range s.TaxTotalAmount {
+			check("BT-110 TaxTotalAmount", tt.Amount)
 		}
 	}
 	for _, tx := range stlm.Tax {
@@ -208,8 +208,8 @@ func assertTotalsAddUp(t *testing.T, out *cii.Invoice) {
 
 	// BR-CO-15: BT-112 = BT-109 + BT-110.
 	var tax num.Amount
-	if s.TaxTotalAmount != nil {
-		tax = amount(s.TaxTotalAmount.Amount)
+	if len(s.TaxTotalAmount) > 0 {
+		tax = amount(s.TaxTotalAmount[0].Amount)
 	}
 	assert.Equal(t, amount(s.TaxBasisTotalAmount).Add(tax).String(), s.GrandTotalAmount, "BR-CO-15")
 
