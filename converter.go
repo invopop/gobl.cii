@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/convert"
 	"github.com/invopop/gobl/i18n"
+	"github.com/invopop/gobl/rules"
 	"github.com/invopop/gobl/schema"
 )
 
@@ -44,7 +45,6 @@ func (c *converter) Formats() []*convert.Format {
 			MIME:      mimeXML,
 			Syntax:    "cii",
 			Countries: f.Countries,
-			Addons:    f.Addons,
 			Import:    f.Schemas,
 			Export:    f.Schemas,
 		})
@@ -79,8 +79,21 @@ func (c *converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
 	return Import(doc)
 }
 
-func (c *converter) Accepts(_ cbc.Key, _ *gobl.Envelope) bool {
-	return true
+// Accepts checks the document includes the addons of the format.
+func (c *converter) Accepts(key cbc.Key, env *gobl.Envelope) error {
+	f := c.format(key)
+	if f == nil {
+		return ErrUnsupportedDocumentType
+	}
+	if len(f.Addons) == 0 {
+		return nil
+	}
+	doc := env.Extract()
+	set := convert.Rules(f.Key, rules.For(doc, convert.RequireAddons("01", f.Addons...)))
+	if fs := set.Validate(doc); fs != nil {
+		return fs
+	}
+	return nil
 }
 
 func (c *converter) Export(key cbc.Key, env *gobl.Envelope) ([]byte, error) {

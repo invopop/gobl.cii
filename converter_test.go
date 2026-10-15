@@ -4,10 +4,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/invopop/gobl"
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/convert"
+	"github.com/invopop/gobl/rules"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -80,11 +82,17 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, cii.FormatPeppol.Key, f.Key)
 	})
 
-	t.Run("export error", func(t *testing.T) {
+	t.Run("missing addon", func(t *testing.T) {
 		env := loadEnvelope(t, "en16931/invoice-complete.json")
 		env.Extract().(*bill.Invoice).SetAddons()
 		_, err := convert.Export(env, cii.FormatEN16931.Key)
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, convert.ErrNotSupported)
+		var ge *gobl.Error
+		require.ErrorAs(t, err, &ge)
+		require.NotNil(t, ge.Faults())
+		f := ge.Faults().First()
+		assert.Equal(t, rules.Code("CII-EN16931-V2017-BILL-INVOICE-01"), f.Code())
+		assert.Equal(t, []string{"$.$addons"}, f.Paths())
 	})
 }
 

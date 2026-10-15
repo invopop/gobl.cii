@@ -288,6 +288,11 @@
 			]
 		},
 		"payment": {
+			"advances": [
+				{
+					"amount": "19.43"
+				}
+			],
 			"terms": {
 				"due_dates": [
 					{
@@ -297,11 +302,6 @@
 					}
 				]
 			},
-			"advances": [
-				{
-					"amount": "19.43"
-				}
-			],
 			"instructions": {
 				"key": "debit-transfer",
 				"detail": "Paiement sur compte bancaire",
