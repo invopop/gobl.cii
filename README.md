@@ -62,6 +62,31 @@ To export into a format other than the default EN 16931, add it as an option. `E
 doc, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatPeppol))
 ```
 
+To embed files in the invoice, such as a PDF version of it, add them with `WithAttachments`. Each is written as an `AdditionalReferencedDocument` with an `AttachmentBinaryObject`:
+
+```go
+doc, err := cii.ExportInvoice(env,
+    cii.WithFormat(cii.FormatPeppol),
+    cii.WithAttachments(cii.BinaryAttachment{
+        ID:          "INV-001-PDF",
+        Description: "Invoice INV-001",
+        Data:        pdf,
+        MimeCode:    "application/pdf",
+        Filename:    "INV-001.pdf",
+    }),
+)
+```
+
+Through the GOBL `convert` register, pass them with `convert.WithAttachments`. Only formats that set `Attachments` embed them, using the attachment's name as its ID when it has none; the register refuses the others:
+
+```go
+out, err := convert.Export(env, "cii+peppol+bis-v3", convert.WithAttachments(&convert.Attachment{
+    Name: "INV-001.pdf",
+    MIME: "application/pdf",
+    Data: pdf,
+}))
+```
+
 #### Formats
 
 This package provides the base CII import and export, and the formats that apply in any country:
@@ -74,6 +99,8 @@ This package provides the base CII import and export, and the formats that apply
 CII invoices that declare no known specification are imported under the `cii` key, but cannot be exported.
 
 A format lists the GOBL schemas it imports into and exports from in `Import` and `Export`. Formats without `Import` schemas are export-only and never detected. This is the case for formats whose documents only differ from another format's by their container: Factur-X and ZUGFeRD EN 16931 documents declare exactly the EN 16931 guideline, as only their PDF tells them apart, so they are imported as `cii+en16931-v2017`.
+
+A format sets `Attachments` when its specification allows embedded files in additional referenced documents. `FormatEN16931` and `FormatPeppol` do.
 
 The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported CII document, and an import function the CII document and the imported envelope, before it is calculated.
 

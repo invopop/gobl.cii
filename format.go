@@ -57,6 +57,10 @@ type Format struct {
 	Version string
 	// Addons required by the format.
 	Addons []cbc.Key
+	// Attachments is true when the format's documents can embed files, such
+	// as a PDF version of the invoice, in additional referenced documents.
+	// The GOBL convert register only passes attachments to these formats.
+	Attachments bool
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
 	// Match optionally identifies the format's documents before the
@@ -86,6 +90,7 @@ var FormatEN16931 = Format{
 	GuidelineID: GuidelineIDEN16931,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
+	Attachments: true,
 	VESID:       vesIDEN16931CII,
 }
 
@@ -99,6 +104,7 @@ var FormatPeppol = Format{
 	BusinessID:  ProfileIDPeppolBilling,
 	Version:     VersionD16B,
 	Addons:      []cbc.Key{en16931.V2017},
+	Attachments: true,
 	VESID:       vesIDEN16931CII,
 }
 

@@ -96,6 +96,44 @@ func TestConverter(t *testing.T) {
 	})
 }
 
+func TestConverterExportAttachments(t *testing.T) {
+	pdf := &convert.Attachment{
+		ID:          "INV-PDF",
+		Name:        "invoice.pdf",
+		Description: "Invoice PDF",
+		MIME:        "application/pdf",
+		Data:        []byte("%PDF-1.7"),
+	}
+	t.Run("embedded", func(t *testing.T) {
+		env := loadEnvelope(t, "peppol/invoice-complete.json")
+		csv := &convert.Attachment{Name: "lines.csv", MIME: "text/csv", Data: []byte("a,b")}
+		out, err := convert.Export(env, cii.FormatPeppol.Key, convert.WithAttachments(pdf, csv))
+		require.NoError(t, err)
+
+		doc, err := cii.Decode(out.Data)
+		require.NoError(t, err)
+		atts := doc.(*cii.Invoice).ExtractBinaryAttachments()
+		require.Len(t, atts, 2)
+		assert.Equal(t, "INV-PDF", atts[0].ID)
+		assert.Equal(t, "Invoice PDF", atts[0].Description)
+		assert.Equal(t, "application/pdf", atts[0].MimeCode)
+		assert.Equal(t, "invoice.pdf", atts[0].Filename)
+		assert.Equal(t, []byte("%PDF-1.7"), atts[0].Data)
+		assert.Equal(t, "lines.csv", atts[1].ID, "named by the file without an ID")
+	})
+	t.Run("refused by formats that do not embed them", func(t *testing.T) {
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		_, err := convert.Export(env, formatTestExportOnly.Key, convert.WithAttachments(pdf))
+		assert.ErrorIs(t, err, convert.ErrNotSupported)
+		assert.ErrorContains(t, err, "does not embed attachments")
+	})
+	t.Run("formats", func(t *testing.T) {
+		assert.True(t, convert.FormatFor(cii.FormatEN16931.Key).Attachments)
+		assert.True(t, convert.FormatFor(cii.FormatPeppol.Key).Attachments)
+		assert.False(t, convert.FormatFor(formatTestExportOnly.Key).Attachments)
+	})
+}
+
 func TestReadHeader(t *testing.T) {
 	t.Run("invoice", func(t *testing.T) {
 		in := convert.NewInput(example1(t))

@@ -162,6 +162,9 @@ func Export(env *gobl.Envelope, opts ...Option) (Document, error) {
 	if err != nil {
 		return nil, err
 	}
+	for _, a := range o.attachments {
+		out.AddBinaryAttachment(a)
+	}
 	if err := o.format.runExportFuncs(env, out); err != nil {
 		return nil, err
 	}
@@ -179,8 +182,9 @@ func ExportInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 }
 
 type options struct {
-	format   Format
-	from, to cbc.URI
+	format      Format
+	from, to    cbc.URI
+	attachments []BinaryAttachment
 }
 
 // Option is used to define configuration options to use during the
@@ -203,6 +207,14 @@ func WithRouting(from, to cbc.URI) Option {
 	return func(o *options) {
 		o.from = from
 		o.to = to
+	}
+}
+
+// WithAttachments embeds files, such as a PDF version of the invoice, in the
+// exported invoice.
+func WithAttachments(atts ...BinaryAttachment) Option {
+	return func(o *options) {
+		o.attachments = append(o.attachments, atts...)
 	}
 }
 
