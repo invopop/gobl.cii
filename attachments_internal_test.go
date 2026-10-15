@@ -178,3 +178,19 @@ func TestBinaryAttachments(t *testing.T) {
 		assert.Empty(t, out.ExtractBinaryAttachments())
 	})
 }
+
+func TestEmbeddedOverURIAttachment(t *testing.T) {
+	payload := []byte("%PDF-1.4 not really a pdf")
+	out := emptyInvoice()
+	out.Transaction.Agreement.AdditionalDocument = []*AdditionalDocument{{
+		TypeCode:               AdditionalDocumentTypeAttachment,
+		ID:                     testDocID,
+		URIID:                  "https://example.com/doc.pdf",
+		AttachmentBinaryObject: &BinaryObject{Value: base64.StdEncoding.EncodeToString(payload)},
+	}}
+
+	assert.Empty(t, goblAttachments(out.Transaction.Agreement.AdditionalDocument))
+	bins := out.ExtractBinaryAttachments()
+	require.Len(t, bins, 1)
+	assert.Equal(t, payload, bins[0].Data)
+}
