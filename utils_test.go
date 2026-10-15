@@ -10,6 +10,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -45,20 +48,24 @@ func TestTypeCodeParse(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected string
+		expected cbc.Key
+		tags     []cbc.Key
 	}{
-		{"Standard invoice", "380", "standard"},
-		{"Credit note", "381", "credit-note"},
-		{"Corrective invoice", "384", "corrective"},
-		{"Proforma invoice", "325", "proforma"},
-		{"Debit note", "383", "debit-note"},
-		{"Unknown type code", "999", "other"},
+		{"Standard invoice", "380", bill.InvoiceTypeStandard, nil},
+		{"Credit note", "381", bill.InvoiceTypeCreditNote, nil},
+		{"Corrective invoice", "384", bill.InvoiceTypeCorrective, nil},
+		{"Proforma invoice", "325", bill.InvoiceTypeProforma, nil},
+		{"Debit note", "383", bill.InvoiceTypeDebitNote, nil},
+		{"Self-billed invoice", "389", bill.InvoiceTypeStandard, []cbc.Key{tax.TagSelfBilled}},
+		{"Partial invoice", "326", bill.InvoiceTypeStandard, []cbc.Key{tax.TagPartial}},
+		{"Unknown type code", "999", bill.InvoiceTypeOther, nil},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := typeCodeParse(tt.input)
-			assert.Equal(t, tt.expected, string(result))
+			result, tags := typeCodeParse(tt.input)
+			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.tags, tags)
 		})
 	}
 }
