@@ -71,13 +71,22 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 }
 
 // Import decodes the data and imports it, determining the format from the
-// document in the same way as Detect.
-func (c *converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
+// document in the same way as Detect, and provides the files embedded in
+// invoices as attachments.
+func (c *converter) Import(_ cbc.Key, data []byte) (*convert.ImportResult, error) {
 	doc, err := Decode(data)
 	if err != nil {
 		return nil, err
 	}
-	return Import(doc)
+	env, err := Import(doc)
+	if err != nil {
+		return nil, err
+	}
+	res := &convert.ImportResult{Envelope: env}
+	if inv, ok := doc.(*Invoice); ok {
+		res.Attachments = convertAttachments(inv.ExtractBinaryAttachments())
+	}
+	return res, nil
 }
 
 // Accepts checks the document includes the addons of the format.
@@ -125,6 +134,22 @@ func binaryAttachments(atts []*convert.Attachment) []BinaryAttachment {
 			Data:        a.Data,
 			MimeCode:    a.MIME,
 			Filename:    a.Name,
+		}
+	}
+	return out
+}
+
+// convertAttachments provides CII binary attachments as the register's
+// attachments.
+func convertAttachments(atts []BinaryAttachment) []*convert.Attachment {
+	out := make([]*convert.Attachment, len(atts))
+	for i, a := range atts {
+		out[i] = &convert.Attachment{
+			ID:          a.ID,
+			Name:        a.Filename,
+			Description: a.Description,
+			MIME:        a.MimeCode,
+			Data:        a.Data,
 		}
 	}
 	return out

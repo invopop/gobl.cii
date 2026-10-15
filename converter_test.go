@@ -1,6 +1,9 @@
 package cii_test
 
 import (
+	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -45,9 +48,10 @@ func TestConverter(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, cii.KeyCII, f.Key)
 
-		env, err := convert.Import([]byte(data))
+		res, err := convert.Import([]byte(data))
 		require.NoError(t, err)
-		_, ok := env.Extract().(*bill.Invoice)
+		assert.Equal(t, cii.KeyCII, res.Format.Key)
+		_, ok := res.Envelope.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 	})
 
@@ -61,14 +65,30 @@ func TestConverter(t *testing.T) {
 	})
 
 	t.Run("import", func(t *testing.T) {
-		env, err := convert.Import(example1(t))
+		res, err := convert.Import(example1(t))
 		require.NoError(t, err)
-		inv, ok := env.Extract().(*bill.Invoice)
+		inv, ok := res.Envelope.Extract().(*bill.Invoice)
 		require.True(t, ok)
 		assert.Equal(t, "12115118", inv.Code.String())
+		assert.Empty(t, res.Attachments)
 
-		_, err = convert.Import([]byte(`<rsm:CrossIndustryInvoice xmlns:rsm="`+cii.NamespaceRSM+`"><`), cii.KeyCII)
+		_, err = convert.Import([]byte(`<rsm:CrossIndustryInvoice xmlns:rsm="`+cii.NamespaceRSM+`"><`), convert.WithFormats(cii.KeyCII))
 		assert.Error(t, err)
+	})
+
+	t.Run("import attachments", func(t *testing.T) {
+		data, err := os.ReadFile(filepath.Join(getParsePath(), "CII_example2.xml"))
+		require.NoError(t, err)
+		res, err := convert.Import(data)
+		require.NoError(t, err)
+		require.Len(t, res.Attachments, 1)
+		a := res.Attachments[0]
+		assert.Equal(t, "Doc1", a.ID)
+		assert.Equal(t, "Timesheet", a.Description)
+		assert.Equal(t, "EHF.pdf", a.Name)
+		assert.Equal(t, "application/pdf", a.MIME)
+		// The example's file is itself base64 text, of a PDF.
+		assert.True(t, bytes.HasPrefix(a.Data, []byte("JVBERi0x")), "decoded")
 	})
 
 	t.Run("export and detect again", func(t *testing.T) {
@@ -120,6 +140,12 @@ func TestConverterExportAttachments(t *testing.T) {
 		assert.Equal(t, "invoice.pdf", atts[0].Filename)
 		assert.Equal(t, []byte("%PDF-1.7"), atts[0].Data)
 		assert.Equal(t, "lines.csv", atts[1].ID, "named by the file without an ID")
+
+		res, err := convert.Import(out.Data)
+		require.NoError(t, err)
+		require.Len(t, res.Attachments, 2)
+		assert.Equal(t, pdf, res.Attachments[0], "imported again")
+		assert.Equal(t, []byte("a,b"), res.Attachments[1].Data)
 	})
 	t.Run("refused by formats that do not embed them", func(t *testing.T) {
 		env := loadEnvelope(t, "en16931/invoice-complete.json")

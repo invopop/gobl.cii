@@ -155,6 +155,15 @@ func main() {
 }
 ```
 
+Through the GOBL `convert` register, `convert.Import` returns the files embedded in an invoice as `Attachments`, alongside the envelope:
+
+```go
+res, err := convert.Import(data)
+for _, a := range res.Attachments {
+    // store a.Data as a.Name
+}
+```
+
 ## Command Line
 
 This package no longer includes a command-line tool. The `gobl` CLI from [gobl.dev](https://github.com/invopop/gobl.dev) converts between GOBL and every format registered with the GOBL `convert` register, including CII:
