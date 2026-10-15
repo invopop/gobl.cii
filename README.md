@@ -128,22 +128,14 @@ func main() {
 
 ## Command Line
 
-The GOBL to CII tool includes a command-line helper. You can install it manually in your Go environment with:
+This package no longer includes a command-line tool. The `gobl` CLI from [gobl.dev](https://github.com/invopop/gobl.dev) converts between GOBL and every format registered with the GOBL `convert` register, including CII:
 
 ```bash
-go install ./cmd/gobl.cii
-```
+go install github.com/invopop/gobl.dev/cmd/gobl@latest
 
-Usage:
-
-```bash
-gobl.cii convert <input> <output> [--format <key>]
-```
-
-The tool automatically detects the input file type (JSON/XML) and performs the appropriate conversion. Optionally specify the key of the export format:
-
-```bash
-gobl.cii convert invoice.json invoice.xml --format cii+peppol+bis-v3
+gobl convert invoice.json invoice.xml --to cii+en16931-v2017   # export
+gobl convert invoice.xml                                       # import, format detected
+gobl convert --list                                            # registered formats
 ```
 
 ## Testing
