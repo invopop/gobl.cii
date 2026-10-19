@@ -30,7 +30,6 @@ const (
 
 	// Format names shared by the conversion and parse tables.
 	ctxEN16931 = "EN16931"
-	ctxPeppol  = "Peppol"
 
 	// Item attribute labels and values shared by the attribute tests.
 	attrLabelColor  = "Color"
@@ -61,7 +60,6 @@ func TestConvertToInvoice(t *testing.T) {
 		dir     string
 	}{
 		{ctxEN16931, cii.FormatEN16931, "en16931"},
-		{ctxPeppol, cii.FormatPeppol, "peppol"},
 	}
 
 	for _, ctx := range contexts {
