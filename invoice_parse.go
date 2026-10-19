@@ -84,6 +84,8 @@ func goblInvoice(in *Invoice, f *Format) (*bill.Invoice, error) {
 
 	goblAddTaxNotes(ahts.Tax, out)
 
+	out.ExchangeRates = goblExchangeRates(in, out.Currency)
+
 	// Everything the document declares is now mapped, so the calculated
 	// amounts can be checked against the ones the sender stated.
 	if err := goblReconcileTotals(in, out, srcs, taxMap); err != nil {
@@ -91,6 +93,34 @@ func goblInvoice(in *Invoice, f *Format) (*bill.Invoice, error) {
 	}
 
 	return out, nil
+}
+
+// exchangeRatePrecision is the number of decimals kept when deriving a rate
+// from two rounded totals, so converting BT-110 gives back BT-111.
+const exchangeRatePrecision = 6
+
+// goblExchangeRates derives the rate into the VAT accounting currency from
+// BT-111 / BT-110, when the document states both totals.
+func goblExchangeRates(in *Invoice, cur currency.Code) []*currency.ExchangeRate {
+	doc, acc := goblTaxTotals(in, cur)
+	if doc == nil || acc == nil {
+		return nil
+	}
+	docAmount, ok := goblDeclaredAmount(doc.Amount)
+	if !ok || docAmount.IsZero() {
+		return nil
+	}
+	accAmount, ok := goblDeclaredAmount(acc.Amount)
+	if !ok {
+		return nil
+	}
+	return []*currency.ExchangeRate{
+		{
+			From:   cur,
+			To:     currency.Code(acc.Currency),
+			Amount: accAmount.RescaleUp(exchangeRatePrecision).Divide(docAmount),
+		},
+	}
 }
 
 // goblAddTaxDates extracts BT-7 (VAT point date) and BT-8 (VAT point date code) from
