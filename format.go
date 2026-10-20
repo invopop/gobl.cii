@@ -68,6 +68,10 @@ type Format struct {
 	Match func(guidelineID, businessID string) bool
 	// Fallback optionally claims documents that no format matched.
 	Fallback func(guidelineID, businessID string) bool
+	// OnRequest formats are never detected: they import only when asked for
+	// by key, as their documents can't be told from another format's by
+	// their contents, only by their container.
+	OnRequest bool
 	// ExportFuncs adjust the CII document exported from GOBL, in order, after
 	// the base export.
 	ExportFuncs []ExportFunc
@@ -149,7 +153,7 @@ func FormatFor(key cbc.Key) *Format {
 func FindFormat(guidelineID string, businessID string) *Format {
 	list := make([]*Format, 0, len(formats))
 	for i := range formats {
-		if len(formats[i].Import) > 0 {
+		if len(formats[i].Import) > 0 && !formats[i].OnRequest {
 			list = append(list, &formats[i])
 		}
 	}
@@ -184,4 +188,16 @@ func FindFormat(guidelineID string, businessID string) *Format {
 	}
 
 	return nil
+}
+
+// claims reports whether a document declaring the guideline and business
+// process could be in the format, as when the format is asked for by key.
+func (f *Format) claims(guidelineID, businessID string) bool {
+	if len(f.Import) == 0 {
+		return false
+	}
+	if f.Match != nil && f.Match(guidelineID, businessID) {
+		return true
+	}
+	return guidelineID == f.GuidelineID || (f.OutputGuidelineID != "" && guidelineID == f.OutputGuidelineID)
 }
