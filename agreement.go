@@ -12,12 +12,27 @@ type Agreement struct {
 	Buyer              *Party                `xml:"ram:BuyerTradeParty,omitempty"`
 	SalesAgent         *Party                `xml:"ram:SalesAgentTradeParty,omitempty"`
 	TaxRepresentative  *Party                `xml:"ram:SellerTaxRepresentativeTradeParty,omitempty"`
+	DeliveryTerms      *DeliveryTerms        `xml:"ram:ApplicableTradeDeliveryTerms,omitempty"`
 	Sales              *IssuerID             `xml:"ram:SellerOrderReferencedDocument,omitempty"`
 	Purchase           *IssuerID             `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	Contract           *IssuerID             `xml:"ram:ContractReferencedDocument,omitempty"`
 	AdditionalDocument []*AdditionalDocument `xml:"ram:AdditionalReferencedDocument,omitempty"`
 	BuyerAgent         *Party                `xml:"ram:BuyerAgentTradeParty,omitempty"`
 	Project            *Project              `xml:"ram:SpecifiedProcurringProject,omitempty"`
+}
+
+// DeliveryTerms defines the structure of the ApplicableTradeDeliveryTerms of the
+// CII standard. EN 16931 has no business term for it, so the formats that
+// define it, such as the French CTC Extended profile, map it themselves.
+type DeliveryTerms struct {
+	Code     string         `xml:"ram:DeliveryTypeCode,omitempty"`
+	Location *TradeLocation `xml:"ram:RelevantTradeLocation,omitempty"`
+}
+
+// TradeLocation defines the structure of a RelevantTradeLocation of the CII
+// standard.
+type TradeLocation struct {
+	Name string `xml:"ram:Name,omitempty"`
 }
 
 // Project defines common architecture of document reference fields in the CII standard
