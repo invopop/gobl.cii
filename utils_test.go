@@ -58,6 +58,10 @@ func TestTypeCodeParse(t *testing.T) {
 		{"Debit note", "383", bill.InvoiceTypeDebitNote, nil},
 		{"Self-billed invoice", "389", bill.InvoiceTypeStandard, []cbc.Key{tax.TagSelfBilled}},
 		{"Partial invoice", "326", bill.InvoiceTypeStandard, []cbc.Key{tax.TagPartial}},
+		{"Self-billed credit note", "261", bill.InvoiceTypeCreditNote, []cbc.Key{tax.TagSelfBilled}},
+		{"Prepayment invoice", "386", bill.InvoiceTypeStandard, []cbc.Key{tax.TagPrepayment}},
+		{"Factored invoice", "393", bill.InvoiceTypeStandard, []cbc.Key{tax.TagFactoring}},
+		{"Factored credit note", "396", bill.InvoiceTypeCreditNote, []cbc.Key{tax.TagFactoring}},
 		{"Unknown type code", "999", bill.InvoiceTypeOther, nil},
 	}
 

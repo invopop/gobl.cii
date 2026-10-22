@@ -14,12 +14,20 @@ var invoiceTypeMap = map[string]cbc.Key{
 	"384": bill.InvoiceTypeCorrective,
 	"389": bill.InvoiceTypeStandard,
 	"326": bill.InvoiceTypeStandard,
+	"261": bill.InvoiceTypeCreditNote,
+	"386": bill.InvoiceTypeStandard,
+	"393": bill.InvoiceTypeStandard,
+	"396": bill.InvoiceTypeCreditNote,
 }
 
 // invoiceTagMap holds the tags a type code adds to its GOBL type
 var invoiceTagMap = map[string][]cbc.Key{
 	"389": {tax.TagSelfBilled},
 	"326": {tax.TagPartial},
+	"261": {tax.TagSelfBilled},
+	"386": {tax.TagPrepayment},
+	"393": {tax.TagFactoring},
+	"396": {tax.TagFactoring},
 }
 
 // typeCodeParse maps a CII invoice type to a GOBL type and the tags it implies
