@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/schema"
+	"github.com/invopop/xmlctx"
 )
 
 var (
@@ -219,7 +220,7 @@ func WithAttachments(atts ...BinaryAttachment) Option {
 }
 
 func extractRootNamespace(data []byte) (string, error) {
-	dc := xml.NewDecoder(bytes.NewReader(data))
+	dc := xmlctx.NewXMLDecoder(bytes.NewReader(data))
 	for {
 		tk, err := dc.Token()
 		if err == io.EOF {
