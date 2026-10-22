@@ -11,6 +11,7 @@ import (
 	"github.com/invopop/gobl/i18n"
 	"github.com/invopop/gobl/rules"
 	"github.com/invopop/gobl/schema"
+	"github.com/invopop/xmlctx"
 )
 
 // KeyCII identifies CII invoices that do not declare a known specification.
@@ -206,7 +207,7 @@ type headerContext struct {
 // stopping at the first other element.
 func readHeader(data []byte) *HeaderInfo {
 	h := new(HeaderInfo)
-	d := xml.NewDecoder(bytes.NewReader(data))
+	d := xmlctx.NewXMLDecoder(bytes.NewReader(data))
 	root := false
 	for {
 		tk, err := d.Token()
