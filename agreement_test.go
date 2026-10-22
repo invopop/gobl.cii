@@ -1,8 +1,11 @@
 package cii_test
 
 import (
+	"os"
+	"strings"
 	"testing"
 
+	cii "github.com/invopop/gobl.cii"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,4 +38,23 @@ func TestNewAgreement(t *testing.T) {
 		assert.Equal(t, "PO4711", doc.Transaction.Agreement.BuyerReference)
 		assert.Equal(t, "2013-05", doc.Transaction.Agreement.Contract.ID)
 	})
+}
+
+func TestContractReferenceTypeCode(t *testing.T) {
+	raw, err := os.ReadFile(dataPath(pathParse, "CII_business_example_02.xml"))
+	require.NoError(t, err)
+	data := strings.Replace(string(raw),
+		"</ram:IssuerAssignedID>\n            </ram:ContractReferencedDocument>",
+		"</ram:IssuerAssignedID>\n                <ram:ReferenceTypeCode>GC</ram:ReferenceTypeCode>\n            </ram:ContractReferencedDocument>", 1)
+	require.NotEqual(t, string(raw), data, "ReferenceTypeCode was not added")
+
+	doc, err := cii.Decode([]byte(data))
+	require.NoError(t, err)
+	inv, ok := doc.(*cii.Invoice)
+	require.True(t, ok)
+	assert.Equal(t, "GC", inv.Transaction.Agreement.Contract.ReferenceTypeCode)
+
+	out, err := cii.Encode(inv)
+	require.NoError(t, err)
+	assert.Contains(t, string(out), "<ram:ReferenceTypeCode>GC</ram:ReferenceTypeCode>")
 }

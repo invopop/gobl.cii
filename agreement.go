@@ -43,9 +43,12 @@ type BinaryObject struct {
 	Filename string `xml:"filename,attr,omitempty"`
 }
 
-// IssuerID defines the structure of IssuerAssignedID of the CII standard
+// IssuerID defines the structure of IssuerAssignedID of the CII standard.
+// ReferenceTypeCode (UNCL 1153) is left for profiles that define it, such as
+// the French contract type.
 type IssuerID struct {
-	ID string `xml:"ram:IssuerAssignedID,omitempty"`
+	ID                string `xml:"ram:IssuerAssignedID,omitempty"`
+	ReferenceTypeCode string `xml:"ram:ReferenceTypeCode,omitempty"`
 }
 
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
