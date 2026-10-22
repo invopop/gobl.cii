@@ -6,7 +6,7 @@ require (
 	github.com/invopop/gobl v0.510.0
 	github.com/invopop/phorm v0.1.5
 	github.com/invopop/validation v0.8.0
-	github.com/invopop/xmlctx v0.13.0
+	github.com/invopop/xmlctx v0.14.0
 	github.com/stretchr/testify v1.11.1
 )
 

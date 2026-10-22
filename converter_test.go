@@ -207,3 +207,21 @@ func TestReadHeader(t *testing.T) {
 		assert.ErrorIs(t, h.Err, cii.ErrUnknownDocumentType)
 	})
 }
+
+// A document in a single-byte encoding it declares itself imports like a UTF-8
+// one, its non-ASCII characters intact.
+func TestConverterImportLatin1(t *testing.T) {
+	doc := strings.Replace(string(example1(t)), `encoding="utf-8"`, `encoding="ISO-8859-1"`, 1)
+	doc = strings.Replace(doc, "<ram:Name>De Koksmaat", "<ram:Name>Société Démo", 1)
+	latin1 := make([]byte, 0, len(doc))
+	for _, r := range doc {
+		require.Less(t, r, rune(0x100))
+		latin1 = append(latin1, byte(r))
+	}
+
+	res, err := convert.Import(latin1)
+	require.NoError(t, err)
+	inv, ok := res.Envelope.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.Equal(t, "Société Démo", inv.Supplier.Name)
+}
