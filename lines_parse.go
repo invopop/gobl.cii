@@ -397,8 +397,11 @@ func goblItemAttribute(char *Characteristic) (*org.Attribute, error) {
 	return attr, nil
 }
 
-// goblLinePrice reads the net price (BT-146).
+// goblLinePrice reads the net price (BT-146), as zero when the line carries none.
 func goblLinePrice(np *NetPrice) (num.Amount, error) {
+	if np == nil {
+		return num.AmountZero, nil
+	}
 	return num.AmountFromString(np.Amount)
 }
 
@@ -406,6 +409,9 @@ func goblLinePrice(np *NetPrice) (num.Amount, error) {
 // (BT-149), and the list price and price discount (BT-148, BT-147) when they
 // come to the net price.
 func goblLinePriceDetails(agmt *LineAgreement, item *org.Item) error {
+	if agmt == nil || agmt.NetPrice == nil {
+		return nil
+	}
 	bq := agmt.NetPrice.BaseQuantity
 	if (bq == nil || bq.Amount == "") && agmt.GrossPrice != nil {
 		bq = agmt.GrossPrice.BaseQuantity

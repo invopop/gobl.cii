@@ -299,3 +299,18 @@ func TestGoblLinePriceDetails(t *testing.T) {
 		assert.False(t, goblCanFold(parent, nil, map[string]*taxCategoryInfo{}))
 	})
 }
+
+func TestGoblLinePriceMissing(t *testing.T) {
+	t.Run("reads a missing net price as zero", func(t *testing.T) {
+		price, err := goblLinePrice(nil)
+		require.NoError(t, err)
+		assert.True(t, price.IsZero())
+	})
+	t.Run("skips price details without a net price", func(t *testing.T) {
+		item := &org.Item{}
+		require.NoError(t, goblLinePriceDetails(nil, item))
+		require.NoError(t, goblLinePriceDetails(&LineAgreement{GrossPrice: &GrossPrice{Amount: "10.00"}}, item))
+		assert.Nil(t, item.Per)
+		assert.Nil(t, item.List)
+	})
+}
