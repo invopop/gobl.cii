@@ -52,10 +52,19 @@ var (
 		GuidelineID: "urn:test:export-only",
 		Addons:      cii.FormatEN16931.Addons,
 	}
+	formatTestNamed = cii.Format{
+		Key:         "cii+en16931-v2017+test-named",
+		Name:        i18n.NewString("CII Test Named"),
+		Import:      cii.FormatEN16931.Import,
+		Export:      cii.FormatEN16931.Export,
+		GuidelineID: "urn:test:named",
+		Addons:      cii.FormatEN16931.Addons,
+		Named:       true,
+	}
 )
 
 func init() {
-	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback, formatTestExportOnly)
+	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback, formatTestExportOnly, formatTestNamed)
 }
 
 func TestFindFormat(t *testing.T) {
@@ -73,6 +82,7 @@ func TestFindFormat(t *testing.T) {
 		{"output guideline", "urn:test:output-out", "", formatTestOutput.Key},
 		{"fallback function", "urn:test:unknown", "test-fallback", formatTestFallback.Key},
 		{"export only", "urn:test:export-only", "", cbc.KeyEmpty},
+		{"named", "urn:test:named", "", cbc.KeyEmpty},
 		{"unknown", "urn:test:unknown", "", cbc.KeyEmpty},
 	}
 	for _, tt := range tests {

@@ -68,6 +68,10 @@ type Format struct {
 	Match func(guidelineID, businessID string) bool
 	// Fallback optionally claims documents that no format matched.
 	Fallback func(guidelineID, businessID string) bool
+	// Named formats are never detected, only used when asked for by key with
+	// WithFormat, as their documents can't be told apart from another
+	// format's, such as Factur-X and ZUGFeRD sharing their guidelines.
+	Named bool
 	// ExportFuncs adjust the CII document exported from GOBL, in order, after
 	// the base export.
 	ExportFuncs []ExportFunc
@@ -138,8 +142,8 @@ func FormatFor(key cbc.Key) *Format {
 }
 
 // FindFormat looks up a registered format by GuidelineID and optionally
-// BusinessID, among those with Import schemas. Returns nil if no matching
-// format is found.
+// BusinessID, among those with Import schemas that are not Named. Returns nil
+// if no matching format is found.
 //
 // The lookup logic works as follows:
 //  1. Formats whose Match function claims the document
@@ -149,7 +153,7 @@ func FormatFor(key cbc.Key) *Format {
 func FindFormat(guidelineID string, businessID string) *Format {
 	list := make([]*Format, 0, len(formats))
 	for i := range formats {
-		if len(formats[i].Import) > 0 {
+		if len(formats[i].Import) > 0 && !formats[i].Named {
 			list = append(list, &formats[i])
 		}
 	}
