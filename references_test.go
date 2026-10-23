@@ -7,9 +7,18 @@ import (
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+)
+
+// Delivery identity values shared by the delivery location round-trip tests.
+const (
+	testSchemeGLN = "0088"
+	testIncoterm  = "DAP"
 )
 
 // referencesEnvelope loads a complete invoice with every ordering, delivery
@@ -69,11 +78,38 @@ func TestReferencesRoundTrip(t *testing.T) {
 
 	t.Run("delivery location with scheme", func(t *testing.T) {
 		env := referencesEnvelope(t)
-		env.Extract().(*bill.Invoice).Delivery.Identities[0].Label = "0088"
+		env.Extract().(*bill.Invoice).Delivery.Identities[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
+			iso.ExtKeySchemeID: testSchemeGLN,
+		})
 		out, err := roundTrip(t, env, nil)
 		require.NoError(t, err)
+		require.Len(t, out.Delivery.Identities, 1)
 		assert.Equal(t, "LOC-1", out.Delivery.Identities[0].Code.String())
-		assert.Equal(t, "0088", out.Delivery.Identities[0].Label)
+		assert.Equal(t, testSchemeGLN, out.Delivery.Identities[0].Ext.Get(iso.ExtKeySchemeID).String())
+		assert.Empty(t, out.Delivery.Identities[0].Label)
+	})
+
+	t.Run("delivery location with scheme in the label", func(t *testing.T) {
+		env := referencesEnvelope(t)
+		env.Extract().(*bill.Invoice).Delivery.Identities[0].Label = testSchemeGLN
+		out, err := roundTrip(t, env, nil)
+		require.NoError(t, err)
+		require.Len(t, out.Delivery.Identities, 1)
+		assert.Equal(t, "LOC-1", out.Delivery.Identities[0].Code.String())
+		assert.Equal(t, testSchemeGLN, out.Delivery.Identities[0].Ext.Get(iso.ExtKeySchemeID).String())
+	})
+
+	t.Run("delivery terms are left to the formats that define them", func(t *testing.T) {
+		out, err := roundTrip(t, referencesEnvelope(t), func(in *cii.Invoice) {
+			in.Transaction.Agreement.DeliveryTerms = &cii.DeliveryTerms{
+				Code:     testIncoterm,
+				Location: &cii.TradeLocation{Name: "Port of Le Havre"},
+			}
+		})
+		require.NoError(t, err)
+		require.Len(t, out.Delivery.Identities, 1)
+		assert.Equal(t, "LOC-1", out.Delivery.Identities[0].Code.String())
+		assert.True(t, out.Delivery.Ext.IsZero())
 	})
 
 	t.Run("tender issue date", func(t *testing.T) {
