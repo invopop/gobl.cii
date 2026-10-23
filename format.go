@@ -15,11 +15,6 @@ const GuidelineIDEN16931 = "urn:cen.eu:en16931:2017"
 
 const vesIDEN16931CII = "eu.cen.en16931:cii:1.3.16"
 
-// Profile ID codes
-const (
-	ProfileIDPeppolBilling = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
-)
-
 // CII Versions
 const (
 	VersionD16B string = "D16B"
@@ -94,25 +89,11 @@ var FormatEN16931 = Format{
 	VESID:       vesIDEN16931CII,
 }
 
-// FormatPeppol for Peppol Billing V3.0.
-var FormatPeppol = Format{
-	Key:         "cii+peppol+bis-v3",
-	Name:        i18n.NewString("CII Peppol BIS Billing 3"),
-	Import:      []schema.ID{invoiceSchema},
-	Export:      []schema.ID{invoiceSchema},
-	GuidelineID: GuidelineIDEN16931 + "#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
-	BusinessID:  ProfileIDPeppolBilling,
-	Version:     VersionD16B,
-	Addons:      []cbc.Key{en16931.V2017},
-	Attachments: true,
-	VESID:       vesIDEN16931CII,
-}
-
 // formats holds every registered format for lookups during parsing.
 var formats []Format
 
 func init() {
-	registerFormats(true, []Format{FormatEN16931, FormatPeppol})
+	registerFormats(true, []Format{FormatEN16931})
 }
 
 // RegisterFormats makes the formats available to FindFormat, and registers
