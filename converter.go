@@ -59,6 +59,12 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 	if h.Err != nil || h.Namespace != NamespaceRSM {
 		return cbc.KeyEmpty
 	}
+	// A requested format the document could be in wins over detection.
+	for _, k := range in.Requested {
+		if f := c.format(k); f != nil && f.claims(h.GuidelineID, h.BusinessID) {
+			return k
+		}
+	}
 	if f := FindFormat(h.GuidelineID, h.BusinessID); f != nil {
 		if c.format(f.Key) != nil {
 			return f.Key
@@ -71,15 +77,20 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 	return cbc.KeyEmpty
 }
 
-// Import decodes the data and imports it, determining the format from the
-// document in the same way as Detect, and provides the files embedded in
-// invoices as attachments.
-func (c *converter) Import(_ cbc.Key, data []byte) (*convert.ImportResult, error) {
+// Import decodes the data and imports it in the detected format, and provides
+// the files embedded in invoices as attachments.
+func (c *converter) Import(key cbc.Key, data []byte, _ *convert.ImportOptions) (*convert.ImportResult, error) {
 	doc, err := Decode(data)
 	if err != nil {
 		return nil, err
 	}
-	env, err := Import(doc)
+	// The detected key may be a requested format detection alone wouldn't
+	// pick, so import in that format rather than finding it again.
+	var opts []Option
+	if f := c.format(key); f != nil {
+		opts = append(opts, WithFormat(*f))
+	}
+	env, err := Import(doc, opts...)
 	if err != nil {
 		return nil, err
 	}
