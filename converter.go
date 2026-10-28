@@ -79,7 +79,7 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 
 // Import decodes the data and imports it in the detected format, and provides
 // the files embedded in invoices as attachments.
-func (c *converter) Import(key cbc.Key, data []byte) (*convert.ImportResult, error) {
+func (c *converter) Import(key cbc.Key, data []byte, _ *convert.ImportOptions) (*convert.ImportResult, error) {
 	doc, err := Decode(data)
 	if err != nil {
 		return nil, err
