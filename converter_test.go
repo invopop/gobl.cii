@@ -76,6 +76,13 @@ func TestConverter(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("import routing", func(t *testing.T) {
+		res, err := convert.Import(example1(t), convert.WithRouting("iso6523-actorid-upis::0088:sender", "iso6523-actorid-upis::0088:receiver"))
+		require.NoError(t, err)
+		assert.Equal(t, cbc.URI("iso6523-actorid-upis::0088:sender"), res.Envelope.Head.From)
+		assert.Equal(t, cbc.URI("iso6523-actorid-upis::0088:receiver"), res.Envelope.Head.To)
+	})
+
 	t.Run("import attachments", func(t *testing.T) {
 		data, err := os.ReadFile(filepath.Join(getParsePath(), "CII_example2.xml"))
 		require.NoError(t, err)

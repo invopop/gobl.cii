@@ -72,14 +72,14 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 }
 
 // Import decodes the data and imports it, determining the format from the
-// document in the same way as Detect, and provides the files embedded in
-// invoices as attachments.
-func (c *converter) Import(_ cbc.Key, data []byte) (*convert.ImportResult, error) {
+// document in the same way as Detect, with the routing the document was
+// received with, and provides the files embedded in invoices as attachments.
+func (c *converter) Import(_ cbc.Key, data []byte, opts *convert.ImportOptions) (*convert.ImportResult, error) {
 	doc, err := Decode(data)
 	if err != nil {
 		return nil, err
 	}
-	env, err := Import(doc)
+	env, err := Import(doc, WithRouting(opts.From, opts.To))
 	if err != nil {
 		return nil, err
 	}
