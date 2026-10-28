@@ -77,16 +77,17 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 	return cbc.KeyEmpty
 }
 
-// Import decodes the data and imports it in the detected format, and provides
-// the files embedded in invoices as attachments.
-func (c *converter) Import(key cbc.Key, data []byte, _ *convert.ImportOptions) (*convert.ImportResult, error) {
+// Import decodes the data and imports it in the detected format, with the
+// routing the document was received with, and provides the files embedded in
+// invoices as attachments.
+func (c *converter) Import(key cbc.Key, data []byte, o *convert.ImportOptions) (*convert.ImportResult, error) {
 	doc, err := Decode(data)
 	if err != nil {
 		return nil, err
 	}
 	// The detected key may be a requested format detection alone wouldn't
 	// pick, so import in that format rather than finding it again.
-	var opts []Option
+	opts := []Option{WithRouting(o.From, o.To)}
 	if f := c.format(key); f != nil {
 		opts = append(opts, WithFormat(*f))
 	}
