@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -37,7 +38,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 			Reason:  "Freight",
 			Percent: pct(t, "10.5%"),
 			Ext:     tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyCharge: "FC"}),
-		}, testCurrencyEUR, nil)
+		}, testCurrencyEUR)
 
 		assert.True(t, ac.ChargeIndicator.Value)
 		assert.Equal(t, "10.50", ac.Amount)
@@ -52,7 +53,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 			Amount: amount,
 			Reason: "Loyalty",
 			Ext:    tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyAllowance: "95"}),
-		}, testCurrencyEUR, nil)
+		}, testCurrencyEUR)
 
 		assert.False(t, ac.ChargeIndicator.Value)
 		assert.Equal(t, "10.50", ac.Amount)
@@ -62,7 +63,7 @@ func TestNewChargeAndDiscount(t *testing.T) {
 	})
 
 	t.Run("amounts follow the currency, not a fixed two decimals", func(t *testing.T) {
-		ac := newCharge(&bill.Charge{Amount: num.MakeAmount(105000, 2)}, "JPY", nil)
+		ac := newCharge(&bill.Charge{Amount: num.MakeAmount(105000, 2)}, "JPY")
 		assert.Equal(t, "1050", ac.Amount)
 	})
 
@@ -70,17 +71,36 @@ func TestNewChargeAndDiscount(t *testing.T) {
 		ac := newCharge(&bill.Charge{
 			Amount: amount,
 			Taxes:  tax.Set{{Category: testCategoryVAT, Percent: pct(t, "21%")}},
-		}, testCurrencyEUR, nil)
+		}, testCurrencyEUR)
 		require.NotNil(t, ac.Tax)
 	})
 
+	t.Run("an exempt charge carries no exemption reason", func(t *testing.T) {
+		// EN 16931 has no BT-120/121 on allowances and charges: only the
+		// EXTENDED profiles add them, through their own export functions.
+		ac := newCharge(&bill.Charge{
+			Amount: amount,
+			Taxes: tax.Set{{
+				Category: testCategoryVAT,
+				Ext: tax.ExtensionsOf(cbc.CodeMap{
+					untdid.ExtKeyTaxCategory: "E",
+					cef.ExtKeyVATEX:          "VATEX-EU-79-C",
+				}),
+			}},
+		}, testCurrencyEUR)
+		require.NotNil(t, ac.Tax)
+		assert.Equal(t, "E", ac.Tax.CategoryCode)
+		assert.Empty(t, ac.Tax.ExemptionReasonCode)
+		assert.Empty(t, ac.Tax.ExemptionReason)
+	})
+
 	t.Run("a bare charge and discount", func(t *testing.T) {
-		c := newCharge(&bill.Charge{Amount: amount}, testCurrencyEUR, nil)
+		c := newCharge(&bill.Charge{Amount: amount}, testCurrencyEUR)
 		assert.Empty(t, c.Reason)
 		assert.Empty(t, c.ReasonCode)
 		assert.Nil(t, c.Tax)
 
-		d := newDiscount(&bill.Discount{Amount: amount}, testCurrencyEUR, nil)
+		d := newDiscount(&bill.Discount{Amount: amount}, testCurrencyEUR)
 		assert.Empty(t, d.Reason)
 		assert.Nil(t, d.Tax)
 	})
