@@ -1,11 +1,17 @@
 package cii
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 )
 
 // Line defines the structure of the IncludedSupplyChainTradeLineItem in the CII standard
@@ -19,15 +25,30 @@ type Line struct {
 
 // LineDoc defines the structure of the AssociatedDocumentLineDocument in the CII standard
 type LineDoc struct {
-	ID   string  `xml:"ram:LineID"`
-	Note []*Note `xml:"ram:IncludedNote,omitempty"`
+	ID string `xml:"ram:LineID"`
+	// EXT-FR-FE-162/163. LineStatusCode is only read.
+	ParentLineID         string  `xml:"ram:ParentLineID,omitempty"`
+	LineStatusCode       string  `xml:"ram:LineStatusCode,omitempty"`
+	LineStatusReasonCode string  `xml:"ram:LineStatusReasonCode,omitempty"`
+	Note                 []*Note `xml:"ram:IncludedNote,omitempty"`
 }
+
+// Sub-invoice line types (EXT-FR-FE-163).
+const (
+	lineStatusGroup       = "GROUP"
+	lineStatusDetail      = "DETAIL"
+	lineStatusInformation = "INFORMATION"
+)
 
 // LineAgreement defines the structure of the SpecifiedLineTradeAgreement in the CII standard
 type LineAgreement struct {
 	OrderReference      *LineOrderReference `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	AdditionalReference *LineDocReference   `xml:"ram:AdditionalReferencedDocument,omitempty"`
+	GrossPrice          *GrossPrice         `xml:"ram:GrossPriceProductTradePrice,omitempty"`
 	NetPrice            *NetPrice           `xml:"ram:NetPriceProductTradePrice"`
+	// The XSD sequence places the item seller after the prices, before
+	// ItemBuyerTradeParty.
+	ItemSellerParty *Party `xml:"ram:ItemSellerTradeParty,omitempty"`
 }
 
 // LineDocReference defines the structure of AdditionalReferencedDocument at line level
@@ -46,6 +67,14 @@ type LineOrderReference struct {
 type NetPrice struct {
 	Amount       string    `xml:"ram:ChargeAmount"`
 	BaseQuantity *Quantity `xml:"ram:BasisQuantity,omitempty"`
+}
+
+// GrossPrice defines the structure of the GrossPriceProductTradePrice in the
+// CII standard: the list price (BT-148) and the price discount (BT-147).
+type GrossPrice struct {
+	Amount          string           `xml:"ram:ChargeAmount"`
+	BaseQuantity    *Quantity        `xml:"ram:BasisQuantity,omitempty"`
+	AllowanceCharge *AllowanceCharge `xml:"ram:AppliedTradeAllowanceCharge,omitempty"`
 }
 
 // LineDelivery defines the structure of the SpecifiedLineTradeDelivery in the CII standard
@@ -82,10 +111,14 @@ type ListID struct {
 	ListID string `xml:"listID,attr,omitempty"`
 }
 
-// Characteristic defines the structure of the ApplicableProductCharacteristic of the CII standard
+// Characteristic defines the structure of the ApplicableProductCharacteristic
+// of the CII standard. ValueMeasure is only ever read: documents from senders
+// using the CII extended profile may carry one, but the EN 16931 profiles do
+// not accept it on output.
 type Characteristic struct {
-	Description string `xml:"ram:Description,omitempty"`
-	Value       string `xml:"ram:Value,omitempty"`
+	Description  string    `xml:"ram:Description,omitempty"`
+	ValueMeasure *Quantity `xml:"ram:ValueMeasure,omitempty"`
+	Value        string    `xml:"ram:Value,omitempty"`
 }
 
 // Quantity defines the structure of the quantity with its attributes for the CII standard
@@ -113,18 +146,203 @@ type Summation struct {
 	Amount string `xml:"ram:LineTotalAmount"`
 }
 
-func (out *Invoice) addLines(lines []*bill.Line) error {
+func (out *Invoice) addLines(inv *bill.Invoice) error {
 	var Lines []*Line
 
-	for _, l := range lines {
-		Lines = append(Lines, newLine(l))
+	for _, l := range inv.Lines {
+		Lines = append(Lines, newLine(l, lineCurrency(inv, l)))
 	}
 
 	out.Transaction.Lines = Lines
 	return nil
 }
 
-func newLine(l *bill.Line) *Line {
+// ExpandGroupLines writes the breakdown of each invoice line as sub-lines
+// after it, turning the line into a GROUP line, as the EXTENDED profiles
+// allow. Formats that support sub-lines call it from their export functions.
+func ExpandGroupLines(inv *bill.Invoice, out *Invoice) {
+	if out.Transaction == nil || len(out.Transaction.Lines) != len(inv.Lines) {
+		return
+	}
+	var lines []*Line
+	for i, l := range inv.Lines {
+		line := out.Transaction.Lines[i]
+		if line != nil && writesSubLines(l) {
+			lines = append(lines, newGroupLines(l, line, lineCurrency(inv, l))...)
+			continue
+		}
+		lines = append(lines, line)
+	}
+	out.Transaction.Lines = lines
+}
+
+// A GROUP line's own allowances would count nowhere, so such a line is written alone.
+func writesSubLines(l *bill.Line) bool {
+	return len(l.Breakdown) > 0 && len(l.Discounts) == 0 && len(l.Charges) == 0
+}
+
+// Without a priced sub-line the line keeps its own price and is not a GROUP.
+func newGroupLines(l *bill.Line, group *Line, ccy string) []*Line {
+	priced := false
+	for _, sl := range l.Breakdown {
+		if sl != nil && sl.Item != nil && sl.Item.Price != nil {
+			priced = true
+		}
+	}
+
+	lines := []*Line{group}
+	sum := num.AmountZero
+	for i, sl := range l.Breakdown {
+		if sl == nil || sl.Item == nil {
+			continue
+		}
+		child := newSubLine(sl, l, fmt.Sprintf("%s.%d", group.LineDoc.ID, i+1), group.LineDoc.ID, ccy)
+		if child.LineDoc.LineStatusReasonCode == lineStatusDetail {
+			amount, _ := num.AmountFromString(child.TradeSettlement.Sum.Amount)
+			sum = sum.MatchPrecision(amount).Add(amount)
+		}
+		lines = append(lines, child)
+	}
+
+	if priced {
+		// BR-FREXT-08 and BR-CO-10 cannot both hold once rounding diverges.
+		if rescaleToCurrency(sum, ccy) != group.TradeSettlement.Sum.Amount {
+			return []*Line{group}
+		}
+		group.LineDoc.LineStatusReasonCode = lineStatusGroup
+		group.TradeSettlement.ApplicableTradeTax = nil
+	} else {
+		group.LineDoc.LineStatusReasonCode = lineStatusDetail
+	}
+	return lines
+}
+
+// Sub-lines count per parent unit; the XML states full quantities and amounts.
+func newSubLine(sl *bill.SubLine, parent *bill.Line, id, parentID, ccy string) *Line {
+	it := sl.Item
+	qty := parent.Quantity
+	line := &Line{
+		LineDoc: &LineDoc{
+			ID:                   id,
+			ParentLineID:         parentID,
+			LineStatusReasonCode: lineStatusDetail,
+		},
+		Product:   newProduct(it),
+		Agreement: &LineAgreement{},
+		Quantity: &LineDelivery{
+			Quantity: &Quantity{
+				Amount:   sl.Quantity.Multiply(qty).String(),
+				UnitCode: untdidUnit(it.Ext, it.Unit).String(),
+			},
+		},
+		TradeSettlement: &TradeSettlement{},
+	}
+	for _, t := range parent.Taxes {
+		line.TradeSettlement.ApplicableTradeTax = append(line.TradeSettlement.ApplicableTradeTax, makeTaxCategory(t))
+	}
+
+	if it.Price == nil || sl.Total == nil {
+		// The extended schemas require both, even on INFORMATION lines.
+		line.LineDoc.LineStatusReasonCode = lineStatusInformation
+		line.Agreement.NetPrice = &NetPrice{Amount: rescaleToCurrency(num.AmountZero, ccy)}
+		line.TradeSettlement.Sum = &Summation{Amount: rescaleToCurrency(num.AmountZero, ccy)}
+	} else {
+		line.Agreement.GrossPrice, line.Agreement.NetPrice = newLinePrices(it, line.Quantity.Quantity.UnitCode)
+		line.TradeSettlement.Sum = &Summation{
+			Amount: rescaleToCurrency(sl.Total.Multiply(qty), ccy),
+		}
+		line.TradeSettlement.AllowanceCharge = newLineAllowanceCharges(
+			scaleLineCharges(sl.Charges, qty), scaleLineDiscounts(sl.Discounts, qty), ccy,
+		)
+	}
+
+	line.LineDoc.Note = newLineNotes(sl.Notes)
+	line.TradeSettlement.Period = newLinePeriod(sl.Period)
+	line.Agreement.AdditionalReference = newLineDocReference(sl.Identifier)
+	if sl.Order != "" {
+		line.Agreement.OrderReference = &LineOrderReference{LineID: sl.Order.String()}
+	}
+	if sl.Cost != "" {
+		line.TradeSettlement.AccountingAccount = &AccountingAccount{ID: sl.Cost.String()}
+	}
+	return line
+}
+
+func scaleLineCharges(charges []*bill.LineCharge, qty num.Amount) []*bill.LineCharge {
+	out := make([]*bill.LineCharge, 0, len(charges))
+	for _, c := range charges {
+		sc := *c
+		sc.Amount = c.Amount.Multiply(qty)
+		if c.Base != nil {
+			b := c.Base.Multiply(qty)
+			sc.Base = &b
+		}
+		out = append(out, &sc)
+	}
+	return out
+}
+
+func scaleLineDiscounts(discounts []*bill.LineDiscount, qty num.Amount) []*bill.LineDiscount {
+	out := make([]*bill.LineDiscount, 0, len(discounts))
+	for _, d := range discounts {
+		sd := *d
+		sd.Amount = d.Amount.Multiply(qty)
+		if d.Base != nil {
+			b := d.Base.Multiply(qty)
+			sd.Base = &b
+		}
+		out = append(out, &sd)
+	}
+	return out
+}
+
+// newCharacteristics builds the BG-32 item attributes from the item's
+// attributes: the label names the attribute (BT-160) and the value (BT-161)
+// presents whichever value the attribute holds. Amounts carry their unit in
+// the value text, as ram:ValueMeasure is rejected by the Factur-X and ZUGFeRD
+// EN 16931 schemas and warned against by CII-SR-070 everywhere else.
+func newCharacteristics(attrs []*org.Attribute) []*Characteristic {
+	chars := make([]*Characteristic, 0, len(attrs))
+	for _, attr := range attrs {
+		c := &Characteristic{Description: characteristicName(attr)}
+		switch {
+		case attr.Amount != nil:
+			c.Value = attr.Amount.String()
+			if label := unitLabel(attr.Unit, untdidUnit(attr.Ext, attr.Unit)); label != "" {
+				c.Value += " " + label
+			}
+		case attr.Text != "":
+			c.Value = attr.Text
+		case attr.Code != "":
+			c.Value = attr.Code.String()
+		case attr.Date != nil:
+			c.Value = attr.Date.String()
+		}
+		if c.Description == "" || c.Value == "" {
+			continue
+		}
+		chars = append(chars, c)
+	}
+	if len(chars) == 0 {
+		return nil
+	}
+	return chars
+}
+
+// characteristicName names an attribute for BT-160, falling back to the key or
+// type when it carries no label.
+func characteristicName(attr *org.Attribute) string {
+	switch {
+	case attr.Label != "":
+		return attr.Label
+	case attr.Key != cbc.KeyEmpty:
+		return attr.Key.String()
+	default:
+		return attr.Type.String()
+	}
+}
+
+func newLine(l *bill.Line, ccy string) *Line {
 	if l.Item == nil {
 		return nil
 	}
@@ -132,77 +350,26 @@ func newLine(l *bill.Line) *Line {
 
 	lineItem := &Line{
 		LineDoc: &LineDoc{
-			ID: strconv.Itoa(l.Index),
+			ID:   strconv.Itoa(l.Index),
+			Note: newLineNotes(l.Notes),
 		},
-		Product: &Product{
-			Name: it.Name,
-		},
+		Product: newProduct(it),
 		Agreement: &LineAgreement{
-			NetPrice: &NetPrice{
-				// Amount: it.Price.Rescale(2).String(),
-				Amount: it.Price.String(),
-			},
+			AdditionalReference: newLineDocReference(l.Identifier),
 		},
 		Quantity: &LineDelivery{
 			Quantity: &Quantity{
 				Amount:   l.Quantity.String(),
-				UnitCode: string(it.Unit.UNECE()),
+				UnitCode: untdidUnit(it.Ext, it.Unit).String(),
 			},
 		},
-		TradeSettlement: newTradeSettlement(l),
+		TradeSettlement: newTradeSettlement(l, ccy),
 	}
 
-	if it.Description != "" {
-		lineItem.Product.Description = &it.Description
-	}
+	lineItem.Agreement.GrossPrice, lineItem.Agreement.NetPrice = newLinePrices(it, lineItem.Quantity.Quantity.UnitCode)
 
-	if len(l.Notes) > 0 {
-		notes := make([]*Note, 0, len(l.Notes))
-		for _, n := range l.Notes {
-			note := &Note{Content: n.Text}
-			if code := n.Ext.Get(untdid.ExtKeyTextSubject); code != "" {
-				note.SubjectCode = code.String()
-			}
-			notes = append(notes, note)
-		}
-		lineItem.LineDoc.Note = notes
-	}
-
-	if len(it.Identities) > 0 {
-		for _, id := range it.Identities {
-			// BT-157: Standard identifier (has scheme ID extension)
-			if id.Ext.Has(iso.ExtKeySchemeID) {
-				lineItem.Product.GlobalID = &GlobalID{
-					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
-					Value:    id.Code.String(),
-				}
-			} else if id.Label != "" {
-				// BT-158: Item classification (Label holds the list ID)
-				lineItem.Product.Classification = &Classification{
-					Code: &ListID{
-						Value:  id.Code.String(),
-						ListID: id.Label,
-					},
-				}
-			} else if lineItem.Product.BuyerAssignedID == nil {
-				// BT-156: Buyer's item identifier (plain identity)
-				code := id.Code.String()
-				lineItem.Product.BuyerAssignedID = &code
-			}
-		}
-	}
-
-	// BT-128: Invoice line object identifier
-	if l.Identifier != nil {
-		ref := &LineDocReference{
-			ID:       l.Identifier.Code.String(),
-			TypeCode: "130",
-		}
-		if l.Identifier.Ext.Has(untdid.ExtKeyReference) {
-			rc := l.Identifier.Ext.Get(untdid.ExtKeyReference).String()
-			ref.RefCode = &rc
-		}
-		lineItem.Agreement.AdditionalReference = ref
+	if l.Seller != nil {
+		lineItem.Agreement.ItemSellerParty = newParty(l.Seller)
 	}
 
 	// BT-132: Purchase order line reference
@@ -215,7 +382,75 @@ func newLine(l *bill.Line) *Line {
 	return lineItem
 }
 
-func newTradeSettlement(l *bill.Line) *TradeSettlement {
+func newProduct(it *org.Item) *Product {
+	p := &Product{
+		Name: it.Name,
+	}
+
+	if it.Description != "" {
+		p.Description = &it.Description
+	}
+
+	// BG-32: item attributes
+	p.Characteristics = newCharacteristics(it.Attributes)
+
+	for _, id := range it.Identities {
+		// BT-157: Standard identifier (has scheme ID extension)
+		if id.Ext.Has(iso.ExtKeySchemeID) {
+			p.GlobalID = &GlobalID{
+				SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
+				Value:    id.Code.String(),
+			}
+		} else if id.Label != "" {
+			// BT-158: Item classification (Label holds the list ID)
+			p.Classification = &Classification{
+				Code: &ListID{
+					Value:  id.Code.String(),
+					ListID: id.Label,
+				},
+			}
+		} else if p.BuyerAssignedID == nil {
+			// BT-156: Buyer's item identifier (plain identity)
+			code := id.Code.String()
+			p.BuyerAssignedID = &code
+		}
+	}
+
+	return p
+}
+
+func newLineNotes(notes []*org.Note) []*Note {
+	if len(notes) == 0 {
+		return nil
+	}
+	out := make([]*Note, 0, len(notes))
+	for _, n := range notes {
+		note := &Note{Content: n.Text}
+		if code := n.Ext.Get(untdid.ExtKeyTextSubject); code != "" {
+			note.SubjectCode = code.String()
+		}
+		out = append(out, note)
+	}
+	return out
+}
+
+// BT-128: invoice line object identifier.
+func newLineDocReference(id *org.Identity) *LineDocReference {
+	if id == nil {
+		return nil
+	}
+	ref := &LineDocReference{
+		ID:       id.Code.String(),
+		TypeCode: "130",
+	}
+	if id.Ext.Has(untdid.ExtKeyReference) {
+		rc := id.Ext.Get(untdid.ExtKeyReference).String()
+		ref.RefCode = &rc
+	}
+	return ref
+}
+
+func newTradeSettlement(l *bill.Line, ccy string) *TradeSettlement {
 	var taxes []*Tax
 	for _, tax := range l.Taxes {
 		t := makeTaxCategory(tax)
@@ -225,16 +460,12 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	stlm := &TradeSettlement{
 		ApplicableTradeTax: taxes,
 		Sum: &Summation{
-			Amount: l.Total.Rescale(2).String(),
+			// BT-131: the line net amount, capped at the currency's
+			// precision by BR-DEC-23.
+			Amount: rescaleToCurrency(*l.Total, ccy),
 		},
-	}
-
-	if l.Period != nil {
-		stlm.Period = newPeriod(l.Period)
-	}
-
-	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-		stlm.AllowanceCharge = newLineAllowanceCharges(l)
+		Period:          newLinePeriod(l.Period),
+		AllowanceCharge: newLineAllowanceCharges(l.Charges, l.Discounts, ccy),
 	}
 
 	// BT-133: Line buyer accounting reference
@@ -245,4 +476,49 @@ func newTradeSettlement(l *bill.Line) *TradeSettlement {
 	}
 
 	return stlm
+}
+
+// BT-134/BT-135: either end may be absent.
+func newLinePeriod(p *cal.Period) *Period {
+	if p == nil {
+		return nil
+	}
+	out := &Period{}
+	if d := documentDate(p.Start); d != nil {
+		out.Start = &IssueDate{DateFormat: d}
+	}
+	if d := documentDate(p.End); d != nil {
+		out.End = &IssueDate{DateFormat: d}
+	}
+	return out
+}
+
+// lineCurrency resolves the currency a line's amounts are expressed in: its
+// item may override the document's.
+func lineCurrency(inv *bill.Invoice, l *bill.Line) string {
+	if l.Item != nil && l.Item.Currency != currency.CodeEmpty {
+		return l.Item.Currency.String()
+	}
+	return inv.Currency.String()
+}
+
+// newLinePrices writes the item's price details: the net price (BT-146), the
+// list price and price discount (BT-148, BT-147), and the number of units
+// the prices apply to (BT-149), in the line quantity's unit (BT-150).
+func newLinePrices(it *org.Item, unitCode string) (*GrossPrice, *NetPrice) {
+	np := &NetPrice{Amount: it.Price.String()}
+	if it.Per != nil {
+		np.BaseQuantity = &Quantity{Amount: it.Per.String(), UnitCode: unitCode}
+	}
+	if it.List == nil {
+		return nil, np
+	}
+	gp := &GrossPrice{Amount: it.List.String(), BaseQuantity: np.BaseQuantity}
+	if it.Discount != nil {
+		gp.AllowanceCharge = &AllowanceCharge{
+			ChargeIndicator: Indicator{Value: false},
+			Amount:          it.Discount.String(),
+		}
+	}
+	return gp, np
 }

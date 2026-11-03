@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
-	"github.com/invopop/gobl/tax"
 )
 
 var paymentMeansMap = map[string]cbc.Key{
@@ -26,8 +25,8 @@ var paymentMeansMap = map[string]cbc.Key{
 func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 	pymt := &bill.PaymentDetails{}
 
-	if stlm.Payee != nil {
-		payee := &org.Party{Name: stlm.Payee.Name}
+	if stlm.Payee != nil && stlm.Payee.Name != "" {
+		payee := &org.Party{Name: cleanString(stlm.Payee.Name)}
 		if stlm.Payee.PostalTradeAddress != nil {
 			payee.Addresses = []*org.Address{
 				goblNewAddress(stlm.Payee.PostalTradeAddress),
@@ -49,6 +48,9 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 
 	if len(stlm.Advance) > 0 {
 		for _, ap := range stlm.Advance {
+			if ap.Amount == "" {
+				continue
+			}
 			amt, err := num.AmountFromString(ap.Amount)
 			if err != nil {
 				return nil, err
@@ -65,7 +67,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 			}
 			pymt.Advances = append(pymt.Advances, a)
 		}
-	} else if stlm.Summary.TotalPrepaidAmount != "" {
+	} else if stlm.Summary != nil && stlm.Summary.TotalPrepaidAmount != "" {
 		// Fake an advanced payment so the totals will be re-calculated correctly
 		amt, err := num.AmountFromString(stlm.Summary.TotalPrepaidAmount)
 		if err != nil {
@@ -78,6 +80,7 @@ func goblNewPaymentDetails(stlm *Settlement) (*bill.PaymentDetails, error) {
 	}
 
 	if pymt.Payee == nil &&
+		pymt.Payer == nil &&
 		pymt.Terms == nil &&
 		pymt.Instructions == nil &&
 		len(pymt.Advances) == 0 {
@@ -96,7 +99,7 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 			if terms.Notes != "" {
 				terms.Notes = strings.Join([]string{terms.Notes, term.Description}, ". ")
 			} else {
-				terms.Notes = term.Description
+				terms.Notes = cleanString(term.Description)
 			}
 		}
 
@@ -127,9 +130,10 @@ func goblNewTerms(settlement *Settlement) (*pay.Terms, error) {
 
 	terms.DueDates = dates
 
-	// If there's only one due date, set its percent to 100.
+	// If there's only one due date, set its percent to 100. Since GOBL v0.505
+	// a due date need not carry an amount, so the absent case is a nil one.
 	if len(terms.DueDates) == 1 &&
-		terms.DueDates[0].Amount == nil &&
+		(terms.DueDates[0].Amount == nil || terms.DueDates[0].Amount.IsZero()) &&
 		terms.DueDates[0].Percent == nil {
 		percent, err := num.PercentageFromString("100%")
 		if err != nil {
@@ -152,10 +156,8 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 	pm := stlm.PaymentMeans[0]
 	inst := &pay.Instructions{
 		Key: goblPaymentMeansCode(pm.TypeCode),
-		Ext: tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyPaymentMeans: cbc.Code(pm.TypeCode),
-		}),
 	}
+	inst.Ext = inst.Ext.Set(untdid.ExtKeyPaymentMeans, cbc.Code(pm.TypeCode))
 
 	// BT-83: Payment reference
 	if stlm.PaymentReference != "" {
@@ -163,10 +165,10 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 	}
 
 	if pm.Information != "" {
-		inst.Detail = pm.Information
+		inst.Detail = cleanString(pm.Information)
 	}
 
-	if pm.Card != nil {
+	if pm.Card != nil && (pm.Card.ID != "" || pm.Card.Name != "") {
 		card := pm.Card
 		inst.Card = &pay.Card{}
 		if len(card.ID) >= 4 {
@@ -175,7 +177,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 			inst.Card.Last4 = card.ID
 		}
 		if card.Name != "" {
-			inst.Card.Holder = card.Name
+			inst.Card.Holder = cleanString(card.Name)
 		}
 	}
 
@@ -186,7 +188,7 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 			ct.IBAN = cbc.Code(ac.IBAN)
 		}
 		if ac.Name != "" {
-			ct.Name = ac.Name
+			ct.Name = cleanString(ac.Name)
 		}
 		if ac.Number != "" {
 			ct.Number = cbc.Code(ac.Number)
@@ -194,7 +196,9 @@ func goblNewInstructions(stlm *Settlement) *pay.Instructions {
 		if pm.CreditorInstitution != nil && pm.CreditorInstitution.BIC != "" {
 			ct.BIC = cbc.Code(pm.CreditorInstitution.BIC)
 		}
-		inst.CreditTransfer = append(inst.CreditTransfer, ct)
+		if ct.IBAN != "" || ct.Name != "" || ct.Number != "" || ct.BIC != "" {
+			inst.CreditTransfer = append(inst.CreditTransfer, ct)
+		}
 	}
 
 	// BT-89, BT-90, BT-91: Direct debit details
@@ -213,7 +217,7 @@ func goblNewDirectDebit(stlm *Settlement) *pay.DirectDebit {
 	// BT-89: Direct debit mandate ID (from payment terms)
 	for _, term := range stlm.PaymentTerms {
 		if term.Mandate != "" {
-			dd.Ref = term.Mandate
+			dd.Ref = cbc.Code(term.Mandate)
 			hasData = true
 			break
 		}

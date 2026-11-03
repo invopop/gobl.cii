@@ -26,8 +26,8 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
 		assert.Equal(t, "2142.01", doc.Transaction.Settlement.Summary.DuePayableAmount)
 		assert.Equal(t, "0.01", doc.Transaction.Settlement.Summary.RoundingAmount)
-		assert.Equal(t, "342.00", doc.Transaction.Settlement.Summary.TaxTotalAmount.Amount)
-		assert.Equal(t, "EUR", doc.Transaction.Settlement.Summary.TaxTotalAmount.Currency)
+		assert.Equal(t, "342.00", doc.Transaction.Settlement.Summary.TaxTotalAmount[0].Amount)
+		assert.Equal(t, "EUR", doc.Transaction.Settlement.Summary.TaxTotalAmount[0].Currency)
 	})
 
 	t.Run("correction-invoice.json", func(t *testing.T) {
@@ -49,7 +49,7 @@ func TestNewSettlement(t *testing.T) {
 		require.NotEmpty(t, inv.Preceding)
 		inv.Preceding[0].IssueDate = nil
 
-		doc, err := cii.ConvertInvoice(env)
+		doc, err := cii.ExportInvoice(env)
 		require.NoError(t, err)
 
 		rd := doc.Transaction.Settlement.ReferencedDocument[0]
@@ -80,7 +80,7 @@ func TestNewSettlement(t *testing.T) {
 		inv.Payment.Instructions.DirectDebit.Ref = ""
 		inv.Payment.Instructions.Card = nil
 
-		doc, err := cii.ConvertInvoice(env)
+		doc, err := cii.ExportInvoice(env)
 		require.NoError(t, err)
 
 		for _, term := range doc.Transaction.Settlement.PaymentTerms {
@@ -96,7 +96,7 @@ func TestNewSettlement(t *testing.T) {
 
 		inv.Payment.Instructions.Ext = tax.ExtensionsOf(cbc.CodeMap{})
 
-		_, err := cii.ConvertInvoice(env)
+		_, err := cii.ExportInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 
@@ -138,7 +138,7 @@ func TestTaxPointConversion(t *testing.T) {
 			require.True(t, ok)
 
 			inv.Tax.Point = tt.key
-			doc, err := cii.ConvertInvoice(env)
+			doc, err := cii.ExportInvoice(env)
 			require.NoError(t, err)
 
 			// All header-level tax entries should have the code
@@ -154,7 +154,7 @@ func TestTaxPointConversion(t *testing.T) {
 		require.True(t, ok)
 
 		inv.Tax.Point = "unknown"
-		doc, err := cii.ConvertInvoice(env)
+		doc, err := cii.ExportInvoice(env)
 		require.NoError(t, err)
 
 		for _, tax := range doc.Transaction.Settlement.Tax {
@@ -168,7 +168,7 @@ func TestTaxPointConversion(t *testing.T) {
 		require.True(t, ok)
 
 		inv.Tax.Point = ""
-		doc, err := cii.ConvertInvoice(env)
+		doc, err := cii.ExportInvoice(env)
 		require.NoError(t, err)
 
 		for _, tax := range doc.Transaction.Settlement.Tax {
@@ -195,14 +195,14 @@ func TestTaxPointRoundTrip(t *testing.T) {
 			require.True(t, ok)
 
 			inv.Tax.Point = tt.key
-			doc, err := cii.ConvertInvoice(env)
+			doc, err := cii.ExportInvoice(env)
 			require.NoError(t, err)
 
 			// Marshal to XML and parse back
-			data, err := doc.Bytes()
+			data, err := cii.Encode(doc)
 			require.NoError(t, err)
 
-			parsed, err := cii.Parse(data)
+			parsed, err := parseCII(data)
 			require.NoError(t, err)
 			parsedInv, ok := parsed.Extract().(*bill.Invoice)
 			require.True(t, ok)

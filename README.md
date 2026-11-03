@@ -11,22 +11,23 @@ Copyright [Invopop Ltd.](https://invopop.com) 2025. Released publicly under the 
 
 ### Go Package
 
-Usage of the GOBL to CII conversion library is straightforward and supports two key actions
+Usage of the GOBL to CII conversion library is straightforward and supports bidirectional conversion:
 
-1. Conversion of GOBL to CII XML:
+1. Convert GOBL to CII XML:
    You must first have a GOBL Envelope, including an invoice, ready to convert. There are some samples in the `test/data` directory.
 
-2. Parsing of CII XML to GOBL:
+2. Parse CII XML into GOBL:
    You need to have a valid CII XML document that you want to convert to GOBL format.
 
-Both conversion directions are supported, allowing you to seamlessly transform between GOBL and CII XML formats as needed.
+The package uses the same terms as GOBL's `convert` package: **export** maps a GOBL envelope into a CII document and **import** maps it back, while **encode** and **decode** turn CII documents into XML bytes and back.
 
-#### Converting GOBL to CII Invoice
+#### Export GOBL to CII
 
 ```go
 package main
 
 import (
+    "encoding/json"
     "os"
 
     "github.com/invopop/gobl"
@@ -41,97 +42,138 @@ func main() {
         panic(err)
     }
 
-    // Prepare the CII document
-    doc, err := cii.ConvertInvoice(env)
+    // Export the CII document
+    doc, err := cii.Export(env)
     if err != nil {
         panic(err)
     }
 
-    // Create the XML output
-    out, err := doc.Bytes()
+    // Encode the XML output
+    out, err := cii.Encode(doc)
     if err != nil {
         panic(err)
     }
-
 }
 ```
 
-Contexts are supported to include specific Guideline and Business rules. Available contexts include:
-
-- `ContextEN16931V2017` (default)
-- `ContextPeppolV3`
-- `ContextXRechnungV3`
-- `ContextChorusProV1`
-- `ContextPeppolFranceFacturXV1`
-- `ContextPeppolFranceCIUSV1`
-- `ContextPeppolFranceExtendedV1`
-- `ContextCDARFlow6`, `ContextCDARFlow6PPF`
-
-Factur-X and ZUGFeRD have one context per profile, since BT-24 is checked
-against a closed codelist per profile:
-
-| Profile  | Factur-X                   | ZUGFeRD                    |
-| -------- | -------------------------- | -------------------------- |
-| BASIC    | `ContextFacturXBasicV1`    | `ContextZUGFeRDBasicV2`    |
-| EN 16931 | `ContextFacturXV1`         | `ContextZUGFeRDV2`         |
-| EXTENDED | `ContextFacturXExtendedV1` | `ContextZUGFeRDExtendedV2` |
-
-MINIMUM and BASIC WL are not covered: they are not EN 16931 conformant.
-
-Example:
+To export into a format other than the default EN 16931, add it as an option. `ExportInvoice` does the same when an invoice is expected:
 
 ```go
-doc, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextXRechnungV3))
+doc, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatPeppol))
 ```
 
-#### Parsing CII Invoice into GOBL
+To embed files in the invoice, such as a PDF version of it, add them with `WithAttachments`. Each is written as an `AdditionalReferencedDocument` with an `AttachmentBinaryObject`:
+
+```go
+doc, err := cii.ExportInvoice(env,
+    cii.WithFormat(cii.FormatPeppol),
+    cii.WithAttachments(cii.BinaryAttachment{
+        ID:          "INV-001-PDF",
+        Description: "Invoice INV-001",
+        Data:        pdf,
+        MimeCode:    "application/pdf",
+        Filename:    "INV-001.pdf",
+    }),
+)
+```
+
+Through the GOBL `convert` register, pass them with `convert.WithAttachments`. Only formats that set `Attachments` embed them, using the attachment's name as its ID when it has none; the register refuses the others:
+
+```go
+out, err := convert.Export(env, "cii+peppol+bis-v3", convert.WithAttachments(&convert.Attachment{
+    Name: "INV-001.pdf",
+    MIME: "application/pdf",
+    Data: pdf,
+}))
+```
+
+#### Formats
+
+This package provides the base CII import and export, and the formats that apply in any country:
+
+| Key | Format |
+| --- | --- |
+| `cii+en16931-v2017` | `FormatEN16931` |
+| `cii+peppol+bis-v3` | `FormatPeppol` (Peppol BIS Billing 3.0) |
+
+CII invoices that declare no known specification are imported under the `cii` key, but cannot be exported.
+
+A format lists the GOBL schemas it imports into and exports from in `Import` and `Export`. Formats without `Import` schemas are export-only and never detected. This is the case for formats whose documents only differ from another format's by their container: Factur-X and ZUGFeRD EN 16931 documents declare exactly the EN 16931 guideline, as only their PDF tells them apart, so they are imported as `cii+en16931-v2017`.
+
+A format sets `Attachments` when its specification allows embedded files in additional referenced documents. `FormatEN16931` and `FormatPeppol` do.
+
+The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported CII document, and an import function the CII document and the imported envelope, before it is calculated.
+
+Regional formats live in their own modules, which register them with `cii.RegisterFormats` when imported, making them available to `FindFormat`, `Import`, and the GOBL `convert` register:
+
+| Key | Module |
+| --- | --- |
+| `cii+fr-ctc-cius-v1`, `cii+fr-ctc-extended-v1`, `cii+fr-ctc-facturx-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
+| `cii+fr-facturx-v1`, `cii+fr-facturx-v1+basic`, `cii+fr-facturx-v1+extended` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
+| `cii+fr-choruspro-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
+| `cii+de-xrechnung-v3`, `cii+de-zugferd-v2`, `cii+de-zugferd-v2+basic`, `cii+de-zugferd-v2+extended` | [gobl.de.xinvoice](https://github.com/invopop/gobl.de.xinvoice) |
+
+#### CDAR
+
+`Decode` and `Encode` also handle UN/CEFACT Cross Domain Acknowledgement and Response (CDAR) documents, as a `*CDAR`. Their mapping to GOBL is specific to each specification, so it lives in the regional modules: the French CTC Flow 6 lifecycle statuses and payments are in [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cdar"`), under the `cdar+fr-ctc-cdv-v1` and `cdar+fr-ctc-cdv-v1+ppf` keys.
+
+#### Import CII to GOBL
 
 ```go
 package main
 
 import (
-    "io"
+    "encoding/json"
+    "os"
 
     cii "github.com/invopop/gobl.cii"
-    )
+)
 
 func main() {
     // Read the CII XML file
-	data, err := io.ReadAll("path/to/cii_invoice.xml")
-	if err != nil {
-		panic(err)
-	}
-
-    env, err := cii.Parse(data)
+    data, err := os.ReadFile("path/to/cii_invoice.xml")
     if err != nil {
         panic(err)
     }
 
-    out, err = json.MarshalIndent(env, "", "  ")
+    // Decode the CII document
+    doc, err := cii.Decode(data)
+    if err != nil {
+        panic(err)
+    }
+
+    // Import into a GOBL envelope, with the format found from the document
+    env, err := cii.Import(doc)
+    if err != nil {
+        panic(err)
+    }
+
+    out, err := json.MarshalIndent(env, "", "  ")
     if err != nil {
         panic(err)
     }
 }
 ```
 
+Through the GOBL `convert` register, `convert.Import` returns the files embedded in an invoice as `Attachments`, alongside the envelope:
+
+```go
+res, err := convert.Import(data)
+for _, a := range res.Attachments {
+    // store a.Data as a.Name
+}
+```
+
 ## Command Line
 
-The GOBL to CII tool includes a command-line helper. You can install it manually in your Go environment with:
+This package no longer includes a command-line tool. The `gobl` CLI from [gobl.dev](https://github.com/invopop/gobl.dev) converts between GOBL and every format registered with the GOBL `convert` register, including CII:
 
 ```bash
-go install ./cmd/gobl.cii
-```
+go install github.com/invopop/gobl.dev/cmd/gobl@latest
 
-Usage:
-
-```bash
-gobl.cii convert <input> <output> [--context <format>]
-```
-
-The tool automatically detects the input file type (JSON/XML) and performs the appropriate conversion. Optionally specify a context format:
-
-```bash
-gobl.cii convert invoice.json invoice.xml --context xrechnung
+gobl convert invoice.json invoice.xml --to cii+en16931-v2017   # export
+gobl convert invoice.xml                                       # import, format detected
+gobl convert --list                                            # registered formats
 ```
 
 ## Testing
@@ -148,13 +190,67 @@ To update test fixtures:
 go test ./... -update
 ```
 
-To validate XML output using [Phive](https://github.com/invopop/phoss):
+### Schematron validation
+
+Beyond the golden-file comparisons, the generated XML can be pushed through the
+real EN 16931 and Peppol schematron rule sets. Validation runs against [phorm](https://github.com/phax/phorm), the
+standalone validation service that replaced the now-archived `invopop/phive`
+gRPC wrapper, using the [`invopop/phorm`](https://github.com/invopop/phorm)
+HTTP client.
+
+Start a service locally:
+
+```bash
+docker run -d --name phorm -p 8080:8080 phelger/phorm
+```
+
+Use `phelger/phorm-arm64` on Apple Silicon. Note the image is `phelger/phorm`,
+**not** `phax/phorm` — the latter does not exist.
+
+It takes a few seconds to boot. It is ready once this returns HTTP 200:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H 'X-Token: phorm-dev-token' \
+  'http://localhost:8080/api/get/vesids?include-deprecated=true'
+```
+
+Then run the suite with `-validate`:
 
 ```bash
 go test ./... -validate
 ```
 
-Validation requires a running Phive service on `127.0.0.1:9091`
+Without `-validate` the validating tests are skipped, so the plain `go test
+./...` never needs a service and CI stays offline.
+
+`PHORM_URL` and `PHORM_TOKEN` default to `http://localhost:8080` and phorm's
+stock development token. Override them for a shared instance, or when port 8080
+is already taken locally:
+
+```bash
+docker run -d --name phorm -p 8085:8080 phelger/phorm
+PHORM_URL=http://localhost:8085 go test ./... -validate
+```
+
+All fixtures currently pass schematron across every format.
+
+#### Notes
+
+- **A failed validation is not an error.** phorm answers a document that breaks
+  a rule with an HTTP 400 carrying the report, which it also uses for a request
+  it rejects outright, so `invopop/phorm` separates the two by whether the body
+  is a validation report. An error from `ValidateXml` therefore means the
+  validation never ran — unreachable service, rejected token, unresolvable
+  VESID, or a body that is not XML — and the tests treat it as fatal, since
+  nothing was checked.
+- **phorm normalises VESID versions**, so a `1.4.0-03` spelling resolves to its
+  published `1.4-03` rule set. The
+  resolved id comes back as `ves.vesid`, worth checking when a rule set behaves
+  unexpectedly.
+- **phive-rules keeps only a rolling window of releases**, so the VESIDs in `format.go`
+  need periodic updating; `GET /api/get/vesids?include-deprecated=true` lists what a
+  given phorm build carries, along with a `deprecated` flag.
 
 ## Considerations
 

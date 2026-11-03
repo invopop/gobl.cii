@@ -10,12 +10,29 @@ type Agreement struct {
 	BuyerReference     string                `xml:"ram:BuyerReference,omitempty"`
 	Seller             *Party                `xml:"ram:SellerTradeParty,omitempty"`
 	Buyer              *Party                `xml:"ram:BuyerTradeParty,omitempty"`
+	SalesAgent         *Party                `xml:"ram:SalesAgentTradeParty,omitempty"`
 	TaxRepresentative  *Party                `xml:"ram:SellerTaxRepresentativeTradeParty,omitempty"`
+	DeliveryTerms      *DeliveryTerms        `xml:"ram:ApplicableTradeDeliveryTerms,omitempty"`
 	Sales              *IssuerID             `xml:"ram:SellerOrderReferencedDocument,omitempty"`
 	Purchase           *IssuerID             `xml:"ram:BuyerOrderReferencedDocument,omitempty"`
 	Contract           *IssuerID             `xml:"ram:ContractReferencedDocument,omitempty"`
 	AdditionalDocument []*AdditionalDocument `xml:"ram:AdditionalReferencedDocument,omitempty"`
+	BuyerAgent         *Party                `xml:"ram:BuyerAgentTradeParty,omitempty"`
 	Project            *Project              `xml:"ram:SpecifiedProcurringProject,omitempty"`
+}
+
+// DeliveryTerms defines the structure of the ApplicableTradeDeliveryTerms of the
+// CII standard. EN 16931 has no business term for it, so the formats that
+// define it, such as the French CTC Extended profile, map it themselves.
+type DeliveryTerms struct {
+	Code     string         `xml:"ram:DeliveryTypeCode,omitempty"`
+	Location *TradeLocation `xml:"ram:RelevantTradeLocation,omitempty"`
+}
+
+// TradeLocation defines the structure of a RelevantTradeLocation of the CII
+// standard.
+type TradeLocation struct {
+	Name string `xml:"ram:Name,omitempty"`
 }
 
 // Project defines common architecture of document reference fields in the CII standard
@@ -41,23 +58,26 @@ type BinaryObject struct {
 	Filename string `xml:"filename,attr,omitempty"`
 }
 
-// IssuerID defines the structure of IssuerAssignedID of the CII standard
+// IssuerID defines the structure of IssuerAssignedID of the CII standard.
+// ReferenceTypeCode (UNCL 1153) is left for profiles that define it, such as
+// the French contract type.
 type IssuerID struct {
-	ID string `xml:"ram:IssuerAssignedID,omitempty"`
+	ID                string `xml:"ram:IssuerAssignedID,omitempty"`
+	ReferenceTypeCode string `xml:"ram:ReferenceTypeCode,omitempty"`
 }
 
 // prepareAgreement creates the ApplicableHeaderTradeAgreement part of a EN 16931 compliant invoice
-func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
+func (out *Invoice) addAgreement(inv *bill.Invoice) error {
 	out.Transaction.Agreement = new(Agreement)
 	agmt := out.Transaction.Agreement
 	if inv.Ordering != nil && inv.Ordering.Code != "" {
 		agmt.BuyerReference = inv.Ordering.Code.String()
 	}
 	if supplier := inv.Supplier; supplier != nil {
-		agmt.Seller = newParty(supplier, ctx)
+		agmt.Seller = newParty(supplier)
 	}
 	if customer := inv.Customer; customer != nil {
-		agmt.Buyer = newParty(customer, ctx)
+		agmt.Buyer = newParty(customer)
 	}
 	if inv.Ordering != nil {
 		// The party liable for the tax, when not the supplier, is the
@@ -66,7 +86,7 @@ func (out *Invoice) addAgreement(inv *bill.Invoice, ctx Context) error {
 		// from CII-SR-282 to 291: they are warnings, but honouring them
 		// produces cleaner invoices.
 		if inv.Ordering.Seller != nil {
-			rep := newParty(inv.Ordering.Seller, ctx)
+			rep := newParty(inv.Ordering.Seller)
 			agmt.TaxRepresentative = &Party{
 				Name:                     rep.Name,
 				PostalTradeAddress:       rep.PostalTradeAddress,

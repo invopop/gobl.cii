@@ -27,7 +27,7 @@ func TestNewPartyTaxRegistrations(t *testing.T) {
 					Code:  "483671517",
 				},
 			},
-		}, ContextEN16931V2017)
+		})
 
 		require.Len(t, p.SpecifiedTaxRegistration, 1)
 		assert.Equal(t, SchemeIDTaxRegistration, p.SpecifiedTaxRegistration[0].ID.SchemeID)
@@ -52,7 +52,7 @@ func TestNewPartyTaxRegistrations(t *testing.T) {
 					Code:  "35600000000048",
 				},
 			},
-		}, ContextEN16931V2017)
+		})
 
 		require.Len(t, p.SpecifiedTaxRegistration, 2)
 		assert.Equal(t, SchemeIDVAT, p.SpecifiedTaxRegistration[0].ID.SchemeID)
@@ -74,7 +74,7 @@ func TestNewPartyTaxRegistrations(t *testing.T) {
 					}),
 				},
 			},
-		}, ContextEN16931V2017)
+		})
 
 		require.NotNil(t, p.LegalOrganization)
 		assert.Equal(t, "483671517", p.LegalOrganization.ID.Value)
@@ -109,7 +109,7 @@ func TestNewPartyMultipleIdentifiers(t *testing.T) {
 					Ext:  tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0231"}),
 				},
 			},
-		}, ContextEN16931V2017)
+		})
 
 		// The legal identity is BT-30, not BT-29.
 		require.NotNil(t, p.LegalOrganization)
@@ -132,7 +132,7 @@ func TestNewPartyMultipleIdentifiers(t *testing.T) {
 				{Code: "REF-ONE"},
 				{Code: "REF-TWO"},
 			},
-		}, ContextEN16931V2017)
+		})
 
 		require.Len(t, p.ID, 2)
 		assert.Equal(t, "REF-ONE", p.ID[0].Value)
@@ -207,4 +207,15 @@ func TestParsePartyWithoutAddress(t *testing.T) {
 	assert.Equal(t, org.IdentityScopeTax, p.Identities[0].Scope)
 	assert.Equal(t, cbc.Code("828701557"), p.Identities[0].Code)
 	assert.Empty(t, p.Identities[0].Country)
+}
+
+func TestMapGOBLTaxIDScheme(t *testing.T) {
+	t.Run("VAT maps to the CII scheme id", func(t *testing.T) {
+		assert.Equal(t, SchemeIDVAT, mapGOBLTaxIDScheme(&tax.Identity{Country: "ES", Code: "B98602642"}))
+	})
+
+	t.Run("another scheme is passed through", func(t *testing.T) {
+		id := &tax.Identity{Country: "FR", Code: "123", Scheme: "GST"}
+		assert.Equal(t, "GST", mapGOBLTaxIDScheme(id))
+	})
 }

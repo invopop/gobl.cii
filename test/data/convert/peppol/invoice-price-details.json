@@ -1,0 +1,161 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "5d8e6f1f2eb43075b8466d849eba6071af5223fe77f68401c3f7a279a0c4085b"
+		},
+		"from": "iso6523-actorid-upis::9920:ESB85905495",
+		"to": "iso6523-actorid-upis::9920:X3157928M"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "SAMPLE",
+		"code": "PRICE",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Provide One GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:ESB85905495"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "ESB85905495"
+				}
+			],
+			"addresses": [
+				{
+					"num": "16",
+					"street": "Dietmar-Hopp-Allee",
+					"locality": "Walldorf",
+					"code": "69190",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"tax_id": {
+				"country": "DE",
+				"code": "282741168"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:X3157928M"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "X3157928M"
+				}
+			],
+			"addresses": [
+				{
+					"num": "25",
+					"street": "Werner-Heisenberg-Allee",
+					"locality": "München",
+					"code": "80939",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "250",
+				"item": {
+					"name": "Bulk coffee beans",
+					"list": "120.00",
+					"discount": "12.00",
+					"price": "108.00",
+					"per": "100",
+					"unit": "kg"
+				},
+				"sum": "270.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "270.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "E2025003242"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "lorem ipsum"
+			}
+		},
+		"totals": {
+			"sum": "270.00",
+			"total": "270.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "270.00",
+								"percent": "19%",
+								"amount": "51.30"
+							}
+						],
+						"amount": "51.30"
+					}
+				],
+				"sum": "51.30"
+			},
+			"tax": "51.30",
+			"total_with_tax": "321.30",
+			"payable": "321.30"
+		}
+	}
+}

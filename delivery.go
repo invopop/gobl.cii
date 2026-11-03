@@ -1,11 +1,8 @@
 package cii
 
 import (
-	"slices"
-
-	"github.com/invopop/gobl/addons/de/zugferd"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
 )
 
@@ -39,31 +36,15 @@ func newDelivery(inv *bill.Invoice) *Delivery {
 		if inv.Delivery.Receiver != nil {
 			d.Receiver = newDeliveryParty(inv.Delivery.Receiver)
 		}
-		// BT-71: Delivery location identifier
-		if len(inv.Delivery.Identities) > 0 {
-			id := inv.Delivery.Identities[0]
+		if id := newDeliveryLocationID(inv.Delivery.Identities); id != nil {
 			if d.Receiver == nil {
 				d.Receiver = new(Party)
 			}
-			if id.Label != "" {
-				// When scheme ID is present, use GlobalID
-				d.Receiver.GlobalID = []*PartyID{{
-					Value:    id.Code.String(),
-					SchemeID: id.Label,
-				}}
+			if id.SchemeID != "" {
+				d.Receiver.GlobalID = []*PartyID{id}
 			} else {
-				d.Receiver.ID = []*PartyID{{
-					Value: id.Code.String(),
-				}}
+				d.Receiver.ID = []*PartyID{id}
 			}
-		}
-	} else if documentType := inv.Tax.Ext.Get(untdid.ExtKeyDocumentType); slices.Contains(inv.GetAddons(), zugferd.V2) && documentType.String() != "386" {
-		// Helper for Zugferd BR-FX-EN-04 rule in case delivery
-		// is not specified in the invoice (imported invoice)
-		// TODO: move logic to addon
-		customerParty := inv.Customer
-		if customerParty != nil && len(customerParty.Addresses) > 0 {
-			d.Receiver = newDeliveryParty(customerParty)
 		}
 	}
 	if inv.Ordering != nil && inv.Ordering.Despatch != nil {
@@ -81,8 +62,12 @@ func newDelivery(inv *bill.Invoice) *Delivery {
 	return d
 }
 
-// newDeliveryParty creates a Party with only the BTs available for
+// NewDeliveryParty creates a Party with only the BTs available for
 // the delivery party (BT-70 name, BG-15 address).
+func NewDeliveryParty(party *org.Party) *Party {
+	return newDeliveryParty(party)
+}
+
 func newDeliveryParty(party *org.Party) *Party {
 	if party == nil {
 		return nil
@@ -91,4 +76,24 @@ func newDeliveryParty(party *org.Party) *Party {
 		Name:               party.Name,
 		PostalTradeAddress: newPostalTradeAddress(party.Addresses),
 	}
+}
+
+// newDeliveryLocationID builds the delivery location ID (BT-71) and its scheme
+// (BT-71-1) from the first delivery identity, falling back to the label for
+// documents imported before the scheme moved to the ISO scheme ID extension.
+func newDeliveryLocationID(ids []*org.Identity) *PartyID {
+	for _, id := range ids {
+		if id == nil {
+			continue
+		}
+		out := &PartyID{
+			Value:    id.Code.String(),
+			SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
+		}
+		if out.SchemeID == "" {
+			out.SchemeID = id.Label
+		}
+		return out
+	}
+	return nil
 }

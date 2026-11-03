@@ -3,7 +3,6 @@ package cii
 import (
 	"strings"
 
-	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -11,32 +10,15 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
-	"github.com/invopop/xmlctx"
 )
 
-func parseInvoice(data []byte) (*bill.Invoice, error) {
-
-	in := new(Invoice)
-	if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(
-		map[string]string{
-			nsPrefixRSM: NamespaceRSM,
-			nsPrefixRAM: NamespaceRAM,
-			nsPrefixQDT: NamespaceQDT,
-			nsPrefixUDT: NamespaceUDT,
-		},
-	)); err != nil {
-		return nil, err
-	}
-	return goblInvoice(in)
-}
-
-func goblInvoice(in *Invoice) (*bill.Invoice, error) {
-	ctx := goblDetectContext(in)
+func goblInvoice(in *Invoice, f *Format) (*bill.Invoice, error) {
 	ahts := in.Transaction.Settlement
+	invoiceType, tags := typeCodeParse(in.ExchangedDocument.TypeCode)
 
 	out := &bill.Invoice{
 		Code:     cbc.Code(in.ExchangedDocument.ID),
-		Type:     typeCodeParse(in.ExchangedDocument.TypeCode),
+		Type:     invoiceType,
 		Currency: currency.Code(ahts.Currency),
 		Supplier: goblNewParty(in.Transaction.Agreement.Seller),
 		Customer: goblNewParty(in.Transaction.Agreement.Buyer),
@@ -48,14 +30,11 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		},
 	}
 
-	if ctx != nil {
-		out.Addons = tax.Addons{List: ctx.Addons}
-		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) || ctx.Is(ContextPeppolFranceExtendedV1) {
-			if in.ExchangedContext.BusinessContext != nil {
-				out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
-			}
-		}
+	if len(tags) > 0 {
+		out.SetTags(tags...)
 	}
+
+	out.Addons = tax.Addons{List: f.Addons}
 
 	issueDate, err := parseDate(in.ExchangedDocument.IssueDate.DateFormat.Value)
 	if err != nil {
@@ -69,7 +48,8 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		return nil, err
 	}
 
-	if err = goblAddLines(in.Transaction, out, taxMap); err != nil {
+	srcs, err := goblAddLines(in.Transaction, out, taxMap, nil)
+	if err != nil {
 		return nil, err
 	}
 
@@ -104,20 +84,43 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 
 	goblAddTaxNotes(ahts.Tax, out)
 
+	out.ExchangeRates = goblExchangeRates(in, out.Currency)
+
+	// Everything the document declares is now mapped, so the calculated
+	// amounts can be checked against the ones the sender stated.
+	if err := goblReconcileTotals(in, out, srcs, taxMap); err != nil {
+		return nil, err
+	}
+
 	return out, nil
 }
 
-// goblDetectContext determines the conversion context from guideline and business IDs.
-func goblDetectContext(in *Invoice) *Context {
-	if in.ExchangedContext == nil || in.ExchangedContext.GuidelineContext == nil {
+// exchangeRatePrecision is the number of decimals kept when deriving a rate
+// from two rounded totals, so converting BT-110 gives back BT-111.
+const exchangeRatePrecision = 6
+
+// goblExchangeRates derives the rate into the VAT accounting currency from
+// BT-111 / BT-110, when the document states both totals.
+func goblExchangeRates(in *Invoice, cur currency.Code) []*currency.ExchangeRate {
+	doc, acc := goblTaxTotals(in, cur)
+	if doc == nil || acc == nil {
 		return nil
 	}
-	guidelineID := in.ExchangedContext.GuidelineContext.ID
-	var businessID string
-	if in.ExchangedContext.BusinessContext != nil {
-		businessID = in.ExchangedContext.BusinessContext.ID
+	docAmount, ok := goblDeclaredAmount(doc.Amount)
+	if !ok || docAmount.IsZero() {
+		return nil
 	}
-	return FindContext(guidelineID, businessID)
+	accAmount, ok := goblDeclaredAmount(acc.Amount)
+	if !ok {
+		return nil
+	}
+	return []*currency.ExchangeRate{
+		{
+			From:   cur,
+			To:     currency.Code(acc.Currency),
+			Amount: accAmount.RescaleUp(exchangeRatePrecision).Divide(docAmount),
+		},
+	}
 }
 
 // goblAddTaxDates extracts BT-7 (VAT point date) and BT-8 (VAT point date code) from
@@ -154,7 +157,10 @@ func goblParseNotes(notes []*Note) []*org.Note {
 	}
 	out := make([]*org.Note, 0, len(notes))
 	for _, note := range notes {
-		n := &org.Note{Text: note.Content}
+		if note.Content == "" {
+			continue
+		}
+		n := &org.Note{Text: cleanString(note.Content)}
 		if note.SubjectCode != "" {
 			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
 		}
@@ -170,6 +176,9 @@ func goblParsePreceding(refs []*ReferencedDocument) ([]*org.DocumentRef, error) 
 	}
 	out := make([]*org.DocumentRef, 0, len(refs))
 	for _, ref := range refs {
+		if ref.IssuerAssignedID == "" {
+			continue
+		}
 		docRef := &org.DocumentRef{
 			Code: cbc.Code(ref.IssuerAssignedID),
 		}

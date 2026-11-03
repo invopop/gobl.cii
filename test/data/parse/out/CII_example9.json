@@ -4,18 +4,22 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "978e034d112b3af79ea94f16bdd768d12359e5f94984a18f2e4a6c743e254d48"
+			"val": "06d39fc2ac99d2a713e9daf0143d38fce66d876e62d53fb39f6d6f1e8cf1f0e1"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "NL",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "20150483",
 		"issue_date": "2015-04-01",
 		"currency": "EUR",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -26,6 +30,12 @@
 				"country": "NL",
 				"code": "809163160B01"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "32081330 Amersfoort"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Lindeboomseweg 41",
@@ -60,12 +70,22 @@
 			{
 				"i": 1,
 				"quantity": "3",
+				"period": {
+					"start": "2016-04-01",
+					"end": "2016-04-01"
+				},
 				"item": {
 					"name": "IExpress licentiekosten",
+					"attributes": [
+						{
+							"label": "Verbruikscategorie",
+							"text": "Start"
+						}
+					],
 					"price": "49.00",
 					"unit": "mon",
-					"meta": {
-						"verbruikscategorie": "Start"
+					"ext": {
+						"untdid-unit": "MON"
 					}
 				},
 				"sum": "147.00",
@@ -73,7 +93,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "147.00"
@@ -91,12 +114,14 @@
 				"due_dates": [
 					{
 						"date": "2015-04-15",
-						"amount": "0.00"
+						"amount": "177.87",
+						"percent": "100%"
 					}
 				]
 			},
 			"instructions": {
 				"key": "credit-transfer",
+				"ref": "2015 0483 0000 0000",
 				"credit_transfer": [
 					{
 						"iban": "NL13RABO0377815500",
@@ -118,6 +143,9 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "147.00",
 								"percent": "21%",
 								"amount": "30.87"

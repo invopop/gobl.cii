@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "94ae7afa4e37e8fe9d9c60afbad226ca45ad7434e6af2ab448f40510edf0a508"
+			"val": "65eac66d577fc9c7a0e89e2abe295134088f8e10390fe35839e601dc1edb3f16"
 		}
 	},
 	"doc": {
@@ -114,7 +114,18 @@
 						}
 					}
 				],
-				"total": "1620.00"
+				"total": "1620.00",
+				"seller": {
+					"name": "Marketplace Seller GmbH",
+					"identities": [
+						{
+							"code": "1234567890128",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						}
+					]
+				}
 			}
 		],
 		"discounts": [

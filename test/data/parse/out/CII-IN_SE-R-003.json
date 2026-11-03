@@ -4,17 +4,21 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7ff9fdeee2cb11bbd85c89cd8a73c56362ef84dceb151a4ebcb1a60857e094c6"
+			"val": "12737300f4088b1300e62d9e897aa7b694b5921b4844c0d60e22ce1704195c58"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "2018210",
 		"issue_date": "2018-02-08",
 		"currency": "SEK",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -23,8 +27,13 @@
 			"name": "Allsälj AB",
 			"identities": [
 				{
+					"scope": "legal",
+					"code": "1234567890"
+				},
+				{
+					"scope": "tax",
 					"country": "SE",
-					"code": "Godknd fr F-skatt"
+					"code": "Godkänd för F-skatt"
 				}
 			],
 			"inboxes": [
@@ -60,14 +69,20 @@
 				"item": {
 					"name": "Printing paper",
 					"price": "1.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "1000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "1000.00"
@@ -78,14 +93,20 @@
 				"item": {
 					"name": "Parker Pen",
 					"price": "5.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "500.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "500.00"
@@ -96,14 +117,20 @@
 				"item": {
 					"name": "Eraser P-97",
 					"price": "5.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "2500.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "12%"
+						"percent": "12%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "2500.00"
@@ -120,7 +147,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -139,7 +169,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -155,12 +188,14 @@
 				"due_dates": [
 					{
 						"date": "2018-03-07",
-						"amount": "0.00"
+						"amount": "4675.00",
+						"percent": "100%"
 					}
 				]
 			},
 			"instructions": {
 				"key": "credit-transfer",
+				"ref": "08/00355",
 				"credit_transfer": [
 					{
 						"bic": "BANKSBIC",
@@ -184,12 +219,18 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "1500.00",
 								"percent": "25%",
 								"amount": "375.00"
 							},
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "2500.00",
 								"percent": "12%",
 								"amount": "300.00"

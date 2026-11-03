@@ -25,6 +25,10 @@
         <ram:NetPriceProductTradePrice>
           <ram:ChargeAmount>90.00</ram:ChargeAmount>
         </ram:NetPriceProductTradePrice>
+        <ram:ItemSellerTradeParty>
+          <ram:GlobalID schemeID="0088">1234567890128</ram:GlobalID>
+          <ram:Name>Marketplace Seller GmbH</ram:Name>
+        </ram:ItemSellerTradeParty>
       </ram:SpecifiedLineTradeAgreement>
       <ram:SpecifiedLineTradeDelivery>
         <ram:BilledQuantity unitCode="HUR">20</ram:BilledQuantity>

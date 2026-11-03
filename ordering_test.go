@@ -30,7 +30,7 @@ func TestOrderingIssuer(t *testing.T) {
 	}
 
 	t.Run("maps ordering issuer to InvoicerTradeParty", func(t *testing.T) {
-		doc, err := cii.ConvertInvoice(issuerEnv(t))
+		doc, err := cii.ExportInvoice(issuerEnv(t))
 		require.NoError(t, err)
 
 		invoicer := doc.Transaction.Settlement.Invoicer
@@ -39,12 +39,12 @@ func TestOrderingIssuer(t *testing.T) {
 	})
 
 	t.Run("round-trips issuer back to GOBL ordering", func(t *testing.T) {
-		doc, err := cii.ConvertInvoice(issuerEnv(t))
+		doc, err := cii.ExportInvoice(issuerEnv(t))
 		require.NoError(t, err)
-		data, err := doc.Bytes()
+		data, err := cii.Encode(doc)
 		require.NoError(t, err)
 
-		env, err := cii.Parse(data)
+		env, err := parseCII(data)
 		require.NoError(t, err)
 		out, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -77,10 +77,10 @@ func TestOrderingSeller(t *testing.T) {
 	t.Run("round-trips seller back to GOBL ordering", func(t *testing.T) {
 		doc, err := newInvoiceFrom(t, "en16931/invoice-de-de.json")
 		require.NoError(t, err)
-		data, err := doc.Bytes()
+		data, err := cii.Encode(doc)
 		require.NoError(t, err)
 
-		env, err := cii.Parse(data)
+		env, err := parseCII(data)
 		require.NoError(t, err)
 		out, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -115,7 +115,7 @@ func TestOrderingCost(t *testing.T) {
 	}
 
 	t.Run("maps ordering cost to ReceivableSpecifiedTradeAccountingAccount", func(t *testing.T) {
-		doc, err := cii.ConvertInvoice(costEnv(t))
+		doc, err := cii.ExportInvoice(costEnv(t))
 		require.NoError(t, err)
 
 		acc := doc.Transaction.Settlement.AccountingAccount
@@ -124,12 +124,12 @@ func TestOrderingCost(t *testing.T) {
 	})
 
 	t.Run("round-trips accounting cost back to GOBL ordering", func(t *testing.T) {
-		doc, err := cii.ConvertInvoice(costEnv(t))
+		doc, err := cii.ExportInvoice(costEnv(t))
 		require.NoError(t, err)
-		data, err := doc.Bytes()
+		data, err := cii.Encode(doc)
 		require.NoError(t, err)
 
-		env, err := cii.Parse(data)
+		env, err := parseCII(data)
 		require.NoError(t, err)
 		out, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)

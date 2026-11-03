@@ -4,17 +4,22 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "07100dd70c8974a29cf0f4114f7225f01c2a0b40e72848534c26fb3a06c55935"
+			"val": "9a4a10f52266b978bf30330eb7d47cfa0dbeaf4ebfa3f3f759a93288b344c454"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-04-10",
 		"currency": "DKK",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -25,6 +30,12 @@
 				"country": "DK",
 				"code": "16356706"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK16356706"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Main street 2, Building 4",
@@ -66,14 +77,20 @@
 					"name": "Paper subscription",
 					"description": "Subscription fee 1st quarter",
 					"price": "800.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "800.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "800.00"
@@ -88,7 +105,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -112,12 +132,14 @@
 				"due_dates": [
 					{
 						"date": "2013-05-10",
-						"amount": "0.00"
+						"amount": "1125.00",
+						"percent": "100%"
 					}
 				]
 			},
 			"instructions": {
 				"key": "credit-transfer",
+				"ref": "Payref1",
 				"credit_transfer": [
 					{
 						"iban": "DK1212341234123412"
@@ -139,6 +161,9 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "900.00",
 								"percent": "25%",
 								"amount": "225.00"

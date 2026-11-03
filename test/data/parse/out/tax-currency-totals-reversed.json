@@ -1,0 +1,141 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "b38a7fc105a8d51b46a2d2a8ac4b31f84deb49a505ebe7d70f8623fc81f7324f"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "VAT-ISSUE-002",
+		"issue_date": "2026-10-15",
+		"currency": "EUR",
+		"exchange_rates": [
+			{
+				"from": "EUR",
+				"to": "RON",
+				"amount": "5.085000"
+			}
+		],
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Exemplu Furnizor SRL",
+			"tax_id": {
+				"country": "RO",
+				"code": "10000008"
+			},
+			"addresses": [
+				{
+					"street": "Strada Exemplu 1",
+					"locality": "SECTOR1",
+					"region": "RO-B",
+					"code": "010101",
+					"country": "RO"
+				}
+			]
+		},
+		"customer": {
+			"name": "Exemplu Client SRL",
+			"tax_id": {
+				"country": "RO",
+				"code": "20000006"
+			},
+			"addresses": [
+				{
+					"street": "Strada Test 2",
+					"locality": "Cluj-Napoca",
+					"region": "RO-CJ",
+					"code": "400001",
+					"country": "RO"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Consulting services",
+					"price": "500.00",
+					"unit": "h",
+					"ext": {
+						"untdid-unit": "HUR"
+					}
+				},
+				"sum": "5000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "5000.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-11-14",
+						"amount": "6050.00",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "RO49AAAA1B31007593840000"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "5000.00",
+			"total": "5000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "5000.00",
+								"percent": "21%",
+								"amount": "1050.00"
+							}
+						],
+						"amount": "1050.00"
+					}
+				],
+				"sum": "1050.00"
+			},
+			"tax": "1050.00",
+			"total_with_tax": "6050.00",
+			"payable": "6050.00"
+		}
+	}
+}

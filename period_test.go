@@ -39,9 +39,9 @@ func TestPeriodSingleBound(t *testing.T) {
 		env, err := parseInvoiceFrom(t, "CII_period_single_bound.xml")
 		require.NoError(t, err)
 
-		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+		out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 		require.NoError(t, err)
-		data, err := out.Bytes()
+		data, err := cii.Encode(out)
 		require.NoError(t, err)
 		xml := string(data)
 
@@ -56,9 +56,9 @@ func TestPeriodSingleBound(t *testing.T) {
 	t.Run("convert", func(t *testing.T) {
 		env := loadEnvelope(t, "en16931/invoice-period-single-bound.json")
 
-		out, err := cii.ConvertInvoice(env, cii.WithContext(cii.ContextEN16931V2017))
+		out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 		require.NoError(t, err)
-		data, err := out.Bytes()
+		data, err := cii.Encode(out)
 		require.NoError(t, err)
 		xml := string(data)
 

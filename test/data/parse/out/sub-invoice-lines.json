@@ -1,0 +1,207 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "4a6480a0e302db488a108b2e406260c220bf85ff5e3fe1b286da9c26450a9cfa"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "SUBLINES-1",
+		"issue_date": "2026-01-01",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Seller SA",
+			"tax_id": {
+				"country": "FR",
+				"code": "59381511039"
+			},
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyer SA",
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Kit",
+					"price": "0.00"
+				},
+				"sum": "0.00",
+				"total": "0.00"
+			},
+			{
+				"i": 2,
+				"quantity": "10",
+				"item": {
+					"name": "Part A",
+					"price": "10.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "100.00"
+			},
+			{
+				"i": 3,
+				"quantity": "2",
+				"item": {
+					"name": "Part B",
+					"price": "25.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "50.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "10.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "50.00"
+			},
+			{
+				"i": 4,
+				"quantity": "1",
+				"item": {
+					"name": "Service bundle",
+					"currency": "EUR",
+					"price": "20.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"breakdown": [
+					{
+						"i": 1,
+						"quantity": "1",
+						"item": {
+							"name": "Installation",
+							"price": "20.00",
+							"unit": "one",
+							"ext": {
+								"untdid-unit": "C62"
+							}
+						},
+						"sum": "20.00",
+						"total": "20.00"
+					}
+				],
+				"sum": "20.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "20.00"
+			},
+			{
+				"i": 5,
+				"quantity": "1",
+				"item": {
+					"name": "Assembly instructions",
+					"price": "0.00",
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
+				},
+				"sum": "0.00",
+				"total": "0.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-01-31",
+						"amount": "199.00",
+						"percent": "100%"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "170.00",
+			"total": "170.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "120.00",
+								"percent": "20.00%",
+								"amount": "24.00"
+							},
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "50.00",
+								"percent": "10.00%",
+								"amount": "5.00"
+							}
+						],
+						"amount": "29.00"
+					}
+				],
+				"sum": "29.00"
+			},
+			"tax": "29.00",
+			"total_with_tax": "199.00",
+			"payable": "199.00"
+		}
+	}
+}

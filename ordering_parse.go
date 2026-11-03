@@ -35,38 +35,20 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 		ord.Cost = cbc.Code(tr.Settlement.AccountingAccount.ID)
 	}
 
-	if tr.Agreement.Sales != nil {
-		ord.Sales = []*org.DocumentRef{
-			{
-				Code: cbc.Code(tr.Agreement.Sales.ID),
-			},
-		}
-	}
+	ord.Sales = goblIssuerRefs(tr.Agreement.Sales)
 
-	if tr.Agreement.Purchase != nil {
-		ord.Purchases = []*org.DocumentRef{
-			{
-				Code: cbc.Code(tr.Agreement.Purchase.ID),
-			},
-		}
-	}
+	ord.Purchases = goblIssuerRefs(tr.Agreement.Purchase)
 
-	if tr.Agreement.Project != nil {
+	if tr.Agreement.Project != nil && tr.Agreement.Project.ID != "" {
 		ord.Projects = []*org.DocumentRef{
 			{
 				Code:        cbc.Code(tr.Agreement.Project.ID),
-				Description: tr.Agreement.Project.Name,
+				Description: cleanString(tr.Agreement.Project.Name),
 			},
 		}
 	}
 
-	if tr.Agreement.Contract != nil {
-		ord.Contracts = []*org.DocumentRef{
-			{
-				Code: cbc.Code(tr.Agreement.Contract.ID),
-			},
-		}
-	}
+	ord.Contracts = goblIssuerRefs(tr.Agreement.Contract)
 
 	// Ordering period parsing
 	if tr.Settlement.Period != nil {
@@ -88,30 +70,23 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 			per.End = &end
 		}
 		if tr.Settlement.Period.Description != nil {
-			per.Label = *tr.Settlement.Period.Description
+			per.Label = cleanString(*tr.Settlement.Period.Description)
 		}
-		ord.Period = per
+		if per.Start != nil || per.End != nil || per.Label != "" {
+			ord.Period = per
+		}
 	}
 
 	// Despatch, Receiving and Tender parsing
-	if tr.Delivery.Despatch != nil {
-		ord.Despatch = []*org.DocumentRef{
-			{
-				Code: cbc.Code(tr.Delivery.Despatch.ID),
-			},
-		}
-	}
+	ord.Despatch = goblIssuerRefs(tr.Delivery.Despatch)
 
-	if tr.Delivery.Receiving != nil {
-		ord.Receiving = []*org.DocumentRef{
-			{
-				Code: cbc.Code(tr.Delivery.Receiving.ID),
-			},
-		}
-	}
+	ord.Receiving = goblIssuerRefs(tr.Delivery.Receiving)
 
 	if len(tr.Agreement.AdditionalDocument) > 0 {
 		for _, ref := range tr.Agreement.AdditionalDocument {
+			if ref.ID == "" {
+				continue
+			}
 			switch ref.TypeCode {
 			case AdditionalDocumentTypeTender:
 				if ord.Tender == nil {
@@ -151,6 +126,13 @@ func goblNewOrdering(in *Invoice) (*bill.Ordering, error) {
 	return nil, nil
 }
 
+func goblIssuerRefs(ref *IssuerID) []*org.DocumentRef {
+	if ref == nil || ref.ID == "" {
+		return nil
+	}
+	return []*org.DocumentRef{{Code: cbc.Code(ref.ID)}}
+}
+
 func goblOrderingHasData(ord *bill.Ordering) bool {
 	return ord.Code != "" ||
 		ord.Period != nil ||
@@ -162,5 +144,6 @@ func goblOrderingHasData(ord *bill.Ordering) bool {
 		ord.Purchases != nil ||
 		ord.Projects != nil ||
 		ord.Contracts != nil ||
-		ord.Issuer != nil
+		ord.Issuer != nil ||
+		ord.Buyer != nil
 }

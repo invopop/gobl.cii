@@ -3,6 +3,7 @@ package cii
 import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/tax"
 )
@@ -24,41 +25,46 @@ type Indicator struct {
 }
 
 func newAllowanceCharges(inv *bill.Invoice) []*AllowanceCharge {
-	if inv.Charges == nil && inv.Discounts == nil {
+	ccy := inv.Currency.String()
+	if len(inv.Charges) == 0 && len(inv.Discounts) == 0 {
 		return nil
+	}
+	var notes []*tax.Note
+	if inv.Tax != nil {
+		notes = inv.Tax.Notes
 	}
 	ac := make([]*AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	for i, c := range inv.Charges {
-		ac[i] = newCharge(c)
+		ac[i] = newCharge(c, ccy, notes)
 	}
 	for i, d := range inv.Discounts {
-		ac[i+len(inv.Charges)] = newDiscount(d)
+		ac[i+len(inv.Charges)] = newDiscount(d, ccy, notes)
 	}
 	return ac
 }
 
-func newLineAllowanceCharges(line *bill.Line) []*AllowanceCharge {
-	if line.Charges == nil && line.Discounts == nil {
+func newLineAllowanceCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string) []*AllowanceCharge {
+	if len(charges) == 0 && len(discounts) == 0 {
 		return nil
 	}
-	ac := make([]*AllowanceCharge, len(line.Charges)+len(line.Discounts))
-	for i, charge := range line.Charges {
-		ac[i] = makeLineCharge(charge)
+	ac := make([]*AllowanceCharge, len(charges)+len(discounts))
+	for i, charge := range charges {
+		ac[i] = makeLineCharge(charge, ccy)
 	}
-	for i, discount := range line.Discounts {
-		ac[i+len(line.Charges)] = makeLineDiscount(discount)
+	for i, discount := range discounts {
+		ac[i+len(charges)] = makeLineDiscount(discount, ccy)
 	}
 	return ac
 }
 
-func newCharge(c *bill.Charge) *AllowanceCharge {
+func newCharge(c *bill.Charge, ccy string, notes []*tax.Note) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
-		Amount:          c.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(c.Amount, ccy),
 	}
 
 	if c.Base != nil {
-		ac.Base = c.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*c.Base, ccy)
 	}
 
 	if c.Reason != "" {
@@ -73,18 +79,19 @@ func newCharge(c *bill.Charge) *AllowanceCharge {
 	}
 	if c.Taxes != nil {
 		ac.Tax = makeTaxCategory(c.Taxes[0])
+		applyExemptionReason(ac.Tax, c.Taxes[0], notes)
 	}
 	return ac
 }
 
-func newDiscount(d *bill.Discount) *AllowanceCharge {
+func newDiscount(d *bill.Discount, ccy string, notes []*tax.Note) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
-		Amount:          d.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(d.Amount, ccy),
 	}
 
 	if d.Base != nil {
-		ac.Base = d.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*d.Base, ccy)
 	}
 
 	if d.Reason != "" {
@@ -97,15 +104,16 @@ func newDiscount(d *bill.Discount) *AllowanceCharge {
 	}
 	if d.Taxes != nil {
 		ac.Tax = makeTaxCategory(d.Taxes[0])
+		applyExemptionReason(ac.Tax, d.Taxes[0], notes)
 	}
 
 	return ac
 }
 
-func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
+func makeLineCharge(c *bill.LineCharge, ccy string) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: true},
-		Amount:          c.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(c.Amount, ccy),
 	}
 	if c.Reason != "" {
 		ac.Reason = c.Reason
@@ -114,15 +122,15 @@ func makeLineCharge(c *bill.LineCharge) *AllowanceCharge {
 	if c.Percent != nil && c.Base != nil {
 		p := c.Percent.StringWithoutSymbol()
 		ac.Percent = p
-		ac.Base = c.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*c.Base, ccy)
 	}
 	return ac
 }
 
-func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
+func makeLineDiscount(d *bill.LineDiscount, ccy string) *AllowanceCharge {
 	ac := &AllowanceCharge{
 		ChargeIndicator: Indicator{Value: false},
-		Amount:          d.Amount.Rescale(2).String(),
+		Amount:          rescaleToCurrency(d.Amount, ccy),
 	}
 	if d.Reason != "" {
 		ac.Reason = d.Reason
@@ -131,7 +139,7 @@ func makeLineDiscount(d *bill.LineDiscount) *AllowanceCharge {
 	if d.Percent != nil && d.Base != nil {
 		p := d.Percent.StringWithoutSymbol()
 		ac.Percent = p
-		ac.Base = d.Base.Rescale(2).String()
+		ac.Base = rescaleToCurrency(*d.Base, ccy)
 	}
 	return ac
 }
@@ -151,4 +159,20 @@ func makeTaxCategory(t *tax.Combo) *Tax {
 		}
 	}
 	return c
+}
+
+// applyExemptionReason sets BT-120 on an allowance or charge's own tax
+// category. Only valid here and at document level: the line-level
+// ApplicableTradeTax does not permit ram:ExemptionReasonCode in the Factur-X
+// profile.
+func applyExemptionReason(c *Tax, t *tax.Combo, notes []*tax.Note) {
+	if c == nil {
+		return
+	}
+	if t.Ext.Has(cef.ExtKeyVATEX) {
+		c.ExemptionReasonCode = t.Ext.Get(cef.ExtKeyVATEX).String()
+	}
+	if note := findTaxNote(notes, t.Category, t.Ext); note != nil {
+		c.ExemptionReason = note.Text
+	}
 }
