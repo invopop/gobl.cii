@@ -87,7 +87,7 @@ func (c *converter) Import(key cbc.Key, data []byte, o *convert.ImportOptions) (
 	}
 	// The detected key may be a requested format detection alone wouldn't
 	// pick, so import in that format rather than finding it again.
-	opts := []Option{WithRouting(o.From, o.To)}
+	opts := []Option{WithTo(o.To), WithFrom(o.From)}
 	if f := c.format(key); f != nil {
 		opts = append(opts, WithFormat(*f))
 	}
