@@ -115,7 +115,7 @@ func TestConverter(t *testing.T) {
 		_, err = convert.Import([]byte(`<rsm:CrossIndustryInvoice xmlns:rsm="`+cii.NamespaceRSM+`"><`), convert.WithFormats(cii.KeyCII))
 		assert.Error(t, err)
 
-		_, err = convert.Import([]byte(`<rsm:CrossIndustryInvoice xmlns:rsm="`+cii.NamespaceRSM+`"><rsm:ExchangedDocument><x></rsm:ExchangedDocument></rsm:CrossIndustryInvoice>`))
+		_, err = convert.Import([]byte(`<rsm:CrossIndustryInvoice xmlns:rsm="` + cii.NamespaceRSM + `"><rsm:ExchangedDocument><x></rsm:ExchangedDocument></rsm:CrossIndustryInvoice>`))
 		assert.ErrorIs(t, err, convert.ErrConversion, "not decoded")
 
 		data := strings.Replace(string(example1(t)), ">20150109<", ">not a date<", 1)
