@@ -107,7 +107,7 @@ func Import(doc Document, opts ...Option) (*gobl.Envelope, error) {
 	env := gobl.NewEnvelope()
 	// A parsed document is one we received: its transport addresses are the
 	// ones the Peppol layer routed it with (who sent it → who received it),
-	// supplied via WithTo and WithFrom as fully-qualified participant URIs. Set
+	// supplied via WithRouting as fully-qualified participant URIs. Set
 	// Head.From / Head.To from those args verbatim, BEFORE calculation, so GOBL
 	// respects them — normalizeRouting only fills empty routing fields, so it
 	// won't overwrite them with the document-derived, OUTGOING-direction guess
@@ -204,28 +204,10 @@ func WithFormat(f Format) Option {
 // with — the Peppol SBD From / To — as fully-qualified participant URIs (e.g.
 // "iso6523-actorid-upis::0225:code"). They are recorded verbatim on the
 // envelope's Head.From / Head.To to mark who sent and who received the document.
-//
-// Deprecated: use WithTo and WithFrom.
 func WithRouting(from, to cbc.URI) Option {
 	return func(o *options) {
-		WithTo(to)(o)
-		WithFrom(from)(o)
-	}
-}
-
-// WithTo supplies the transport address a received document was routed to,
-// recorded verbatim on the envelope's Head.To.
-func WithTo(to cbc.URI) Option {
-	return func(o *options) {
-		o.to = to
-	}
-}
-
-// WithFrom supplies the transport address a received document was routed
-// from, recorded verbatim on the envelope's Head.From.
-func WithFrom(from cbc.URI) Option {
-	return func(o *options) {
 		o.from = from
+		o.to = to
 	}
 }
 

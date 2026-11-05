@@ -293,21 +293,11 @@ func TestImportRouting(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(getParsePath(), "CII_example1.xml"))
 	require.NoError(t, err)
 
-	env, err := parseCII(data,
-		cii.WithTo("iso6523-actorid-upis::0088:sender"),
-		cii.WithFrom("iso6523-actorid-upis::0088:receiver"),
-	)
+	env, err := parseCII(data, cii.WithRouting(
+		"iso6523-actorid-upis::0088:receiver",
+		"iso6523-actorid-upis::0088:sender",
+	))
 	require.NoError(t, err)
 	assert.Equal(t, "iso6523-actorid-upis::0088:receiver", string(env.Head.From))
 	assert.Equal(t, "iso6523-actorid-upis::0088:sender", string(env.Head.To))
-
-	t.Run("deprecated WithRouting", func(t *testing.T) {
-		env, err := parseCII(data, cii.WithRouting(
-			"iso6523-actorid-upis::0088:receiver",
-			"iso6523-actorid-upis::0088:sender",
-		))
-		require.NoError(t, err)
-		assert.Equal(t, "iso6523-actorid-upis::0088:receiver", string(env.Head.From))
-		assert.Equal(t, "iso6523-actorid-upis::0088:sender", string(env.Head.To))
-	})
 }
