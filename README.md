@@ -102,6 +102,8 @@ A format lists the GOBL schemas it imports into and exports from in `Import` and
 
 A format sets `Attachments` when its specification allows embedded files in additional referenced documents. `FormatEN16931` and `FormatPeppol` do.
 
+A format sets `Hybrid` when its documents are the XML side of a hybrid PDF/A-3 invoice, embedded into the PDF as `factur-x.xml`. Only the Factur-X and ZUGFeRD profiles, defined in their regional modules, are hybrid: `FormatEN16931`, `FormatPeppol` and XML-only formats such as XRechnung are not, and should not be embedded into a PDF.
+
 The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported CII document, and an import function the CII document and the imported envelope, before it is calculated.
 
 Regional formats live in their own modules, which register them with `cii.RegisterFormats` when imported, making them available to `FindFormat`, `Import`, and the GOBL `convert` register:
