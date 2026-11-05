@@ -59,14 +59,13 @@ func main() {
 To export into a format other than the default EN 16931, add it as an option. `ExportInvoice` does the same when an invoice is expected:
 
 ```go
-doc, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatPeppol))
+doc, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatEN16931))
 ```
 
 To embed files in the invoice, such as a PDF version of it, add them with `WithAttachments`. Each is written as an `AdditionalReferencedDocument` with an `AttachmentBinaryObject`:
 
 ```go
 doc, err := cii.ExportInvoice(env,
-    cii.WithFormat(cii.FormatPeppol),
     cii.WithAttachments(cii.BinaryAttachment{
         ID:          "INV-001-PDF",
         Description: "Invoice INV-001",
@@ -80,7 +79,7 @@ doc, err := cii.ExportInvoice(env,
 Through the GOBL `convert` register, pass them with `convert.WithAttachments`. Only formats that set `Attachments` embed them, using the attachment's name as its ID when it has none; the register refuses the others:
 
 ```go
-out, err := convert.Export(env, "cii+peppol+bis-v3", convert.WithAttachments(&convert.Attachment{
+out, err := convert.Export(env, "cii+en16931-v2017", convert.WithAttachments(&convert.Attachment{
     Name: "INV-001.pdf",
     MIME: "application/pdf",
     Data: pdf,
@@ -94,13 +93,12 @@ This package provides the base CII import and export, and the formats that apply
 | Key | Format |
 | --- | --- |
 | `cii+en16931-v2017` | `FormatEN16931` |
-| `cii+peppol+bis-v3` | `FormatPeppol` (Peppol BIS Billing 3.0) |
 
 CII invoices that declare no known specification are imported under the `cii` key, but cannot be exported.
 
 A format lists the GOBL schemas it imports into and exports from in `Import` and `Export`. Formats without `Import` schemas are export-only and never detected. This is the case for formats whose documents only differ from another format's by their container: Factur-X and ZUGFeRD EN 16931 documents declare exactly the EN 16931 guideline, as only their PDF tells them apart, so they are imported as `cii+en16931-v2017`.
 
-A format sets `Attachments` when its specification allows embedded files in additional referenced documents. `FormatEN16931` and `FormatPeppol` do.
+A format sets `Attachments` when its specification allows embedded files in additional referenced documents. `FormatEN16931` does.
 
 The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported CII document, and an import function the CII document and the imported envelope, before it is calculated.
 
@@ -108,6 +106,7 @@ Regional formats live in their own modules, which register them with `cii.Regist
 
 | Key | Module |
 | --- | --- |
+| `cii+peppol+bis-v3` | [gobl.peppol](https://github.com/invopop/gobl.peppol) (`_ "github.com/invopop/gobl.peppol/cii"`) |
 | `cii+fr-ctc-cius-v1`, `cii+fr-ctc-extended-v1`, `cii+fr-ctc-facturx-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
 | `cii+fr-facturx-v1`, `cii+fr-facturx-v1+basic`, `cii+fr-facturx-v1+extended` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
 | `cii+fr-choruspro-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/cii"`) |
@@ -193,7 +192,7 @@ go test ./... -update
 ### Schematron validation
 
 Beyond the golden-file comparisons, the generated XML can be pushed through the
-real EN 16931 and Peppol schematron rule sets. Validation runs against [phorm](https://github.com/phax/phorm), the
+real EN 16931 schematron rule sets. Validation runs against [phorm](https://github.com/phax/phorm), the
 standalone validation service that replaced the now-archived `invopop/phive`
 gRPC wrapper, using the [`invopop/phorm`](https://github.com/invopop/phorm)
 HTTP client.

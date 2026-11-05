@@ -40,15 +40,6 @@ func TestExport(t *testing.T) {
 		assert.ErrorContains(t, err, "gobl invoice missing addon eu-en16931-v2017")
 	})
 
-	t.Run("with Peppol format", func(t *testing.T) {
-		env := loadEnvelope(t, "peppol/invoice-complete.json")
-		out, err := cii.ExportInvoice(env, cii.WithFormat(cii.FormatPeppol))
-		require.NoError(t, err)
-
-		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", out.ExchangedContext.BusinessContext.ID)
-		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0", out.ExchangedContext.GuidelineContext.ID)
-	})
-
 	t.Run("with output guideline", func(t *testing.T) {
 		env := loadEnvelope(t, "en16931/invoice-complete.json")
 		f := cii.FormatEN16931

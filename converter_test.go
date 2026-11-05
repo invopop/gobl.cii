@@ -19,7 +19,7 @@ import (
 
 func TestConverter(t *testing.T) {
 	t.Run("formats", func(t *testing.T) {
-		for _, key := range []cbc.Key{cii.KeyCII, cii.FormatEN16931.Key, cii.FormatPeppol.Key} {
+		for _, key := range []cbc.Key{cii.KeyCII, cii.FormatEN16931.Key} {
 			f := convert.FormatFor(key)
 			require.NotNil(t, f, key)
 			assert.Equal(t, "application/xml", f.MIME)
@@ -92,14 +92,14 @@ func TestConverter(t *testing.T) {
 	})
 
 	t.Run("export and detect again", func(t *testing.T) {
-		env := loadEnvelope(t, "peppol/invoice-complete.json")
-		out, err := convert.Export(env, cii.FormatPeppol.Key)
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		out, err := convert.Export(env, cii.FormatEN16931.Key)
 		require.NoError(t, err)
-		assert.Equal(t, cii.FormatPeppol.Key, out.Format.Key)
+		assert.Equal(t, cii.FormatEN16931.Key, out.Format.Key)
 
 		f, err := convert.Detect(out.Data)
 		require.NoError(t, err)
-		assert.Equal(t, cii.FormatPeppol.Key, f.Key)
+		assert.Equal(t, cii.FormatEN16931.Key, f.Key)
 	})
 
 	t.Run("missing addon", func(t *testing.T) {
@@ -125,9 +125,9 @@ func TestConverterExportAttachments(t *testing.T) {
 		Data:        []byte("%PDF-1.7"),
 	}
 	t.Run("embedded", func(t *testing.T) {
-		env := loadEnvelope(t, "peppol/invoice-complete.json")
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
 		csv := &convert.Attachment{Name: "lines.csv", MIME: "text/csv", Data: []byte("a,b")}
-		out, err := convert.Export(env, cii.FormatPeppol.Key, convert.WithAttachments(pdf, csv))
+		out, err := convert.Export(env, cii.FormatEN16931.Key, convert.WithAttachments(pdf, csv))
 		require.NoError(t, err)
 
 		doc, err := cii.Decode(out.Data)
@@ -155,7 +155,6 @@ func TestConverterExportAttachments(t *testing.T) {
 	})
 	t.Run("formats", func(t *testing.T) {
 		assert.True(t, convert.FormatFor(cii.FormatEN16931.Key).Attachments)
-		assert.True(t, convert.FormatFor(cii.FormatPeppol.Key).Attachments)
 		assert.False(t, convert.FormatFor(formatTestExportOnly.Key).Attachments)
 	})
 }
@@ -171,11 +170,15 @@ func TestReadHeader(t *testing.T) {
 	})
 
 	t.Run("business process", func(t *testing.T) {
-		env := loadEnvelope(t, "peppol/invoice-complete.json")
-		out, err := convert.Export(env, cii.FormatPeppol.Key)
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		f := cii.FormatEN16931
+		f.BusinessID = "urn:test:business-process"
+		doc, err := cii.ExportInvoice(env, cii.WithFormat(f))
 		require.NoError(t, err)
-		h := cii.ReadHeader(convert.NewInput(out.Data))
-		assert.Equal(t, cii.ProfileIDPeppolBilling, h.BusinessID)
+		data, err := cii.Encode(doc)
+		require.NoError(t, err)
+		h := cii.ReadHeader(convert.NewInput(data))
+		assert.Equal(t, "urn:test:business-process", h.BusinessID)
 	})
 
 	t.Run("CDAR", func(t *testing.T) {

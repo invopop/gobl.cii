@@ -67,8 +67,6 @@ func TestFindFormat(t *testing.T) {
 	}{
 		{"EN 16931 by guideline", cii.GuidelineIDEN16931, "", cii.FormatEN16931.Key},
 		{"EN 16931 with another business process", cii.GuidelineIDEN16931, "some-business-process", cii.FormatEN16931.Key},
-		{"Peppol by guideline and business process", cii.FormatPeppol.GuidelineID, cii.ProfileIDPeppolBilling, cii.FormatPeppol.Key},
-		{"Peppol with a different business process", cii.FormatPeppol.GuidelineID, "other", cbc.KeyEmpty},
 		{"match function", cii.GuidelineIDEN16931, "test-match", formatTestMatch.Key},
 		{"output guideline", "urn:test:output-out", "", formatTestOutput.Key},
 		{"fallback function", "urn:test:unknown", "test-fallback", formatTestFallback.Key},
@@ -89,16 +87,16 @@ func TestFindFormat(t *testing.T) {
 }
 
 func TestFormatFor(t *testing.T) {
-	f := cii.FormatFor("cii+peppol+bis-v3")
+	f := cii.FormatFor("cii+en16931-v2017")
 	require.NotNil(t, f)
-	assert.Equal(t, cii.FormatPeppol.GuidelineID, f.GuidelineID)
+	assert.Equal(t, cii.FormatEN16931.GuidelineID, f.GuidelineID)
 	assert.Nil(t, cii.FormatFor("cii+unknown"))
 }
 
 func TestFormatIs(t *testing.T) {
 	f := cii.FormatEN16931
 	assert.True(t, f.Is(cii.FormatEN16931))
-	assert.False(t, f.Is(cii.FormatPeppol))
+	assert.False(t, f.Is(formatTestOutput))
 }
 
 func TestRegisterFormats(t *testing.T) {
