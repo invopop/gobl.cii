@@ -1,5 +1,32 @@
 package cii
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/invopop/gobl/num"
+)
+
+// CDARNumeric is a whole-number counter carried in a udt:NumericType
+// element. The XSD types these as xsd:decimal, so platforms may send
+// values like "1.000000000"; any decimal form with no fractional part
+// is accepted.
+type CDARNumeric int
+
+// UnmarshalText parses a decimal value with no fractional part.
+func (n *CDARNumeric) UnmarshalText(data []byte) error {
+	a, err := num.AmountFromString(strings.TrimSpace(string(data)))
+	if err != nil {
+		return fmt.Errorf("invalid numeric: %w", err)
+	}
+	i := a.Rescale(0)
+	if !i.Equals(a) {
+		return fmt.Errorf("invalid numeric: %q is not a whole number", data)
+	}
+	*n = CDARNumeric(i.Value())
+	return nil
+}
+
 // CDARAcknowledgement represents an AcknowledgementDocument in the CDAR standard
 type CDARAcknowledgement struct {
 	MultipleReferencesIndicator *CDARIndicator            `xml:"ram:MultipleReferencesIndicator,omitempty"`
@@ -53,7 +80,7 @@ type CDARDocumentStatus struct {
 	Reason                           []string                      `xml:"ram:Reason,omitempty"`
 	RequestedActionCode              string                        `xml:"ram:RequestedActionCode,omitempty"`
 	RequestedAction                  string                        `xml:"ram:RequestedAction,omitempty"`
-	SequenceNumeric                  int                           `xml:"ram:SequenceNumeric,omitempty"`
+	SequenceNumeric                  CDARNumeric                   `xml:"ram:SequenceNumeric,omitempty"`
 	IncludedNotes                    []*CDARNote                   `xml:"ram:IncludedNote,omitempty"`
 	SpecifiedDocumentCharacteristics []*CDARDocumentCharacteristic `xml:"ram:SpecifiedDocumentCharacteristic,omitempty"`
 }
