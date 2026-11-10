@@ -53,7 +53,7 @@ type CDARDocumentStatus struct {
 	Reason                           []string                      `xml:"ram:Reason,omitempty"`
 	RequestedActionCode              string                        `xml:"ram:RequestedActionCode,omitempty"`
 	RequestedAction                  string                        `xml:"ram:RequestedAction,omitempty"`
-	SequenceNumeric                  int                           `xml:"ram:SequenceNumeric,omitempty"`
+	SequenceNumeric                  string                        `xml:"ram:SequenceNumeric,omitempty"`
 	IncludedNotes                    []*CDARNote                   `xml:"ram:IncludedNote,omitempty"`
 	SpecifiedDocumentCharacteristics []*CDARDocumentCharacteristic `xml:"ram:SpecifiedDocumentCharacteristic,omitempty"`
 }
