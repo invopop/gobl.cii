@@ -42,6 +42,46 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, formatTestOutput.Key, f.Key)
 	})
 
+	t.Run("import an on-request format only when asked for", func(t *testing.T) {
+		f, err := convert.Detect(example1(t))
+		require.NoError(t, err)
+		assert.Equal(t, cii.FormatEN16931.Key, f.Key, "never detected on its own")
+
+		res, err := convert.Import(example1(t), convert.WithFormats(formatTestOnRequest.Key))
+		require.NoError(t, err)
+		assert.Equal(t, formatTestOnRequest.Key, res.Format.Key)
+	})
+
+	t.Run("a requested format wins over a match", func(t *testing.T) {
+		data := strings.Replace(string(example1(t)), "<ram:GuidelineSpecifiedDocumentContextParameter>",
+			"<ram:BusinessProcessSpecifiedDocumentContextParameter><ram:ID>test-match</ram:ID></ram:BusinessProcessSpecifiedDocumentContextParameter><ram:GuidelineSpecifiedDocumentContextParameter>", 1)
+		f, err := convert.Detect([]byte(data))
+		require.NoError(t, err)
+		assert.Equal(t, formatTestMatch.Key, f.Key)
+
+		res, err := convert.Import([]byte(data), convert.WithFormats(cii.FormatEN16931.Key))
+		require.NoError(t, err)
+		assert.Equal(t, cii.FormatEN16931.Key, res.Format.Key)
+	})
+
+	t.Run("a requested format the document can't be in is refused", func(t *testing.T) {
+		_, err := convert.Import(example1(t), convert.WithFormats(formatTestOutput.Key))
+		assert.ErrorIs(t, err, convert.ErrUnknownFormat)
+	})
+
+	t.Run("a requested format matching the document", func(t *testing.T) {
+		data := strings.Replace(string(example1(t)), "<ram:GuidelineSpecifiedDocumentContextParameter>",
+			"<ram:BusinessProcessSpecifiedDocumentContextParameter><ram:ID>test-match</ram:ID></ram:BusinessProcessSpecifiedDocumentContextParameter><ram:GuidelineSpecifiedDocumentContextParameter>", 1)
+		res, err := convert.Import([]byte(data), convert.WithFormats(formatTestMatch.Key))
+		require.NoError(t, err)
+		assert.Equal(t, formatTestMatch.Key, res.Format.Key)
+	})
+
+	t.Run("a requested format without import is refused", func(t *testing.T) {
+		_, err := convert.Import(example1(t), convert.WithFormats(formatTestExportOnly.Key))
+		assert.ErrorIs(t, err, convert.ErrUnknownFormat)
+	})
+
 	t.Run("detect an unknown specification", func(t *testing.T) {
 		data := strings.Replace(string(example1(t)), cii.GuidelineIDEN16931, "urn:test:unknown", 1)
 		f, err := convert.Detect([]byte(data))
@@ -74,6 +114,13 @@ func TestConverter(t *testing.T) {
 
 		_, err = convert.Import([]byte(`<rsm:CrossIndustryInvoice xmlns:rsm="`+cii.NamespaceRSM+`"><`), convert.WithFormats(cii.KeyCII))
 		assert.Error(t, err)
+
+		_, err = convert.Import([]byte(`<rsm:CrossIndustryInvoice xmlns:rsm="` + cii.NamespaceRSM + `"><rsm:ExchangedDocument><x></rsm:ExchangedDocument></rsm:CrossIndustryInvoice>`))
+		assert.ErrorIs(t, err, convert.ErrConversion, "not decoded")
+
+		data := strings.Replace(string(example1(t)), ">20150109<", ">not a date<", 1)
+		_, err = convert.Import([]byte(data))
+		assert.ErrorIs(t, err, convert.ErrConversion, "not imported")
 	})
 
 	t.Run("import attachments", func(t *testing.T) {

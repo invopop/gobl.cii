@@ -205,6 +205,21 @@ func TestDecodeEncode(t *testing.T) {
 		assert.ErrorContains(t, err, "error unmarshaling CDAR")
 	})
 
+	t.Run("CDAR with decimal sequence numeric", func(t *testing.T) {
+		data := []byte(`<rsm:CrossDomainAcknowledgementAndResponse xmlns:rsm="` + cii.NamespaceCDARRSM + `" xmlns:ram="` + cii.NamespaceRAM + `">` +
+			`<rsm:ExchangedDocument><ram:ID>CDAR-1</ram:ID></rsm:ExchangedDocument>` +
+			`<rsm:AcknowledgementDocument><ram:ReferenceReferencedDocument>` +
+			`<ram:SpecifiedDocumentStatus><ram:SequenceNumeric>1.000000000</ram:SequenceNumeric></ram:SpecifiedDocumentStatus>` +
+			`</ram:ReferenceReferencedDocument></rsm:AcknowledgementDocument>` +
+			`</rsm:CrossDomainAcknowledgementAndResponse>`)
+		doc, err := cii.Decode(data)
+		require.NoError(t, err)
+		out, ok := doc.(*cii.CDAR)
+		require.True(t, ok)
+		status := out.AcknowledgementDocuments[0].ReferenceReferencedDocument[0].SpecifiedDocumentStatuses[0]
+		assert.Equal(t, "1.000000000", status.SequenceNumeric)
+	})
+
 	t.Run("unknown namespace", func(t *testing.T) {
 		_, err := cii.Decode([]byte(`<Invoice xmlns="urn:test"/>`))
 		assert.ErrorIs(t, err, cii.ErrUnknownDocumentType)
