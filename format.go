@@ -61,6 +61,11 @@ type Format struct {
 	// as a PDF version of the invoice, in additional referenced documents.
 	// The GOBL convert register only passes attachments to these formats.
 	Attachments bool
+	// Hybrid is true when the format's documents are the XML side of a hybrid
+	// invoice, embedded into a PDF/A-3 as factur-x.xml: the Factur-X and
+	// ZUGFeRD profiles. XML-only formats, such as XRechnung, leave it unset
+	// and must not be embedded into a PDF.
+	Hybrid bool
 	// VESID is the Validation Exchange Specification ID used for validation
 	VESID string
 	// Match optionally identifies the format's documents before the
