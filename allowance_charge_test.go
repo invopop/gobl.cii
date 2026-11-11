@@ -46,6 +46,9 @@ func TestNewAllowanceCharges(t *testing.T) {
 	})
 }
 
+// EN 16931 has no exemption reason on an allowance or charge (CII-DT-052,
+// CII-DT-098), and Factur-X EN 16931 rejects one: it belongs to the VAT
+// breakdown alone.
 func TestAllowanceChargeExemptionReason(t *testing.T) {
 	env := loadEnvelope(t, "en16931/invoice-exempt.json")
 	inv, ok := env.Extract().(*bill.Invoice)
@@ -64,10 +67,15 @@ func TestAllowanceChargeExemptionReason(t *testing.T) {
 	require.NotEmpty(t, doc.Transaction.Settlement.AllowanceCharges)
 	ac := doc.Transaction.Settlement.AllowanceCharges[len(doc.Transaction.Settlement.AllowanceCharges)-1]
 	require.NotNil(t, ac.Tax)
-	assert.Equal(t, "VATEX-EU-132", ac.Tax.ExemptionReasonCode)
+	assert.Empty(t, ac.Tax.ExemptionReasonCode)
+	assert.Empty(t, ac.Tax.ExemptionReason)
 
-	// The line-level ApplicableTradeTax must never carry it: the Factur-X
-	// profile marks it as unused in that context.
+	var codes []string
+	for _, tt := range doc.Transaction.Settlement.Tax {
+		codes = append(codes, tt.ExemptionReasonCode)
+	}
+	assert.Contains(t, codes, "VATEX-EU-132", "the VAT breakdown keeps it")
+
 	for _, line := range doc.Transaction.Lines {
 		for _, lineTax := range line.TradeSettlement.ApplicableTradeTax {
 			assert.Empty(t, lineTax.ExemptionReasonCode)
