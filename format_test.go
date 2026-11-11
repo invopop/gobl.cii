@@ -45,6 +45,15 @@ var (
 			return businessID == "test-fallback"
 		},
 	}
+	formatTestOnRequest = cii.Format{
+		Key:         "cii+en16931-v2017+test-on-request",
+		Name:        i18n.NewString("CII Test On Request"),
+		Import:      cii.FormatEN16931.Import,
+		Export:      cii.FormatEN16931.Export,
+		GuidelineID: cii.GuidelineIDEN16931,
+		Addons:      cii.FormatEN16931.Addons,
+		OnRequest:   true,
+	}
 	formatTestExportOnly = cii.Format{
 		Key:         "cii+en16931-v2017+test-export-only",
 		Name:        i18n.NewString("CII Test Export Only"),
@@ -55,7 +64,7 @@ var (
 )
 
 func init() {
-	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback, formatTestExportOnly)
+	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback, formatTestOnRequest, formatTestExportOnly)
 }
 
 func TestFindFormat(t *testing.T) {
