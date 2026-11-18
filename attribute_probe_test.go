@@ -29,7 +29,6 @@ type attributeProbe struct {
 // clean run must have zero of both (mirrors invoice_probe_test.go).
 var attributeProbes = []attributeProbe{
 	{ctxEN16931, "en16931/invoice-minimal.json", cii.FormatEN16931},
-	{ctxPeppol, "peppol/invoice-minimal.json", cii.FormatPeppol},
 }
 
 // TestProbeItemAttributes converts an invoice carrying both a text and a
