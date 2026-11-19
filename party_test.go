@@ -3,6 +3,9 @@ package cii_test
 import (
 	"testing"
 
+	cii "github.com/invopop/gobl.cii"
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -46,4 +49,35 @@ func TestNewSeller(t *testing.T) {
 		assert.Equal(t, "123456789", doc.Transaction.Agreement.Buyer.GlobalID[0].Value)
 		assert.Equal(t, "0088", doc.Transaction.Agreement.Buyer.GlobalID[0].SchemeID)
 	})
+}
+
+// TestPartyRegistration checks that BT-33 (additional legal information)
+// round-trips through ram:Description for both the seller (supplier) and
+// the buyer (customer).
+func TestPartyRegistration(t *testing.T) {
+	env := loadEnvelope(t, "en16931/invoice-complete.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	inv.Supplier.Registration = &org.Registration{Other: "Share capital 100.000 EUR"}
+	inv.Customer.Registration = &org.Registration{Other: "GmbH"}
+	require.NoError(t, env.Calculate())
+
+	// GOBL -> CII
+	doc, err := cii.ExportInvoice(env)
+	require.NoError(t, err)
+	assert.Equal(t, "Share capital 100.000 EUR", doc.Transaction.Agreement.Seller.Description)
+	assert.Equal(t, "GmbH", doc.Transaction.Agreement.Buyer.Description)
+
+	// CII -> GOBL
+	data, err := cii.Encode(doc)
+	require.NoError(t, err)
+	back, err := parseCII(data)
+	require.NoError(t, err)
+	inv2, ok := back.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.NotNil(t, inv2.Supplier.Registration)
+	assert.Equal(t, "Share capital 100.000 EUR", inv2.Supplier.Registration.Other)
+	require.NotNil(t, inv2.Customer.Registration)
+	assert.Equal(t, "GmbH", inv2.Customer.Registration.Other)
 }

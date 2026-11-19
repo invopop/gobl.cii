@@ -54,6 +54,17 @@ var (
 		Addons:      cii.FormatEN16931.Addons,
 		OnRequest:   true,
 	}
+	formatTestBusiness = cii.Format{
+		Key:         "cii+en16931-v2017+test-business",
+		Name:        i18n.NewString("CII Test Business"),
+		Import:      cii.FormatEN16931.Import,
+		Export:      cii.FormatEN16931.Export,
+		GuidelineID: "urn:test:business",
+		BusinessID:  "urn:test:business-process",
+		Version:     cii.VersionD16B,
+		Addons:      cii.FormatEN16931.Addons,
+		Attachments: true,
+	}
 	formatTestExportOnly = cii.Format{
 		Key:         "cii+en16931-v2017+test-export-only",
 		Name:        i18n.NewString("CII Test Export Only"),
@@ -64,7 +75,7 @@ var (
 )
 
 func init() {
-	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback, formatTestOnRequest, formatTestExportOnly)
+	cii.RegisterFormats(formatTestMatch, formatTestOutput, formatTestFallback, formatTestOnRequest, formatTestBusiness, formatTestExportOnly)
 }
 
 func TestFindFormat(t *testing.T) {
@@ -76,8 +87,9 @@ func TestFindFormat(t *testing.T) {
 	}{
 		{"EN 16931 by guideline", cii.GuidelineIDEN16931, "", cii.FormatEN16931.Key},
 		{"EN 16931 with another business process", cii.GuidelineIDEN16931, "some-business-process", cii.FormatEN16931.Key},
-		{"Peppol by guideline and business process", cii.FormatPeppol.GuidelineID, cii.ProfileIDPeppolBilling, cii.FormatPeppol.Key},
-		{"Peppol with a different business process", cii.FormatPeppol.GuidelineID, "other", cbc.KeyEmpty},
+		{"guideline and business process", formatTestBusiness.GuidelineID, formatTestBusiness.BusinessID, formatTestBusiness.Key},
+		{"guideline without business process", formatTestBusiness.GuidelineID, "", formatTestBusiness.Key},
+		{"guideline with a different business process", formatTestBusiness.GuidelineID, "other", cbc.KeyEmpty},
 		{"match function", cii.GuidelineIDEN16931, "test-match", formatTestMatch.Key},
 		{"output guideline", "urn:test:output-out", "", formatTestOutput.Key},
 		{"fallback function", "urn:test:unknown", "test-fallback", formatTestFallback.Key},
@@ -98,16 +110,16 @@ func TestFindFormat(t *testing.T) {
 }
 
 func TestFormatFor(t *testing.T) {
-	f := cii.FormatFor("cii+peppol+bis-v3")
+	f := cii.FormatFor(formatTestBusiness.Key)
 	require.NotNil(t, f)
-	assert.Equal(t, cii.FormatPeppol.GuidelineID, f.GuidelineID)
+	assert.Equal(t, formatTestBusiness.GuidelineID, f.GuidelineID)
 	assert.Nil(t, cii.FormatFor("cii+unknown"))
 }
 
 func TestFormatIs(t *testing.T) {
 	f := cii.FormatEN16931
 	assert.True(t, f.Is(cii.FormatEN16931))
-	assert.False(t, f.Is(cii.FormatPeppol))
+	assert.False(t, f.Is(formatTestBusiness))
 }
 
 func TestRegisterFormats(t *testing.T) {
