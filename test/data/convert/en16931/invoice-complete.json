@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "258cf84cbdb24390be85f690019fc9b6482888ba63cf50d392aa41501f257b02"
+			"val": "65eac66d577fc9c7a0e89e2abe295134088f8e10390fe35839e601dc1edb3f16"
 		}
 	},
 	"doc": {
@@ -20,6 +20,7 @@
 		"issue_date": "2024-02-13",
 		"currency": "EUR",
 		"tax": {
+			"point": "payment",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -113,7 +114,18 @@
 						}
 					}
 				],
-				"total": "1620.00"
+				"total": "1620.00",
+				"seller": {
+					"name": "Marketplace Seller GmbH",
+					"identities": [
+						{
+							"code": "1234567890128",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						}
+					]
+				}
 			}
 		],
 		"discounts": [

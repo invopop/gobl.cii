@@ -2,20 +2,18 @@ package cii
 
 import (
 	"fmt"
-	"slices"
 
-	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/regimes/fr"
 	"github.com/invopop/gobl/tax"
 )
 
 // Party defines the structure of the TradePartyType of the CII standard
 type Party struct {
-	ID                        *PartyID                    `xml:"ram:ID,omitempty"`
-	GlobalID                  *PartyID                    `xml:"ram:GlobalID,omitempty"`
+	ID                        []*PartyID                  `xml:"ram:ID,omitempty"`
+	GlobalID                  []*PartyID                  `xml:"ram:GlobalID,omitempty"`
 	Name                      string                      `xml:"ram:Name,omitempty"`
+	RoleCode                  string                      `xml:"ram:RoleCode,omitempty"`
 	Description               string                      `xml:"ram:Description,omitempty"`
 	LegalOrganization         *LegalOrganization          `xml:"ram:SpecifiedLegalOrganization,omitempty"`
 	Contact                   *Contact                    `xml:"ram:DefinedTradeContact,omitempty"`
@@ -74,11 +72,23 @@ type Email struct {
 	URIID string `xml:"ram:URIID,omitempty"`
 }
 
-// SchemeIDEmail represents the Scheme ID for email addresses
-const SchemeIDEmail = "EM"
+const (
+	// SchemeIDEmail represents the Scheme ID for email addresses
+	SchemeIDEmail = "EM"
+	// SchemeIDVAT represents a VAT registration (BT-31, BT-48, BT-63)
+	SchemeIDVAT = "VA"
+	// SchemeIDTaxRegistration represents a non-VAT tax registration (BT-32)
+	SchemeIDTaxRegistration = "FC"
+)
+
+// NewParty converts the GOBL party into a CII trade party, without any
+// format specific adjustments.
+func NewParty(party *org.Party) *Party {
+	return newParty(party)
+}
 
 // newParty creates the SellerTradeParty part of a EN 16931 compliant invoice
-func newParty(party *org.Party, ctx Context) *Party {
+func newParty(party *org.Party) *Party {
 	if party == nil {
 		return nil
 	}
@@ -101,15 +111,13 @@ func newParty(party *org.Party, ctx Context) *Party {
 	}
 
 	if party.TaxID != nil && party.TaxID.Code != "" {
-		// Assumes VAT ID being used instead of possible tax number
-		p.SpecifiedTaxRegistration = []*SpecifiedTaxRegistration{
-			{
-				ID: &PartyID{
-					Value:    party.TaxID.String(),
-					SchemeID: mapGOBLTaxIDScheme(party.TaxID),
-				},
+		// BT-31/BT-48: VAT identifier, other registrations come from the identities below
+		p.SpecifiedTaxRegistration = append(p.SpecifiedTaxRegistration, &SpecifiedTaxRegistration{
+			ID: &PartyID{
+				Value:    party.TaxID.String(),
+				SchemeID: mapGOBLTaxIDScheme(party.TaxID),
 			},
-		}
+		})
 		// Override address country from tax ID (authoritative source)
 		if party.TaxID.Country != "" {
 			if p.PostalTradeAddress == nil {
@@ -129,30 +137,35 @@ func newParty(party *org.Party, ctx Context) *Party {
 					Value: id.Code.String(),
 				}
 				if id.Ext.Has(iso.ExtKeySchemeID) {
-					p.LegalOrganization.ID.SchemeID = id.Ext[iso.ExtKeySchemeID].String()
+					p.LegalOrganization.ID.SchemeID = id.Ext.Get(iso.ExtKeySchemeID).String()
 				}
+				continue
+			}
+
+			// BT-32: Tax registration identifier, "FC" required by BR-E-02, BR-Z-02, BR-AE-02
+			if id.Scope == org.IdentityScopeTax {
+				p.SpecifiedTaxRegistration = append(p.SpecifiedTaxRegistration, &SpecifiedTaxRegistration{
+					ID: &PartyID{
+						Value:    id.Code.String(),
+						SchemeID: SchemeIDTaxRegistration,
+					},
+				})
 				continue
 			}
 
 			// GlobalID: identity with scheme ID and no scope
 			if id.Ext.Has(iso.ExtKeySchemeID) {
-				p.GlobalID = &PartyID{
-					SchemeID: id.Ext[iso.ExtKeySchemeID].String(),
+				p.GlobalID = append(p.GlobalID, &PartyID{
+					SchemeID: id.Ext.Get(iso.ExtKeySchemeID).String(),
 					Value:    id.Code.String(),
-				}
+				})
 				continue
 			}
 			// BT-29/BT-46: Seller/Buyer identifier (no scheme, no scope)
-			if p.ID == nil {
-				p.ID = &PartyID{
-					Value: id.Code.String(),
-				}
-			}
+			p.ID = append(p.ID, &PartyID{
+				Value: id.Code.String(),
+			})
 		}
-	}
-
-	if slices.Contains(ctx.Addons, choruspro.V1) {
-		applyChorusPro(party, p)
 	}
 
 	p.URIUniversalCommunication = newURIUniversalCommunication(party.Inboxes)
@@ -164,64 +177,11 @@ func newParty(party *org.Party, ctx Context) *Party {
 	return p
 }
 
-// chorusProLegalOrgID returns the LegalOrganization ID for Chorus Pro based on the
-// scheme extension value, which determines the type of identifier to use.
-// applyChorusPro sets Chorus Pro-specific fields on the CII party. It suppresses
-// the GlobalID (which is not used in Chorus Pro) and sets the LegalOrganization ID
-// to the identifier required for the given scheme type.
-func applyChorusPro(party *org.Party, p *Party) {
-	p.GlobalID = nil
-	if p.LegalOrganization == nil {
-		p.LegalOrganization = &LegalOrganization{}
-	}
-	p.LegalOrganization.ID = chorusProLegalOrgID(party)
-}
-
-func chorusProLegalOrgID(party *org.Party) *PartyID {
-	scheme := party.Ext.Get(choruspro.ExtKeyScheme)
-	pid := &PartyID{
-		SchemeID: scheme.String(),
-	}
-	switch scheme {
-	case "1":
-		// SIRET: identity with type SIRET
-		for _, id := range party.Identities {
-			if id.Type == fr.IdentityTypeSIRET {
-				pid.Value = id.Code.String()
-				return pid
-			}
-		}
-	case "2":
-		// Intra-community VAT number
-		if party.TaxID != nil {
-			pid.Value = party.TaxID.String()
-		}
-	case "3", "6":
-		// Country code + first 16 characters of company name
-		if party.TaxID != nil && party.TaxID.Country != "" {
-			name := []rune(party.Name)
-			if len(name) > 16 {
-				name = name[:16]
-			}
-			pid.Value = party.TaxID.Country.String() + string(name)
-		}
-	case "4", "5":
-		// RIDET / Tahiti: identity with scope legal
-		for _, id := range party.Identities {
-			if id.Scope == org.IdentityScopeLegal {
-				pid.Value = id.Code.String()
-				return pid
-			}
-		}
-	}
-	return pid
-}
-
 func mapGOBLTaxIDScheme(id *tax.Identity) string {
 	s := id.GetScheme()
 	switch s {
 	case tax.CategoryVAT:
-		return "VA"
+		return SchemeIDVAT
 	default:
 		// TODO: cover more versions here.
 		return s.String()

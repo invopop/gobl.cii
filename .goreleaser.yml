@@ -1,29 +1,12 @@
-before:
-  hooks:
-    - go mod download
-builds:
-  - id: gobl.cii
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - windows
-      - darwin
-    main: ./cmd/gobl.cii
-    binary: gobl.cii
+version: 2
 
-archives:
-  - id: gobl.cii
-    builds:
-      - gobl.cii
-    format: tar.gz
-    name_template: "gobl.cii_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    wrap_in_directory: true
+builds:
+  - skip: true
 
 checksum:
-  name_template: "checksums.txt"
+  disable: true
 snapshot:
-  name_template: "{{ .Tag }}"
+  version_template: "{{ .Tag }}"
 changelog:
   sort: asc
   filters:

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7d50448cef70cfa84df0936059692ebbf270a199e0fdf322071de9d32ab9c931"
+			"val": "5de63f992daf8c305fe2aa620d3a6823a66dd5166b47f21a92002782584b98a8"
 		}
 	},
 	"doc": {
@@ -32,6 +32,7 @@
 			},
 			"identities": [
 				{
+					"scope": "tax",
 					"country": "DE",
 					"code": "201/113/40209"
 				},
@@ -76,9 +77,6 @@
 					"name": "Kunstrasen grün 3m breit",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4012345001235",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -86,8 +84,13 @@
 						}
 					],
 					"description": "300cm x 100 cm",
+					"list": "4.0000",
+					"discount": "0.6667",
 					"price": "3.3333",
-					"unit": "m2"
+					"unit": "m2",
+					"ext": {
+						"untdid-unit": "MTK"
+					}
 				},
 				"sum": "10.00",
 				"taxes": [
@@ -115,9 +118,6 @@
 					"name": "Schweinesteak",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000050986428",
 							"ext": {
 								"iso-scheme-id": "0160"
@@ -125,8 +125,12 @@
 						}
 					],
 					"description": "aus Deutschland",
+					"list": "5.5000",
 					"price": "5.5000",
-					"unit": "kg"
+					"unit": "kg",
+					"ext": {
+						"untdid-unit": "KGM"
+					}
 				},
 				"sum": "27.50",
 				"taxes": [
@@ -149,17 +153,18 @@
 					"name": "Mineralwasser Medium 12 x 1,0l PET",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000001234561",
 							"ext": {
 								"iso-scheme-id": "0160"
 							}
 						}
 					],
+					"list": "5.4900",
 					"price": "5.4900",
-					"unit": "piece"
+					"unit": "piece",
+					"ext": {
+						"untdid-unit": "H87"
+					}
 				},
 				"sum": "109.80",
 				"taxes": [
@@ -182,17 +187,18 @@
 					"name": "Pfand",
 					"identities": [
 						{
-							"code": ""
-						},
-						{
 							"code": "4000001234578",
 							"ext": {
 								"iso-scheme-id": "0160"
 							}
 						}
 					],
+					"list": "2.7700",
 					"price": "2.7700",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "55.40",
 				"taxes": [
@@ -212,7 +218,6 @@
 			{
 				"i": 1,
 				"reason": "Sondernachlass",
-				"base": "10.00",
 				"amount": "1.00",
 				"taxes": [
 					{
@@ -228,7 +233,6 @@
 			{
 				"i": 2,
 				"reason": "Sondernachlass",
-				"base": "137.30",
 				"amount": "13.73",
 				"taxes": [
 					{
@@ -246,7 +250,6 @@
 			{
 				"i": 1,
 				"reason": "Versandkosten",
-				"base": "137.30",
 				"amount": "5.80",
 				"taxes": [
 					{
@@ -268,15 +271,14 @@
 			]
 		},
 		"payment": {
-			"terms": {
-				"notes": "Zahlbar innerhalb 30 Tagen netto bis 04.07.2018, 3% Skonto innerhalb 10 Tagen bis 15.06.2018"
-			},
 			"advances": [
 				{
-					"description": "",
 					"amount": "50.00"
 				}
-			]
+			],
+			"terms": {
+				"notes": "Zahlbar innerhalb 30 Tagen netto bis 04.07.2018, 3% Skonto innerhalb 10 Tagen bis 15.06.2018"
+			}
 		},
 		"delivery": {
 			"date": "2018-06-03"

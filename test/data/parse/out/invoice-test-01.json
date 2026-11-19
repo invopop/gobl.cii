@@ -4,18 +4,22 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0ef209c4c4e3410e9fa891877787425ddf87a14303700e3a3aef5bdfed7a6bcf"
+			"val": "da9e545d56bc7c5ae70a18c28a4dcc93919dfa7dbb2ba0b6e068692e0307f268"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$tags": [
+			"bypass"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TEST-001",
 		"issue_date": "2024-10-01",
 		"currency": "EUR",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -60,6 +64,11 @@
 		},
 		"customer": {
 			"name": "Sample Buyer",
+			"identities": [
+				{
+					"code": "DE208156390"
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "VA",
@@ -88,7 +97,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "7%"
+						"percent": "7%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "5350.00"
@@ -105,7 +117,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19%"
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "149.00"
@@ -115,34 +130,38 @@
 			"code": "N/A"
 		},
 		"totals": {
-			"sum": "5499.00",
-			"total": "5499.00",
+			"sum": "5125.21",
+			"total": "5125.21",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
-								"base": "5350.00",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "5000.00",
 								"percent": "7%",
-								"amount": "374.50"
+								"amount": "350.00"
 							},
 							{
-								"key": "standard",
-								"base": "149.00",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "125.21",
 								"percent": "19%",
-								"amount": "28.31"
+								"amount": "23.79"
 							}
 						],
-						"amount": "402.81"
+						"amount": "373.79"
 					}
 				],
-				"sum": "402.81"
+				"sum": "373.79"
 			},
-			"tax": "402.81",
-			"total_with_tax": "5901.81",
-			"payable": "5901.81"
+			"tax": "373.79",
+			"total_with_tax": "5499.00",
+			"payable": "5499.00"
 		}
 	}
 }

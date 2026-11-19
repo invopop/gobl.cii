@@ -8,15 +8,21 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
+// ParseParty converts the CII trade party into a GOBL party, without any
+// format specific adjustments.
+func ParseParty(party *Party) *org.Party {
+	return goblNewParty(party)
+}
+
 func goblNewParty(party *Party) *org.Party {
 	p := &org.Party{
-		Name: party.Name,
+		Name: cleanString(party.Name),
 	}
 
 	// BT-28/BT-45: Trading name (alias)
 	if party.LegalOrganization != nil && party.LegalOrganization.Name != "" {
 		if party.LegalOrganization.Name != p.Name {
-			p.Alias = party.LegalOrganization.Name
+			p.Alias = cleanString(party.LegalOrganization.Name)
 		}
 	}
 
@@ -34,22 +40,25 @@ func goblNewParty(party *Party) *org.Party {
 			Scope: org.IdentityScopeLegal,
 		}
 		if party.LegalOrganization.ID.SchemeID != "" {
-			identity.Ext = tax.Extensions{
+			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
 				iso.ExtKeySchemeID: cbc.Code(party.LegalOrganization.ID.SchemeID),
-			}
+			})
 		}
 		p.Identities = append(p.Identities, identity)
 	}
 
 	// BT-29/BT-46: Seller/Buyer identifier
-	if party.ID != nil && party.ID.Value != "" {
-		identity := &org.Identity{
-			Code: cbc.Code(party.ID.Value),
+	for _, partyID := range party.ID {
+		if partyID == nil || partyID.Value == "" {
+			continue
 		}
-		if party.ID.SchemeID != "" {
-			identity.Ext = tax.Extensions{
-				iso.ExtKeySchemeID: cbc.Code(party.ID.SchemeID),
-			}
+		identity := &org.Identity{
+			Code: cbc.Code(partyID.Value),
+		}
+		if partyID.SchemeID != "" {
+			identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
+				iso.ExtKeySchemeID: cbc.Code(partyID.SchemeID),
+			})
 		}
 		p.Identities = append(p.Identities, identity)
 	}
@@ -64,13 +73,15 @@ func goblNewParty(party *Party) *org.Party {
 	goblPartyTaxRegistrations(party, p)
 
 	// Global ID is not yet mapped to the ISO 6523 ICD, its identifier is used as the label
-	if party.GlobalID != nil {
-		p.Identities = append(p.Identities, &org.Identity{
-			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: cbc.Code(party.GlobalID.SchemeID),
-			},
-			Code: cbc.Code(party.GlobalID.Value),
-		})
+	for _, gid := range party.GlobalID {
+		if gid == nil || gid.Value == "" {
+			continue
+		}
+		identity := &org.Identity{
+			Code: cbc.Code(gid.Value),
+		}
+		identity.Ext = identity.Ext.Set(iso.ExtKeySchemeID, cbc.Code(gid.SchemeID))
+		p.Identities = append(p.Identities, identity)
 	}
 
 	return p
@@ -82,27 +93,27 @@ func goblPartyContact(party *Party, p *org.Party) {
 			p.People = []*org.Person{
 				{
 					Name: &org.Name{
-						Given: party.Contact.PersonName,
+						Given: cleanString(party.Contact.PersonName),
 					},
 				},
 			}
 		}
-		if party.Contact.Phone != nil {
+		if party.Contact.Phone != nil && party.Contact.Phone.CompleteNumber != "" {
 			p.Telephones = []*org.Telephone{
 				{
 					Number: party.Contact.Phone.CompleteNumber,
 				},
 			}
 		}
-		if party.Contact.Email != nil {
+		if party.Contact.Email != nil && party.Contact.Email.URIID != "" {
 			p.Emails = []*org.Email{
 				{
-					Address: party.Contact.Email.URIID,
+					Address: cleanString(party.Contact.Email.URIID),
 				},
 			}
 		}
 	}
-	if uc := party.URIUniversalCommunication; uc != nil {
+	if uc := party.URIUniversalCommunication; uc != nil && uc.ID.Value != "" {
 		if uc.ID.SchemeID == SchemeIDEmail {
 			p.Inboxes = []*org.Inbox{{Email: uc.ID.Value}}
 		} else {
@@ -113,12 +124,13 @@ func goblPartyContact(party *Party, p *org.Party) {
 
 func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 	// Source: https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
+	country := partyCountryID(party)
 	for _, taxReg := range party.SpecifiedTaxRegistration {
 		if taxReg.ID == nil || taxReg.ID.Value == "" {
 			continue
 		}
 		switch taxReg.ID.SchemeID {
-		case "VA":
+		case SchemeIDVAT:
 			if identity, err := tax.ParseIdentity(taxReg.ID.Value); err == nil {
 				if identity.Code != "" {
 					p.TaxID = identity
@@ -126,17 +138,29 @@ func goblPartyTaxRegistrations(party *Party, p *org.Party) {
 			} else {
 				// Fallback to preserve the tax id
 				p.TaxID = &tax.Identity{
-					Country: l10n.TaxCountryCode(party.PostalTradeAddress.CountryID),
+					Country: l10n.TaxCountryCode(country),
 					Code:    cbc.Code(taxReg.ID.Value),
 				}
 			}
-		case "FC":
+		case SchemeIDTaxRegistration:
+			// BT-32: tax scope so it converts back out as "FC"
 			p.Identities = append(p.Identities, &org.Identity{
-				Country: l10n.ISOCountryCode(party.PostalTradeAddress.CountryID),
+				Scope:   org.IdentityScopeTax,
+				Country: l10n.ISOCountryCode(country),
 				Code:    cbc.Code(taxReg.ID.Value),
 			})
 		}
 	}
+}
+
+// partyCountryID returns the country of the party's postal address, or an
+// empty string when it has none. BG-5 and BG-8 are mandatory in EN 16931,
+// but the CII schema allows the address to be absent.
+func partyCountryID(party *Party) string {
+	if party.PostalTradeAddress == nil {
+		return ""
+	}
+	return party.PostalTradeAddress.CountryID
 }
 
 func goblNewAddress(address *PostalTradeAddress) *org.Address {
@@ -149,15 +173,15 @@ func goblNewAddress(address *PostalTradeAddress) *org.Address {
 	}
 
 	if address.LineOne != "" {
-		addr.Street = address.LineOne
+		addr.Street = cleanString(address.LineOne)
 	}
 
 	if address.LineTwo != "" {
-		addr.StreetExtra = address.LineTwo
+		addr.StreetExtra = cleanString(address.LineTwo)
 	}
 
 	if address.City != "" {
-		addr.Locality = address.City
+		addr.Locality = cleanString(address.City)
 	}
 
 	if address.Postcode != "" {
@@ -165,8 +189,20 @@ func goblNewAddress(address *PostalTradeAddress) *org.Address {
 	}
 
 	if address.Region != "" {
-		addr.Region = address.Region
+		addr.Region = cleanString(address.Region)
 	}
 
 	return addr
+}
+
+// firstPartyID returns the first identifier carrying a value, or nil when the
+// slice holds none. BT-29/BT-46 are 0..n, but a few mappings (BT-71 delivery
+// location) only ever deal with a single entry.
+func firstPartyID(ids []*PartyID) *PartyID {
+	for _, id := range ids {
+		if id != nil && id.Value != "" {
+			return id
+		}
+	}
+	return nil
 }

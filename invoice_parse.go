@@ -3,7 +3,6 @@ package cii
 import (
 	"strings"
 
-	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -11,59 +10,31 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
-	"github.com/invopop/xmlctx"
 )
 
-func parseInvoice(data []byte) (*bill.Invoice, error) {
-
-	in := new(Invoice)
-	if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(
-		map[string]string{
-			"rsm": NamespaceRSM,
-			"ram": NamespaceRAM,
-			"qdt": NamespaceQDT,
-			"udt": NamespaceUDT,
-		},
-	)); err != nil {
-		return nil, err
-	}
-	return goblInvoice(in)
-}
-
-func goblInvoice(in *Invoice) (*bill.Invoice, error) {
-	// Detect context from guideline/business IDs
-	var ctx *Context
-	if in.ExchangedContext != nil && in.ExchangedContext.GuidelineContext != nil {
-		guidelineID := in.ExchangedContext.GuidelineContext.ID
-		var businessID string
-		if in.ExchangedContext.BusinessContext != nil {
-			businessID = in.ExchangedContext.BusinessContext.ID
-		}
-		ctx = FindContext(guidelineID, businessID)
-	}
+func goblInvoice(in *Invoice, f *Format) (*bill.Invoice, error) {
+	ahts := in.Transaction.Settlement
+	invoiceType, tags := typeCodeParse(in.ExchangedDocument.TypeCode)
 
 	out := &bill.Invoice{
 		Code:     cbc.Code(in.ExchangedDocument.ID),
-		Type:     typeCodeParse(in.ExchangedDocument.TypeCode),
-		Currency: currency.Code(in.Transaction.Settlement.Currency),
+		Type:     invoiceType,
+		Currency: currency.Code(ahts.Currency),
 		Supplier: goblNewParty(in.Transaction.Agreement.Seller),
 		Customer: goblNewParty(in.Transaction.Agreement.Buyer),
 		Tax: &bill.Tax{
 			Rounding: tax.RoundingRuleCurrency,
-			Ext: tax.Extensions{
+			Ext: tax.ExtensionsOf(cbc.CodeMap{
 				untdid.ExtKeyDocumentType: cbc.Code(in.ExchangedDocument.TypeCode),
-			},
+			}),
 		},
 	}
 
-	if ctx != nil {
-		out.Addons = tax.Addons{List: ctx.Addons}
-		if ctx.Is(ContextPeppolFranceCIUSV1) || ctx.Is(ContextPeppolFranceFacturXV1) {
-			if in.ExchangedContext.BusinessContext != nil {
-				out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(in.ExchangedContext.BusinessContext.ID))
-			}
-		}
+	if len(tags) > 0 {
+		out.SetTags(tags...)
 	}
+
+	out.Addons = tax.Addons{List: f.Addons}
 
 	issueDate, err := parseDate(in.ExchangedDocument.IssueDate.DateFormat.Value)
 	if err != nil {
@@ -71,38 +42,22 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	}
 	out.IssueDate = issueDate
 
-	// Build tax category map from header-level tax summary for exemption code lookups
-	ahts := in.Transaction.Settlement
 	taxMap := buildTaxCategoryMap(ahts.Tax)
 
-	// BT-7: VAT point date (from first header-level ApplicableTradeTax)
-	if len(ahts.Tax) > 0 && ahts.Tax[0].TaxPointDate != nil && ahts.Tax[0].TaxPointDate.DateFormat != nil {
-		vd, err := parseDate(ahts.Tax[0].TaxPointDate.DateFormat.Value)
-		if err != nil {
-			return nil, err
-		}
-		out.ValueDate = &vd
-	}
-
-	if err = goblAddLines(in.Transaction, out, taxMap); err != nil {
+	if err := goblAddTaxDates(ahts.Tax, out); err != nil {
 		return nil, err
 	}
 
-	// Payment comprised of terms, means and payee. Check there is relevant info in at least one of them to create a payment
+	srcs, err := goblAddLines(in.Transaction, out, taxMap, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	if out.Payment, err = goblNewPaymentDetails(ahts); err != nil {
 		return nil, err
 	}
 
-	if len(in.ExchangedDocument.IncludedNote) > 0 {
-		out.Notes = make([]*org.Note, 0, len(in.ExchangedDocument.IncludedNote))
-		for _, note := range in.ExchangedDocument.IncludedNote {
-			n := &org.Note{Text: note.Content}
-			if note.SubjectCode != "" {
-				n.Ext = tax.Extensions{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)}
-			}
-			out.Notes = append(out.Notes, n)
-		}
-	}
+	out.Notes = goblParseNotes(in.ExchangedDocument.IncludedNote)
 
 	if out.Ordering, err = goblNewOrdering(in); err != nil {
 		return nil, err
@@ -111,33 +66,11 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		return nil, err
 	}
 
-	if len(ahts.ReferencedDocument) > 0 {
-		out.Preceding = make([]*org.DocumentRef, 0, len(ahts.ReferencedDocument))
-		for _, ref := range ahts.ReferencedDocument {
-			docRef := &org.DocumentRef{
-				Code: cbc.Code(ref.IssuerAssignedID),
-			}
-			if ref.IssueDate != nil && ref.IssueDate.DateFormat != nil {
-				refDate, err := parseDate(ref.IssueDate.DateFormat.Value)
-				if err != nil {
-					return nil, err
-				}
-				docRef.IssueDate = &refDate
-			}
-			out.Preceding = append(out.Preceding, docRef)
-		}
+	if out.Preceding, err = goblParsePreceding(ahts.ReferencedDocument); err != nil {
+		return nil, err
 	}
 
-	if in.Transaction.Agreement.TaxRepresentative != nil {
-		// Move the original seller to the ordering.seller party
-		if out.Ordering == nil {
-			out.Ordering = new(bill.Ordering)
-		}
-		out.Ordering.Seller = out.Supplier
-
-		// Overwrite the seller field with the tax representative
-		out.Supplier = goblNewParty(in.Transaction.Agreement.TaxRepresentative)
-	}
+	goblApplyTaxRepresentative(in, out)
 
 	if len(ahts.AllowanceCharges) > 0 {
 		if err = goblAddChargesAndDiscounts(ahts, out, taxMap); err != nil {
@@ -145,14 +78,133 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		}
 	}
 
-	// BT-125: Attachments
 	if atts := goblAttachments(in.Transaction.Agreement.AdditionalDocument); len(atts) > 0 {
 		out.Attachments = atts
 	}
 
 	goblAddTaxNotes(ahts.Tax, out)
 
+	out.ExchangeRates = goblExchangeRates(in, out.Currency)
+
+	// Everything the document declares is now mapped, so the calculated
+	// amounts can be checked against the ones the sender stated.
+	if err := goblReconcileTotals(in, out, srcs, taxMap); err != nil {
+		return nil, err
+	}
+
 	return out, nil
+}
+
+// exchangeRatePrecision is the number of decimals kept when deriving a rate
+// from two rounded totals, so converting BT-110 gives back BT-111.
+const exchangeRatePrecision = 6
+
+// goblExchangeRates derives the rate into the VAT accounting currency from
+// BT-111 / BT-110, when the document states both totals.
+func goblExchangeRates(in *Invoice, cur currency.Code) []*currency.ExchangeRate {
+	doc, acc := goblTaxTotals(in, cur)
+	if doc == nil || acc == nil {
+		return nil
+	}
+	docAmount, ok := goblDeclaredAmount(doc.Amount)
+	if !ok || docAmount.IsZero() {
+		return nil
+	}
+	accAmount, ok := goblDeclaredAmount(acc.Amount)
+	if !ok {
+		return nil
+	}
+	return []*currency.ExchangeRate{
+		{
+			From:   cur,
+			To:     currency.Code(acc.Currency),
+			Amount: accAmount.RescaleUp(exchangeRatePrecision).Divide(docAmount),
+		},
+	}
+}
+
+// goblAddTaxDates extracts BT-7 (VAT point date) and BT-8 (VAT point date code) from
+// the first header-level ApplicableTradeTax entry.
+func goblAddTaxDates(taxes []*Tax, out *bill.Invoice) error {
+	if len(taxes) == 0 {
+		return nil
+	}
+	first := taxes[0]
+
+	// BT-7: VAT point date
+	if first.TaxPointDate != nil && first.TaxPointDate.DateFormat != nil {
+		vd, err := parseDate(first.TaxPointDate.DateFormat.Value)
+		if err != nil {
+			return err
+		}
+		out.ValueDate = &vd
+	}
+
+	// BT-8: VAT point date code (UNTDID 2475)
+	if first.DueDateTypeCode != "" {
+		if key, ok := taxPointCIIKeyMap[first.DueDateTypeCode]; ok {
+			out.Tax.Point = key
+		}
+	}
+
+	return nil
+}
+
+// goblParseNotes converts CII IncludedNote entries to GOBL notes.
+func goblParseNotes(notes []*Note) []*org.Note {
+	if len(notes) == 0 {
+		return nil
+	}
+	out := make([]*org.Note, 0, len(notes))
+	for _, note := range notes {
+		if note.Content == "" {
+			continue
+		}
+		n := &org.Note{Text: cleanString(note.Content)}
+		if note.SubjectCode != "" {
+			n.Ext = tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(note.SubjectCode)})
+		}
+		out = append(out, n)
+	}
+	return out
+}
+
+// goblParsePreceding converts CII InvoiceReferencedDocument entries to GOBL document references.
+func goblParsePreceding(refs []*ReferencedDocument) ([]*org.DocumentRef, error) {
+	if len(refs) == 0 {
+		return nil, nil
+	}
+	out := make([]*org.DocumentRef, 0, len(refs))
+	for _, ref := range refs {
+		if ref.IssuerAssignedID == "" {
+			continue
+		}
+		docRef := &org.DocumentRef{
+			Code: cbc.Code(ref.IssuerAssignedID),
+		}
+		if ref.IssueDate != nil && ref.IssueDate.DateFormat != nil {
+			refDate, err := parseDate(ref.IssueDate.DateFormat.Value)
+			if err != nil {
+				return nil, err
+			}
+			docRef.IssueDate = &refDate
+		}
+		out = append(out, docRef)
+	}
+	return out, nil
+}
+
+// goblApplyTaxRepresentative maps the BG-11 tax representative to
+// ordering.seller, the party liable for the tax when it is not the
+// supplier. The supplier keeps the BG-4 seller.
+func goblApplyTaxRepresentative(in *Invoice, out *bill.Invoice) {
+	if in.Transaction.Agreement.TaxRepresentative == nil {
+		return
+	}
+	if out.Ordering == nil {
+		out.Ordering = new(bill.Ordering)
+	}
+	out.Ordering.Seller = goblNewParty(in.Transaction.Agreement.TaxRepresentative)
 }
 
 // taxCategoryInfo holds tax category information from header-level tax summary.

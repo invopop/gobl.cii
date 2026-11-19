@@ -4,23 +4,43 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4dc9f104008d0c56015604f304a28c3d90e88c158702e407e536fdbcc528e1c6"
+			"val": "167595144ea56e18997d52c25955bdea5f49f8646cb78df178a03f2c24954ca7"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "INVOICE_test_7",
 		"issue_date": "2013-05-13",
 		"currency": "SEK",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "outside-scope",
+					"text": "Tax",
+					"ext": {
+						"untdid-tax-category": "O"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",
+			"alias": "Civic Service Centre",
+			"identities": [
+				{
+					"code": "5532331183"
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -81,18 +101,25 @@
 			{
 				"i": 1,
 				"quantity": "1",
+				"order": "1",
 				"item": {
 					"ref": "RT3000",
 					"name": "Road tax",
 					"description": "Weight-based tax, vehicles \u003e3000 KGM",
 					"price": "2500.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "2500.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard"
+						"key": "outside-scope",
+						"ext": {
+							"untdid-tax-category": "O"
+						}
 					}
 				],
 				"total": "2500.00"
@@ -105,13 +132,19 @@
 					"name": "Road Register fee",
 					"description": "Annual registration fee",
 					"price": "700.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "700.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard"
+						"key": "outside-scope",
+						"ext": {
+							"untdid-tax-category": "O"
+						}
 					}
 				],
 				"total": "700.00"
@@ -154,7 +187,10 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
+								"key": "outside-scope",
+								"ext": {
+									"untdid-tax-category": "O"
+								},
 								"base": "3200.00",
 								"amount": "0.00"
 							}

@@ -2,7 +2,6 @@ package cii_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"flag"
 	"os"
@@ -14,11 +13,9 @@ import (
 	cii "github.com/invopop/gobl.cii"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
-	"github.com/invopop/phive"
+	"github.com/invopop/phorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -28,43 +25,41 @@ const (
 	pathParse       = "parse"
 	pathOut         = "out"
 
+	// rateZero is a zero amount, as written in totals.
+	rateZero = "0.00"
+
+	// Format names shared by the conversion and parse tables.
+	ctxEN16931 = "EN16931"
+
+	// Item attribute labels and values shared by the attribute tests.
+	attrLabelColor  = "Color"
+	attrValueBlack  = "Black"
+	attrLabelWeight = "Weight"
+
 	staticUUID uuid.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 )
 
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
-// validate is a flag that enables Phive validation
-var validate = flag.Bool("validate", false, "Run Phive validation on generated XML")
+// validate is a flag that enables schematron validation against phorm
+var validate = flag.Bool("validate", false, "Run phorm schematron validation on generated XML")
 
 func TestConvertToInvoice(t *testing.T) {
-	var pc phive.ValidationServiceClient
+	var pc *phorm.Client
 
-	// Only connect to Phive if validation is requested
+	// Only connect to phorm if validation is requested
 	if *validate {
-		conn, err := grpc.NewClient(
-			"localhost:9091",
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
-		require.NoError(t, err)
-		defer conn.Close() //nolint:errcheck
-		pc = phive.NewValidationServiceClient(conn)
+		pc = phormClient(t)
 	}
 
 	// Define contexts to test
 	contexts := []struct {
 		name    string
-		context cii.Context
+		context cii.Format
 		dir     string
 	}{
-		{"EN16931", cii.ContextEN16931V2017, "en16931"},
-		{"Peppol", cii.ContextPeppolV3, "peppol"},
-		{"FacturX", cii.ContextFacturXV1, "facturx"},
-		{"XRechnung", cii.ContextXRechnungV3, "xrechnung"},
-		{"ChorusPro", cii.ContextChorusProV1, "choruspro"},
-		{"PeppolFranceFacturX", cii.ContextPeppolFranceFacturXV1, "peppol-france-facturx"},
-		{"PeppolFranceCIUS", cii.ContextPeppolFranceCIUSV1, "peppol-france-cius"},
-		{"ZUGFeRD", cii.ContextZUGFeRDV2, "zugferd"},
+		{ctxEN16931, cii.FormatEN16931, "en16931"},
 	}
 
 	for _, ctx := range contexts {
@@ -83,10 +78,10 @@ func TestConvertToInvoice(t *testing.T) {
 				t.Run(inName, func(t *testing.T) {
 					// Load and convert using the format-specific context
 					env := loadEnvelope(t, filepath.Join(ctx.dir, inName))
-					out, err := cii.ConvertInvoice(env, cii.WithContext(ctx.context))
+					out, err := cii.ExportInvoice(env, cii.WithFormat(ctx.context))
 					require.NoError(t, err)
 
-					data, err := out.Bytes()
+					data, err := cii.Encode(out)
 					require.NoError(t, err)
 
 					outPath := filepath.Join(getConvertPath(), ctx.dir, pathOut, outName)
@@ -99,16 +94,9 @@ func TestConvertToInvoice(t *testing.T) {
 						require.NoError(t, err)
 					}
 
-					// Run Phive validation if requested
+					// Run schematron validation if requested
 					if *validate && ctx.context.VESID != "" {
-						resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-							Vesid:      ctx.context.VESID,
-							XmlContent: data,
-						})
-						require.NoError(t, err)
-						results, err := json.MarshalIndent(resp.Results, "", "  ")
-						require.NoError(t, err)
-						require.True(t, resp.Success, "Generated XML should be valid for %s: %s", ctx.context.VESID, string(results))
+						validateXML(t, pc, ctx.context.VESID, data)
 					}
 
 					// Load the expected output
@@ -121,89 +109,65 @@ func TestConvertToInvoice(t *testing.T) {
 	}
 }
 
+// TestParseInvoice imports each CII example, detecting its format, and
+// compares the result with its expected output.
 func TestParseInvoice(t *testing.T) {
-	// Define contexts to test
-	contexts := []struct {
-		name string
-		dir  string
-	}{
-		{"EN16931", "en16931"},
-		{"Peppol", "peppol"},
-		{"FacturX", "facturx"},
-		{"XRechnung", "xrechnung"},
-		{"ChorusPro", "choruspro"},
-		{"PeppolFranceFacturX", "peppol-france-facturx"},
-		{"PeppolFranceCIUS", "peppol-france-cius"},
-		{"PeppolFranceExtended", "peppol-france-extended"},
-	}
+	examples, err := filepath.Glob(filepath.Join(getParsePath(), pathPatternXML))
+	require.NoError(t, err)
+	require.NotEmpty(t, examples)
 
-	for _, ctx := range contexts {
-		t.Run(ctx.name, func(t *testing.T) {
-			examples, err := filepath.Glob(filepath.Join(getParsePath(), ctx.dir, pathPatternXML))
+	for _, example := range examples {
+		inName := filepath.Base(example)
+		outName := strings.Replace(inName, ".xml", ".json", 1)
+
+		t.Run(inName, func(t *testing.T) {
+			// Load XML data
+			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			if len(examples) == 0 {
-				t.Skip("No examples found for context")
+			// Convert CII XML to GOBL
+			env, err := parseCII(xmlData)
+			require.NoError(t, err)
+
+			env.Head.UUID = staticUUID
+			if inv, ok := env.Extract().(*bill.Invoice); ok {
+				inv.UUID = staticUUID
+			}
+			require.NoError(t, env.Calculate())
+
+			outPath := filepath.Join(getParsePath(), pathOut, outName)
+			if *updateOut {
+				data, err := json.MarshalIndent(env, "", "\t")
+				require.NoError(t, err)
+				err = os.WriteFile(outPath, data, 0644)
+				require.NoError(t, err)
 			}
 
-			for _, example := range examples {
-				inName := filepath.Base(example)
-				outName := strings.Replace(inName, ".xml", ".json", 1)
+			// Extract the invoice from the envelope
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok, "Document should be an invoice")
 
-				t.Run(inName, func(t *testing.T) {
-					// Load XML data
-					xmlData, err := os.ReadFile(example)
-					require.NoError(t, err)
+			// Marshal only the invoice
+			data, err := json.MarshalIndent(inv, "", "\t")
+			require.NoError(t, err)
 
-					// Convert CII XML to GOBL
-					env, err := cii.Parse(xmlData)
-					require.NoError(t, err)
+			// Load the expected output
+			output, err := os.ReadFile(outPath)
+			require.NoError(t, err, "Missing expected output. Create it with --update flag.")
 
-					env.Head.UUID = staticUUID
-					if inv, ok := env.Extract().(*bill.Invoice); ok {
-						inv.UUID = staticUUID
-					}
-					require.NoError(t, env.Calculate())
+			// Parse the expected output to extract the invoice
+			var expectedEnv gobl.Envelope
+			err = json.Unmarshal(output, &expectedEnv)
+			require.NoError(t, err)
 
-					outPath := filepath.Join(getParsePath(), ctx.dir, pathOut, outName)
-					if *updateOut {
-						// Create the output directory if it doesn't exist
-						outDir := filepath.Join(getParsePath(), ctx.dir, pathOut)
-						require.NoError(t, os.MkdirAll(outDir, 0755))
+			expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
+			require.True(t, ok, "Expected document should be an invoice")
 
-						data, err := json.MarshalIndent(env, "", "\t")
-						require.NoError(t, err)
-						err = os.WriteFile(outPath, data, 0644)
-						require.NoError(t, err)
-					}
+			// Marshal the expected invoice
+			expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
+			require.NoError(t, err)
 
-					// Extract the invoice from the envelope
-					inv, ok := env.Extract().(*bill.Invoice)
-					require.True(t, ok, "Document should be an invoice")
-
-					// Marshal only the invoice
-					data, err := json.MarshalIndent(inv, "", "\t")
-					require.NoError(t, err)
-
-					// Load the expected output
-					output, err := os.ReadFile(outPath)
-					assert.NoError(t, err)
-
-					// Parse the expected output to extract the invoice
-					var expectedEnv gobl.Envelope
-					err = json.Unmarshal(output, &expectedEnv)
-					require.NoError(t, err)
-
-					expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
-					require.True(t, ok, "Expected document should be an invoice")
-
-					// Marshal the expected invoice
-					expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
-					require.NoError(t, err)
-
-					assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
-				})
-			}
+			assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
 		})
 	}
 }
@@ -212,7 +176,7 @@ func TestParseInvoice(t *testing.T) {
 func newInvoiceFrom(t *testing.T, name string) (*cii.Invoice, error) {
 	t.Helper()
 	env := loadEnvelope(t, name)
-	return cii.ConvertInvoice(env)
+	return cii.ExportInvoice(env)
 }
 
 // parseInvoiceFrom parses a CII XML file from the `test/data/parse` folder
@@ -223,7 +187,16 @@ func parseInvoiceFrom(t *testing.T, name string) (*gobl.Envelope, error) {
 	if err != nil {
 		return nil, err
 	}
-	return cii.Parse(data)
+	return parseCII(data)
+}
+
+// parseCII decodes and imports CII XML into a GOBL envelope.
+func parseCII(data []byte, opts ...cii.Option) (*gobl.Envelope, error) {
+	doc, err := cii.Decode(data)
+	if err != nil {
+		return nil, err
+	}
+	return cii.Import(doc, opts...)
 }
 
 // loadEnvelope returns a GOBL Envelope from a file in the `test/data/convert` folder
@@ -309,4 +282,20 @@ func removeLastEntry(dir string) string {
 	lastEntry := "/" + filepath.Base(dir)
 	i := strings.LastIndex(dir, lastEntry)
 	return dir[:i]
+}
+
+// TestImportRouting verifies that a received document takes its transport
+// Head.From/To from the routing options, overriding GOBL's document-derived,
+// outgoing (supplier->customer) assumption.
+func TestImportRouting(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join(getParsePath(), "CII_example1.xml"))
+	require.NoError(t, err)
+
+	env, err := parseCII(data, cii.WithRouting(
+		"iso6523-actorid-upis::0088:receiver",
+		"iso6523-actorid-upis::0088:sender",
+	))
+	require.NoError(t, err)
+	assert.Equal(t, "iso6523-actorid-upis::0088:receiver", string(env.Head.From))
+	assert.Equal(t, "iso6523-actorid-upis::0088:sender", string(env.Head.To))
 }

@@ -49,33 +49,21 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 	// This is a charge
 	c := &bill.Charge{}
 	if ac.Reason != "" {
-		c.Reason = ac.Reason
+		c.Reason = cleanString(ac.Reason)
 	}
 	if ac.Amount != "" {
 		c.Amount, _ = num.AmountFromString(ac.Amount)
 	}
 	if ac.ReasonCode != "" {
-		c.Ext = tax.Extensions{
+		c.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
-		}
+		})
 	}
-	if ac.Base != "" {
-		b, err := num.AmountFromString(ac.Base)
-		if err != nil {
-			return nil, err
-		}
-		c.Base = &b
+	base, percent, err := goblACBasis(ac, c.Amount)
+	if err != nil {
+		return nil, err
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		c.Percent = &p
-	}
+	c.Base, c.Percent = base, percent
 	if ac.Tax != nil && ac.Tax.TypeCode != "" {
 		c.Taxes = tax.Set{
 			{
@@ -83,12 +71,12 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 			},
 		}
 		if ac.Tax.CategoryCode != "" {
-			c.Taxes[0].Ext = tax.Extensions{
+			c.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
 				untdid.ExtKeyTaxCategory: cbc.Code(ac.Tax.CategoryCode),
-			}
+			})
 			key := buildTaxCategoryKey(ac.Tax.TypeCode, ac.Tax.CategoryCode, ac.Tax.RateApplicablePercent)
 			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
-				c.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+				c.Taxes[0].Ext = c.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
 		}
 		if ac.Tax.RateApplicablePercent != "" {
@@ -111,33 +99,21 @@ func goblNewCharge(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bi
 func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.Reason != "" {
-		d.Reason = ac.Reason
+		d.Reason = cleanString(ac.Reason)
 	}
 	if ac.Amount != "" {
 		d.Amount, _ = num.AmountFromString(ac.Amount)
 	}
 	if ac.ReasonCode != "" {
-		d.Ext = tax.Extensions{
+		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
-		}
+		})
 	}
-	if ac.Base != "" {
-		b, err := num.AmountFromString(ac.Base)
-		if err != nil {
-			return nil, err
-		}
-		d.Base = &b
+	base, percent, err := goblACBasis(ac, d.Amount)
+	if err != nil {
+		return nil, err
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
-	}
+	d.Base, d.Percent = base, percent
 	if ac.Tax != nil && ac.Tax.TypeCode != "" {
 		d.Taxes = tax.Set{
 			{
@@ -145,12 +121,12 @@ func goblNewDiscount(ac *AllowanceCharge, taxMap map[string]*taxCategoryInfo) (*
 			},
 		}
 		if ac.Tax.CategoryCode != "" {
-			d.Taxes[0].Ext = tax.Extensions{
+			d.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
 				untdid.ExtKeyTaxCategory: cbc.Code(ac.Tax.CategoryCode),
-			}
+			})
 			key := buildTaxCategoryKey(ac.Tax.TypeCode, ac.Tax.CategoryCode, ac.Tax.RateApplicablePercent)
 			if info, ok := taxMap[key]; ok && info.exemptionReasonCode != "" {
-				d.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
 		}
 		if ac.Tax.RateApplicablePercent != "" {
@@ -180,23 +156,18 @@ func goblNewLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		Amount: a,
 	}
 	if ac.ReasonCode != "" {
-		c.Ext = tax.Extensions{
+		c.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyCharge: cbc.Code(ac.ReasonCode),
-		}
+		})
 	}
 	if ac.Reason != "" {
-		c.Reason = ac.Reason
+		c.Reason = cleanString(ac.Reason)
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		c.Percent = &p
+	base, percent, err := goblACBasis(ac, c.Amount)
+	if err != nil {
+		return nil, err
 	}
+	c.Base, c.Percent = base, percent
 	return c, nil
 }
 
@@ -209,22 +180,47 @@ func goblNewLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		Amount: a,
 	}
 	if ac.ReasonCode != "" {
-		d.Ext = tax.Extensions{
+		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyAllowance: cbc.Code(ac.ReasonCode),
-		}
+		})
 	}
 	if ac.Reason != "" {
-		d.Reason = ac.Reason
+		d.Reason = cleanString(ac.Reason)
 	}
-	if ac.Percent != "" {
-		if !strings.HasSuffix(ac.Percent, "%") {
-			ac.Percent += "%"
-		}
-		p, err := num.PercentageFromString(ac.Percent)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
+	base, percent, err := goblACBasis(ac, d.Amount)
+	if err != nil {
+		return nil, err
 	}
+	d.Base, d.Percent = base, percent
 	return d, nil
+}
+
+// goblACBasis parses the basis amount (BT-137 at line level, BT-142 at document
+// level) and decides if percentage can be used alongside the declared amount.
+func goblACBasis(ac *AllowanceCharge, amount num.Amount) (*num.Amount, *num.Percentage, error) {
+	var base *num.Amount
+	if ac.Base != "" {
+		b, err := num.AmountFromString(ac.Base)
+		if err != nil {
+			return nil, nil, err
+		}
+		base = &b
+	}
+	// GOBL requires a percentage wherever a basis is set, and without one the
+	// basis has nothing to apply to, so they are only ever returned together.
+	if ac.Percent == "" {
+		return nil, nil, nil
+	}
+	p, err := num.PercentageFromString(strings.TrimSuffix(ac.Percent, "%") + "%")
+	if err != nil {
+		return nil, nil, err
+	}
+	if ac.Amount == "" {
+		// Without a declared amount the percentage is the only way to derive one.
+		return base, &p, nil
+	}
+	if base == nil || !p.Of(*base).Rescale(amount.Exp()).Equals(amount) {
+		return nil, nil, nil
+	}
+	return base, &p, nil
 }

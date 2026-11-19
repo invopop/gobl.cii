@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,8 +26,8 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "2142.00", doc.Transaction.Settlement.Summary.GrandTotalAmount)
 		assert.Equal(t, "2142.01", doc.Transaction.Settlement.Summary.DuePayableAmount)
 		assert.Equal(t, "0.01", doc.Transaction.Settlement.Summary.RoundingAmount)
-		assert.Equal(t, "342.00", doc.Transaction.Settlement.Summary.TaxTotalAmount.Amount)
-		assert.Equal(t, "EUR", doc.Transaction.Settlement.Summary.TaxTotalAmount.Currency)
+		assert.Equal(t, "342.00", doc.Transaction.Settlement.Summary.TaxTotalAmount[0].Amount)
+		assert.Equal(t, "EUR", doc.Transaction.Settlement.Summary.TaxTotalAmount[0].Currency)
 	})
 
 	t.Run("correction-invoice.json", func(t *testing.T) {
@@ -36,6 +37,24 @@ func TestNewSettlement(t *testing.T) {
 		assert.Equal(t, "SAMPLE-001", doc.Transaction.Settlement.ReferencedDocument[0].IssuerAssignedID)
 		assert.Equal(t, "20240213", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.DateFormat.Value)
 		assert.Equal(t, "102", doc.Transaction.Settlement.ReferencedDocument[0].IssueDate.DateFormat.Format)
+	})
+
+	t.Run("correction without preceding date", func(t *testing.T) {
+		// A preceding reference (BT-25) without an issue date (BT-26, optional) is
+		// valid GOBL; the FormattedIssueDateTime element must be omitted rather than
+		// rendered empty, which would fail the CII XSD.
+		env := loadEnvelope(t, "en16931/correction-invoice.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.NotEmpty(t, inv.Preceding)
+		inv.Preceding[0].IssueDate = nil
+
+		doc, err := cii.ExportInvoice(env)
+		require.NoError(t, err)
+
+		rd := doc.Transaction.Settlement.ReferencedDocument[0]
+		assert.Equal(t, "SAMPLE-001", rd.IssuerAssignedID)
+		assert.Nil(t, rd.IssueDate, "empty FormattedIssueDateTime must be omitted, not rendered empty")
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {
@@ -61,7 +80,7 @@ func TestNewSettlement(t *testing.T) {
 		inv.Payment.Instructions.DirectDebit.Ref = ""
 		inv.Payment.Instructions.Card = nil
 
-		doc, err := cii.ConvertInvoice(env)
+		doc, err := cii.ExportInvoice(env)
 		require.NoError(t, err)
 
 		for _, term := range doc.Transaction.Settlement.PaymentTerms {
@@ -75,9 +94,9 @@ func TestNewSettlement(t *testing.T) {
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 
-		inv.Payment.Instructions.Ext = nil
+		inv.Payment.Instructions.Ext = tax.ExtensionsOf(cbc.CodeMap{})
 
-		_, err := cii.ConvertInvoice(env)
+		_, err := cii.ExportInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 
@@ -99,6 +118,97 @@ func TestNewSettlement(t *testing.T) {
 			assert.Empty(t, tax.ExemptionReasonCode)
 		}
 	})
+}
+
+func TestTaxPointConversion(t *testing.T) {
+	tests := []struct {
+		name string
+		key  cbc.Key
+		code string
+	}{
+		{"issue", tax.PointIssue, "5"},
+		{"delivery", tax.PointDelivery, "29"},
+		{"payment", tax.PointPayment, "72"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			env := loadEnvelope(t, "en16931/invoice-complete.json")
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			inv.Tax.Point = tt.key
+			doc, err := cii.ExportInvoice(env)
+			require.NoError(t, err)
+
+			// All header-level tax entries should have the code
+			for _, tax := range doc.Transaction.Settlement.Tax {
+				assert.Equal(t, tt.code, tax.DueDateTypeCode)
+			}
+		})
+	}
+
+	t.Run("unknown key ignored", func(t *testing.T) {
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Tax.Point = "unknown"
+		doc, err := cii.ExportInvoice(env)
+		require.NoError(t, err)
+
+		for _, tax := range doc.Transaction.Settlement.Tax {
+			assert.Empty(t, tax.DueDateTypeCode)
+		}
+	})
+
+	t.Run("empty point ignored", func(t *testing.T) {
+		env := loadEnvelope(t, "en16931/invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Tax.Point = ""
+		doc, err := cii.ExportInvoice(env)
+		require.NoError(t, err)
+
+		for _, tax := range doc.Transaction.Settlement.Tax {
+			assert.Empty(t, tax.DueDateTypeCode)
+		}
+	})
+}
+
+func TestTaxPointRoundTrip(t *testing.T) {
+	tests := []struct {
+		name string
+		key  cbc.Key
+		code string
+	}{
+		{"issue", tax.PointIssue, "5"},
+		{"delivery", tax.PointDelivery, "29"},
+		{"payment", tax.PointPayment, "72"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			env := loadEnvelope(t, "en16931/invoice-complete.json")
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			inv.Tax.Point = tt.key
+			doc, err := cii.ExportInvoice(env)
+			require.NoError(t, err)
+
+			// Marshal to XML and parse back
+			data, err := cii.Encode(doc)
+			require.NoError(t, err)
+
+			parsed, err := parseCII(data)
+			require.NoError(t, err)
+			parsedInv, ok := parsed.Extract().(*bill.Invoice)
+			require.True(t, ok)
+			assert.Equal(t, tt.key, parsedInv.Tax.Point)
+		})
+	}
 }
 
 func TestParseTaxNotes(t *testing.T) {

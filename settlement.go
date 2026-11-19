@@ -19,7 +19,10 @@ type Settlement struct {
 	CreditorRefID      string                `xml:"ram:CreditorReferenceID,omitempty"`
 	PaymentReference   string                `xml:"ram:PaymentReference,omitempty"`
 	Currency           string                `xml:"ram:InvoiceCurrencyCode"`
+	Invoicer           *Party                `xml:"ram:InvoicerTradeParty,omitempty"`
+	Invoicee           *Party                `xml:"ram:InvoiceeTradeParty,omitempty"`
 	Payee              *Party                `xml:"ram:PayeeTradeParty,omitempty"`
+	Payer              *Party                `xml:"ram:PayerTradeParty,omitempty"`
 	PaymentMeans       []*PaymentMeans       `xml:"ram:SpecifiedTradeSettlementPaymentMeans"`
 	Tax                []*Tax                `xml:"ram:ApplicableTradeTax"`
 	Period             *Period               `xml:"ram:BillingSpecifiedPeriod,omitempty"`
@@ -27,6 +30,7 @@ type Settlement struct {
 	PaymentTerms       []*Terms              `xml:"ram:SpecifiedTradePaymentTerms,omitempty"`
 	Summary            *Summary              `xml:"ram:SpecifiedTradeSettlementHeaderMonetarySummation"`
 	ReferencedDocument []*ReferencedDocument `xml:"ram:InvoiceReferencedDocument,omitempty"`
+	AccountingAccount  *AccountingAccount    `xml:"ram:ReceivableSpecifiedTradeAccountingAccount,omitempty"`
 	Advance            []*Advance            `xml:"ram:SpecifiedAdvancePayment,omitempty"`
 }
 
@@ -95,15 +99,15 @@ type Period struct {
 
 // Summary defines the structure of SpecifiedTradeSettlementHeaderMonetarySummation of the CII standard
 type Summary struct {
-	LineTotalAmount     string          `xml:"ram:LineTotalAmount"`
-	Charges             string          `xml:"ram:ChargeTotalAmount,omitempty"`
-	Discounts           string          `xml:"ram:AllowanceTotalAmount,omitempty"`
-	TaxBasisTotalAmount string          `xml:"ram:TaxBasisTotalAmount"`
-	TaxTotalAmount      *TaxTotalAmount `xml:"ram:TaxTotalAmount"`
-	RoundingAmount      string          `xml:"ram:RoundingAmount,omitempty"`
-	GrandTotalAmount    string          `xml:"ram:GrandTotalAmount"`
-	TotalPrepaidAmount  string          `xml:"ram:TotalPrepaidAmount,omitempty"`
-	DuePayableAmount    string          `xml:"ram:DuePayableAmount"`
+	LineTotalAmount     string            `xml:"ram:LineTotalAmount"`
+	Charges             string            `xml:"ram:ChargeTotalAmount,omitempty"`
+	Discounts           string            `xml:"ram:AllowanceTotalAmount,omitempty"`
+	TaxBasisTotalAmount string            `xml:"ram:TaxBasisTotalAmount"`
+	TaxTotalAmount      []*TaxTotalAmount `xml:"ram:TaxTotalAmount"`
+	RoundingAmount      string            `xml:"ram:RoundingAmount,omitempty"`
+	GrandTotalAmount    string            `xml:"ram:GrandTotalAmount"`
+	TotalPrepaidAmount  string            `xml:"ram:TotalPrepaidAmount,omitempty"`
+	DuePayableAmount    string            `xml:"ram:DuePayableAmount"`
 }
 
 // TaxTotalAmount defines the structure of the TaxTotalAmount of the CII standard
@@ -112,8 +116,22 @@ type TaxTotalAmount struct {
 	Currency string `xml:"currencyID,attr"`
 }
 
+// taxPointCIICodeMap maps GOBL tax point keys to UNTDID 2475 codes for CII.
+var taxPointCIICodeMap = map[cbc.Key]string{
+	tax.PointIssue:    "5",
+	tax.PointDelivery: "29",
+	tax.PointPayment:  "72",
+}
+
+// taxPointCIIKeyMap is the reverse mapping from UNTDID 2475 codes to GOBL tax point keys.
+var taxPointCIIKeyMap = map[string]cbc.Key{
+	"5":  tax.PointIssue,
+	"29": tax.PointDelivery,
+	"72": tax.PointPayment,
+}
+
 // prepareSettlement creates the ApplicableHeaderTradeSettlement part of a EN 16931 compliant invoice
-func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
+func newSettlement(inv *bill.Invoice) (*Settlement, error) {
 	stlm := &Settlement{
 		Currency: string(inv.Currency),
 	}
@@ -132,32 +150,53 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 				}
 			}
 		}
+		// BT-8: VAT point date code (UNTDID 2475)
+		if inv.Tax != nil && inv.Tax.Point != cbc.KeyEmpty {
+			if code, ok := taxPointCIICodeMap[inv.Tax.Point]; ok {
+				for _, t := range stlm.Tax {
+					t.DueDateTypeCode = code
+				}
+			}
+		}
 		stlm.Summary = newSummary(inv.Totals, string(inv.Currency))
 	}
 
 	if len(inv.Preceding) > 0 {
 		pre := inv.Preceding[0]
-		stlm.ReferencedDocument = []*ReferencedDocument{
-			{
-				IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
-				IssueDate: &FormattedIssueDate{
-					DateFormat: documentDate(pre.IssueDate),
-				},
-			},
+		rd := &ReferencedDocument{
+			IssuerAssignedID: invoiceNumber(pre.Series, pre.Code),
+		}
+		// IssueDate (BT-26) is optional; only emit FormattedIssueDateTime when the
+		// preceding reference actually has a date, otherwise it renders as an empty
+		// element and fails the CII XSD.
+		if d := documentDate(pre.IssueDate); d != nil {
+			rd.IssueDate = &FormattedIssueDate{DateFormat: d}
+		}
+		stlm.ReferencedDocument = []*ReferencedDocument{rd}
+	}
+	// The issuer raising the invoice on the seller's behalf.
+	if inv.Ordering != nil && inv.Ordering.Issuer != nil {
+		stlm.Invoicer = newParty(inv.Ordering.Issuer)
+	}
+	// BT-19: Buyer accounting reference
+	if inv.Ordering != nil && inv.Ordering.Cost != "" {
+		stlm.AccountingAccount = &AccountingAccount{
+			ID: inv.Ordering.Cost.String(),
 		}
 	}
 	if inv.Payment != nil && inv.Payment.Payee != nil {
-		stlm.Payee = newPayee(inv.Payment.Payee, ctx)
+		stlm.Payee = newPayee(inv.Payment.Payee)
 	}
 
-	if inv.Delivery != nil && inv.Delivery.Period != nil {
-		stlm.Period = &Period{
-			Start: &IssueDate{
-				DateFormat: documentDate(&inv.Delivery.Period.Start),
-			},
-			End: &IssueDate{
-				DateFormat: documentDate(&inv.Delivery.Period.End),
-			},
+	// BG-14 is the period the invoice refers to, which GOBL keeps in
+	// Ordering.Period; Delivery.Period is when to expect delivery.
+	if inv.Ordering != nil && inv.Ordering.Period != nil {
+		stlm.Period = &Period{}
+		if d := documentDate(inv.Ordering.Period.Start); d != nil {
+			stlm.Period.Start = &IssueDate{DateFormat: d}
+		}
+		if d := documentDate(inv.Ordering.Period.End); d != nil {
+			stlm.Period.End = &IssueDate{DateFormat: d}
 		}
 	}
 
@@ -167,9 +206,7 @@ func newSettlement(inv *bill.Invoice, ctx Context) (*Settlement, error) {
 		}
 	}
 
-	if len(inv.Charges) > 0 || len(inv.Discounts) > 0 {
-		stlm.AllowanceCharges = newAllowanceCharges(inv)
-	}
+	stlm.AllowanceCharges = newAllowanceCharges(inv)
 
 	return stlm, nil
 }
@@ -222,14 +259,14 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 		var c *Creditor
 		if ct.IBAN != "" {
 			c = &Creditor{}
-			c.IBAN = ct.IBAN
+			c.IBAN = ct.IBAN.String()
 		}
 
 		if ct.Number != "" {
 			if c == nil {
 				c = &Creditor{}
 			}
-			c.Number = ct.Number
+			c.Number = ct.Number.String()
 		}
 
 		if c != nil {
@@ -238,7 +275,7 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 
 		if ct.BIC != "" {
 			pm.CreditorInstitution = &CreditorInstitution{
-				BIC: instr.CreditTransfer[0].BIC,
+				BIC: instr.CreditTransfer[0].BIC.String(),
 			}
 		}
 	}
@@ -249,10 +286,10 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 		}
 		if instr.DirectDebit.Ref != "" {
 			if stlm.PaymentTerms == nil {
-				stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref}}
+				stlm.PaymentTerms = []*Terms{{Mandate: instr.DirectDebit.Ref.String()}}
 			} else {
 				for _, term := range stlm.PaymentTerms {
-					term.Mandate = instr.DirectDebit.Ref
+					term.Mandate = instr.DirectDebit.Ref.String()
 				}
 			}
 		}
@@ -272,31 +309,35 @@ func addPaymentInstructions(stlm *Settlement, instr *pay.Instructions) error {
 }
 
 func newSummary(totals *bill.Totals, currency string) *Summary {
+	// BT-106 to BT-115: the document totals, each capped at the currency's
+	// precision by BR-DEC-09 through BR-DEC-18.
 	s := &Summary{
-		LineTotalAmount:     totals.Sum.String(),
-		TaxBasisTotalAmount: totals.Total.String(),
-		GrandTotalAmount:    totals.TotalWithTax.String(),
-		DuePayableAmount:    totals.Payable.String(),
-		TaxTotalAmount: &TaxTotalAmount{
-			Amount:   totals.Tax.String(),
-			Currency: currency,
+		LineTotalAmount:     rescaleToCurrency(totals.Sum, currency),
+		TaxBasisTotalAmount: rescaleToCurrency(totals.Total, currency),
+		GrandTotalAmount:    rescaleToCurrency(totals.TotalWithTax, currency),
+		DuePayableAmount:    rescaleToCurrency(totals.Payable, currency),
+		TaxTotalAmount: []*TaxTotalAmount{
+			{
+				Amount:   rescaleToCurrency(totals.Tax, currency),
+				Currency: currency,
+			},
 		},
 	}
 	if totals.Due != nil {
-		s.DuePayableAmount = totals.Due.String()
+		s.DuePayableAmount = rescaleToCurrency(*totals.Due, currency)
 	}
 	if totals.Charge != nil {
-		s.Charges = totals.Charge.String()
+		s.Charges = rescaleToCurrency(*totals.Charge, currency)
 	}
 	if totals.Discount != nil {
-		s.Discounts = totals.Discount.String()
+		s.Discounts = rescaleToCurrency(*totals.Discount, currency)
 	}
 	if totals.Advances != nil {
-		s.TotalPrepaidAmount = totals.Advances.String()
+		s.TotalPrepaidAmount = rescaleToCurrency(*totals.Advances, currency)
 	}
 
 	if totals.Rounding != nil {
-		s.RoundingAmount = totals.Rounding.String()
+		s.RoundingAmount = rescaleToCurrency(*totals.Rounding, currency)
 	}
 
 	return s
@@ -318,10 +359,13 @@ func newTaxes(inv *bill.Invoice, total *tax.Total) []*Tax {
 
 func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal) *Tax {
 	cat := rate.Ext.Get(untdid.ExtKeyTaxCategory)
+	ccy := inv.Currency.String()
+	// BT-116/BT-117: the taxable base and tax amount per category, capped at
+	// the currency's precision by BR-DEC-19 and BR-DEC-20.
 	t := &Tax{
-		CalculatedAmount: rate.Amount.Rescale(2).String(),
+		CalculatedAmount: rescaleToCurrency(rate.Amount, ccy),
 		TypeCode:         category.Code.String(),
-		BasisAmount:      rate.Base.String(),
+		BasisAmount:      rescaleToCurrency(rate.Base, ccy),
 		CategoryCode:     cat.String(),
 	}
 
@@ -339,31 +383,35 @@ func newTax(inv *bill.Invoice, rate *tax.RateTotal, category *tax.CategoryTotal)
 	}
 	// BT-120: Set exemption reason from tax notes
 	if inv.Tax != nil {
-		if note := findTaxNote(inv.Tax.Notes, category.Code, rate); note != nil {
+		if note := findTaxNote(inv.Tax.Notes, category.Code, rate.Ext); note != nil {
 			t.ExemptionReason = note.Text
 		}
 	}
 	return t
 }
 
-func newPayee(party *org.Party, ctx Context) *Party {
+func newPayee(party *org.Party) *Party {
 	// Reflects rules from CII-SR-352 to 364 and CII-SR-364
 	// These rules are warnings but have been added as they produce cleaner invoices
-	p := newParty(party, ctx)
+	p := newParty(party)
 	payee := &Party{
 		Name: p.Name,
-		ID:   p.ID,
 	}
 
-	if payee.ID != nil {
-		payee.GlobalID = p.GlobalID
+	// BT-60 is 0..1, so unlike the seller and buyer (BT-29/BT-46) the payee
+	// keeps a single identifier even when the GOBL party carries several.
+	if id := firstPartyID(p.ID); id != nil {
+		payee.ID = []*PartyID{id}
+		if gid := firstPartyID(p.GlobalID); gid != nil {
+			payee.GlobalID = []*PartyID{gid}
+		}
 	}
 
 	return payee
 }
 
 func getPaymentMeansCode(instr *pay.Instructions) (string, error) {
-	if instr == nil || instr.Ext == nil || instr.Ext[untdid.ExtKeyPaymentMeans].String() == "" {
+	if instr == nil || instr.Ext.Len() == 0 || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return "", validation.Errors{
 			"instructions": validation.Errors{
 				"ext": validation.Errors{
@@ -384,21 +432,21 @@ func goblAddTaxNotes(taxes []*Tax, inv *bill.Invoice) {
 		}
 		note := &tax.Note{
 			Category: cbc.Code(t.TypeCode),
-			Text:     t.ExemptionReason,
-			Ext:      tax.Extensions{untdid.ExtKeyTaxCategory: cbc.Code(t.CategoryCode)},
+			Text:     cleanString(t.ExemptionReason),
+			Ext:      tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTaxCategory: cbc.Code(t.CategoryCode)}),
 		}
 		inv.Tax = inv.Tax.MergeNotes(note)
 	}
 }
 
-// findTaxNote finds a tax note that matches the given category code and rate total
+// findTaxNote finds a tax note matching the given category code and extensions
 // by comparing category and the UNTDID tax category extension.
-func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
+func findTaxNote(notes []*tax.Note, catCode cbc.Code, ext tax.Extensions) *tax.Note {
 	for _, n := range notes {
 		if n.Category != catCode {
 			continue
 		}
-		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == ext.Get(untdid.ExtKeyTaxCategory) {
 			return n
 		}
 	}
