@@ -66,7 +66,19 @@ func decodeInvoice(data []byte) (*Invoice, error) {
 	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CII invoice: %w", err)
 	}
+	inv.setNamespaces()
 	return inv, nil
+}
+
+// setNamespaces declares the namespaces the encoder writes, as the export
+// does, so a decoded invoice encodes to valid XML. Decoding only fills the
+// fields for prefixes the source declares on its root, and an empty field is
+// written as an empty declaration, which XML 1.0 forbids.
+func (out *Invoice) setNamespaces() {
+	out.RSMNamespace = NamespaceRSM
+	out.RAMNamespace = NamespaceRAM
+	out.QDTNamespace = NamespaceQDT
+	out.UDTNamespace = NamespaceUDT
 }
 
 // contextIDs provides the guideline (BT-24) and business process (BT-23) IDs
