@@ -48,8 +48,17 @@ func decodeCDAR(data []byte) (*CDAR, error) {
 	)); err != nil {
 		return nil, fmt.Errorf("error unmarshaling CDAR: %w", err)
 	}
-
+	cdar.setNamespaces()
 	return cdar, nil
+}
+
+// setNamespaces declares the namespaces the encoder writes, as NewCDAR does,
+// so a decoded CDAR encodes to valid XML. See Invoice.setNamespaces.
+func (c *CDAR) setNamespaces() {
+	c.RSMNamespace = NamespaceCDARRSM
+	c.RAMNamespace = NamespaceRAM
+	c.QDTNamespace = NamespaceQDT
+	c.UDTNamespace = NamespaceUDT
 }
 
 // encode converts the CDAR document to XML bytes
